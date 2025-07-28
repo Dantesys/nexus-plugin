@@ -1,0 +1,6 @@
+name: Reliquias Nexus
+version: '1.0'
+main: org.dantesys.reliquiasNexus.ReliquiasNexus
+api-version: '1.21'
+authors: [ Dantesys ]
+depend: ["Geyser-Spigot"]
