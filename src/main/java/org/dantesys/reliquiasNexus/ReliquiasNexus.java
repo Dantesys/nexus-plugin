@@ -6,6 +6,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -20,6 +21,10 @@ import java.util.UUID;
 
 public final class ReliquiasNexus extends JavaPlugin implements EventRegistrar {
     FileConfiguration config = getConfig();
+    NamespacedKey key = new NamespacedKey(this,"nexus");
+    public NamespacedKey getKey(){
+        return key;
+    }
     @Override
     public void onEnable() {
         getLogger().info("Registering Geyser event bus!");
