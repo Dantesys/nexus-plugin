@@ -6,31 +6,25 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
-import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
-import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.geyser.api.GeyserApi;
 import org.geysermc.geyser.api.event.EventRegistrar;
-import org.geysermc.geyser.api.event.lifecycle.GeyserPostInitializeEvent;
 
 import java.util.UUID;
 
 public final class ReliquiasNexus extends JavaPlugin implements EventRegistrar {
     FileConfiguration config = getConfig();
-    NamespacedKey key = new NamespacedKey(this,"nexus");
-    public NamespacedKey getKey(){
-        return key;
-    }
     @Override
     public void onEnable() {
         getLogger().info("Registering Geyser event bus!");
         GeyserApi.api().eventBus().register(this, this);
         ItemsRegistro.init();
         config.createSection("nexus");
+        config.addDefault("nexus.guerreiro","");
         config.options().copyDefaults(true);
         saveConfig();
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("nexus");
@@ -51,7 +45,7 @@ public final class ReliquiasNexus extends JavaPlugin implements EventRegistrar {
                     }
                     ctx.getSource().getSender().sendMessage(dono);
                 }
-            }else ctx.getSource().getSender().sendMessage("§cNão foi encontrado nenhuma reliquia Nexus");
+            }else ctx.getSource().getSender().sendMessage("§cNão foi encontrado nenhum Nexus");
             return Command.SINGLE_SUCCESS;
         }));
         LiteralCommandNode<CommandSourceStack> buildCommand = root.build();
@@ -66,9 +60,5 @@ public final class ReliquiasNexus extends JavaPlugin implements EventRegistrar {
         // Plugin shutdown logic
         getServer().clearRecipes();
         getServer().getConsoleSender().sendMessage("§4[Valent City]: Plugin Desativado!");
-    }
-    @Subscribe
-    public void onGeyserPostInitializeEvent(GeyserPostInitializeEvent event) {
-        getLogger().info("Geyser started!");
     }
 }
