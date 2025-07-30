@@ -2,7 +2,6 @@ package org.dantesys.reliquiasNexus.items;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
-import org.bukkit.Tag;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemRarity;
@@ -19,10 +18,13 @@ import static org.dantesys.reliquiasNexus.util.NexusKeys.NEXUS;
 
 public class ItemsRegistro {
     public static Nexus guerreiro;
+    public static Nexus ceifador;
     private static final List<Nexus> reliquias = new ArrayList<>();
     public static void init(){
         createGuerreiro();
         reliquias.add(guerreiro);
+        createCeifador();
+        reliquias.add(ceifador);
     }
     private static void createGuerreiro(){
         List<Material> mat = new ArrayList<>();
@@ -35,7 +37,7 @@ public class ItemsRegistro {
         List<PotionEffectType> efeitos = new ArrayList<>();
         efeitos.add(PotionEffectType.RESISTANCE);
         efeitos.add(PotionEffectType.STRENGTH);
-        ItemStack item = new ItemStack(Material.WOODEN_SWORD,1);
+        ItemStack item = new ItemStack(mat.getFirst(),1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Guerreiro"));
         meta.setUnbreakable(true);
@@ -44,7 +46,37 @@ public class ItemsRegistro {
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"guerreiro");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
         item.setItemMeta(meta);
-        guerreiro = new Nexus(item,6,mat,efeitos,"guerreiro", Attribute.ATTACK_DAMAGE);
+        guerreiro = new Nexus(item,mat.size(),mat,efeitos,"guerreiro", Attribute.ATTACK_DAMAGE);
+    }
+    private static void createCeifador(){
+        List<Material> mat = new ArrayList<>();
+        mat.add(0,Material.WOODEN_SWORD);
+        mat.add(1,Material.STONE_SWORD);
+        mat.add(2,Material.IRON_SWORD);
+        mat.add(3,Material.GOLDEN_SWORD);
+        mat.add(4,Material.DIAMOND_SWORD);
+        mat.add(5,Material.NETHERITE_SWORD);
+        List<Material> visual = new ArrayList<>();
+        visual.add(0,Material.WOODEN_HOE);
+        visual.add(1,Material.STONE_HOE);
+        visual.add(2,Material.IRON_HOE);
+        visual.add(3,Material.GOLDEN_HOE);
+        visual.add(4,Material.DIAMOND_HOE);
+        visual.add(5,Material.NETHERITE_HOE);
+        List<PotionEffectType> efeitos = new ArrayList<>();
+        efeitos.add(PotionEffectType.NIGHT_VISION);
+        efeitos.add(PotionEffectType.INVISIBILITY);
+        ItemStack item = new ItemStack(mat.getFirst(),1);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Nexus do Ceifador"));
+        meta.setItemModel(Material.WOODEN_HOE.getKey());
+        meta.setUnbreakable(true);
+        meta.setGlider(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"ceifador");
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
+        item.setItemMeta(meta);
+        ceifador = new Nexus(item,mat.size(),mat,efeitos,"ceifador", Attribute.ATTACK_DAMAGE,visual);
     }
     public static List<Nexus> getValidReliquia(FileConfiguration config){
         List<Nexus> validos = new ArrayList<>();
@@ -59,6 +91,7 @@ public class ItemsRegistro {
     public static Nexus getFromNome(String nome){
         return switch (nome){
             case "guerreiro" -> guerreiro;
+            case "ceifador" -> ceifador;
             default -> null;
         };
     }

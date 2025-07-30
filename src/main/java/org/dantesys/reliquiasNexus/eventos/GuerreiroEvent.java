@@ -62,10 +62,14 @@ public class GuerreiroEvent implements Listener {
             dataPlayer.set(MISSAOGUERREIRO.key, PersistentDataType.INTEGER, 0);
             dataPlayer.set(GUERREIRO.key,PersistentDataType.INTEGER,levelAtual+1);
             String nome = data.get(NEXUS.key,PersistentDataType.STRING);
-            Nexus n = ItemsRegistro.getFromNome(nome);
-            nexusItem=n.getItem(levelAtual+1);
-            player.getInventory().setItemInMainHand(nexusItem);
-            player.sendMessage("§aSeu Nexus do Guerreiro evoluiu para o nível " + (levelAtual + 1) + "!");
+            if(nome!=null && !nome.isBlank()){
+                Nexus n = ItemsRegistro.getFromNome(nome);
+                if(n!=null){
+                    nexusItem=n.getItem(levelAtual+1);
+                    player.getInventory().setItemInMainHand(nexusItem);
+                    player.sendMessage("§aSeu Nexus do Guerreiro evoluiu para o nível " + (levelAtual + 1) + "!");
+                }
+            }
         } else {
             player.sendMessage("§cVocê precisa de "+(10*levelAtual)+" leveis XP ou derrotar mais "+(killsRequeridos-kills)+" "+mobsPorLevel.get(levelAtual).name()+" para evoluir sua relíquia.");
         }
@@ -84,47 +88,52 @@ public class GuerreiroEvent implements Listener {
         if(player.isSneaking() && container.has(SPECIAL.key, PersistentDataType.INTEGER) && stack.getPersistentDataContainer().has(NEXUS.key,PersistentDataType.STRING)){
             int tempo = container.getOrDefault(SPECIAL.key,PersistentDataType.INTEGER,0);
             String nome = stack.getPersistentDataContainer().get(NEXUS.key,PersistentDataType.STRING);
-            Nexus item = ItemsRegistro.getFromNome(nome);
-            if(tempo<=0 && item!=null && item.equals(ItemsRegistro.guerreiro)){
-                int range = 10*item.getLevel();
-                double damage = 10*item.getLevel();
-                final int finalRange = range;
-                final double finalDamage = damage;
-                final Location location = player.getLocation();
-                final Vector direction = location.getDirection().normalize();
-                final double[] tp = {0};
-                Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 10,
-                        ()->{
-                        },()-> {
-                },(t)->{
-                    tp[0] = tp[0]+3.4;
-                    double x = direction.getX()*tp[0];
-                    double y = direction.getY()*tp[0]+1.4;
-                    double z = direction.getZ()*tp[0];
-                    location.add(x,y,z);
-                    location.getWorld().spawnParticle(Particle.SWEEP_ATTACK,location,1,0,0,0,0);
-                    location.getWorld().playSound(location, Sound.ENTITY_PLAYER_ATTACK_SWEEP,0.5f,0.7f);
-                    Collection<Entity> pressf = location.getWorld().getNearbyEntities(location,2,2,2);
-                    while(pressf.iterator().hasNext()){
-                        Entity surdo = pressf.iterator().next();
-                        if(surdo instanceof LivingEntity vivo){
-                            if(vivo instanceof Player pl){
-                                if(pl != player){
+            if(nome!=null && !nome.isBlank()){
+                Nexus item = ItemsRegistro.getFromNome(nome);
+                if(tempo<=0 && item!=null && item.equals(ItemsRegistro.guerreiro)){
+                    PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+                    int l = dataPlayer.getOrDefault(CEIFADOR.key,PersistentDataType.INTEGER,1);
+                    item.setLevel(l);
+                    int range = 10*item.getLevel();
+                    double damage = 10*item.getLevel();
+                    final int finalRange = range;
+                    final double finalDamage = damage;
+                    final Location location = player.getLocation();
+                    final Vector direction = location.getDirection().normalize();
+                    final double[] tp = {0};
+                    Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 10,
+                            ()->{
+                            },()-> {
+                    },(t)->{
+                        tp[0] = tp[0]+3.4;
+                        double x = direction.getX()*tp[0];
+                        double y = direction.getY()*tp[0]+1.4;
+                        double z = direction.getZ()*tp[0];
+                        location.add(x,y,z);
+                        location.getWorld().spawnParticle(Particle.SWEEP_ATTACK,location,1,0,0,0,0);
+                        location.getWorld().playSound(location, Sound.ENTITY_PLAYER_ATTACK_SWEEP,0.5f,0.7f);
+                        Collection<Entity> pressf = location.getWorld().getNearbyEntities(location,2,2,2);
+                        while(pressf.iterator().hasNext()){
+                            Entity surdo = pressf.iterator().next();
+                            if(surdo instanceof LivingEntity vivo){
+                                if(vivo instanceof Player pl){
+                                    if(pl != player){
+                                        vivo.damage(finalDamage);
+                                    }
+                                }else{
                                     vivo.damage(finalDamage);
                                 }
-                            }else{
-                                vivo.damage(finalDamage);
                             }
+                            pressf.remove(surdo);
                         }
-                        pressf.remove(surdo);
-                    }
-                    location.subtract(x,y,z);
-                    if(t.getSegundosRestantes()>finalRange){
-                        t.stop();
-                    }
-                });
-                timer.scheduleTimer(1L);
-                container.set(SPECIAL.key,PersistentDataType.INTEGER,(item.getMaxLevel()/item.getLevel())*60);
+                        location.subtract(x,y,z);
+                        if(t.getSegundosRestantes()>finalRange){
+                            t.stop();
+                        }
+                    });
+                    timer.scheduleTimer(1L);
+                    container.set(SPECIAL.key,PersistentDataType.INTEGER,(item.getMaxLevel()/item.getLevel())*60);
+                }
             }
         }
     }

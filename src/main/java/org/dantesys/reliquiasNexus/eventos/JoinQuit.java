@@ -1,6 +1,7 @@
 package org.dantesys.reliquiasNexus.eventos;
 
 import net.kyori.adventure.text.Component;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -29,7 +30,7 @@ public class JoinQuit implements Listener {
         int qtd = 0;
         PersistentDataContainer container = player.getPersistentDataContainer();
         if(container.has(QTD.key,PersistentDataType.INTEGER)){
-            qtd=container.get(QTD.key, PersistentDataType.INTEGER);
+            qtd=container.getOrDefault(QTD.key, PersistentDataType.INTEGER,0);
         }
         container.set(SPECIAL.key,PersistentDataType.INTEGER,qtd);
         player.sendActionBar(Component.text("Special OK"));
@@ -42,24 +43,25 @@ public class JoinQuit implements Listener {
             config.set("nexus."+nome,player.getUniqueId());
             container.set(QTD.key,PersistentDataType.INTEGER,1);
             int level =1;
-            if(container.has(NexusKeys.getKey(nome),PersistentDataType.INTEGER)){
-                level=container.get(NexusKeys.getKey(nome),PersistentDataType.INTEGER);
-            }else{
-                container.set(NexusKeys.getKey(nome),PersistentDataType.INTEGER,1);
+            NamespacedKey key = NexusKeys.getKey(nome);
+            if(key!=null && container.has(key,PersistentDataType.INTEGER)){
+                level=container.getOrDefault(key,PersistentDataType.INTEGER,1);
+            }else if(key!=null){
+                container.set(key,PersistentDataType.INTEGER,1);
             }
             ItemStack stack = n.getItem(level);
             ItemMeta meta = stack.getItemMeta();
             meta.getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,player.getUniqueId().toString());
             stack.setItemMeta(meta);
             player.getInventory().addItem(stack);
-            event.joinMessage(Component.text("§l§0[☐] §r§2 Bem-vindo ao jogo, Jogador "+player.getName()));
+            event.joinMessage(Component.text("§2 Bem-vindo ao jogo, Jogador "+player.getName()));
         }else{
-            event.joinMessage(Component.text("§l§0[☐] §r§2 Bem-vindo devolta, Jogador "+player.getName()));
+            event.joinMessage(Component.text("§2 Bem-vindo devolta, Jogador "+player.getName()));
         }
     }
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        event.quitMessage(Component.text("§l§0[☐] §r§4O Jogador "+player.getName()+" saiu do jogo!"));
+        event.quitMessage(Component.text("§4O Jogador "+player.getName()+" saiu do jogo!"));
     }
 }
