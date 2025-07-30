@@ -27,13 +27,14 @@ public class LimitadorEvent implements Listener {
     private void checkLimit(Player player){
         if(passou(player)){
             kaboom(player);
+        }else{
+            player.sendActionBar(Component.text("§cNão seja um colecionador"));
         }
     }
     private void kaboom(Player player){
         Location loc = player.getLocation();
         World world = player.getWorld();
-        world.strikeLightning(loc);
-        world.createExplosion(loc,4f,false,false);
+        world.createExplosion(loc,5f,false,false);
         player.setHealth(0);
     }
     private boolean passou(Player player){

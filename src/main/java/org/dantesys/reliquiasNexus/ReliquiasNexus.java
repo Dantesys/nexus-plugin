@@ -31,6 +31,10 @@ public final class ReliquiasNexus extends JavaPlugin {
         config.createSection("nexus");
         config.addDefault("nexus.guerreiro","");
         config.addDefault("nexus.ceifador","");
+        config.addDefault("nexus.vida","");
+        config.addDefault("nexus.mares","");
+        config.addDefault("nexus.barbaro","");
+        config.addDefault("nexus.fazendeiro","");
         config.options().copyDefaults(true);
         saveConfig();
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("nexus").executes(ctx -> {
@@ -103,13 +107,15 @@ public final class ReliquiasNexus extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PassivaEvent(), this);
         getServer().getPluginManager().registerEvents(new PerdeuReliquia(), this);
         getServer().getPluginManager().registerEvents(new CeifadorEvent(), this);
+        getServer().getPluginManager().registerEvents(new VidaEvent(), this);
+        getServer().getPluginManager().registerEvents(new MaresEvent(), this);
+        getServer().getPluginManager().registerEvents(new BarbaroEvent(), this);
+        getServer().getPluginManager().registerEvents(new FazendeiroEvent(), this);
         getServer().getConsoleSender().sendMessage("§2[Nexus]: Plugin Ativado!");
     }
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
-        getServer().clearRecipes();
         getServer().getConsoleSender().sendMessage("§4[Nexus]: Plugin Desativado!");
     }
 }

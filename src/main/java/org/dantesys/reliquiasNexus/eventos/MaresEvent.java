@@ -2,7 +2,7 @@ package org.dantesys.reliquiasNexus.eventos;
 
 import org.bukkit.Location;
 import org.bukkit.Particle;
-import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -15,7 +15,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.util.Vector;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
@@ -25,15 +24,13 @@ import java.util.Collection;
 import java.util.Map;
 
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
+import static org.dantesys.reliquiasNexus.util.NexusKeys.SPECIAL;
 
-public class GuerreiroEvent implements Listener {
+public class MaresEvent implements Listener {
     Map<Integer, EntityType> mobsPorLevel = Map.of(
-            1, EntityType.ZOMBIE,
-            2, EntityType.SKELETON,
-            3, EntityType.CREEPER,
-            4, EntityType.ENDERMAN,
-            5, EntityType.PIGLIN_BRUTE,
-            6, EntityType.WITHER_SKELETON
+            1, EntityType.DROWNED,
+            2, EntityType.GUARDIAN,
+            3, EntityType.ELDER_GUARDIAN
     );
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
@@ -41,12 +38,12 @@ public class GuerreiroEvent implements Listener {
         ItemStack stack = killer.getInventory().getItemInMainHand();
         if(stack.getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)){
             String nome = stack.getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING);
-            if(nome==null || !nome.equals("guerreiro")) return;
+            if(nome==null || !nome.equals("mares")) return;
             PersistentDataContainer data = killer.getPersistentDataContainer();
-            int kills = data.getOrDefault(MISSAOGUERREIRO.key, PersistentDataType.INTEGER, 0);
-            int level = data.getOrDefault(GUERREIRO.key, PersistentDataType.INTEGER, 1);
+            int kills = data.getOrDefault(MISSAOMARES.key, PersistentDataType.INTEGER, 0);
+            int level = data.getOrDefault(MARES.key, PersistentDataType.INTEGER, 1);
             if(event.getEntity().getType().equals(mobsPorLevel.get(level))){
-                data.set(MISSAOGUERREIRO.key, PersistentDataType.INTEGER, kills + 1);
+                data.set(MISSAOMARES.key, PersistentDataType.INTEGER, kills + 1);
                 tentarEvoluir(killer,stack,level);
             }
         }
@@ -54,20 +51,20 @@ public class GuerreiroEvent implements Listener {
     public void tentarEvoluir(Player player, ItemStack nexusItem, int levelAtual) {
         ItemMeta meta = nexusItem.getItemMeta();
         PersistentDataContainer data = meta.getPersistentDataContainer();
-        int kills = player.getPersistentDataContainer().getOrDefault(MISSAOGUERREIRO.key, PersistentDataType.INTEGER, 0);
+        int kills = player.getPersistentDataContainer().getOrDefault(MISSAOMARES.key, PersistentDataType.INTEGER, 0);
         int killsRequeridos = 5 * levelAtual;
         if (podeEvoluir(player, levelAtual) && data.has(NEXUS.key,PersistentDataType.STRING)) {
             player.giveExp(-10 * levelAtual);
             PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-            dataPlayer.set(MISSAOGUERREIRO.key, PersistentDataType.INTEGER, 0);
-            dataPlayer.set(GUERREIRO.key,PersistentDataType.INTEGER,levelAtual+1);
+            dataPlayer.set(MISSAOMARES.key, PersistentDataType.INTEGER, 0);
+            dataPlayer.set(MARES.key,PersistentDataType.INTEGER,levelAtual+1);
             String nome = data.get(NEXUS.key,PersistentDataType.STRING);
             if(nome!=null && !nome.isBlank()){
                 Nexus n = ItemsRegistro.getFromNome(nome);
                 if(n!=null){
                     nexusItem=n.getItem(levelAtual+1);
                     player.getInventory().setItemInMainHand(nexusItem);
-                    player.sendMessage("§aSeu Nexus do Guerreiro evoluiu para o nível " + (levelAtual + 1) + "!");
+                    player.sendMessage("§aSeu Nexus dos Mares evoluiu para o nível " + (levelAtual + 1) + "!");
                 }
             }
         } else {
@@ -77,11 +74,11 @@ public class GuerreiroEvent implements Listener {
     private boolean podeEvoluir(Player player, int levelAtual) {
         int xpRequerido = 10 * levelAtual;
         int killsRequeridos = 5 * levelAtual;
-        int kills = player.getPersistentDataContainer().getOrDefault(MISSAOGUERREIRO.key, PersistentDataType.INTEGER, 0);
+        int kills = player.getPersistentDataContainer().getOrDefault(MISSAOMARES.key, PersistentDataType.INTEGER, 0);
         return player.getTotalExperience() >= xpRequerido && kills >= killsRequeridos;
     }
     @EventHandler
-    public void corte(PlayerInteractEvent event){
+    public void raio(PlayerInteractEvent event){
         Player player = event.getPlayer();
         PersistentDataContainer container = player.getPersistentDataContainer();
         ItemStack stack = player.getInventory().getItemInMainHand();
@@ -90,45 +87,45 @@ public class GuerreiroEvent implements Listener {
             String nome = stack.getPersistentDataContainer().get(NEXUS.key,PersistentDataType.STRING);
             if(nome!=null && !nome.isBlank()){
                 Nexus item = ItemsRegistro.getFromNome(nome);
-                if(tempo<=0 && item!=null && item.equals(ItemsRegistro.guerreiro)){
+                if(tempo<=0 && item!=null && item.equals(ItemsRegistro.mares)){
                     PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-                    int l = dataPlayer.getOrDefault(GUERREIRO.key,PersistentDataType.INTEGER,1);
+                    int l = dataPlayer.getOrDefault(MARES.key,PersistentDataType.INTEGER,1);
                     item.setLevel(l);
-                    int range = 10*item.getLevel();
-                    double damage = 10*item.getLevel();
-                    final int finalRange = range;
-                    final double finalDamage = damage;
+                    World w = event.getPlayer().getWorld();
+                    w.setStorm(true);
+                    w.setThundering(true);
+                    final int finalRange = 30*l;
+                    final double damage = 5*l;
                     final Location location = player.getLocation();
-                    final Vector direction = location.getDirection().normalize();
-                    final double[] tp = {0};
+                    final World world = player.getWorld();
                     Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 10,
                             ()->{
                             },()-> {
                     },(t)->{
-                        tp[0] = tp[0]+3.4;
-                        double x = direction.getX()*tp[0];
-                        double y = direction.getY()*tp[0]+1.4;
-                        double z = direction.getZ()*tp[0];
-                        location.add(x,y,z);
-                        location.getWorld().spawnParticle(Particle.SWEEP_ATTACK,location,1,0,0,0,0);
-                        location.getWorld().playSound(location, Sound.ENTITY_PLAYER_ATTACK_SWEEP,0.5f,0.7f);
-                        Collection<Entity> pressf = location.getWorld().getNearbyEntities(location,2,2,2);
+                        double area = (double) finalRange /(t.getSegundosRestantes());
+                        for (double i = 0; i <= 2*Math.PI*area; i += 0.05) {
+                            double x = (area * Math.cos(i)) + location.getX();
+                            double z = (location.getZ() + area * Math.sin(i));
+                            Location particle = new Location(world, x, location.getY() + 1, z);
+                            world.spawnParticle(Particle.END_ROD,particle,1);
+                        }
+                        Collection<Entity> pressf = location.getWorld().getNearbyEntities(location,area,2,area);
                         while(pressf.iterator().hasNext()){
                             Entity surdo = pressf.iterator().next();
                             if(surdo instanceof LivingEntity vivo){
-                                if(vivo instanceof Player pl){
-                                    if(pl != player){
-                                        vivo.damage(finalDamage);
+                                if(vivo instanceof Player p){
+                                    if(p!=player){
+                                        vivo.getWorld().strikeLightning(vivo.getLocation());
+                                        vivo.setRemainingAir(0);
+                                        vivo.damage(damage);
                                     }
                                 }else{
-                                    vivo.damage(finalDamage);
+                                    vivo.getWorld().strikeLightning(vivo.getLocation());
+                                    vivo.setRemainingAir(0);
+                                    vivo.damage(damage);
                                 }
                             }
                             pressf.remove(surdo);
-                        }
-                        location.subtract(x,y,z);
-                        if(t.getSegundosRestantes()>finalRange){
-                            t.stop();
                         }
                     });
                     timer.scheduleTimer(1L);

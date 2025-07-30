@@ -2,8 +2,7 @@ package org.dantesys.reliquiasNexus.eventos;
 
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import org.bukkit.Material;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
@@ -13,8 +12,11 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.UUID;
@@ -75,6 +77,20 @@ public class PerdeuReliquia implements Listener {
                     player.getInventory().addItem(item);
                     event.getEntity().remove();
                 }
+            }
+        }
+    }
+    @EventHandler
+    public void itemFrame(PlayerInteractEntityEvent event){
+        Player player = event.getPlayer();
+        Entity e = event.getRightClicked();
+        if(e instanceof ItemFrame){
+            ItemStack stack = player.getInventory().getItemInMainHand();
+            ItemMeta meta = stack.getItemMeta();
+            PersistentDataContainer data = meta.getPersistentDataContainer();
+            if(data.has(NEXUS.key,PersistentDataType.STRING)){
+                event.setCancelled(true);
+                player.sendMessage("§cVocê não pode colocar a reliquia numa moldura");
             }
         }
     }

@@ -42,6 +42,15 @@ public class PassivaEvent implements Listener {
                     if(nexus!=null){
                         player.addPotionEffects(nexus.getEfeitos());
                     }
+                }else{
+                    data = pinv.getItemInOffHand().getPersistentDataContainer();
+                    if(data.has(NEXUS.key)){
+                        String nome = data.get(NEXUS.key,PersistentDataType.STRING);
+                        Nexus nexus = ItemsRegistro.getFromNome(nome!=null?nome:"");
+                        if(nexus!=null){
+                            player.addPotionEffects(nexus.getEfeitos());
+                        }
+                    }
                 }
             });
         }
