@@ -95,7 +95,7 @@ public class Nexus{
             this.item = this.item.withType(getMaterialPorLevel());
             ItemMeta item = this.item.getItemMeta();
             item.setItemModel(getVisualPorLevel());
-            item.addAttributeModifier(attribute, new AttributeModifier(attribute.getKey(),+this.level, AttributeModifier.Operation.ADD_NUMBER));
+            item.addAttributeModifier(attribute, new AttributeModifier(attribute.getKey(),this.level, AttributeModifier.Operation.ADD_NUMBER));
             this.item.setItemMeta(item);
         }
     }

@@ -124,7 +124,7 @@ public class ItemsRegistro {
         List<Material> visual = new ArrayList<>();
         visual.add(0,Material.STICK);
         visual.add(1,Material.ARROW);
-        visual.add(3,Material.TRIDENT);
+        visual.add(2,Material.TRIDENT);
         List<PotionEffectType> efeitos = new ArrayList<>();
         efeitos.add(PotionEffectType.CONDUIT_POWER);
         ItemStack item = new ItemStack(mat.getFirst(),1);
