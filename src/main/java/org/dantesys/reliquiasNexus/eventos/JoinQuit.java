@@ -31,17 +31,23 @@ public class JoinQuit implements Listener {
         if(container.has(QTD.key,PersistentDataType.INTEGER)){
             qtd=container.get(QTD.key, PersistentDataType.INTEGER);
         }
-        container.set(SPECIAL.key,PersistentDataType.INTEGER,0);
+        container.set(SPECIAL.key,PersistentDataType.INTEGER,qtd);
         player.sendActionBar(Component.text("Special OK"));
         if(qtd==0){
             List<Nexus> reliquias = ItemsRegistro.getValidReliquia(config);
             Random rng = new Random();
             int escolhido = rng.nextInt(reliquias.size());
-            String nome = reliquias.get(escolhido).getNome();
+            Nexus n = reliquias.get(escolhido);
+            String nome = n.getNome();
             config.set("nexus."+nome,player.getUniqueId());
             container.set(QTD.key,PersistentDataType.INTEGER,1);
-            container.set(NexusKeys.getKey(nome),PersistentDataType.INTEGER,1);
-            ItemStack stack = reliquias.get(escolhido).getItem();
+            int level =1;
+            if(container.has(NexusKeys.getKey(nome),PersistentDataType.INTEGER)){
+                level=container.get(NexusKeys.getKey(nome),PersistentDataType.INTEGER);
+            }else{
+                container.set(NexusKeys.getKey(nome),PersistentDataType.INTEGER,1);
+            }
+            ItemStack stack = n.getItem(level);
             ItemMeta meta = stack.getItemMeta();
             meta.getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,player.getUniqueId().toString());
             stack.setItemMeta(meta);

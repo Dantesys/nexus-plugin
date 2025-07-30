@@ -2,6 +2,8 @@ package org.dantesys.reliquiasNexus.items;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
+import org.bukkit.Tag;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemRarity;
 import org.bukkit.inventory.ItemStack;
@@ -24,12 +26,12 @@ public class ItemsRegistro {
     }
     private static void createGuerreiro(){
         List<Material> mat = new ArrayList<>();
-        mat.add(Material.WOODEN_SWORD);
-        mat.add(Material.STONE_SWORD);
-        mat.add(Material.IRON_SWORD);
-        mat.add(Material.GOLDEN_SWORD);
-        mat.add(Material.DIAMOND_SWORD);
-        mat.add(Material.NETHERITE_SWORD);
+        mat.add(0,Material.WOODEN_SWORD);
+        mat.add(1,Material.STONE_SWORD);
+        mat.add(2,Material.IRON_SWORD);
+        mat.add(3,Material.GOLDEN_SWORD);
+        mat.add(4,Material.DIAMOND_SWORD);
+        mat.add(5,Material.NETHERITE_SWORD);
         List<PotionEffectType> efeitos = new ArrayList<>();
         efeitos.add(PotionEffectType.RESISTANCE);
         efeitos.add(PotionEffectType.STRENGTH);
@@ -42,7 +44,7 @@ public class ItemsRegistro {
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"guerreiro");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
         item.setItemMeta(meta);
-        guerreiro = new Nexus(item,6,mat,efeitos,"guerreiro");
+        guerreiro = new Nexus(item,6,mat,efeitos,"guerreiro", Attribute.ATTACK_DAMAGE);
     }
     public static List<Nexus> getValidReliquia(FileConfiguration config){
         List<Nexus> validos = new ArrayList<>();

@@ -10,6 +10,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.dantesys.reliquiasNexus.eventos.*;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.geysermc.geyser.api.GeyserApi;
 import org.geysermc.geyser.api.event.EventRegistrar;
@@ -52,6 +53,11 @@ public final class ReliquiasNexus extends JavaPlugin implements EventRegistrar {
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
             commands.registrar().register(buildCommand);
         });
+        getServer().getPluginManager().registerEvents(new JoinQuit(), this);
+        getServer().getPluginManager().registerEvents(new GuerreiroEvent(), this);
+        getServer().getPluginManager().registerEvents(new LimitadorEvent(), this);
+        getServer().getPluginManager().registerEvents(new PassivaEvent(), this);
+        getServer().getPluginManager().registerEvents(new PerdeuReliquia(), this);
         getServer().getConsoleSender().sendMessage("§2[Valent City]: Plugin Ativado!");
     }
 

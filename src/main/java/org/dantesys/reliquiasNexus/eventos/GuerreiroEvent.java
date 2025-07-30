@@ -4,12 +4,15 @@ import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
@@ -19,18 +22,67 @@ import org.dantesys.reliquiasNexus.items.Nexus;
 import org.dantesys.reliquiasNexus.util.Temporizador;
 
 import java.util.Collection;
+import java.util.Map;
 
-import static org.dantesys.reliquiasNexus.util.NexusKeys.NEXUS;
-import static org.dantesys.reliquiasNexus.util.NexusKeys.SPECIAL;
+import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 
 public class GuerreiroEvent implements Listener {
+    Map<Integer, EntityType> mobsPorLevel = Map.of(
+            1, EntityType.ZOMBIE,
+            2, EntityType.SKELETON,
+            3, EntityType.CREEPER,
+            4, EntityType.ENDERMAN,
+            5, EntityType.PIGLIN_BRUTE,
+            6, EntityType.WITHER_SKELETON
+    );
+    @EventHandler
+    public void onEntityDeath(EntityDeathEvent event) {
+        if (!(event.getEntity().getKiller() instanceof Player killer)) return;
+        ItemStack stack = killer.getInventory().getItemInMainHand();
+        if(stack.getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)){
+            String nome = stack.getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING);
+            if(nome==null || !nome.equals("guerreiro")) return;
+            PersistentDataContainer data = killer.getPersistentDataContainer();
+            int kills = data.getOrDefault(MISSAOGUERREIRO.key, PersistentDataType.INTEGER, 0);
+            int level = data.getOrDefault(GUERREIRO.key, PersistentDataType.INTEGER, 1);
+            if(event.getEntity().getType().equals(mobsPorLevel.get(level))){
+                data.set(MISSAOGUERREIRO.key, PersistentDataType.INTEGER, kills + 1);
+                tentarEvoluir(killer,stack,level);
+            }
+        }
+    }
+    public void tentarEvoluir(Player player, ItemStack nexusItem, int levelAtual) {
+        ItemMeta meta = nexusItem.getItemMeta();
+        PersistentDataContainer data = meta.getPersistentDataContainer();
+        int kills = player.getPersistentDataContainer().getOrDefault(MISSAOGUERREIRO.key, PersistentDataType.INTEGER, 0);
+        int killsRequeridos = 5 * levelAtual;
+        if (podeEvoluir(player, levelAtual) && data.has(NEXUS.key,PersistentDataType.STRING)) {
+            player.giveExp(-10 * levelAtual);
+            PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+            dataPlayer.set(MISSAOGUERREIRO.key, PersistentDataType.INTEGER, 0);
+            dataPlayer.set(GUERREIRO.key,PersistentDataType.INTEGER,levelAtual+1);
+            String nome = data.get(NEXUS.key,PersistentDataType.STRING);
+            Nexus n = ItemsRegistro.getFromNome(nome);
+            nexusItem=n.getItem(levelAtual+1);
+            player.getInventory().setItemInMainHand(nexusItem);
+            player.sendMessage("§aSeu Nexus do Guerreiro evoluiu para o nível " + (levelAtual + 1) + "!");
+        } else {
+            player.sendMessage("§cVocê precisa de "+(10*levelAtual)+" leveis XP ou derrotar mais "+(killsRequeridos-kills)+" "+mobsPorLevel.get(levelAtual).name()+" para evoluir sua relíquia.");
+        }
+    }
+    private boolean podeEvoluir(Player player, int levelAtual) {
+        int xpRequerido = 10 * levelAtual;
+        int killsRequeridos = 5 * levelAtual;
+        int kills = player.getPersistentDataContainer().getOrDefault(MISSAOGUERREIRO.key, PersistentDataType.INTEGER, 0);
+        return player.getTotalExperience() >= xpRequerido && kills >= killsRequeridos;
+    }
     @EventHandler
     public void corte(PlayerInteractEvent event){
         Player player = event.getPlayer();
         PersistentDataContainer container = player.getPersistentDataContainer();
         ItemStack stack = player.getInventory().getItemInMainHand();
         if(player.isSneaking() && container.has(SPECIAL.key, PersistentDataType.INTEGER) && stack.getPersistentDataContainer().has(NEXUS.key,PersistentDataType.STRING)){
-            int tempo = container.get(SPECIAL.key,PersistentDataType.INTEGER);
+            int tempo = container.getOrDefault(SPECIAL.key,PersistentDataType.INTEGER,0);
             String nome = stack.getPersistentDataContainer().get(NEXUS.key,PersistentDataType.STRING);
             Nexus item = ItemsRegistro.getFromNome(nome);
             if(tempo<=0 && item!=null && item.equals(ItemsRegistro.guerreiro)){

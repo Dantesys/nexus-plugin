@@ -19,25 +19,28 @@ public class Nexus{
     private final List<Material> materialLevel;
     private final List<PotionEffectType> passiva;
     private final ItemStack itemBase;
-    public Nexus(ItemStack stack,List<Material> mateirais,List<PotionEffectType> passiva,String nome){
+    private final Attribute attribute;
+    public Nexus(ItemStack stack,List<Material> mateirais,List<PotionEffectType> passiva,String nome,Attribute attribute){
         this.item=stack;
         this.materialLevel = mateirais;
         this.itemBase=stack;
         this.nome=nome;
         this.passiva = passiva;
+        this.attribute=attribute;
     }
-    public Nexus(ItemStack stack, int max, List<Material> mateirais,List<PotionEffectType> passiva,String nome){
+    public Nexus(ItemStack stack, int max, List<Material> mateirais,List<PotionEffectType> passiva,String nome,Attribute attribute){
         this.item=stack;
         this.maxLevel=max;
         this.materialLevel=mateirais;
         this.itemBase=stack;
         this.nome=nome;
         this.passiva = passiva;
+        this.attribute=attribute;
     }
     public List<PotionEffect> getEfeitos(){
         List<PotionEffect> efeitos = new ArrayList<>();
         for(PotionEffectType efeito:passiva){
-            int aplificador = (level/maxLevel)*4;
+            int aplificador = (level/maxLevel)*3;
             efeitos.add(new PotionEffect(efeito,level*20,aplificador));
         }
         return efeitos;
@@ -58,9 +61,16 @@ public class Nexus{
         return this.item;
     }
     public ItemStack getItem(int level){
-        return level>1? this.item: this.itemBase;
+        if(level==1){
+            return this.itemBase;
+        }
+        this.item = this.itemBase;
+        for(int i=1;i<level;i++){
+            upgrade();
+        }
+        return this.item;
     }
-    public boolean upgrade(Attribute attribute){
+    public boolean upgrade(){
         if(podeUpar()){
             this.level++;
             this.item = this.item.withType(getMaterialPorLevel());

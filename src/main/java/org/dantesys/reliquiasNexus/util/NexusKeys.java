@@ -8,7 +8,8 @@ public enum NexusKeys {
     SPECIAL(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"special")),
     QTD(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"qtd_nexus")),
     DONO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"dono")),
-    GUERREIRO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"guerreiro"));
+    GUERREIRO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"guerreiro")),
+    MISSAOGUERREIRO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_guerreiro"));
     public final NamespacedKey key;
     NexusKeys(NamespacedKey nexus) {
         key = nexus;
