@@ -116,23 +116,20 @@ public class FazendeiroEvent implements Listener {
                         while(pressf.iterator().hasNext()){
                             Entity surdo = pressf.iterator().next();
                             if(surdo instanceof LivingEntity vivo){
-                                switch (vivo) {
-                                    case Player p -> {
-                                        if (p != player) vivo.damage(damage);
-                                    }
-                                    case Boss boss -> vivo.damage(damage);
-                                    case Tameable domado -> {
-                                        if (!domado.isTamed()) {
-                                            Location locV = vivo.getLocation();
-                                            world.dropItemNaturally(locV, new ItemStack(upador.get(l)));
-                                            vivo.remove();
-                                        }
-                                    }
-                                    default -> {
+                                if(vivo instanceof Player p){
+                                    if(p!=player)vivo.damage(damage);
+                                }else if(vivo instanceof Boss){
+                                    vivo.damage(damage);
+                                }else if(vivo instanceof Tameable domado){
+                                    if(!domado.isTamed()){
                                         Location locV = vivo.getLocation();
-                                        world.dropItemNaturally(locV, new ItemStack(upador.get(l)));
+                                        world.dropItemNaturally(locV,new ItemStack(upador.get(l)));
                                         vivo.remove();
                                     }
+                                }else{
+                                    Location locV = vivo.getLocation();
+                                    world.dropItemNaturally(locV,new ItemStack(upador.get(l)));
+                                    vivo.remove();
                                 }
                             }
                             pressf.remove(surdo);
