@@ -24,11 +24,11 @@ import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 
 public class FazendeiroEvent implements Listener {
     Map<Integer, Material> upador = Map.of(
-            1, Material.SUGAR_CANE,
-            2, Material.WHEAT,
-            3, Material.BEETROOTS,
-            4, Material.POTATOES,
-            5, Material.CARROTS,
+            1, Material.WHEAT,
+            2, Material.BEETROOTS,
+            3, Material.POTATOES,
+            4, Material.CARROTS,
+            5, Material.MELON,
             6, Material.PUMPKIN
     );
     public void tentarEvoluir(Player player, ItemStack nexusItem, int levelAtual) {
@@ -46,6 +46,9 @@ public class FazendeiroEvent implements Listener {
                 Nexus n = ItemsRegistro.getFromNome(nome);
                 if(n!=null){
                     nexusItem=n.getItem(levelAtual+1);
+                    if(meta.hasEnchants()){
+                        meta.getEnchants().forEach((nexusItem::addEnchantment));
+                    }
                     player.getInventory().setItemInMainHand(nexusItem);
                     player.sendMessage("§aSeu Nexus do Fazendeiro evoluiu para o nível " + (levelAtual + 1) + "!");
                 }

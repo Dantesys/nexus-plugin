@@ -67,12 +67,9 @@ public class GuerreiroEvent implements Listener {
                 Nexus n = ItemsRegistro.getFromNome(nome);
                 if(n!=null){
                     nexusItem=n.getItem(levelAtual+1);
-                    nexusItem.editMeta(consumer -> {
-                        metinha.getEnchants().forEach((enchantment, integer) -> {
-                            consumer.addEnchant(enchantment,integer,false);
-                        });
-                        metinha.getAttributeModifiers().forEach(consumer::addAttributeModifier);
-                    });
+                    if(meta.hasEnchants()){
+                        meta.getEnchants().forEach((nexusItem::addEnchantment));
+                    }
                     nexusItem.setItemMeta(metinha);
                     player.getInventory().setItemInMainHand(nexusItem);
                     player.sendMessage("§aSeu Nexus do Guerreiro evoluiu para o nível " + (levelAtual + 1) + "!");

@@ -47,7 +47,6 @@ public class BarbaroEvent implements Listener {
         ItemMeta meta = nexusItem.getItemMeta();
         PersistentDataContainer data = meta.getPersistentDataContainer();
         int kills = player.getPersistentDataContainer().getOrDefault(MISSAOBARBARO.key, PersistentDataType.INTEGER, 0);
-        int killsRequeridos = 5 * levelAtual;
         if (podeEvoluir(player, levelAtual) && data.has(NEXUS.key,PersistentDataType.STRING)) {
             player.giveExp(-10 * levelAtual);
             PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
@@ -58,12 +57,15 @@ public class BarbaroEvent implements Listener {
                 Nexus n = ItemsRegistro.getFromNome(nome);
                 if(n!=null){
                     nexusItem=n.getItem(levelAtual+1);
+                    if(meta.hasEnchants()){
+                        meta.getEnchants().forEach((nexusItem::addEnchantment));
+                    }
                     player.getInventory().setItemInMainHand(nexusItem);
                     player.sendMessage("§aSeu Nexus do Barbaro evoluiu para o nível " + (levelAtual + 1) + "!");
                 }
             }
         } else {
-            player.sendMessage("§cVocê precisa de "+(10*levelAtual)+" leveis XP ou derrotar mais "+(killsRequeridos-kills)+" "+mobsPorLevel.get(levelAtual).name()+" para evoluir sua relíquia.");
+            player.sendMessage("§cVocê precisa de "+(10*levelAtual)+" leveis XP ou derrotar mais "+(levelAtual -kills)+" "+mobsPorLevel.get(levelAtual).name()+" para evoluir sua relíquia.");
         }
     }
     private boolean podeEvoluir(Player player, int levelAtual) {

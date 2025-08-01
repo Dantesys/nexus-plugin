@@ -2,6 +2,7 @@ package org.dantesys.reliquiasNexus.eventos;
 
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -35,7 +36,7 @@ public class VidaEvent implements Listener {
         ItemMeta meta = nexusItem.getItemMeta();
         PersistentDataContainer data = meta.getPersistentDataContainer();
         double recuperacao = player.getPersistentDataContainer().getOrDefault(MISSAOVIDA.key, PersistentDataType.DOUBLE, 0d);
-        double recuperacaoNescessaria = 5 * levelAtual;
+        double recuperacaoNescessaria = level.get(levelAtual) * levelAtual;
         if (podeEvoluir(player, levelAtual) && data.has(NEXUS.key,PersistentDataType.STRING)) {
             player.giveExp(-10 * levelAtual);
             PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
@@ -46,6 +47,9 @@ public class VidaEvent implements Listener {
                 Nexus n = ItemsRegistro.getFromNome(nome);
                 if(n!=null){
                     nexusItem=n.getItem(levelAtual+1);
+                    if(meta.hasEnchants()){
+                        meta.getEnchants().forEach((nexusItem::addEnchantment));
+                    }
                     player.getInventory().setItemInMainHand(nexusItem);
                     player.sendMessage("§aSeu Nexus da Vida evoluiu para o nível " + (levelAtual + 1) + "!");
                 }
@@ -65,6 +69,10 @@ public class VidaEvent implements Listener {
         Entity e = event.getEntity();
         if(e instanceof Player player){
             ItemStack stack = player.getInventory().getItemInMainHand();
+            if(stack.getType() != Material.TOTEM_OF_UNDYING){
+                stack = player.getInventory().getItemInOffHand();
+            }
+            if(stack.getType() != Material.TOTEM_OF_UNDYING)return;
             ItemMeta meta = stack.getItemMeta();
             PersistentDataContainer data = meta.getPersistentDataContainer();
             if(data.has(NEXUS.key,PersistentDataType.STRING)){

@@ -53,6 +53,9 @@ public class CeifadorEvent implements Listener {
                 Nexus n = ItemsRegistro.getFromNome(nome);
                 if(n!=null){
                     nexusItem=n.getItem(levelAtual+1);
+                    if(meta.hasEnchants()){
+                        meta.getEnchants().forEach((nexusItem::addEnchantment));
+                    }
                     player.getInventory().setItemInMainHand(nexusItem);
                     player.sendMessage("§aSeu Nexus do Ceifador evoluiu para o nível " + (levelAtual + 1) + "!");
                 }

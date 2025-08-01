@@ -92,10 +92,11 @@ public class Nexus{
     public void upgrade(){
         if(podeUpar()){
             this.level++;
-            this.item = this.item.withType(getMaterialPorLevel());
             ItemMeta item = this.item.getItemMeta();
+            this.item = this.item.withType(getMaterialPorLevel());
             item.setItemModel(getVisualPorLevel());
-            item.addAttributeModifier(attribute, new AttributeModifier(attribute.getKey(),this.level, AttributeModifier.Operation.ADD_NUMBER));
+            NamespacedKey key = new NamespacedKey("nexus_leveld", "boost_lvl_" + level);
+            item.addAttributeModifier(attribute, new AttributeModifier(key, this.level, AttributeModifier.Operation.ADD_NUMBER));
             this.item.setItemMeta(item);
         }
     }
