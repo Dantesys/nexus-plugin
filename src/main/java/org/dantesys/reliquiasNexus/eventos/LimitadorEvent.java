@@ -8,6 +8,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -18,24 +19,20 @@ import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
 import org.dantesys.reliquiasNexus.util.NexusKeys;
 
-import java.util.UUID;
+
+import java.util.*;
 
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 
 public class LimitadorEvent implements Listener {
     FileConfiguration config = ReliquiasNexus.getPlugin(ReliquiasNexus.class).getConfig();
+    private final Map<UUID, List<ItemStack>> reliquiasSalvas = new HashMap<>();
     private void checkLimit(Player player){
         if(passou(player)){
-            kaboom(player);
+            player.setHealth(0);
         }else{
             player.sendActionBar(Component.text("§cNão seja um colecionador"));
         }
-    }
-    private void kaboom(Player player){
-        Location loc = player.getLocation();
-        World world = player.getWorld();
-        world.createExplosion(loc,5f,false,false);
-        player.setHealth(0);
     }
     private boolean passou(Player player){
         PersistentDataContainer container = player.getPersistentDataContainer();
@@ -80,19 +77,20 @@ public class LimitadorEvent implements Listener {
     public void limitesCara(PlayerDeathEvent event){
         Player player = event.getPlayer();
         PlayerInventory inv = player.getInventory();
+        List<ItemStack> manterRelics = new ArrayList<>();
         for(ItemStack item: inv.getContents()){
             if(item!=null){
                 ItemMeta meta = item.getItemMeta();
                 PersistentDataContainer data = meta.getPersistentDataContainer();
-                if(data.has(NEXUS.key,PersistentDataType.STRING) && data.has(DONO.key,PersistentDataType.STRING)){
-                    String nome = data.get(NEXUS.key,PersistentDataType.STRING);
-                    String uuidStr = data.get(DONO.key,PersistentDataType.STRING);
-                    if(uuidStr!=null && !uuidStr.isBlank()){
-                        UUID uuid = UUID.fromString(uuidStr);
-                        if(player.getUniqueId()==uuid){
-                            data.set(DONO.key,PersistentDataType.STRING,"");
-                            config.set("nexus."+nome,"");
-                        }
+                if(data.has(NEXUS.key,PersistentDataType.STRING)){
+                    Player assasino = player.getKiller();
+                    if(assasino!=null){
+                        String nome = data.get(NEXUS.key,PersistentDataType.STRING);
+                        data.set(DONO.key,PersistentDataType.STRING,assasino.getUniqueId().toString());
+                        config.set("nexus."+nome,assasino.getUniqueId().toString());
+                    }else{
+                        manterRelics.add(item);
+                        event.getDrops().remove(item);
                     }
                 }
             }
@@ -100,7 +98,40 @@ public class LimitadorEvent implements Listener {
         if(passou(player)){
             event.deathMessage(Component.text("§cO Jogador "+player.getName()+" foi eliminado por ter reliquias demais!"));
             event.deathScreenMessageOverride(Component.text("§cVocê foi eliminado por ter reliquias demais, se controla cara!"));
+            player.getPersistentDataContainer().set(QTD.key,PersistentDataType.INTEGER,1);
+            Random rd = new Random();
+            int i = rd.nextInt(0, manterRelics.size()-1);
+            ItemStack is = manterRelics.get(i);
+            manterRelics.forEach(r -> {
+                if(!r.equals(is)){
+                    ItemMeta meta = r.getItemMeta();
+                    PersistentDataContainer data = meta.getPersistentDataContainer();
+                    if(data.has(NEXUS.key,PersistentDataType.STRING)){
+                        String nome = data.get(NEXUS.key,PersistentDataType.STRING);
+                        data.set(DONO.key,PersistentDataType.STRING,"");
+                        config.set("nexus."+nome,"");
+                    }
+                }
+            });
+            manterRelics.removeIf(f -> !f.equals(is));
         }
-        player.getPersistentDataContainer().set(QTD.key,PersistentDataType.INTEGER,0);
+        if (!manterRelics.isEmpty()) {
+            reliquiasSalvas.put(player.getUniqueId(), manterRelics);
+        }else{
+            player.getPersistentDataContainer().set(QTD.key,PersistentDataType.INTEGER,0);
+        }
+    }
+    @EventHandler
+    public void onRespawn(PlayerRespawnEvent event) {
+        Player player = event.getPlayer();
+        List<ItemStack> reliquias = reliquiasSalvas.remove(player.getUniqueId());
+
+        if (reliquias != null) {
+            Bukkit.getScheduler().runTaskLater(ReliquiasNexus.getPlugin(ReliquiasNexus.class), () -> {
+                for (ItemStack item : reliquias) {
+                    player.getInventory().addItem(item);
+                }
+            }, 1L);
+        }
     }
 }

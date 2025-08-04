@@ -19,6 +19,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.bukkit.Bukkit.getServer;
@@ -111,12 +112,9 @@ public class PerdeuReliquia implements Listener {
             PersistentDataContainerView data = item.getPersistentDataContainer();
             if (!data.has(NEXUS.key, PersistentDataType.STRING)) return;
             InventoryType inv = event.getInventory().getType();
-            InventoryType clickedType = event.getClickedInventory() != null ? event.getClickedInventory().getType() : null;
-            if (clickedType != InventoryType.PLAYER && clickedType!=InventoryType.ENCHANTING && clickedType!=InventoryType.ANVIL && clickedType!=InventoryType.GRINDSTONE) {
-                if(inv!=InventoryType.PLAYER && inv!=InventoryType.ENCHANTING && inv!=InventoryType.ANVIL && inv!=InventoryType.GRINDSTONE) {
-                    event.setCancelled(true);
-                    event.getWhoClicked().sendMessage("§cVocê não pode arrastar uma relíquia para um container!");
-                }
+            if(inv!= InventoryType.CRAFTING && inv!=InventoryType.PLAYER && inv!=InventoryType.ENCHANTING && inv!=InventoryType.ANVIL && inv!=InventoryType.GRINDSTONE) {
+                event.setCancelled(true);
+                event.getWhoClicked().sendMessage("§cVocê não pode arrastar uma relíquia para um container!");
             }
         }
     }
@@ -136,11 +134,50 @@ public class PerdeuReliquia implements Listener {
         }
     }
     @EventHandler
+    public void naoTrouxa(InventoryClickEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player)) return;
+
+        ItemStack clickedItem = event.getCurrentItem();
+        ItemStack cursorItem = event.getCursor();
+        if(clickedItem != null){
+            if (isBundle(cursorItem.getType()) && clickedItem.getPersistentDataContainer().has(NEXUS.key,PersistentDataType.STRING)) {
+                event.setCancelled(true);
+                player.sendMessage("§cVocê não pode mover uma relíquia para dentro de uma trouxa.");
+            }
+            if (isBundle(clickedItem.getType()) && cursorItem.getPersistentDataContainer().has(NEXUS.key,PersistentDataType.STRING)) {
+                event.setCancelled(true);
+                player.sendMessage("§cVocê não pode guardar uma relíquia dentro de uma trouxa.");
+            }
+        }
+    }
+    private boolean isBundle(Material m){
+        List<Material> mat = List.of(
+                Material.BUNDLE,
+                Material.BLACK_BUNDLE,
+                Material.BLUE_BUNDLE,
+                Material.BROWN_BUNDLE,
+                Material.CYAN_BUNDLE,
+                Material.GRAY_BUNDLE,
+                Material.GREEN_BUNDLE,
+                Material.LIGHT_BLUE_BUNDLE,
+                Material.LIGHT_GRAY_BUNDLE,
+                Material.LIME_BUNDLE,
+                Material.MAGENTA_BUNDLE,
+                Material.ORANGE_BUNDLE,
+                Material.PINK_BUNDLE,
+                Material.PURPLE_BUNDLE,
+                Material.RED_BUNDLE,
+                Material.WHITE_BUNDLE,
+                Material.YELLOW_BUNDLE
+        );
+        return mat.contains(m);
+    }
+    @EventHandler
     public void onDrag(InventoryDragEvent event) {
         InventoryType inv = event.getInventory().getType();
         for (ItemStack item : event.getNewItems().values()) {
             PersistentDataContainerView data = item.getPersistentDataContainer();
-            if (data.has(NEXUS.key, PersistentDataType.STRING) && inv!=InventoryType.PLAYER && inv!=InventoryType.ENCHANTING && inv!=InventoryType.ANVIL && inv!=InventoryType.GRINDSTONE) {
+            if (data.has(NEXUS.key, PersistentDataType.STRING) && inv!=InventoryType.PLAYER && inv!=InventoryType.ENCHANTING && inv!=InventoryType.ANVIL && inv!=InventoryType.GRINDSTONE && inv!= InventoryType.CRAFTING) {
                 event.setCancelled(true);
                 event.getWhoClicked().sendMessage("§cVocê não pode arrastar uma relíquia para um container!");
             }

@@ -15,30 +15,25 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
 import org.dantesys.reliquiasNexus.util.Temporizador;
 
-import java.util.Map;
 
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 import static org.dantesys.reliquiasNexus.util.NexusKeys.NEXUS;
 
 public class VidaEvent implements Listener {
-    Map<Integer, Double> level = Map.of(
-            1, 25d,
-            2, 50d,
-            3, 75d,
-            4, 100d
-    );
     public void tentarEvoluir(Player player, ItemStack nexusItem, int levelAtual) {
         ItemMeta meta = nexusItem.getItemMeta();
         PersistentDataContainer data = meta.getPersistentDataContainer();
         double recuperacao = player.getPersistentDataContainer().getOrDefault(MISSAOVIDA.key, PersistentDataType.DOUBLE, 0d);
-        double recuperacaoNescessaria = level.get(levelAtual) * levelAtual;
+        double recuperacaoNescessaria = 10 * levelAtual;
         if (podeEvoluir(player, levelAtual) && data.has(NEXUS.key,PersistentDataType.STRING)) {
-            player.giveExp(-10 * levelAtual);
+            player.setLevel(player.getLevel()-(10*levelAtual));
             PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
             dataPlayer.set(MISSAOVIDA.key, PersistentDataType.DOUBLE, 0d);
             dataPlayer.set(VIDA.key,PersistentDataType.INTEGER,levelAtual+1);
@@ -55,14 +50,14 @@ public class VidaEvent implements Listener {
                 }
             }
         } else {
-            player.sendMessage("§cVocê precisa de "+(10*levelAtual)+" leveis XP ou ganhar mais "+(recuperacaoNescessaria-recuperacao)+" de vida para evoluir sua relíquia.");
+            player.sendMessage("§cVocê precisa de "+(10*levelAtual)+" leveis XP e recuperar mais "+((int) recuperacaoNescessaria-recuperacao)+" pontos de vida para evoluir sua relíquia.");
         }
     }
     private boolean podeEvoluir(Player player, int levelAtual) {
         int xpRequerido = 10 * levelAtual;
-        double recuperacaoNescessaria = level.get(levelAtual) * levelAtual;
+        double recuperacaoNescessaria = 10 * levelAtual;
         double recuperacao = player.getPersistentDataContainer().getOrDefault(MISSAOVIDA.key, PersistentDataType.DOUBLE, 0d);
-        return player.getTotalExperience() >= xpRequerido && recuperacao >= recuperacaoNescessaria;
+        return player.getLevel() >= xpRequerido && recuperacao >= recuperacaoNescessaria;
     }
     @EventHandler
     public void recuperaVida(EntityRegainHealthEvent event){
@@ -137,15 +132,19 @@ public class VidaEvent implements Listener {
                         e.setCancelled(true);
                         return;
                     }
-                    int level = dataPlayer.getOrDefault(VIDA.key, PersistentDataType.INTEGER, 1);
-                    int max = n.getMaxLevel();
-                    int tempo = (max/level)*5;
+                    int l=dataPlayer.getOrDefault(VIDA.key,PersistentDataType.INTEGER,1);
+                    int tempo = 120;
                     player.getInventory().setItemInMainHand(item);
                     player.getInventory().setItemInOffHand(item2);
                     Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class),
                             tempo,
-                            () -> player.sendActionBar(Component.text("Habilidade do Nexus da Vida Ativado!")),
-                            () -> {},
+                            () -> {
+                                player.sendActionBar(Component.text("Habilidade do Nexus da Vida Ativado!"));
+                                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION,20+l, l));
+                                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE,20+l, 2));
+                            },
+                            () -> {
+                            },
                             (t) -> {}
                     );
                     timer.scheduleTimer(20L);

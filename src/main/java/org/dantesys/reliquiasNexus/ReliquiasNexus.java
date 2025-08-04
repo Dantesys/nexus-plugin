@@ -5,8 +5,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
-import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
-import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
@@ -43,8 +41,6 @@ public final class ReliquiasNexus extends JavaPlugin {
             ctx.getSource().getSender().sendMessage("§r    -Mostrar quem está com qual reliquia");
             ctx.getSource().getSender().sendMessage("§r/nexus level");
             ctx.getSource().getSender().sendMessage("§r    -Mostrar seus niveis de reliquias");
-            ctx.getSource().getSender().sendMessage("§r/nexus level <player>");
-            ctx.getSource().getSender().sendMessage("§r    -Mostrar os niveis de reliquias de um jogador especifico");
             return Command.SINGLE_SUCCESS;
         });
         root.then(Commands.literal("list").executes(ctx -> {
@@ -57,12 +53,12 @@ public final class ReliquiasNexus extends JavaPlugin {
                         try{
                             UUID uuid = UUID.fromString(uuidStr);
                             OfflinePlayer player = getServer().getOfflinePlayer(uuid);
-                            dono = "§c"+(player.getName() != null? player.getName():"Desconhecido");
+                            dono = "§c"+(player.getName() != null? "§r§2"+player.getName():"§r§cDesconhecido");
                         }catch(IllegalArgumentException ignored){
                             dono = "§cJogador Corrompido";
                         }
                     }
-                    ctx.getSource().getSender().sendMessage(dono);
+                    ctx.getSource().getSender().sendMessage(nexus+": "+dono);
                 }
             }else ctx.getSource().getSender().sendMessage("§cNão foi encontrado nenhum Nexus");
             return Command.SINGLE_SUCCESS;
@@ -75,28 +71,12 @@ public final class ReliquiasNexus extends JavaPlugin {
                 for(NamespacedKey k:keys){
                     int l = dataPlayer.getOrDefault(k, PersistentDataType.INTEGER,0);
                     if(l>0){
-                        player.sendMessage("§r§2"+k.namespace()+": "+l);
+                        player.sendMessage("§r§2"+k.getKey()+": "+l);
                     }else{
-                        player.sendMessage("§r§2"+k.namespace()+": §r§cNunca usou");
+                        player.sendMessage("§r§2"+k.getKey()+": §r§cNunca usou");
                     }
                 }
             }else ctx.getSource().getSender().sendMessage("§cApenas jogadores podem usar");
-            return Command.SINGLE_SUCCESS;
-        }));
-        root.then(Commands.literal("level").then(Commands.argument("player",ArgumentTypes.player())).requires(sender -> sender.getSender().isOp()).executes(ctx -> {
-            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
-            final Player player = targetResolver.resolve(ctx.getSource()).getFirst();
-            List<NamespacedKey> keys = NexusKeys.getKeyLevel();
-            PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-            player.sendMessage("§n§l"+player.getName()+" leveis de reliquias");
-            for(NamespacedKey k:keys){
-                int l = dataPlayer.getOrDefault(k, PersistentDataType.INTEGER,0);
-                if(l>0){
-                    player.sendMessage("§r§2"+k.namespace()+": "+l);
-                }else{
-                    player.sendMessage("§r§2"+k.namespace()+": §r§cNunca usou");
-                }
-            }
             return Command.SINGLE_SUCCESS;
         }));
         LiteralCommandNode<CommandSourceStack> buildCommand = root.build();

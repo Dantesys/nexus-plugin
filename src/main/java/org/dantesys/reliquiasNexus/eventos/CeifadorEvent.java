@@ -23,28 +23,19 @@ import org.dantesys.reliquiasNexus.items.Nexus;
 import org.dantesys.reliquiasNexus.util.Temporizador;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Random;
 
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 import static org.dantesys.reliquiasNexus.util.NexusKeys.NEXUS;
 
 public class CeifadorEvent implements Listener {
-    Map<Integer, Double> level = Map.of(
-            1, 20d,
-            2, 30d,
-            3, 40d,
-            4, 50d,
-            5, 60d,
-            6, 70d
-    );
     public void tentarEvoluir(Player player, ItemStack nexusItem, int levelAtual) {
         ItemMeta meta = nexusItem.getItemMeta();
         PersistentDataContainer data = meta.getPersistentDataContainer();
         double recuperacao = player.getPersistentDataContainer().getOrDefault(MISSAOCEIFADOR.key, PersistentDataType.DOUBLE, 0d);
-        double recuperacaoNescessaria = 5 * levelAtual;
+        double recuperacaoNescessaria = 10 * levelAtual;
         if (podeEvoluir(player, levelAtual) && data.has(NEXUS.key,PersistentDataType.STRING)) {
-            player.giveExp(-10 * levelAtual);
+            player.setLevel(player.getLevel()-(10*levelAtual));
             PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
             dataPlayer.set(MISSAOCEIFADOR.key, PersistentDataType.DOUBLE, 0d);
             dataPlayer.set(CEIFADOR.key,PersistentDataType.INTEGER,levelAtual+1);
@@ -61,14 +52,14 @@ public class CeifadorEvent implements Listener {
                 }
             }
         } else {
-            player.sendMessage("§cVocê precisa de "+(10*levelAtual)+" leveis XP ou roubar mais "+(recuperacaoNescessaria-recuperacao)+" de vida para evoluir sua relíquia.");
+            player.sendMessage("§cVocê precisa de "+(10*levelAtual)+" leveis XP e roubar mais "+((int) recuperacaoNescessaria-recuperacao)+" de vida para evoluir sua relíquia.");
         }
     }
     private boolean podeEvoluir(Player player, int levelAtual) {
         int xpRequerido = 10 * levelAtual;
-        double recuperacaoNescessaria = level.get(levelAtual) * levelAtual;
+        double recuperacaoNescessaria = 10 * levelAtual;
         double recuperacao = player.getPersistentDataContainer().getOrDefault(MISSAOCEIFADOR.key, PersistentDataType.DOUBLE, 0d);
-        return player.getTotalExperience() >= xpRequerido && recuperacao >= recuperacaoNescessaria;
+        return player.getLevel() >= xpRequerido && recuperacao >= recuperacaoNescessaria;
     }
     @EventHandler
     public void roubaVida(EntityDamageByEntityEvent event){
@@ -84,8 +75,7 @@ public class CeifadorEvent implements Listener {
                         double dano = event.getDamage();
                         double recuperacao = player.getPersistentDataContainer().getOrDefault(MISSAOCEIFADOR.key, PersistentDataType.DOUBLE, 0d);
                         int level = player.getPersistentDataContainer().getOrDefault(CEIFADOR.key,PersistentDataType.INTEGER,1);
-                        int max = n.getMaxLevel();
-                        double cura = ((double) level /max)*dano;
+                        double cura = dano/2;
                         player.heal(cura);
                         recuperacao+=cura;
                         player.getPersistentDataContainer().set(MISSAOCEIFADOR.key, PersistentDataType.DOUBLE, recuperacao);
@@ -100,7 +90,7 @@ public class CeifadorEvent implements Listener {
         Player player = event.getPlayer();
         PersistentDataContainer container = player.getPersistentDataContainer();
         ItemStack stack = player.getInventory().getItemInMainHand();
-        if(player.isSneaking() && container.has(SPECIAL.key, PersistentDataType.INTEGER) && stack.getPersistentDataContainer().has(NEXUS.key,PersistentDataType.STRING)){
+        if(player.isSneaking() && stack.getPersistentDataContainer().has(NEXUS.key,PersistentDataType.STRING)){
             int tempo = container.getOrDefault(SPECIAL.key,PersistentDataType.INTEGER,0);
             String nome = stack.getPersistentDataContainer().get(NEXUS.key,PersistentDataType.STRING);
             if(nome!=null && !nome.isBlank()){
@@ -109,8 +99,7 @@ public class CeifadorEvent implements Listener {
                     PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
                     int l = dataPlayer.getOrDefault(CEIFADOR.key,PersistentDataType.INTEGER,1);
                     item.setLevel(l);
-                    double damage = ((double) item.getLevel() /item.getMaxLevel())*0.9d;
-                    final int finalRange = 10*item.getLevel();
+                    final int finalRange = 50;
                     final Location location = player.getLocation();
                     final Vector direction = location.getDirection().normalize();
                     final double[] tp = {0};
@@ -135,19 +124,15 @@ public class CeifadorEvent implements Listener {
                                     if(pct>99 && pl != player){
                                         vivo.setHealth(0);
                                         player.getInventory().addItem(new ItemStack(Material.TOTEM_OF_UNDYING));
-                                        dataPlayer.set(MISSAOCEIFADOR.key, PersistentDataType.DOUBLE, level.get(item.getLevel()));
-                                        tentarEvoluir(player, item.getItem(item.getLevel()), item.getLevel());
                                     }else if(pl != player){
-                                        vivo.setHealth(vivo.getHealth()*damage);
+                                        vivo.setHealth(1d);
                                     }
                                 }else{
                                     if(pct>99){
                                         vivo.setHealth(0);
                                         player.getInventory().addItem(new ItemStack(Material.TOTEM_OF_UNDYING));
-                                        dataPlayer.set(MISSAOCEIFADOR.key, PersistentDataType.DOUBLE, level.get(item.getLevel()));
-                                        tentarEvoluir(player, item.getItem(item.getLevel()), item.getLevel());
                                     }else{
-                                        vivo.setHealth(vivo.getHealth()*damage);
+                                        vivo.setHealth(1d);
                                     }
                                 }
                             }
@@ -159,7 +144,7 @@ public class CeifadorEvent implements Listener {
                         }
                     });
                     timer.scheduleTimer(1L);
-                    container.set(SPECIAL.key,PersistentDataType.INTEGER,(item.getMaxLevel()/item.getLevel())*60);
+                    container.set(SPECIAL.key,PersistentDataType.INTEGER,120);
                 }
             }
         }

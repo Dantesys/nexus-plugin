@@ -3,10 +3,7 @@ package org.dantesys.reliquiasNexus.eventos;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -22,19 +19,10 @@ import org.dantesys.reliquiasNexus.items.Nexus;
 import org.dantesys.reliquiasNexus.util.Temporizador;
 
 import java.util.Collection;
-import java.util.Map;
 
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 
 public class GuerreiroEvent implements Listener {
-    Map<Integer, EntityType> mobsPorLevel = Map.of(
-            1, EntityType.ZOMBIE,
-            2, EntityType.SKELETON,
-            3, EntityType.CREEPER,
-            4, EntityType.ENDERMAN,
-            5, EntityType.PIGLIN_BRUTE,
-            6, EntityType.WITHER_SKELETON
-    );
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
         if (!(event.getEntity().getKiller() instanceof Player killer)) return;
@@ -45,7 +33,7 @@ public class GuerreiroEvent implements Listener {
             PersistentDataContainer data = killer.getPersistentDataContainer();
             int kills = data.getOrDefault(MISSAOGUERREIRO.key, PersistentDataType.INTEGER, 0);
             int level = data.getOrDefault(GUERREIRO.key, PersistentDataType.INTEGER, 1);
-            if(event.getEntity().getType().equals(mobsPorLevel.get(level))){
+            if(event.getEntity() instanceof Monster || event.getEntity() instanceof Boss){
                 data.set(MISSAOGUERREIRO.key, PersistentDataType.INTEGER, kills + 1);
                 tentarEvoluir(killer,stack,level);
             }
@@ -57,12 +45,11 @@ public class GuerreiroEvent implements Listener {
         int kills = player.getPersistentDataContainer().getOrDefault(MISSAOGUERREIRO.key, PersistentDataType.INTEGER, 0);
         int killsRequeridos = 5 * levelAtual;
         if (podeEvoluir(player, levelAtual) && data.has(NEXUS.key,PersistentDataType.STRING)) {
-            player.giveExp(-10 * levelAtual);
+            player.setLevel(player.getLevel()-(10*levelAtual));
             PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
             dataPlayer.set(MISSAOGUERREIRO.key, PersistentDataType.INTEGER, 0);
             dataPlayer.set(GUERREIRO.key,PersistentDataType.INTEGER,levelAtual+1);
             String nome = data.get(NEXUS.key,PersistentDataType.STRING);
-            ItemMeta metinha = nexusItem.getItemMeta();
             if(nome!=null && !nome.isBlank()){
                 Nexus n = ItemsRegistro.getFromNome(nome);
                 if(n!=null){
@@ -70,20 +57,19 @@ public class GuerreiroEvent implements Listener {
                     if(meta.hasEnchants()){
                         meta.getEnchants().forEach((nexusItem::addEnchantment));
                     }
-                    nexusItem.setItemMeta(metinha);
                     player.getInventory().setItemInMainHand(nexusItem);
                     player.sendMessage("§aSeu Nexus do Guerreiro evoluiu para o nível " + (levelAtual + 1) + "!");
                 }
             }
         } else {
-            player.sendMessage("§cVocê precisa de "+(10*levelAtual)+" leveis XP ou derrotar mais "+(killsRequeridos-kills)+" "+mobsPorLevel.get(levelAtual).name()+" para evoluir sua relíquia.");
+            player.sendMessage("§cVocê precisa de "+(10*levelAtual)+" leveis XP e derrotar mais "+(killsRequeridos-kills)+" monstros ou boses para evoluir sua relíquia.");
         }
     }
     private boolean podeEvoluir(Player player, int levelAtual) {
         int xpRequerido = 10 * levelAtual;
         int killsRequeridos = 5 * levelAtual;
         int kills = player.getPersistentDataContainer().getOrDefault(MISSAOGUERREIRO.key, PersistentDataType.INTEGER, 0);
-        return player.getTotalExperience() >= xpRequerido && kills >= killsRequeridos;
+        return player.getLevel() >= xpRequerido && kills >= killsRequeridos;
     }
     @EventHandler
     public void corte(PlayerInteractEvent event){
@@ -99,8 +85,8 @@ public class GuerreiroEvent implements Listener {
                     PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
                     int l = dataPlayer.getOrDefault(GUERREIRO.key,PersistentDataType.INTEGER,1);
                     item.setLevel(l);
-                    int range = 10*item.getLevel();
-                    double damage = 10*item.getLevel();
+                    int range = 50;
+                    double damage = 10+l;
                     final int finalRange = range;
                     final double finalDamage = damage;
                     final Location location = player.getLocation();
@@ -137,7 +123,7 @@ public class GuerreiroEvent implements Listener {
                         }
                     });
                     timer.scheduleTimer(1L);
-                    container.set(SPECIAL.key,PersistentDataType.INTEGER,(item.getMaxLevel()/item.getLevel())*60);
+                    container.set(SPECIAL.key,PersistentDataType.INTEGER,120);
                 }
             }
         }

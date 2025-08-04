@@ -1,6 +1,5 @@
 package org.dantesys.reliquiasNexus.items;
 
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -16,58 +15,33 @@ public class Nexus{
     private final String nome;
     private ItemStack item;
     private int level = 1;
-    private final int maxLevel;
-    private final List<Material> materialLevel;
-    private final List<Material> visual;
     private final List<PotionEffectType> passiva;
     private final ItemStack itemBase;
     private final Attribute attribute;
-    public Nexus(ItemStack stack, int max, List<Material> mateirais,List<PotionEffectType> passiva,String nome,Attribute attribute,List<Material> visual){
+    public Nexus(ItemStack stack, List<PotionEffectType> passiva,String nome,Attribute attribute){
         this.item=stack;
-        this.maxLevel=max;
-        this.materialLevel=mateirais;
         this.itemBase=stack;
         this.nome=nome;
         this.passiva = passiva;
         this.attribute=attribute;
-        this.visual=visual;
-    }
-    public Nexus(ItemStack stack, int max, List<Material> mateirais,List<PotionEffectType> passiva,String nome,Attribute attribute){
-        this.item=stack;
-        this.maxLevel=max;
-        this.materialLevel=mateirais;
-        this.itemBase=stack;
-        this.nome=nome;
-        this.passiva = passiva;
-        this.attribute=attribute;
-        this.visual=this.materialLevel;
     }
     public List<PotionEffect> getEfeitos(){
         List<PotionEffect> efeitos = new ArrayList<>();
         for(PotionEffectType efeito:passiva){
-            int aplificador = (level/maxLevel)*3;
-            efeitos.add(new PotionEffect(efeito,level*20,aplificador));
+            efeitos.add(new PotionEffect(efeito,(level*20)+20,2));
         }
         return efeitos;
     }
-    public int getLevel(){
-        return this.level;
-    }
-    public int getMaxLevel(){
-        return this.maxLevel;
-    }
+
     public String getNome(){
         return this.nome;
-    }
-    private boolean podeUpar(){
-        return this.level<this.maxLevel;
     }
     public ItemStack getItem(int level){
         if(level==1){
             return this.itemBase;
         }
         this.item = this.itemBase;
-        for(int i=1;i<level;i++){
+        for(int i=2;i<level;i++){
             upgrade();
         }
         return this.item;
@@ -90,21 +64,10 @@ public class Nexus{
         this.level=l;
     }
     public void upgrade(){
-        if(podeUpar()){
-            this.level++;
-            ItemMeta item = this.item.getItemMeta();
-            this.item = this.item.withType(getMaterialPorLevel());
-            item.setItemModel(getVisualPorLevel());
-            NamespacedKey key = new NamespacedKey("nexus_leveld", "boost_lvl_" + level);
-            item.addAttributeModifier(attribute, new AttributeModifier(key, this.level, AttributeModifier.Operation.ADD_NUMBER));
-            this.item.setItemMeta(item);
-        }
+        level=level+1;
+        ItemMeta item = this.item.getItemMeta();
+        NamespacedKey key = new NamespacedKey("nexus_leveled", "boost_lvl_" + level);
+        item.addAttributeModifier(attribute, new AttributeModifier(key, level, AttributeModifier.Operation.ADD_NUMBER));
+        this.item.setItemMeta(item);
     }
-    private Material getMaterialPorLevel(){
-        return this.materialLevel.get(this.level-1);
-    }
-    private NamespacedKey getVisualPorLevel(){
-        return this.visual.get(this.level-1).getKey();
-    }
-
 }
