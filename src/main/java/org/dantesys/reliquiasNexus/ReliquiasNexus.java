@@ -33,14 +33,19 @@ public final class ReliquiasNexus extends JavaPlugin {
         config.addDefault("nexus.mares","");
         config.addDefault("nexus.barbaro","");
         config.addDefault("nexus.fazendeiro","");
+        config.addDefault("nexus.espiao","");
+        config.addDefault("nexus.arqueiro","");
+        config.addDefault("nexus.cacador","");
+        config.addDefault("nexus.mineiro","");
+        config.addDefault("nexus.fenix","");
         config.options().copyDefaults(true);
         saveConfig();
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("nexus").executes(ctx -> {
             ctx.getSource().getSender().sendMessage("§rUsando Nexus");
             ctx.getSource().getSender().sendMessage("§r/nexus list");
-            ctx.getSource().getSender().sendMessage("§r    -Mostrar quem está com qual reliquia");
+            ctx.getSource().getSender().sendMessage("§r  -Mostrar quem está com qual reliquia");
             ctx.getSource().getSender().sendMessage("§r/nexus level");
-            ctx.getSource().getSender().sendMessage("§r    -Mostrar seus niveis de reliquias");
+            ctx.getSource().getSender().sendMessage("§r  -Mostrar seus niveis de reliquias");
             return Command.SINGLE_SUCCESS;
         });
         root.then(Commands.literal("list").executes(ctx -> {
@@ -81,16 +86,12 @@ public final class ReliquiasNexus extends JavaPlugin {
         }));
         LiteralCommandNode<CommandSourceStack> buildCommand = root.build();
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> commands.registrar().register(buildCommand));
-        getServer().getPluginManager().registerEvents(new JoinQuit(), this);
-        getServer().getPluginManager().registerEvents(new GuerreiroEvent(), this);
+        getServer().getPluginManager().registerEvents(new JoinQuitEvent(), this);
         getServer().getPluginManager().registerEvents(new LimitadorEvent(), this);
         getServer().getPluginManager().registerEvents(new PassivaEvent(), this);
-        getServer().getPluginManager().registerEvents(new PerdeuReliquia(), this);
-        getServer().getPluginManager().registerEvents(new CeifadorEvent(), this);
-        getServer().getPluginManager().registerEvents(new VidaEvent(), this);
-        getServer().getPluginManager().registerEvents(new MaresEvent(), this);
-        getServer().getPluginManager().registerEvents(new BarbaroEvent(), this);
-        getServer().getPluginManager().registerEvents(new FazendeiroEvent(), this);
+        getServer().getPluginManager().registerEvents(new PerdeuEvent(), this);
+        getServer().getPluginManager().registerEvents(new EvoluirEvent(), this);
+        getServer().getPluginManager().registerEvents(new SpecialEvent(), this);
         getServer().getConsoleSender().sendMessage("§2[Nexus]: Plugin Ativado!");
     }
 

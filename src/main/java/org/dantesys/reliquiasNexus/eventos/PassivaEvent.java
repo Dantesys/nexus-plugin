@@ -4,8 +4,10 @@ import com.destroystokyo.paper.event.server.ServerTickEndEvent;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -36,23 +38,39 @@ public class PassivaEvent implements Listener {
                 }
                 PlayerInventory pinv = player.getInventory();
                 PersistentDataContainerView data = pinv.getItemInMainHand().getPersistentDataContainer();
-                if(data.has(NEXUS.key)){
-                    String nome = data.get(NEXUS.key,PersistentDataType.STRING);
-                    Nexus nexus = ItemsRegistro.getFromNome(nome!=null?nome:"");
-                    if(nexus!=null){
-                        player.addPotionEffects(nexus.getEfeitos());
-                    }
-                }else{
+                aplicaEfeito(data,player);
+                data = pinv.getItemInOffHand().getPersistentDataContainer();
+                aplicaEfeito(data,player);
+                ItemStack stack = pinv.getHelmet();
+                if(stack!=null){
                     data = pinv.getItemInOffHand().getPersistentDataContainer();
-                    if(data.has(NEXUS.key)){
-                        String nome = data.get(NEXUS.key,PersistentDataType.STRING);
-                        Nexus nexus = ItemsRegistro.getFromNome(nome!=null?nome:"");
-                        if(nexus!=null){
-                            player.addPotionEffects(nexus.getEfeitos());
-                        }
-                    }
+                    aplicaEfeito(data,player);
+                }
+                stack = pinv.getChestplate();
+                if(stack!=null){
+                    data = pinv.getItemInOffHand().getPersistentDataContainer();
+                    aplicaEfeito(data,player);
+                }
+                stack = pinv.getLeggings();
+                if(stack!=null){
+                    data = pinv.getItemInOffHand().getPersistentDataContainer();
+                    aplicaEfeito(data,player);
+                }
+                stack = pinv.getBoots();
+                if(stack!=null){
+                    data = pinv.getItemInOffHand().getPersistentDataContainer();
+                    aplicaEfeito(data,player);
                 }
             });
+        }
+    }
+    private void aplicaEfeito(PersistentDataContainerView data, Player player){
+        if(data.has(NEXUS.key)){
+            String nome = data.get(NEXUS.key,PersistentDataType.STRING);
+            Nexus nexus = ItemsRegistro.getFromNome(nome!=null?nome:"");
+            if(nexus!=null){
+                player.addPotionEffects(nexus.getEfeitos());
+            }
         }
     }
 }

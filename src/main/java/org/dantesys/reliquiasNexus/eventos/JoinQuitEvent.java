@@ -22,7 +22,7 @@ import java.util.Random;
 
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 
-public class JoinQuit implements Listener {
+public class JoinQuitEvent implements Listener {
     FileConfiguration config = ReliquiasNexus.getPlugin(ReliquiasNexus.class).getConfig();
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {

@@ -22,7 +22,19 @@ public enum NexusKeys {
     BARBARO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"barbaro")),
     MISSAOBARBARO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_barbaro")),
     FAZENDEIRO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"fazendeiro")),
-    MISSAOFAZENDEIRO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_FAZENDEIRO"));
+    MISSAOFAZENDEIRO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_fazendeiro")),
+    ESPIAO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"espiao")),
+    MISSAOESPIAO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_espiao")),
+    ARQUEIRO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"arqueiro")),
+    MISSAOARQUEIRO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_arqueiro")),
+    CACADOR(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"cacador")),
+    MISSAOCACADOR(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_cacador")),
+    TEMPESTADE(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"tempestade")),
+    MISSAOTEMPESTADE(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_tempestade")),
+    MINEIRO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"mineiro")),
+    MISSAOMINEIRO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_mineiro")),
+    FENIX(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"fenix")),
+    MISSAOFENIX(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_fenix"));
     public final NamespacedKey key;
     NexusKeys(NamespacedKey nexus) {
         key = nexus;
@@ -36,6 +48,12 @@ public enum NexusKeys {
             case "mares" -> MARES.key;
             case "barbaro" -> BARBARO.key;
             case "fazendeiro" -> FAZENDEIRO.key;
+            case "espiao" -> ESPIAO.key;
+            case "arqueiro" -> ARQUEIRO.key;
+            case "cacador" -> CACADOR.key;
+            case "tempestade" -> TEMPESTADE.key;
+            case "mineiro" -> MINEIRO.key;
+            case "fenix" -> FENIX.key;
             default -> null;
         };
     }
@@ -47,6 +65,12 @@ public enum NexusKeys {
         keys.add(MARES.key);
         keys.add(BARBARO.key);
         keys.add(FAZENDEIRO.key);
+        keys.add(ESPIAO.key);
+        keys.add(ARQUEIRO.key);
+        keys.add(CACADOR.key);
+        keys.add(TEMPESTADE.key);
+        keys.add(MINEIRO.key);
+        keys.add(FENIX.key);
         return keys;
     }
 }

@@ -2,9 +2,12 @@ package org.dantesys.reliquiasNexus.eventos;
 
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockType;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
@@ -13,6 +16,7 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -26,7 +30,7 @@ import static org.bukkit.Bukkit.getServer;
 import static org.dantesys.reliquiasNexus.util.NexusKeys.DONO;
 import static org.dantesys.reliquiasNexus.util.NexusKeys.NEXUS;
 
-public class PerdeuReliquia implements Listener {
+public class PerdeuEvent implements Listener {
     @EventHandler
     public void onItemDamage(EntityDamageEvent event) {
         if (!(event.getEntity() instanceof Item itemEntity)) return;
@@ -92,6 +96,32 @@ public class PerdeuReliquia implements Listener {
             if(data.has(NEXUS.key,PersistentDataType.STRING)){
                 event.setCancelled(true);
                 player.sendMessage("§cVocê não pode colocar a reliquia numa moldura");
+            }
+        }
+        if(e instanceof ArmorStand){
+            ItemStack stack = player.getInventory().getItemInMainHand();
+            ItemMeta meta = stack.getItemMeta();
+            PersistentDataContainer data = meta.getPersistentDataContainer();
+            if(data.has(NEXUS.key,PersistentDataType.STRING)){
+                event.setCancelled(true);
+                player.sendMessage("§cVocê não pode colocar a reliquia num suporte de armadura");
+            }
+        }
+    }
+    @EventHandler
+    public void vaso(PlayerInteractEvent event){
+        Player player = event.getPlayer();
+        Action a = event.getAction();
+        if(a==Action.RIGHT_CLICK_BLOCK){
+            Block b = event.getClickedBlock();
+            if(b!=null && b == BlockType.DECORATED_POT){
+                ItemStack stack = player.getInventory().getItemInMainHand();
+                ItemMeta meta = stack.getItemMeta();
+                PersistentDataContainer data = meta.getPersistentDataContainer();
+                if(data.has(NEXUS.key,PersistentDataType.STRING)){
+                    event.setCancelled(true);
+                    player.sendMessage("§cVocê não pode colocar a reliquia num pote");
+                }
             }
         }
     }

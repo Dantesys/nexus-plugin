@@ -2,7 +2,9 @@ package org.dantesys.reliquiasNexus.items;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemRarity;
 import org.bukkit.inventory.ItemStack;
@@ -23,6 +25,12 @@ public class ItemsRegistro {
     public static Nexus mares;
     public static Nexus barbaro;
     public static Nexus fazendeiro;
+    public static Nexus espiao;
+    public static Nexus arqueiro;
+    public static Nexus cacador;
+    public static Nexus tempestade;
+    public static Nexus mineiro;
+    public static Nexus fenix;
     private static final List<Nexus> reliquias = new ArrayList<>();
     public static void init(){
         createGuerreiro();
@@ -37,6 +45,18 @@ public class ItemsRegistro {
         reliquias.add(barbaro);
         createFazendeiro();
         reliquias.add(fazendeiro);
+        createEspiao();
+        reliquias.add(espiao);
+        createArqueiro();
+        reliquias.add(arqueiro);
+        createCacador();
+        reliquias.add(cacador);
+        createTempestade();
+        reliquias.add(tempestade);
+        createMineiro();
+        reliquias.add(mineiro);
+        createFenix();
+        reliquias.add(fenix);
     }
     private static void createGuerreiro(){
         List<PotionEffectType> efeitos = new ArrayList<>();
@@ -46,7 +66,7 @@ public class ItemsRegistro {
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Guerreiro"));
         meta.setUnbreakable(true);
-        meta.setGlider(true);
+        meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"guerreiro");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
@@ -62,7 +82,7 @@ public class ItemsRegistro {
         meta.displayName(Component.text("§6Nexus do Ceifador"));
         meta.setItemModel(Material.NETHERITE_HOE.getKey());
         meta.setUnbreakable(true);
-        meta.setGlider(true);
+        meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"ceifador");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
@@ -77,7 +97,7 @@ public class ItemsRegistro {
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus da vida"));
         meta.setUnbreakable(true);
-        meta.setGlider(true);
+        meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"vida");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
@@ -91,7 +111,7 @@ public class ItemsRegistro {
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus dos Mares"));
         meta.setUnbreakable(true);
-        meta.setGlider(true);
+        meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"mares");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
@@ -106,7 +126,7 @@ public class ItemsRegistro {
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Barbaro"));
         meta.setUnbreakable(true);
-        meta.setGlider(true);
+        meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"barbaro");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
@@ -120,12 +140,102 @@ public class ItemsRegistro {
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Fazendeiro"));
         meta.setUnbreakable(true);
-        meta.setGlider(true);
+        meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"fazendeiro");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
         item.setItemMeta(meta);
         fazendeiro = new Nexus(item,efeitos,"fazendeiro", Attribute.BLOCK_INTERACTION_RANGE);
+    }
+    private static void createEspiao(){
+        List<PotionEffectType> efeitos = new ArrayList<>();
+        efeitos.add(PotionEffectType.SPEED);
+        ItemStack item = new ItemStack(Material.NETHERITE_HELMET,1);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Nexus do Espiao"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"espiao");
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
+        item.setItemMeta(meta);
+        espiao = new Nexus(item,efeitos,"espiao", Attribute.ARMOR);
+    }
+    private static void createArqueiro(){
+        List<PotionEffectType> efeitos = new ArrayList<>();
+        efeitos.add(PotionEffectType.INVISIBILITY);
+        efeitos.add(PotionEffectType.NIGHT_VISION);
+        ItemStack item = new ItemStack(Material.BOW,1);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Nexus do Arqueiro"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"arqueiro");
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
+        item.setItemMeta(meta);
+        arqueiro = new Nexus(item,efeitos,"arqueiro", Attribute.SNEAKING_SPEED);
+    }
+    private static void createCacador(){
+        List<PotionEffectType> efeitos = new ArrayList<>();
+        efeitos.add(PotionEffectType.RESISTANCE);
+        ItemStack item = new ItemStack(Material.CROSSBOW,1);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Nexus do Caçador"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"cacador");
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
+        item.setItemMeta(meta);
+        cacador = new Nexus(item,efeitos,"cacador", Attribute.STEP_HEIGHT);
+    }
+    private static void createTempestade(){
+        List<PotionEffectType> efeitos = new ArrayList<>();
+        efeitos.add(PotionEffectType.JUMP_BOOST);
+        ItemStack item = new ItemStack(Material.MACE,1);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Nexus do Caçador"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"tempestade");
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
+        item.setItemMeta(meta);
+        tempestade = new Nexus(item,efeitos,"tempestade", Attribute.SAFE_FALL_DISTANCE);
+    }
+    private static void createMineiro(){
+        List<PotionEffectType> efeitos = new ArrayList<>();
+        efeitos.add(PotionEffectType.HASTE);
+        efeitos.add(PotionEffectType.NIGHT_VISION);
+        ItemStack item = new ItemStack(Material.NETHERITE_PICKAXE,1);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Nexus do Mineiro"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.addAttributeModifier(Attribute.SCALE,new AttributeModifier(new NamespacedKey("nexus_passiva","tamanho"),-0.25, AttributeModifier.Operation.ADD_NUMBER));
+        meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"mineiro");
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
+        item.setItemMeta(meta);
+        mineiro = new Nexus(item,efeitos,"mineiro", Attribute.BLOCK_BREAK_SPEED);
+    }
+    private static void createFenix(){
+        List<PotionEffectType> efeitos = new ArrayList<>();
+        efeitos.add(PotionEffectType.JUMP_BOOST);
+        efeitos.add(PotionEffectType.FIRE_RESISTANCE);
+        ItemStack item = new ItemStack(Material.NETHERITE_CHESTPLATE,1);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Nexus da Fenix"));
+        meta.setItemModel(Material.ELYTRA.getKey());
+        meta.setUnbreakable(true);
+        meta.setGlider(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"fenix");
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
+        item.setItemMeta(meta);
+        fenix = new Nexus(item,efeitos,"fenix", Attribute.ARMOR);
     }
     public static List<Nexus> getValidReliquia(FileConfiguration config){
         List<Nexus> validos = new ArrayList<>();
@@ -145,6 +255,12 @@ public class ItemsRegistro {
             case "mares" -> mares;
             case "barbaro" -> barbaro;
             case "fazendeiro" -> fazendeiro;
+            case "espiao" -> espiao;
+            case "arqueiro" -> arqueiro;
+            case "cacador" -> cacador;
+            case "tempestade" -> tempestade;
+            case "mineiro" -> mineiro;
+            case "fenix" -> fenix;
             default -> null;
         };
     }
