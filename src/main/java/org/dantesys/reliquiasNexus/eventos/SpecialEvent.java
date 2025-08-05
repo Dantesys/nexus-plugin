@@ -5,6 +5,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -58,8 +59,9 @@ public class SpecialEvent implements Listener {
                             case "mineiro" -> mineiro(player,item);
                             case "sculk" -> sculk(player,item);
                             case "protetor" -> protetor(player,item);
+                            case "pescador" -> pescador(player,item);
                         }
-                        if(item.getNome()!="protetor"){
+                        if(!item.getNome().equals("protetor")){
                             dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,120);
                         }
                     }
@@ -94,6 +96,31 @@ public class SpecialEvent implements Listener {
                     if(item!=null){
                         hulk(player,item);
                         dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,120);
+                    }
+                }
+            }
+        }
+        ItemStack stack = player.getInventory().getItemInMainHand();
+        if (stack.getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)) {
+            String nome = stack.getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING);
+            if (nome != null && nome.equals("mineiro")) {
+                Block bloco = event.getClickedBlock();
+                if(bloco!=null){
+                    if(bloco.getType()==Material.BEDROCK){
+                        player.getWorld().dropItemNaturally(bloco.getLocation(),new ItemStack(Material.BEDROCK));
+                        bloco.setType(Material.AIR);
+                    }
+                    if(bloco.getType()==Material.END_PORTAL){
+                        player.getWorld().dropItemNaturally(bloco.getLocation(),new ItemStack(Material.END_PORTAL));
+                        bloco.setType(Material.AIR);
+                    }
+                    if(bloco.getType()==Material.NETHER_PORTAL){
+                        player.getWorld().dropItemNaturally(bloco.getLocation(),new ItemStack(Material.END_PORTAL));
+                        bloco.setType(Material.AIR);
+                    }
+                    if(bloco.getType()==Material.END_PORTAL_FRAME){
+                        player.getWorld().dropItemNaturally(bloco.getLocation(),new ItemStack(Material.END_PORTAL_FRAME));
+                        bloco.setType(Material.AIR);
                     }
                 }
             }
@@ -579,6 +606,72 @@ public class SpecialEvent implements Listener {
         });
         timer.scheduleTimer(1L);
     }
+    private void pescador(Player player,Nexus item){
+        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+        int l = dataPlayer.getOrDefault(HULK.key,PersistentDataType.INTEGER,1);
+        item.setLevel(l);
+        final int finalRange = 50;
+        final double finalDamage = l;
+        final Location location = player.getLocation();
+        final Vector direction = location.getDirection().normalize();
+        final double[] tp = {0};
+        final List<LivingEntity> atingidos = new ArrayList<>();
+        Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 10,
+                ()->{
+                },()-> {
+        },(t)->{
+            tp[0] = tp[0]+3.4;
+            double x = direction.getX()*tp[0];
+            double y = direction.getY()*tp[0]+1.4;
+            double z = direction.getZ()*tp[0];
+            location.add(x,y,z);
+            location.getWorld().spawnParticle(Particle.BUBBLE_POP,location,1,0,0,0,0);
+            location.getWorld().playSound(location, Sound.BLOCK_WATER_AMBIENT,0.5f,0.7f);
+            Collection<Entity> pressf = location.getWorld().getNearbyEntities(location,2,2,2);
+            while(pressf.iterator().hasNext()){
+                Entity surdo = pressf.iterator().next();
+                if(surdo instanceof LivingEntity vivo){
+                    AttributeInstance at = vivo.getAttribute(Attribute.MAX_HEALTH);
+                    atingidos.add(vivo);
+                    if(at != null){
+                        double max = at.getBaseValue();
+                        if(vivo instanceof Player pl){
+                            if(pl != player){
+                                if(vivo.getHealth()/max<=0.5){
+                                    Location ld = vivo.getLocation();
+                                    World wd = vivo.getWorld();
+                                    EntityType et = peixe();
+                                    if(et.getEntityClass()==null)return;
+                                    Entity e = wd.spawn(ld,et.getEntityClass());
+                                    vivo.getPersistentDataContainer().set(PROTECAO.key,PersistentDataType.STRING,e.getName());
+                                    vivo.setHealth(0);
+                                }else{
+                                    vivo.damage(finalDamage,player);
+                                }
+                            }
+                        }else{
+                            if(vivo.getHealth()/max<=0.2){
+                                Location ld = vivo.getLocation();
+                                World wd = vivo.getWorld();
+                                EntityType et = peixe();
+                                if(et.getEntityClass()==null)return;
+                                wd.spawn(ld,et.getEntityClass());
+                                vivo.setHealth(0);
+                            }else{
+                                vivo.damage(finalDamage,player);
+                            }
+                        }
+                    }
+                }
+                pressf.remove(surdo);
+            }
+            location.subtract(x,y,z);
+            if(t.getSegundosRestantes()>finalRange){
+                t.stop();
+            }
+        });
+        timer.scheduleTimer(1L);
+    }
     private Material getPlanta(){
         List<Material> m = List.of(
                 Material.WHEAT,
@@ -624,6 +717,7 @@ public class SpecialEvent implements Listener {
     public void reviver(EntityResurrectEvent e) {
         LivingEntity deadEntity = e.getEntity();
         if(deadEntity instanceof Player player){
+            player.getPersistentDataContainer().set(PROTECAO.key,PersistentDataType.STRING,"");
             PlayerInventory pinv = player.getInventory();
             ItemStack item = pinv.getItemInMainHand();
             ItemStack item2 = pinv.getItemInOffHand();
@@ -687,6 +781,58 @@ public class SpecialEvent implements Listener {
                         if(atirador instanceof LivingEntity atacante){
                             atacante.damage(damage,e);
                         }
+                    }
+                }
+            }
+        }
+        Entity atacante = event.getDamager();
+        if(atacante instanceof FishHook vara){
+            UUID uuid = vara.getOwnerUniqueId();
+            if(uuid!=null){
+                Player player = Bukkit.getPlayer(uuid);
+                if(player!=null){
+                    lancaPeixe(player,atacado);
+                }
+            }
+        }else if(atacante instanceof Player player){
+            lancaPeixe(player,atacado);
+        }
+    }
+    private EntityType peixe(){
+        List<EntityType> m = List.of(
+                EntityType.SQUID,
+                EntityType.COD,
+                EntityType.DOLPHIN,
+                EntityType.PUFFERFISH,
+                EntityType.SALMON,
+                EntityType.TROPICAL_FISH,
+                EntityType.AXOLOTL,
+                EntityType.GLOW_SQUID,
+                EntityType.TADPOLE,
+                EntityType.TURTLE
+        );
+        Random r = new Random();
+        int i = r.nextInt(0,m.size()-1);
+        return m.get(i);
+    }
+    private void lancaPeixe(Player player,Entity atacado){
+        ItemStack stack = player.getInventory().getItemInMainHand();
+        if(stack.getPersistentDataContainer().has(NEXUS.key,PersistentDataType.STRING)){
+            String nome = stack.getPersistentDataContainer().get(NEXUS.key,PersistentDataType.STRING);
+            if(nome!=null && nome.equals("pescador")){
+                Nexus n = ItemsRegistro.getFromNome(nome);
+                if(n!=null){
+                    PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+                    int level = dataPlayer.getOrDefault(PESCADOR.key,PersistentDataType.INTEGER,1);
+                    n.setLevel(level);
+                    World w = player.getWorld();
+                    EntityType et = peixe();
+                    if(et.getEntityClass()==null)return;
+                    Entity en = w.spawn(atacado.getLocation(),et.getEntityClass());
+                    if(!et.hasDefaultAttributes() && et.getDefaultAttributes().getAttribute(Attribute.MAX_HEALTH)==null)return;
+                    double dano = et.getDefaultAttributes().getAttribute(Attribute.MAX_HEALTH).getBaseValue();
+                    if(atacado instanceof LivingEntity vivo){
+                        vivo.damage(dano,en);
                     }
                 }
             }

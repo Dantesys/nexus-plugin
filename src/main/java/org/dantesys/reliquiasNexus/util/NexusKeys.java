@@ -41,7 +41,17 @@ public enum NexusKeys {
     HULK(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"hulk")),
     MISSAOHULK(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_hulk")),
     SCULK(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"sculk")),
-    MISSAOSCULK(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_sculk"));
+    MISSAOSCULK(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_sculk")),
+    PESCADOR(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"pescador")),
+    MISSAOPESCADOR(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_pescador")),
+    FLASH(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"flash")),
+    MISSAOFLASH(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_flash")),
+    MAGO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"mago")),
+    MISSAOMAGO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_mago")),
+    LADRAO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"ladrao")),
+    MISSAOLADRAO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_ladrao")),
+    DOMADOR(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"domador")),
+    MISSAODOMADOR(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_domador"));
     public final NamespacedKey key;
     NexusKeys(NamespacedKey nexus) {
         key = nexus;
@@ -64,6 +74,11 @@ public enum NexusKeys {
             case "protetor" -> PROTETOR.key;
             case "hulk" -> HULK.key;
             case "sculk" -> SCULK.key;
+            case "pescador" -> PESCADOR.key;
+            case "flash" -> FLASH.key;
+            case "mago" -> MAGO.key;
+            case "ladrao" -> LADRAO.key;
+            case "domador" -> DOMADOR.key;
             default -> null;
         };
     }
@@ -84,6 +99,11 @@ public enum NexusKeys {
         keys.add(PROTETOR.key);
         keys.add(HULK.key);
         keys.add(SCULK.key);
+        keys.add(PESCADOR.key);
+        keys.add(FLASH.key);
+        keys.add(MAGO.key);
+        keys.add(LADRAO.key);
+        keys.add(DOMADOR.key);
         return keys;
     }
 }

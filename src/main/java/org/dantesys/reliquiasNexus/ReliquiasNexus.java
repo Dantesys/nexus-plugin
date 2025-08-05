@@ -53,6 +53,11 @@ public final class ReliquiasNexus extends JavaPlugin {
         config.addDefault("nexus.protetor","");
         config.addDefault("nexus.hulk","");
         config.addDefault("nexus.sculk","");
+        config.addDefault("nexus.pescador","");
+        config.addDefault("nexus.flash","");
+        config.addDefault("nexus.mago","");
+        config.addDefault("nexus.ladrao","");
+        config.addDefault("nexus.domador","");
         config.options().copyDefaults(true);
         saveConfig();
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("nexus").executes(ctx -> {

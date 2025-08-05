@@ -34,6 +34,11 @@ public class ItemsRegistro {
     public static Nexus protetor;
     public static Nexus hulk;
     public static Nexus sculk;
+    public static Nexus pescador;
+    public static Nexus flash;
+    public static Nexus mago;
+    public static Nexus ladrao;
+    public static Nexus domador;
     private static final List<Nexus> reliquias = new ArrayList<>();
     public static void init(){
         createGuerreiro();
@@ -66,6 +71,16 @@ public class ItemsRegistro {
         reliquias.add(hulk);
         createSculk();
         reliquias.add(sculk);
+        createPescador();
+        reliquias.add(pescador);
+        createFlash();
+        reliquias.add(flash);
+        createMago();
+        reliquias.add(mago);
+        createLadrao();
+        reliquias.add(ladrao);
+        createDomador();
+        reliquias.add(domador);
     }
     private static void createGuerreiro(){
         List<PotionEffectType> efeitos = new ArrayList<>();
@@ -291,6 +306,82 @@ public class ItemsRegistro {
         item.setItemMeta(meta);
         sculk = new Nexus(item,efeitos,"sculk", Attribute.LUCK);
     }
+    private static void createPescador(){
+        List<PotionEffectType> efeitos = new ArrayList<>();
+        efeitos.add(PotionEffectType.LUCK);
+        efeitos.add(PotionEffectType.WATER_BREATHING);
+        ItemStack item = new ItemStack(Material.FISHING_ROD,1);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Nexus do Pescador"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"pescador");
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
+        item.setItemMeta(meta);
+        pescador = new Nexus(item,efeitos,"pescador", Attribute.WATER_MOVEMENT_EFFICIENCY);
+    }
+    private static void createFlash(){
+        List<PotionEffectType> efeitos = new ArrayList<>();
+        efeitos.add(PotionEffectType.SPEED);
+        ItemStack item = new ItemStack(Material.NETHERITE_BOOTS,1);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Nexus do Flash"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"flash");
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
+        item.setItemMeta(meta);
+        flash = new Nexus(item,efeitos,"flash", Attribute.ATTACK_SPEED);
+    }
+    private static void createMago(){
+        List<PotionEffectType> efeitos = new ArrayList<>();
+        efeitos.add(PotionEffectType.GLOWING);
+        efeitos.add(PotionEffectType.RESISTANCE);
+        ItemStack item = new ItemStack(Material.WRITTEN_BOOK,1);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Nexus do Mago"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"mago");
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
+        item.setItemMeta(meta);
+        mago = new Nexus(item,efeitos,"mago", Attribute.ATTACK_KNOCKBACK);
+    }
+    private static void createLadrao(){
+        List<PotionEffectType> efeitos = new ArrayList<>();
+        efeitos.add(PotionEffectType.INVISIBILITY);
+        efeitos.add(PotionEffectType.NIGHT_VISION);
+        ItemStack item = new ItemStack(Material.BLACK_BUNDLE,1);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Nexus do Ladrão"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"ladrao");
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
+        item.setItemMeta(meta);
+        ladrao = new Nexus(item,efeitos,"ladrao", Attribute.ENTITY_INTERACTION_RANGE);
+    }
+    private static void createDomador(){
+        List<PotionEffectType> efeitos = new ArrayList<>();
+        efeitos.add(PotionEffectType.LUCK);
+        efeitos.add(PotionEffectType.DOLPHINS_GRACE);
+        efeitos.add(PotionEffectType.OOZING);
+        efeitos.add(PotionEffectType.INFESTED);
+        ItemStack item = new ItemStack(Material.BLACK_BUNDLE,1);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Nexus do Domador"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"domador");
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
+        item.setItemMeta(meta);
+        domador = new Nexus(item,efeitos,"domador", Attribute.ENTITY_INTERACTION_RANGE);
+    }
     public static List<Nexus> getValidReliquia(FileConfiguration config){
         List<Nexus> validos = new ArrayList<>();
         for(Nexus n:reliquias){
@@ -318,6 +409,11 @@ public class ItemsRegistro {
             case "protetor" -> protetor;
             case "hulk" -> hulk;
             case "sculk" -> sculk;
+            case "pescador" -> pescador;
+            case "flash" -> flash;
+            case "mago" -> mago;
+            case "ladrao" -> ladrao;
+            case "domador" -> domador;
             default -> null;
         };
     }

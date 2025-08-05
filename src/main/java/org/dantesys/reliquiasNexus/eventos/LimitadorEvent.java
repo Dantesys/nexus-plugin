@@ -95,6 +95,14 @@ public class LimitadorEvent implements Listener {
                 }
             }
         }
+        if(player.getPersistentDataContainer().has(PROTECAO.key,PersistentDataType.STRING)){
+            String peixe = player.getPersistentDataContainer().get(PROTECAO.key,PersistentDataType.STRING);
+            if(peixe!=null && !peixe.isBlank()){
+                event.deathMessage(Component.text("§cO Jogador "+player.getName()+" foi tranformado em um "+peixe+"!"));
+                event.deathScreenMessageOverride(Component.text("§cVocê foi tranformado em um "+peixe+"!"));
+
+            }
+        }
         if(passou(player)){
             event.deathMessage(Component.text("§cO Jogador "+player.getName()+" foi eliminado por ter reliquias demais!"));
             event.deathScreenMessageOverride(Component.text("§cVocê foi eliminado por ter reliquias demais, se controla cara!"));
@@ -120,6 +128,7 @@ public class LimitadorEvent implements Listener {
         }else{
             player.getPersistentDataContainer().set(QTD.key,PersistentDataType.INTEGER,0);
         }
+        player.getPersistentDataContainer().set(PROTECAO.key,PersistentDataType.STRING,"");
     }
     @EventHandler
     public void onRespawn(PlayerRespawnEvent event) {
