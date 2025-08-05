@@ -34,7 +34,7 @@ import java.util.UUID;
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 
 public class EvoluirEvent implements Listener {
-    public void tentarEvoluir(Player player, ItemStack nexusItem, int levelAtual) {
+    public void tentarEvoluir(Player player, ItemStack nexusItem, int levelAtual,int slot) {
         ItemMeta meta = nexusItem.getItemMeta();
         PersistentDataContainer data = meta.getPersistentDataContainer();
         if(data.has(NEXUS.key,PersistentDataType.STRING)){
@@ -60,6 +60,42 @@ public class EvoluirEvent implements Listener {
                                 dataPlayer.set(MISSAOFAZENDEIRO.key, PersistentDataType.INTEGER, 0);
                                 dataPlayer.set(FAZENDEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
                             }
+                            case "guerreiro" -> {
+                                dataPlayer.set(MISSAOGUERREIRO.key, PersistentDataType.INTEGER, 0);
+                                dataPlayer.set(GUERREIRO.key,PersistentDataType.INTEGER,levelAtual+1);
+                            }
+                            case "mares" -> {
+                                dataPlayer.set(MISSAOMARES.key, PersistentDataType.INTEGER, 0);
+                                dataPlayer.set(MARES.key,PersistentDataType.INTEGER,levelAtual+1);
+                            }
+                            case "vida" -> {
+                                dataPlayer.set(MISSAOVIDA.key, PersistentDataType.INTEGER, 0);
+                                dataPlayer.set(VIDA.key,PersistentDataType.INTEGER,levelAtual+1);
+                            }
+                            case "espiao" -> {
+                                dataPlayer.set(MISSAOESPIAO.key, PersistentDataType.INTEGER, 0);
+                                dataPlayer.set(ESPIAO.key,PersistentDataType.INTEGER,levelAtual+1);
+                            }
+                            case "arqueiro" -> {
+                                dataPlayer.set(MISSAOARQUEIRO.key, PersistentDataType.INTEGER, 0);
+                                dataPlayer.set(ARQUEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
+                            }
+                            case "cacador" -> {
+                                dataPlayer.set(MISSAOCACADOR.key, PersistentDataType.INTEGER, 0);
+                                dataPlayer.set(CACADOR.key,PersistentDataType.INTEGER,levelAtual+1);
+                            }
+                            case "tempestade" -> {
+                                dataPlayer.set(MISSAOTEMPESTADE.key, PersistentDataType.INTEGER, 0);
+                                dataPlayer.set(TEMPESTADE.key,PersistentDataType.INTEGER,levelAtual+1);
+                            }
+                            case "mineiro" -> {
+                                dataPlayer.set(MISSAOMINEIRO.key, PersistentDataType.INTEGER, 0);
+                                dataPlayer.set(MINEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
+                            }
+                            case "fenix" -> {
+                                dataPlayer.set(MISSAOFENIX.key, PersistentDataType.INTEGER, 0);
+                                dataPlayer.set(FENIX.key,PersistentDataType.INTEGER,levelAtual+1);
+                            }
                         }
                         Nexus n = ItemsRegistro.getFromNome(nome);
                         if(n!=null){
@@ -67,7 +103,7 @@ public class EvoluirEvent implements Listener {
                             if(meta.hasEnchants()){
                                 meta.getEnchants().forEach((nexusItem::addEnchantment));
                             }
-                            player.getInventory().setItemInMainHand(nexusItem);
+                            player.getInventory().setItem(slot,nexusItem);
                             msg = "§aSeu Nexus do "+nome+" evoluiu para o nível " + (levelAtual + 1) + "!";
                         }
                     }else{
@@ -239,7 +275,7 @@ public class EvoluirEvent implements Listener {
                                 timer.scheduleTimer(20L);
                                 dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,120+l+9);
                                 dataPlayer.set(MISSAOESPIAO.key,PersistentDataType.INTEGER,usos);
-                                tentarEvoluir(player,stack,l);
+                                tentarEvoluir(player,stack,l,getSlotOfItem(player,stack));
                             }
                         }
                     }
@@ -269,7 +305,7 @@ public class EvoluirEvent implements Listener {
                         n.setLevel(level);
                         recuperacao+=event.getAmount();
                         dataPlayer.set(MISSAOVIDA.key,PersistentDataType.DOUBLE,recuperacao);
-                        tentarEvoluir(player,n.getItem(level),level);
+                        tentarEvoluir(player,n.getItem(level),level,getSlotOfItem(player,stack));
                     }
                 }
             }else{
@@ -287,7 +323,7 @@ public class EvoluirEvent implements Listener {
                             n.setLevel(level);
                             recuperacao += event.getAmount();
                             dataPlayer.set(MISSAOVIDA.key, PersistentDataType.DOUBLE, recuperacao);
-                            tentarEvoluir(player, n.getItem(level), level);
+                            tentarEvoluir(player, n.getItem(level), level, getSlotOfItem(player,stack));
                         }
                     }
                 }
@@ -307,7 +343,7 @@ public class EvoluirEvent implements Listener {
                 int level = data.getOrDefault(BARBARO.key, PersistentDataType.INTEGER, 1);
                 if(event.getEntity() instanceof Monster || event.getEntity() instanceof Boss){
                     data.set(MISSAOBARBARO.key, PersistentDataType.INTEGER, kills + 1);
-                    tentarEvoluir(killer,stack,level);
+                    tentarEvoluir(killer,stack,level, getSlotOfItem(killer,stack));
                 }
             }
             if(nome.equals("guerreiro")){
@@ -315,7 +351,7 @@ public class EvoluirEvent implements Listener {
                 int level = data.getOrDefault(GUERREIRO.key, PersistentDataType.INTEGER, 1);
                 if(event.getEntity() instanceof Monster || event.getEntity() instanceof Boss){
                     data.set(MISSAOGUERREIRO.key, PersistentDataType.INTEGER, kills + 1);
-                    tentarEvoluir(killer,stack,level);
+                    tentarEvoluir(killer,stack,level,getSlotOfItem(killer,stack));
                 }
             }
             if(nome.equals("mares")){
@@ -323,7 +359,7 @@ public class EvoluirEvent implements Listener {
                 int level = data.getOrDefault(MARES.key, PersistentDataType.INTEGER, 1);
                 if(event.getEntity() instanceof WaterMob || event.getEntity() instanceof Boss || event.getEntity() instanceof Monster){
                     data.set(MISSAOMARES.key, PersistentDataType.INTEGER, kills + 1);
-                    tentarEvoluir(killer,stack,level);
+                    tentarEvoluir(killer,stack,level,getSlotOfItem(killer,stack));
                 }
             }
             if(nome.equals("tempestade")){
@@ -331,7 +367,7 @@ public class EvoluirEvent implements Listener {
                 int level = data.getOrDefault(TEMPESTADE.key, PersistentDataType.INTEGER, 1);
                 if(event.getEntity() instanceof Monster || event.getEntity() instanceof Boss){
                     data.set(MISSAOTEMPESTADE.key, PersistentDataType.INTEGER, kills + 1);
-                    tentarEvoluir(killer,stack,level);
+                    tentarEvoluir(killer,stack,level,getSlotOfItem(killer,stack));
                 }
             }
         }
@@ -354,7 +390,7 @@ public class EvoluirEvent implements Listener {
                         player.heal(cura);
                         recuperacao+=cura;
                         player.getPersistentDataContainer().set(MISSAOCEIFADOR.key, PersistentDataType.DOUBLE, recuperacao);
-                        tentarEvoluir(player,n.getItem(level),level);
+                        tentarEvoluir(player,n.getItem(level),level,getSlotOfItem(player,stack));
                     }
                 }
             }
@@ -377,7 +413,7 @@ public class EvoluirEvent implements Listener {
                     int colher = player.getPersistentDataContainer().getOrDefault(MISSAOFAZENDEIRO.key, PersistentDataType.INTEGER, 0);
                     colher++;
                     dataPlayer.set(MISSAOFAZENDEIRO.key, PersistentDataType.INTEGER, colher);
-                    tentarEvoluir(player,stack,level);
+                    tentarEvoluir(player,stack,level,getSlotOfItem(player,stack));
                 }
             }
             if(nome!=null && !nome.isBlank() && nome.equals("mineiro")){
@@ -386,7 +422,7 @@ public class EvoluirEvent implements Listener {
                     int colher = player.getPersistentDataContainer().getOrDefault(MISSAOMINEIRO.key, PersistentDataType.INTEGER, 0);
                     colher++;
                     dataPlayer.set(MISSAOMINEIRO.key, PersistentDataType.INTEGER, colher);
-                    tentarEvoluir(player,stack,level);
+                    tentarEvoluir(player,stack,level,getSlotOfItem(player,stack));
                 }
             }
         }
@@ -417,7 +453,7 @@ public class EvoluirEvent implements Listener {
     public void atingiu(ProjectileHitEvent event){
         Projectile projetiu = event.getEntity();
         Entity entity = event.getHitEntity();
-        if(entity!=null){
+        if(entity instanceof Boss || entity instanceof Monster){
             if(projetiu instanceof Arrow flecha){
                 UUID uuid = flecha.getOwnerUniqueId();
                 if(uuid!=null && !flecha.getPersistentDataContainer().has(SPECIAL.key,PersistentDataType.STRING)){
@@ -433,14 +469,14 @@ public class EvoluirEvent implements Listener {
                                 q++;
                                 player.getPersistentDataContainer().set(MISSAOARQUEIRO.key,PersistentDataType.INTEGER,q);
                                 int l = player.getPersistentDataContainer().getOrDefault(ARQUEIRO.key,PersistentDataType.INTEGER,1);
-                                tentarEvoluir(player,stack,l);
+                                tentarEvoluir(player,stack,l,getSlotOfItem(player,stack));
                             }
                             if(nome!=null && nome.equals("cacador")){
                                 int q = player.getPersistentDataContainer().getOrDefault(MISSAOCACADOR.key,PersistentDataType.INTEGER,0);
                                 q++;
                                 player.getPersistentDataContainer().set(MISSAOCACADOR.key,PersistentDataType.INTEGER,q);
                                 int l = player.getPersistentDataContainer().getOrDefault(CACADOR.key,PersistentDataType.INTEGER,1);
-                                tentarEvoluir(player,stack,l);
+                                tentarEvoluir(player,stack,l,getSlotOfItem(player,stack));
                             }
                         }
                     }
@@ -469,9 +505,18 @@ public class EvoluirEvent implements Listener {
                     int q = player.getPersistentDataContainer().getOrDefault(MISSAOFENIX.key,PersistentDataType.INTEGER,0);
                     q++;
                     player.getPersistentDataContainer().set(MISSAOFENIX.key,PersistentDataType.INTEGER,q);
-                    tentarEvoluir(player,peitoral,l);
+                    tentarEvoluir(player,peitoral,l,getSlotOfItem(player,peitoral));
                 }
             }
         }
+    }
+    private int getSlotOfItem(Player player, ItemStack targetItem) {
+        ItemStack[] contents = player.getInventory().getContents();
+        for (int i = 0; i < contents.length; i++) {
+            if (contents[i] != null && contents[i].isSimilar(targetItem)) {
+                return i;
+            }
+        }
+        return -1;
     }
 }

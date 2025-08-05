@@ -5,21 +5,29 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.dantesys.reliquiasNexus.eventos.*;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
+import org.dantesys.reliquiasNexus.items.Nexus;
 import org.dantesys.reliquiasNexus.util.NexusKeys;
 
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
+
+import static org.dantesys.reliquiasNexus.util.NexusKeys.DONO;
+import static org.dantesys.reliquiasNexus.util.NexusKeys.QTD;
 
 public final class ReliquiasNexus extends JavaPlugin {
     FileConfiguration config = getConfig();
