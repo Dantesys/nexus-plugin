@@ -6,9 +6,12 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import net.kyori.adventure.text.Component;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -44,8 +47,12 @@ public final class ReliquiasNexus extends JavaPlugin {
         config.addDefault("nexus.espiao","");
         config.addDefault("nexus.arqueiro","");
         config.addDefault("nexus.cacador","");
+        config.addDefault("nexus.tempestade","");
         config.addDefault("nexus.mineiro","");
         config.addDefault("nexus.fenix","");
+        config.addDefault("nexus.protetor","");
+        config.addDefault("nexus.hulk","");
+        config.addDefault("nexus.sculk","");
         config.options().copyDefaults(true);
         saveConfig();
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("nexus").executes(ctx -> {
@@ -54,6 +61,10 @@ public final class ReliquiasNexus extends JavaPlugin {
             ctx.getSource().getSender().sendMessage("§r  -Mostrar quem está com qual reliquia");
             ctx.getSource().getSender().sendMessage("§r/nexus level");
             ctx.getSource().getSender().sendMessage("§r  -Mostrar seus niveis de reliquias");
+            if(ctx.getSource().getSender().isOp()){
+                ctx.getSource().getSender().sendMessage("§r/nexus receber <jogador/jogadores>");
+                ctx.getSource().getSender().sendMessage("§r  -Envia reliquias não utilizadas aleatoriamente para jogadores que não tenha 3 ou mais reliquias ");
+            }
             return Command.SINGLE_SUCCESS;
         });
         root.then(Commands.literal("list").executes(ctx -> {
@@ -92,6 +103,42 @@ public final class ReliquiasNexus extends JavaPlugin {
             }else ctx.getSource().getSender().sendMessage("§cApenas jogadores podem usar");
             return Command.SINGLE_SUCCESS;
         }));
+        root.then(Commands.literal("receber").then(Commands.argument("jogadores", ArgumentTypes.players()).requires(sender -> sender.getSender().isOp()).executes(ctx -> {
+            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogadores", PlayerSelectorArgumentResolver.class);
+            final List<Player> targets = targetResolver.resolve(ctx.getSource());
+            final CommandSender sender = ctx.getSource().getSender();
+            for (final Player p : targets) {
+                PersistentDataContainer dataPlayer = p.getPersistentDataContainer();
+                int qtd = dataPlayer.getOrDefault(QTD.key, PersistentDataType.INTEGER,0);
+                if(qtd>=3){
+                    ctx.getSource().getSender().sendMessage("§cO jogador "+p.getName()+" não pode receber a reliquia!");
+                }else{
+                    qtd++;
+                    List<Nexus> reliquias = ItemsRegistro.getValidReliquia(config);
+                    Random rng = new Random();
+                    int escolhido = rng.nextInt(reliquias.size());
+                    Nexus n = reliquias.get(escolhido);
+                    String nome = n.getNome();
+                    config.set("nexus."+nome,p.getUniqueId());
+                    dataPlayer.set(QTD.key,PersistentDataType.INTEGER,qtd);
+                    int level =1;
+                    NamespacedKey key = NexusKeys.getKey(nome);
+                    if(key!=null && dataPlayer.has(key,PersistentDataType.INTEGER)){
+                        level=dataPlayer.getOrDefault(key,PersistentDataType.INTEGER,1);
+                    }else if(key!=null){
+                        dataPlayer.set(key,PersistentDataType.INTEGER,1);
+                    }
+                    ItemStack stack = n.getItem(level);
+                    ItemMeta meta = stack.getItemMeta();
+                    meta.getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,p.getUniqueId().toString());
+                    stack.setItemMeta(meta);
+                    p.getInventory().addItem(stack);
+                    p.sendMessage(Component.text("§2 Você recebeu a reliquia "+nome));
+                    sender.sendMessage(Component.text("§2 O jogador "+p.getName()+" recebeu a reliquia "+nome));
+                }
+            }
+            return Command.SINGLE_SUCCESS;
+        })));
         LiteralCommandNode<CommandSourceStack> buildCommand = root.build();
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> commands.registrar().register(buildCommand));
         getServer().getPluginManager().registerEvents(new JoinQuitEvent(), this);

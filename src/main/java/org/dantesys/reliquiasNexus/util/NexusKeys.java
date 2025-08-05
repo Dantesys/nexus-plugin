@@ -8,6 +8,7 @@ import java.util.List;
 
 public enum NexusKeys {
     NEXUS(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"nexus")),
+    PROTECAO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"protecao")),
     SPECIAL(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"special")),
     QTD(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"qtd_nexus")),
     DONO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"dono")),
@@ -34,7 +35,13 @@ public enum NexusKeys {
     MINEIRO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"mineiro")),
     MISSAOMINEIRO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_mineiro")),
     FENIX(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"fenix")),
-    MISSAOFENIX(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_fenix"));
+    MISSAOFENIX(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_fenix")),
+    PROTETOR(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"protetor")),
+    MISSAOPROTETOR(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_protetor")),
+    HULK(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"hulk")),
+    MISSAOHULK(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_hulk")),
+    SCULK(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"sculk")),
+    MISSAOSCULK(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_sculk"));
     public final NamespacedKey key;
     NexusKeys(NamespacedKey nexus) {
         key = nexus;
@@ -54,6 +61,9 @@ public enum NexusKeys {
             case "tempestade" -> TEMPESTADE.key;
             case "mineiro" -> MINEIRO.key;
             case "fenix" -> FENIX.key;
+            case "protetor" -> PROTETOR.key;
+            case "hulk" -> HULK.key;
+            case "sculk" -> SCULK.key;
             default -> null;
         };
     }
@@ -71,6 +81,9 @@ public enum NexusKeys {
         keys.add(TEMPESTADE.key);
         keys.add(MINEIRO.key);
         keys.add(FENIX.key);
+        keys.add(PROTETOR.key);
+        keys.add(HULK.key);
+        keys.add(SCULK.key);
         return keys;
     }
 }

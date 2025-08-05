@@ -31,6 +31,9 @@ public class ItemsRegistro {
     public static Nexus tempestade;
     public static Nexus mineiro;
     public static Nexus fenix;
+    public static Nexus protetor;
+    public static Nexus hulk;
+    public static Nexus sculk;
     private static final List<Nexus> reliquias = new ArrayList<>();
     public static void init(){
         createGuerreiro();
@@ -57,6 +60,12 @@ public class ItemsRegistro {
         reliquias.add(mineiro);
         createFenix();
         reliquias.add(fenix);
+        createProtetor();
+        reliquias.add(protetor);
+        createHulk();
+        reliquias.add(hulk);
+        createSculk();
+        reliquias.add(sculk);
     }
     private static void createGuerreiro(){
         List<PotionEffectType> efeitos = new ArrayList<>();
@@ -158,6 +167,7 @@ public class ItemsRegistro {
         meta.setRarity(ItemRarity.RARE);
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"espiao");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
+        meta.addAttributeModifier(Attribute.SCALE,new AttributeModifier(new NamespacedKey("nexus_atributo","tamanho"),-0.75, AttributeModifier.Operation.ADD_NUMBER));
         item.setItemMeta(meta);
         espiao = new Nexus(item,efeitos,"espiao", Attribute.ARMOR);
     }
@@ -224,10 +234,9 @@ public class ItemsRegistro {
         List<PotionEffectType> efeitos = new ArrayList<>();
         efeitos.add(PotionEffectType.JUMP_BOOST);
         efeitos.add(PotionEffectType.FIRE_RESISTANCE);
-        ItemStack item = new ItemStack(Material.NETHERITE_CHESTPLATE,1);
+        ItemStack item = new ItemStack(Material.ELYTRA,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus da Fenix"));
-        meta.setItemModel(Material.ELYTRA.getKey());
         meta.setUnbreakable(true);
         meta.setGlider(true);
         meta.setEnchantmentGlintOverride(true);
@@ -236,6 +245,51 @@ public class ItemsRegistro {
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
         item.setItemMeta(meta);
         fenix = new Nexus(item,efeitos,"fenix", Attribute.ARMOR);
+    }
+    private static void createProtetor(){
+        List<PotionEffectType> efeitos = new ArrayList<>();
+        efeitos.add(PotionEffectType.RESISTANCE);
+        efeitos.add(PotionEffectType.FIRE_RESISTANCE);
+        ItemStack item = new ItemStack(Material.SHIELD,1);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Nexus do Protetor"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"protetor");
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
+        item.setItemMeta(meta);
+        protetor = new Nexus(item,efeitos,"protetor", Attribute.MAX_HEALTH);
+    }
+    private static void createHulk(){
+        List<PotionEffectType> efeitos = new ArrayList<>();
+        efeitos.add(PotionEffectType.RESISTANCE);
+        efeitos.add(PotionEffectType.STRENGTH);
+        ItemStack item = new ItemStack(Material.NETHERITE_LEGGINGS,1);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Nexus do Hulk"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.addAttributeModifier(Attribute.SCALE,new AttributeModifier(new NamespacedKey("nexus_hulk","tamanho"),+0.25, AttributeModifier.Operation.ADD_NUMBER));
+        meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"hulk");
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
+        item.setItemMeta(meta);
+        hulk = new Nexus(item,efeitos,"hulk", Attribute.ATTACK_DAMAGE);
+    }
+    private static void createSculk(){
+        List<PotionEffectType> efeitos = new ArrayList<>();
+        efeitos.add(PotionEffectType.NIGHT_VISION);
+        ItemStack item = new ItemStack(Material.ECHO_SHARD,1);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Nexus do Sculk"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"sculk");
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
+        item.setItemMeta(meta);
+        sculk = new Nexus(item,efeitos,"sculk", Attribute.LUCK);
     }
     public static List<Nexus> getValidReliquia(FileConfiguration config){
         List<Nexus> validos = new ArrayList<>();
@@ -261,6 +315,9 @@ public class ItemsRegistro {
             case "tempestade" -> tempestade;
             case "mineiro" -> mineiro;
             case "fenix" -> fenix;
+            case "protetor" -> protetor;
+            case "hulk" -> hulk;
+            case "sculk" -> sculk;
             default -> null;
         };
     }

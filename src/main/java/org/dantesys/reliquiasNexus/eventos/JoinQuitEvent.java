@@ -27,11 +27,8 @@ public class JoinQuitEvent implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        int qtd = 0;
         PersistentDataContainer container = player.getPersistentDataContainer();
-        if(container.has(QTD.key,PersistentDataType.INTEGER)){
-            qtd=container.getOrDefault(QTD.key, PersistentDataType.INTEGER,0);
-        }
+        int qtd = container.getOrDefault(QTD.key, PersistentDataType.INTEGER,0);
         container.set(SPECIAL.key,PersistentDataType.INTEGER,qtd);
         player.sendActionBar(Component.text("Special OK"));
         if(qtd==0){
@@ -55,6 +52,7 @@ public class JoinQuitEvent implements Listener {
             stack.setItemMeta(meta);
             player.getInventory().addItem(stack);
             event.joinMessage(Component.text("§2 Bem-vindo ao jogo, Jogador "+player.getName()));
+            player.sendMessage(Component.text("§2 Você recebeu a reliquia "+nome));
         }else{
             event.joinMessage(Component.text("§2 Bem-vindo devolta, Jogador "+player.getName()));
         }

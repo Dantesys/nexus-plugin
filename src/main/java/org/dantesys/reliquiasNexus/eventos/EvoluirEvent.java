@@ -13,10 +13,7 @@ import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.EntityRegainHealthEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -53,7 +50,7 @@ public class EvoluirEvent implements Listener {
                                 dataPlayer.set(BARBARO.key,PersistentDataType.INTEGER,levelAtual+1);
                             }
                             case "ceifador" -> {
-                                dataPlayer.set(MISSAOCEIFADOR.key, PersistentDataType.INTEGER, 0);
+                                dataPlayer.set(MISSAOCEIFADOR.key, PersistentDataType.DOUBLE, 0d);
                                 dataPlayer.set(CEIFADOR.key,PersistentDataType.INTEGER,levelAtual+1);
                             }
                             case "fazendeiro" -> {
@@ -69,7 +66,7 @@ public class EvoluirEvent implements Listener {
                                 dataPlayer.set(MARES.key,PersistentDataType.INTEGER,levelAtual+1);
                             }
                             case "vida" -> {
-                                dataPlayer.set(MISSAOVIDA.key, PersistentDataType.INTEGER, 0);
+                                dataPlayer.set(MISSAOVIDA.key, PersistentDataType.DOUBLE, 0d);
                                 dataPlayer.set(VIDA.key,PersistentDataType.INTEGER,levelAtual+1);
                             }
                             case "espiao" -> {
@@ -95,6 +92,18 @@ public class EvoluirEvent implements Listener {
                             case "fenix" -> {
                                 dataPlayer.set(MISSAOFENIX.key, PersistentDataType.INTEGER, 0);
                                 dataPlayer.set(FENIX.key,PersistentDataType.INTEGER,levelAtual+1);
+                            }
+                            case "protetor" -> {
+                                dataPlayer.set(MISSAOPROTETOR.key, PersistentDataType.INTEGER, 0);
+                                dataPlayer.set(PROTETOR.key,PersistentDataType.INTEGER,levelAtual+1);
+                            }
+                            case "hulk" -> {
+                                dataPlayer.set(MISSAOHULK.key, PersistentDataType.DOUBLE, 0d);
+                                dataPlayer.set(HULK.key,PersistentDataType.INTEGER,levelAtual+1);
+                            }
+                            case "sculk" -> {
+                                dataPlayer.set(MISSAOSCULK.key, PersistentDataType.INTEGER, 0);
+                                dataPlayer.set(SCULK.key,PersistentDataType.INTEGER,levelAtual+1);
                             }
                         }
                         Nexus n = ItemsRegistro.getFromNome(nome);
@@ -233,6 +242,34 @@ public class EvoluirEvent implements Listener {
                 }else{
                     int qtd = colheitasN-colheitas;
                     condicao="use mais "+qtd+" foguetes";
+                }
+            }
+            case "protetor" -> {
+                int colheitasN = 5 * level;
+                int colheitas = player.getPersistentDataContainer().getOrDefault(MISSAOPROTETOR.key, PersistentDataType.INTEGER, 0);
+                if(colheitas>=colheitasN){
+                    condicao="";
+                }else{
+                    int qtd = colheitasN-colheitas;
+                    condicao="se proteja com o escudo mais "+qtd+" vezes";
+                }
+            }
+            case "hulk" -> {
+                double colheitasN = 20 * level;
+                double colheitas = player.getPersistentDataContainer().getOrDefault(MISSAOHULK.key, PersistentDataType.DOUBLE, 0d);
+                if(colheitas>=colheitasN){
+                    condicao="";
+                }else{
+                    int qtd = (int) (colheitasN-colheitas);
+                    condicao="receba mais "+qtd+" de dano por monstros ou bosses";
+                }
+            }
+            case "sculk" -> {
+                int kills = player.getPersistentDataContainer().getOrDefault(MISSAOSCULK.key, PersistentDataType.INTEGER, 0);
+                if(kills >= level){
+                    condicao="";
+                }else{
+                    condicao="seja atacado mais "+(level-kills)+" vezes por um Warden";
                 }
             }
         }
@@ -395,6 +432,81 @@ public class EvoluirEvent implements Listener {
                 }
             }
         }
+        Entity atacado = event.getEntity();
+        if(atacado instanceof Player player){
+            ItemStack stack = player.getInventory().getLeggings();
+            PersistentDataContainerView data;
+            if(stack!=null){
+                data = stack.getPersistentDataContainer();
+                if(data.has(NEXUS.key,PersistentDataType.STRING)){
+                    String nome = data.get(NEXUS.key,PersistentDataType.STRING);
+                    if(nome!=null && !nome.isBlank() && nome.equals("hulk")){
+                        Nexus n = ItemsRegistro.getFromNome(nome);
+                        if(n!=null && (atacante instanceof Boss || atacante instanceof Monster)){
+                            double protecao = player.getPersistentDataContainer().getOrDefault(MISSAOHULK.key, PersistentDataType.DOUBLE, 0d);
+                            int level = player.getPersistentDataContainer().getOrDefault(HULK.key,PersistentDataType.INTEGER,1);
+                            protecao+=event.getDamage();
+                            player.getPersistentDataContainer().set(MISSAOHULK.key, PersistentDataType.DOUBLE, protecao);
+                            tentarEvoluir(player,n.getItem(level),level,getSlotOfItem(player,stack));
+                        }
+                    }
+                }
+            }
+            if(player.isBlocking()){
+                stack = player.getInventory().getItemInMainHand();
+                if(stack.getType().equals(Material.SHIELD)){
+                    data = stack.getPersistentDataContainer();
+                    if(data.has(NEXUS.key,PersistentDataType.STRING)){
+                        String nome = data.get(NEXUS.key,PersistentDataType.STRING);
+                        if(nome!=null && !nome.isBlank() && nome.equals("protetor")){
+                            Nexus n = ItemsRegistro.getFromNome(nome);
+                            if(n!=null){
+                                int protecao = player.getPersistentDataContainer().getOrDefault(MISSAOPROTETOR.key, PersistentDataType.INTEGER, 0);
+                                int level = player.getPersistentDataContainer().getOrDefault(PROTETOR.key,PersistentDataType.INTEGER,1);
+                                protecao++;
+                                player.getPersistentDataContainer().set(MISSAOPROTETOR.key, PersistentDataType.INTEGER, protecao);
+                                tentarEvoluir(player,n.getItem(level),level,getSlotOfItem(player,stack));
+                            }
+                        }
+                    }
+                }else{
+                    stack = player.getInventory().getItemInOffHand();
+                    if(stack.getType().equals(Material.SHIELD)){
+                        data = stack.getPersistentDataContainer();
+                        if(data.has(NEXUS.key,PersistentDataType.STRING)){
+                            String nome = data.get(NEXUS.key,PersistentDataType.STRING);
+                            if(nome!=null && !nome.isBlank() && nome.equals("protetor")){
+                                Nexus n = ItemsRegistro.getFromNome(nome);
+                                if(n!=null){
+                                    int protecao = player.getPersistentDataContainer().getOrDefault(MISSAOPROTETOR.key, PersistentDataType.INTEGER, 0);
+                                    int level = player.getPersistentDataContainer().getOrDefault(PROTETOR.key,PersistentDataType.INTEGER,1);
+                                    protecao++;
+                                    player.getPersistentDataContainer().set(MISSAOPROTETOR.key, PersistentDataType.INTEGER, protecao);
+                                    tentarEvoluir(player,n.getItem(level),level,getSlotOfItem(player,stack));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            stack = player.getInventory().getItemInMainHand();
+            data = stack.getPersistentDataContainer();
+            if(data.has(NEXUS.key,PersistentDataType.STRING)){
+                String nome = data.get(NEXUS.key,PersistentDataType.STRING);
+                if(nome!=null && !nome.isBlank() && nome.equals("sculk")){
+                    Nexus n = ItemsRegistro.getFromNome(nome);
+                    if(n!=null && atacante instanceof Warden war){
+                        int protecao = player.getPersistentDataContainer().getOrDefault(MISSAOSCULK.key, PersistentDataType.INTEGER, 0);
+                        int level = player.getPersistentDataContainer().getOrDefault(SCULK.key,PersistentDataType.INTEGER,1);
+                        protecao++;
+                        event.setDamage(0);
+                        war.setAnger(player,0);
+                        player.getPersistentDataContainer().set(MISSAOSCULK.key, PersistentDataType.INTEGER, protecao);
+                        tentarEvoluir(player,n.getItem(level),level,getSlotOfItem(player,stack));
+                    }
+                }
+            }
+        }
     }
     @EventHandler
     public void colher(BlockBreakEvent event){
@@ -496,8 +608,8 @@ public class EvoluirEvent implements Listener {
                 if(nome!=null && nome.equals("fenix")){
                     int l = player.getPersistentDataContainer().getOrDefault(FENIX.key,PersistentDataType.INTEGER,1);
                     Random r = new Random();
-                    int i = r.nextInt(0,10);
-                    if(i<=1){
+                    int i = r.nextInt(0,100);
+                    if(i>=100-l){
                         event.setShouldConsume(false);
                         Firework fr = event.getFirework();
                         event.getFirework().setTicksFlown(fr.getTicksFlown()+l);

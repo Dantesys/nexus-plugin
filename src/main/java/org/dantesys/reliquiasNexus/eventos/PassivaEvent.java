@@ -26,9 +26,7 @@ public class PassivaEvent implements Listener {
                 PersistentDataContainer conteiner = player.getPersistentDataContainer();
                 if(conteiner.has(SPECIAL.key,PersistentDataType.INTEGER)){
                     int tempo = conteiner.getOrDefault(SPECIAL.key,PersistentDataType.INTEGER,0);
-                    if(tempo<=0){
-                        player.sendActionBar(Component.text("Special: OK"));
-                    }else{
+                    if(tempo>0){
                         tempo--;
                         conteiner.set(SPECIAL.key,PersistentDataType.INTEGER,tempo);
                         player.sendActionBar(Component.text("Special em "+tempo+"s"));
