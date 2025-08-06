@@ -987,20 +987,23 @@ public class SpecialEvent implements Listener {
         Entity atacado = event.getEntity();
         if(atacado instanceof Player player){
             PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-            if(dataPlayer.getOrDefault(PROTECAO.key,PersistentDataType.BOOLEAN,false)){
-                int l=dataPlayer.getOrDefault(PROTETOR.key,PersistentDataType.INTEGER,1);
-                double damage = event.getDamage();
-                event.setDamage(0);
-                damage+=l;
-                Entity e = event.getDamager();
-                if(e instanceof LivingEntity atacante){
-                    atacante.damage(damage);
-                }else if(e instanceof Projectile projetil){
-                    UUID uuid = projetil.getOwnerUniqueId();
-                    if(uuid!=null){
-                        Entity atirador = e.getWorld().getEntity(uuid);
-                        if(atirador instanceof LivingEntity atacante){
-                            atacante.damage(damage);
+            if(dataPlayer.has(PROTECAO.key,PersistentDataType.BOOLEAN)){
+                boolean protecao = dataPlayer.getOrDefault(PROTECAO.key,PersistentDataType.BOOLEAN,false);
+                if(protecao){
+                    int l=dataPlayer.getOrDefault(PROTETOR.key,PersistentDataType.INTEGER,1);
+                    double damage = event.getDamage();
+                    event.setDamage(0);
+                    damage+=l;
+                    Entity e = event.getDamager();
+                    if(e instanceof LivingEntity atacante){
+                        atacante.damage(damage);
+                    }else if(e instanceof Projectile projetil){
+                        UUID uuid = projetil.getOwnerUniqueId();
+                        if(uuid!=null){
+                            Entity atirador = e.getWorld().getEntity(uuid);
+                            if(atirador instanceof LivingEntity atacante){
+                                atacante.damage(damage);
+                            }
                         }
                     }
                 }

@@ -45,7 +45,7 @@ public class EvoluirEvent implements Listener {
             if(nome!=null && !nome.isBlank()){
                 String condicao = podeEvoluir(player,nome,levelAtual);
                 int level = player.getLevel();
-                if(!condicao.isBlank()){
+                if(!condicao.isEmpty()){
                     if(level>=levelAtual*10){
                         player.setLevel(player.getLevel()-(10*levelAtual));
                         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
@@ -563,28 +563,25 @@ public class EvoluirEvent implements Listener {
                             PlayerInventory pinv = roubado.getInventory();
                             int escolhido = rd.nextInt(0,pinv.getContents().length);
                             roubar = pinv.getItem(escolhido);
-                            boolean continua=true;
-                            while(continua){
-                                escolhido = rd.nextInt(0,pinv.getContents().length);
-                                roubar = pinv.getItem(escolhido);
-                                if(roubar!=null && !roubar.isEmpty()){
-                                    continua=false;
-                                    if(roubar.getPersistentDataContainer().has(NEXUS.key,PersistentDataType.STRING) && config.getBoolean("expurgo")){
-                                        PersistentDataContainer container = player.getPersistentDataContainer();
-                                        String rnome = roubar.getPersistentDataContainer().get(NEXUS.key,PersistentDataType.STRING);
-                                        roubar.getItemMeta().getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,player.getUniqueId().toString());
-                                        config.set("nexus."+rnome,player.getUniqueId().toString());
-                                        ReliquiasNexus.getPlugin(ReliquiasNexus.class).saveConfig();
-                                        int qtd = container.getOrDefault(QTD.key, PersistentDataType.INTEGER,1);
-                                        qtd++;
-                                        container.set(QTD.key, PersistentDataType.INTEGER,qtd);
-                                        LimitadorEvent.checkLimit(player);
-                                    }else{
-                                        continua=true;
-                                    }
+                            if(roubar!=null && !roubar.isEmpty()){
+                                if(roubar.getPersistentDataContainer().has(NEXUS.key,PersistentDataType.STRING) && config.getBoolean("expurgo")){
+                                    PersistentDataContainer container = player.getPersistentDataContainer();
+                                    String rnome = roubar.getPersistentDataContainer().get(NEXUS.key,PersistentDataType.STRING);
+                                    roubar.getItemMeta().getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,player.getUniqueId().toString());
+                                    config.set("nexus."+rnome,player.getUniqueId().toString());
+                                    ReliquiasNexus.getPlugin(ReliquiasNexus.class).saveConfig();
+                                    int qtd = container.getOrDefault(QTD.key, PersistentDataType.INTEGER,1);
+                                    qtd++;
+                                    container.set(QTD.key, PersistentDataType.INTEGER,qtd);
+                                    pinv.setItem(escolhido,new ItemStack(Material.AIR));
+                                    player.sendMessage("Você roubou uma reliquia!");
+                                    LimitadorEvent.checkLimit(player);
+                                }else{
+                                    player.sendMessage("Você roubou uma item!");
                                 }
+                            }else{
+                                player.sendMessage("Você não conseguiu roubar nada!");
                             }
-                            pinv.setItem(escolhido,new ItemStack(Material.AIR));
                         }else{
                             EntityEquipment equipa = furto.getEquipment();
                             if (equipa != null) {
@@ -598,7 +595,12 @@ public class EvoluirEvent implements Listener {
                                     default -> EquipmentSlot.HAND;
                                 };
                                 roubar = equipa.getItem(slot);
-                                equipa.setItem(slot,new ItemStack(Material.AIR));
+                                if(!roubar.isEmpty()){
+                                    player.sendMessage("Você roubou uma item!");
+                                    equipa.setItem(slot,new ItemStack(Material.AIR));
+                                }else{
+                                    player.sendMessage("Você não conseguiu roubar nada!");
+                                }
                             }
                         }
                         Nexus n = ItemsRegistro.getFromNome(nome);
