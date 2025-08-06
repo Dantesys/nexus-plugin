@@ -29,9 +29,11 @@ public class JoinQuitEvent implements Listener {
         Player player = event.getPlayer();
         PersistentDataContainer container = player.getPersistentDataContainer();
         int qtd = container.getOrDefault(QTD.key, PersistentDataType.INTEGER,0);
+        boolean novato = container.getOrDefault(new NamespacedKey("nexus_novato","novato"),PersistentDataType.BOOLEAN,true);
         container.set(SPECIAL.key,PersistentDataType.INTEGER,qtd);
         player.sendActionBar(Component.text("Special OK"));
-        if(qtd==0){
+        if(qtd==0 && novato){
+            container.set(new NamespacedKey("nexus_novato","novato"),PersistentDataType.BOOLEAN,false);
             List<Nexus> reliquias = ItemsRegistro.getValidReliquia(config);
             Random rng = new Random();
             int escolhido = rng.nextInt(reliquias.size());

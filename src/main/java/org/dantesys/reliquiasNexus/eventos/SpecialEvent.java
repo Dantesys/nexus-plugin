@@ -11,6 +11,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
+import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -22,6 +24,7 @@ import org.bukkit.util.Vector;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
+import org.dantesys.reliquiasNexus.util.EntityToEgg;
 import org.dantesys.reliquiasNexus.util.Temporizador;
 
 import java.util.*;
@@ -60,8 +63,17 @@ public class SpecialEvent implements Listener {
                             case "sculk" -> sculk(player,item);
                             case "protetor" -> protetor(player,item);
                             case "pescador" -> pescador(player,item);
+                            case "ladrao" -> {
+                                ladrao(player,item);
+                                event.setCancelled(true);
+                            }
+                            case "domador" -> domador(player,item);
+                            case "mago" -> {
+                                mago(player,item);
+                                event.setCancelled(true);
+                            }
                         }
-                        if(!item.getNome().equals("protetor")){
+                        if(!item.getNome().equals("protetor") || !item.getNome().equals("mago")){
                             dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,120);
                         }
                     }
@@ -110,16 +122,24 @@ public class SpecialEvent implements Listener {
                         player.getWorld().dropItemNaturally(bloco.getLocation(),new ItemStack(Material.BEDROCK));
                         bloco.setType(Material.AIR);
                     }
-                    if(bloco.getType()==Material.END_PORTAL){
-                        player.getWorld().dropItemNaturally(bloco.getLocation(),new ItemStack(Material.END_PORTAL));
-                        bloco.setType(Material.AIR);
-                    }
-                    if(bloco.getType()==Material.NETHER_PORTAL){
-                        player.getWorld().dropItemNaturally(bloco.getLocation(),new ItemStack(Material.END_PORTAL));
-                        bloco.setType(Material.AIR);
-                    }
                     if(bloco.getType()==Material.END_PORTAL_FRAME){
                         player.getWorld().dropItemNaturally(bloco.getLocation(),new ItemStack(Material.END_PORTAL_FRAME));
+                        bloco.setType(Material.AIR);
+                    }
+                    if(bloco.getType()==Material.SPAWNER){
+                        player.getWorld().dropItemNaturally(bloco.getLocation(),new ItemStack(Material.SPAWNER));
+                        bloco.setType(Material.AIR);
+                    }
+                    if(bloco.getType()==Material.SPAWNER){
+                        player.getWorld().dropItemNaturally(bloco.getLocation(),new ItemStack(Material.SPAWNER));
+                        bloco.setType(Material.AIR);
+                    }
+                    if(bloco.getType()==Material.TRIAL_SPAWNER){
+                        player.getWorld().dropItemNaturally(bloco.getLocation(),new ItemStack(Material.TRIAL_SPAWNER));
+                        bloco.setType(Material.AIR);
+                    }
+                    if(bloco.getType()==Material.VAULT){
+                        player.getWorld().dropItemNaturally(bloco.getLocation(),new ItemStack(Material.VAULT));
                         bloco.setType(Material.AIR);
                     }
                 }
@@ -567,7 +587,7 @@ public class SpecialEvent implements Listener {
     }
     private void sculk(Player player,Nexus item){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(HULK.key,PersistentDataType.INTEGER,1);
+        int l = dataPlayer.getOrDefault(SCULK.key,PersistentDataType.INTEGER,1);
         item.setLevel(l);
         final int finalRange = 50;
         final double finalDamage = 20+l;
@@ -608,7 +628,7 @@ public class SpecialEvent implements Listener {
     }
     private void pescador(Player player,Nexus item){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(HULK.key,PersistentDataType.INTEGER,1);
+        int l = dataPlayer.getOrDefault(PESCADOR.key,PersistentDataType.INTEGER,1);
         item.setLevel(l);
         final int finalRange = 50;
         final double finalDamage = l;
@@ -671,6 +691,207 @@ public class SpecialEvent implements Listener {
             }
         });
         timer.scheduleTimer(1L);
+    }
+    private void ladrao(Player player, Nexus item){
+        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+        int l = dataPlayer.getOrDefault(HULK.key,PersistentDataType.INTEGER,1);
+        item.setLevel(l);
+        Location loc = player.getRespawnLocation();
+        player.teleport(loc);
+    }
+    private void domador(Player player,Nexus item){
+        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+        int l = dataPlayer.getOrDefault(DOMADOR.key,PersistentDataType.INTEGER,1);
+        item.setLevel(l);
+        Location loc = player.getLocation();
+        Wolf wolf = player.getWorld().spawn(loc,Wolf.class);
+        wolf.setOwner(player);
+        wolf.getAttribute(Attribute.ARMOR).setBaseValue(l);
+        wolf.getAttribute(Attribute.ARMOR_TOUGHNESS).setBaseValue(l);
+        wolf.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(l);
+        wolf.getAttribute(Attribute.MAX_HEALTH).setBaseValue(l);
+        wolf.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(l);
+        wolf.getAttribute(Attribute.SCALE).setBaseValue(1.25);
+    }
+    private void mago(Player player,Nexus item){
+        int tempo=120;
+        PlayerInventory inv = player.getInventory();
+        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+        int l = dataPlayer.getOrDefault(DOMADOR.key,PersistentDataType.INTEGER,1);
+        item.setLevel(l);
+        int pos=0;
+        for (int i = 0; i <= 8; i++) {
+            ItemStack stack = inv.getItem(i);
+            if(stack!=null && stack.getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)){
+                String nome = stack.getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING);
+                if (nome != null && nome.equals("mago")) {
+                    pos=i;
+                    break;
+                }
+            }
+        }
+        switch (pos){
+            case 0 -> {
+                Fireball bola = player.launchProjectile(Fireball.class);
+                bola.setGlowing(true);
+                Vector vec = player.getEyeLocation().getDirection();
+                bola.setVelocity(vec.multiply(l));
+                tempo=60;
+            }
+            case 1 -> {
+                WindCharge bola = player.launchProjectile(WindCharge.class);
+                bola.setGlowing(true);
+                Vector vec = player.getEyeLocation().getDirection();
+                bola.getPersistentDataContainer().set(SPECIAL.key,PersistentDataType.INTEGER,l);
+                bola.setVelocity(vec.multiply(l));
+                tempo=20;
+            }
+            case 2 -> {
+                Snowball bola = player.launchProjectile(Snowball.class);
+                bola.setGlowing(true);
+                Vector vec = player.getEyeLocation().getDirection();
+                bola.getPersistentDataContainer().set(SPECIAL.key,PersistentDataType.INTEGER,l);
+                bola.setVelocity(vec.multiply(l));
+                tempo=10;
+            }
+            case 3 -> {
+                Egg bola = player.launchProjectile(Egg.class);
+                bola.setGlowing(true);
+                Vector vec = player.getEyeLocation().getDirection();
+                bola.getPersistentDataContainer().set(SPECIAL.key,PersistentDataType.INTEGER,l);
+                bola.setVelocity(vec.multiply(l));
+                tempo=20;
+            }
+            case 4 -> {
+                SpectralArrow bola = player.launchProjectile(SpectralArrow.class);
+                bola.setGlowing(true);
+                Vector vec = player.getEyeLocation().getDirection();
+                bola.setVelocity(vec.multiply(l));
+                tempo=30;
+            }
+            case 5 -> {
+                final int finalRange = 50;
+                final double finalDamage = 20+l;
+                final Location location = player.getLocation();
+                final Vector direction = location.getDirection().normalize();
+                final double[] tp = {0};
+                Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 10,
+                        ()->{
+                        },()-> {
+                },(t)->{
+                    tp[0] = tp[0]+3.4;
+                    double x = direction.getX()*tp[0];
+                    double y = direction.getY()*tp[0]+1.4;
+                    double z = direction.getZ()*tp[0];
+                    location.add(x,y,z);
+                    location.getWorld().spawnParticle(Particle.SONIC_BOOM,location,1,0,0,0,0);
+                    location.getWorld().playSound(location, Sound.ENTITY_WARDEN_SONIC_BOOM,0.5f,0.7f);
+                    Collection<Entity> pressf = location.getWorld().getNearbyEntities(location,2,2,2);
+                    while(pressf.iterator().hasNext()){
+                        Entity surdo = pressf.iterator().next();
+                        if(surdo instanceof LivingEntity vivo){
+                            if(vivo instanceof Player pl){
+                                if(pl != player){
+                                    vivo.damage(finalDamage,player);
+                                }
+                            }else{
+                                vivo.damage(finalDamage,player);
+                            }
+                        }
+                        pressf.remove(surdo);
+                    }
+                    location.subtract(x,y,z);
+                    if(t.getSegundosRestantes()>finalRange){
+                        t.stop();
+                    }
+                });
+                timer.scheduleTimer(1L);
+            }
+            case 6 -> {
+                EnderPearl bola = player.launchProjectile(EnderPearl.class);
+                bola.setGlowing(true);
+                Vector vec = player.getEyeLocation().getDirection();
+                bola.setVelocity(vec.multiply(l));
+                tempo=10;
+            }
+            case 7 -> {
+                final int finalRange = 30;
+                final Location location = player.getLocation();
+                final World world = player.getWorld();
+                final List<LivingEntity> atingidos = new ArrayList<>();
+                Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 10,
+                        ()->{
+                        },()-> {
+                },(t)->{
+                    double area = (double) finalRange /(t.getSegundosRestantes());
+                    for (double i = 0; i <= 2*Math.PI*area; i += 0.05) {
+                        double x = (area * Math.cos(i)) + location.getX();
+                        double z = (location.getZ() + area * Math.sin(i));
+                        Location particle = new Location(world, x, location.getY() + 1, z);
+                        world.spawnParticle(Particle.COMPOSTER,particle,1);
+                    }
+                    Collection<Entity> pressf = location.getWorld().getNearbyEntities(location,area,2,area);
+                    while(pressf.iterator().hasNext()){
+                        Entity surdo = pressf.iterator().next();
+                        if(surdo instanceof LivingEntity vivo && !atingidos.contains(vivo)){
+                            atingidos.add(vivo);
+                            if(vivo instanceof Player p){
+                                if(p!=player) {
+                                    vivo.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION,20+l,l));
+                                }
+                            }else{
+                                vivo.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION,20+l,l));
+                            }
+                            Location locV = vivo.getLocation();
+                        }
+                        pressf.remove(surdo);
+                    }
+                });
+                timer.scheduleTimer(1L);
+            }
+            case 8 -> {
+                World w = player.getWorld();
+                w.setStorm(true);
+                w.setThundering(true);
+                final int finalRange = 30;
+                final double damage = 10+l;
+                final Location location = player.getLocation();
+                final World world = player.getWorld();
+                final List<LivingEntity> atingidos = new ArrayList<>();
+                Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 10,
+                        ()->{
+                        },()-> {
+                },(t)->{
+                    double area = (double) finalRange /(t.getSegundosRestantes());
+                    for (double i = 0; i <= 2*Math.PI*area; i += 0.05) {
+                        double x = (area * Math.cos(i)) + location.getX();
+                        double z = (location.getZ() + area * Math.sin(i));
+                        Location particle = new Location(world, x, location.getY() + 1, z);
+                        world.spawnParticle(Particle.FALLING_WATER,particle,1);
+                    }
+                    Collection<Entity> pressf = location.getWorld().getNearbyEntities(location,area,2,area);
+                    while(pressf.iterator().hasNext()){
+                        Entity surdo = pressf.iterator().next();
+                        if(surdo instanceof LivingEntity vivo && !atingidos.contains(vivo)){
+                            atingidos.add(vivo);
+                            Location vloc = vivo.getLocation();
+                            World vworld = vivo.getWorld();
+                            vworld.strikeLightning(vloc);
+                            if(vivo instanceof Player p){
+                                if(p!=player){
+                                    vivo.damage(damage,player);
+                                }
+                            }else{
+                                vivo.damage(damage,player);
+                            }
+                        }
+                        pressf.remove(surdo);
+                    }
+                });
+                timer.scheduleTimer(1L);
+            }
+        }
+        dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,tempo);
     }
     private Material getPlanta(){
         List<Material> m = List.of(
@@ -833,6 +1054,54 @@ public class SpecialEvent implements Listener {
                     double dano = et.getDefaultAttributes().getAttribute(Attribute.MAX_HEALTH).getBaseValue();
                     if(atacado instanceof LivingEntity vivo){
                         vivo.damage(dano,en);
+                    }
+                }
+            }
+        }
+    }
+    @EventHandler
+    public void amigo(EntityTargetEvent event){
+        Entity alvo = event.getTarget();
+        if(alvo instanceof Player player){
+            ItemStack stack = player.getInventory().getItemInMainHand();
+            if (stack.getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)) {
+                String nome = stack.getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING);
+                if (nome != null && nome.equals("domador")) {
+                    event.setCancelled(true);
+                }
+            }
+        }
+    }
+    @EventHandler
+    public void acertou(ProjectileHitEvent event){
+        if(event.getEntity() instanceof WindCharge bola){
+            if(bola.getPersistentDataContainer().has(SPECIAL.key,PersistentDataType.INTEGER)){
+                int efeito = bola.getPersistentDataContainer().getOrDefault(SPECIAL.key,PersistentDataType.INTEGER,1);
+                Entity e = event.getHitEntity();
+                if(e instanceof LivingEntity vivo){
+                    vivo.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION,100,efeito));
+                }
+            }
+        }
+        if(event.getEntity() instanceof Snowball bola){
+            if(bola.getPersistentDataContainer().has(SPECIAL.key,PersistentDataType.INTEGER)){
+                int efeito = bola.getPersistentDataContainer().getOrDefault(SPECIAL.key,PersistentDataType.INTEGER,1);
+                Entity e = event.getHitEntity();
+                if(e instanceof LivingEntity vivo){
+                    vivo.setFreezeTicks(20*efeito);
+                }
+            }
+        }
+        if(event.getEntity() instanceof Egg bola){
+            if(bola.getPersistentDataContainer().has(SPECIAL.key,PersistentDataType.INTEGER)){
+                Entity e = event.getHitEntity();
+                if(e instanceof LivingEntity vivo){
+                    EntityType entityType = vivo.getType();
+                    Material egg = EntityToEgg.getEntityEgg(entityType);
+                    if(egg!=null){
+                        Location loc = vivo.getEyeLocation();
+                        vivo.getWorld().dropItemNaturally(loc,new ItemStack(egg));
+                        vivo.remove();
                     }
                 }
             }

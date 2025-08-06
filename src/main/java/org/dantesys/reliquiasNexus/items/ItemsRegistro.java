@@ -371,7 +371,7 @@ public class ItemsRegistro {
         efeitos.add(PotionEffectType.DOLPHINS_GRACE);
         efeitos.add(PotionEffectType.OOZING);
         efeitos.add(PotionEffectType.INFESTED);
-        ItemStack item = new ItemStack(Material.BLACK_BUNDLE,1);
+        ItemStack item = new ItemStack(Material.NETHERITE_SHOVEL,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Domador"));
         meta.setUnbreakable(true);
