@@ -67,7 +67,7 @@ public class LimitadorEvent implements Listener {
                         data.set(DONO.key,PersistentDataType.STRING,player.getUniqueId().toString());
                         playerData.set(QTD.key,PersistentDataType.INTEGER,qtd);
                         config.set("nexus."+nome,player.getUniqueId().toString());
-                        saveConfig();
+                        ReliquiasNexus.getPlugin(ReliquiasNexus.class).saveConfig();
                         checkLimit(player);
                     }
                 }
@@ -90,7 +90,7 @@ public class LimitadorEvent implements Listener {
                         String nome = data.get(NEXUS.key,PersistentDataType.STRING);
                         data.set(DONO.key,PersistentDataType.STRING,assasino.getUniqueId().toString());
                         config.set("nexus."+nome,assasino.getUniqueId().toString());
-                        saveConfig();
+                        ReliquiasNexus.getPlugin(ReliquiasNexus.class).saveConfig();
                         assasino.getInventory().addItem(item);
                         int qa = assasino.getPersistentDataContainer().getOrDefault(QTD.key,PersistentDataType.INTEGER,0);
                         qa++;
@@ -128,7 +128,7 @@ public class LimitadorEvent implements Listener {
                         String nome = data.get(NEXUS.key,PersistentDataType.STRING);
                         data.set(DONO.key,PersistentDataType.STRING,"");
                         config.set("nexus."+nome,"");
-                        saveConfig();
+                        ReliquiasNexus.getPlugin(ReliquiasNexus.class).saveConfig();
                     }
                 }
             });
