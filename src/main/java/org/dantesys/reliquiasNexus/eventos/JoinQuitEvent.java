@@ -39,7 +39,7 @@ public class JoinQuitEvent implements Listener {
             int escolhido = rng.nextInt(reliquias.size());
             Nexus n = reliquias.get(escolhido);
             String nome = n.getNome();
-            config.set("nexus."+nome,player.getUniqueId());
+            config.set("nexus."+nome,player.getUniqueId().toString());
             ReliquiasNexus.getPlugin(ReliquiasNexus.class).saveConfig();
             container.set(QTD.key,PersistentDataType.INTEGER,1);
             int level =1;
