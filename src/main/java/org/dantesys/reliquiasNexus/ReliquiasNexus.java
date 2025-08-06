@@ -130,6 +130,7 @@ public final class ReliquiasNexus extends JavaPlugin {
         root.then(Commands.literal("expurgar").then(Commands.argument("exp", BoolArgumentType.bool()).requires(sender -> sender.getSender().isOp()).executes(ctx -> {
             boolean exp = ctx.getArgument("exp", boolean.class);
             config.set("expurgo",exp);
+            saveConfig();
             if(exp){
                 Bukkit.getOnlinePlayers().forEach(player -> {
                     player.sendMessage("§r§c╔═══════════╡⚠ AVISO ⚠╞═══════════╗");
@@ -163,6 +164,7 @@ public final class ReliquiasNexus extends JavaPlugin {
                     Nexus n = reliquias.get(escolhido);
                     String nome = n.getNome();
                     config.set("nexus."+nome,p.getUniqueId());
+                    saveConfig();
                     dataPlayer.set(QTD.key,PersistentDataType.INTEGER,qtd);
                     int level =1;
                     NamespacedKey key = NexusKeys.getKey(nome);

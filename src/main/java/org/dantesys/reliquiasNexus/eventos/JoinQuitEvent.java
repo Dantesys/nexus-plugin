@@ -40,6 +40,7 @@ public class JoinQuitEvent implements Listener {
             Nexus n = reliquias.get(escolhido);
             String nome = n.getNome();
             config.set("nexus."+nome,player.getUniqueId());
+            saveConfig();
             container.set(QTD.key,PersistentDataType.INTEGER,1);
             int level =1;
             NamespacedKey key = NexusKeys.getKey(nome);

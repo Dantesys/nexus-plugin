@@ -574,6 +574,7 @@ public class EvoluirEvent implements Listener {
                                         String rnome = roubar.getPersistentDataContainer().get(NEXUS.key,PersistentDataType.STRING);
                                         roubar.getItemMeta().getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,player.getUniqueId().toString());
                                         config.set("nexus."+rnome,player.getUniqueId().toString());
+                                        saveConfig();
                                         int qtd = container.getOrDefault(QTD.key, PersistentDataType.INTEGER,1);
                                         qtd++;
                                         container.set(QTD.key, PersistentDataType.INTEGER,qtd);
