@@ -64,7 +64,7 @@ public class Nexus{
         this.level=l;
     }
     public void upgrade(){
-        level=level+1;
+        this.level=level+1;
         ItemMeta item = this.item.getItemMeta();
         NamespacedKey key = new NamespacedKey("nexus_leveled", "boost_lvl_" + level);
         item.addAttributeModifier(attribute, new AttributeModifier(key, level, AttributeModifier.Operation.ADD_NUMBER));

@@ -27,14 +27,14 @@ import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 public class LimitadorEvent implements Listener {
     FileConfiguration config = ReliquiasNexus.getPlugin(ReliquiasNexus.class).getConfig();
     private final Map<UUID, List<ItemStack>> reliquiasSalvas = new HashMap<>();
-    private void checkLimit(Player player){
+    public static void checkLimit(Player player){
         if(passou(player)){
             player.setHealth(0);
         }else{
             player.sendActionBar(Component.text("§cNão seja um colecionador"));
         }
     }
-    private boolean passou(Player player){
+    private static boolean passou(Player player){
         PersistentDataContainer container = player.getPersistentDataContainer();
         if(container.has(QTD.key, PersistentDataType.INTEGER)){
             int qtd = container.getOrDefault(QTD.key, PersistentDataType.INTEGER,0);
@@ -84,11 +84,19 @@ public class LimitadorEvent implements Listener {
                 PersistentDataContainer data = meta.getPersistentDataContainer();
                 if(data.has(NEXUS.key,PersistentDataType.STRING)){
                     Player assasino = player.getKiller();
-                    if(assasino!=null){
+                    boolean expurgo = config.getBoolean("expurgo");
+                    if(assasino!=null && expurgo){
                         String nome = data.get(NEXUS.key,PersistentDataType.STRING);
                         data.set(DONO.key,PersistentDataType.STRING,assasino.getUniqueId().toString());
                         config.set("nexus."+nome,assasino.getUniqueId().toString());
-                    }else{
+                        assasino.getInventory().addItem(item);
+                        int qa = assasino.getPersistentDataContainer().getOrDefault(QTD.key,PersistentDataType.INTEGER,0);
+                        qa++;
+                        assasino.getPersistentDataContainer().set(QTD.key,PersistentDataType.INTEGER,qa);
+                        checkLimit(player);
+                        event.getDrops().remove(item);
+                    }
+                    else{
                         manterRelics.add(item);
                         event.getDrops().remove(item);
                     }

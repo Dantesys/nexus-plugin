@@ -1,6 +1,7 @@
 package org.dantesys.reliquiasNexus;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -9,6 +10,7 @@ import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -37,6 +39,7 @@ public final class ReliquiasNexus extends JavaPlugin {
     @Override
     public void onEnable() {
         ItemsRegistro.init();
+        config.addDefault("expurgo",false);
         config.createSection("nexus");
         config.addDefault("nexus.guerreiro","");
         config.addDefault("nexus.ceifador","");
@@ -63,15 +66,31 @@ public final class ReliquiasNexus extends JavaPlugin {
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("nexus").executes(ctx -> {
             ctx.getSource().getSender().sendMessage("§rUsando Nexus");
             ctx.getSource().getSender().sendMessage("§r/nexus list");
-            ctx.getSource().getSender().sendMessage("§r  -Mostrar quem está com qual reliquia");
+            ctx.getSource().getSender().sendMessage("§r-Mostrar quem está com qual reliquia.");
             ctx.getSource().getSender().sendMessage("§r/nexus level");
-            ctx.getSource().getSender().sendMessage("§r  -Mostrar seus niveis de reliquias");
+            ctx.getSource().getSender().sendMessage("§r-Mostrar seus niveis de reliquias.");
+            ctx.getSource().getSender().sendMessage("§r/nexus expurgo");
+            ctx.getSource().getSender().sendMessage("§r-Mostrar seu o servidor está em expurgo.");
             if(ctx.getSource().getSender().isOp()){
                 ctx.getSource().getSender().sendMessage("§r/nexus receber <jogador/jogadores>");
-                ctx.getSource().getSender().sendMessage("§r  -Envia reliquias não utilizadas aleatoriamente para jogadores que não tenha 3 ou mais reliquias ");
+                ctx.getSource().getSender().sendMessage("§r-Envia reliquias não utilizadas aleatoriamente para jogadores que não tenha 3 ou mais reliquias.");
+                ctx.getSource().getSender().sendMessage("§r/nexus expurgar <true/false>");
+                ctx.getSource().getSender().sendMessage("§r-Define se está em expurgo ou não");
             }
             return Command.SINGLE_SUCCESS;
         });
+        root.then(Commands.literal("expurgo").executes(ctx -> {
+            boolean expurgo = config.getBoolean("expurgo");
+            String msg = "§r§2O servidor não está em expurgo!";
+            if(expurgo){
+                msg = "§r§cO servidor está em expurgo!";
+                if(ctx.getSource().getExecutor() instanceof Player){
+                    msg = "§r§cO servidor está em expurgo, caçe ou seja caçado!";
+                }
+            }
+            ctx.getSource().getSender().sendMessage(msg);
+            return Command.SINGLE_SUCCESS;
+        }));
         root.then(Commands.literal("list").executes(ctx -> {
             ConfigurationSection secao = config.getConfigurationSection("nexus");
             if(secao!=null){
@@ -108,6 +127,25 @@ public final class ReliquiasNexus extends JavaPlugin {
             }else ctx.getSource().getSender().sendMessage("§cApenas jogadores podem usar");
             return Command.SINGLE_SUCCESS;
         }));
+        root.then(Commands.literal("expurgar").then(Commands.argument("exp", BoolArgumentType.bool()).requires(sender -> sender.getSender().isOp()).executes(ctx -> {
+            boolean exp = ctx.getArgument("exp", boolean.class);
+            config.set("expurgo",exp);
+            if(exp){
+                Bukkit.getOnlinePlayers().forEach(player -> {
+                    player.sendMessage("§r§c╔═══════════╡⚠ AVISO ⚠╞═══════════╗");
+                    player.sendMessage("§r§c║O Servidor agora está em expurgo.║");
+                    player.sendMessage("§r§c╚═══════════╡⚠ AVISO ⚠╞═══════════╝");
+                });
+            }else{
+                Bukkit.getOnlinePlayers().forEach(player -> {
+                    player.sendMessage("§r§2╔════════════╡⚠ AVISO ⚠╞════════════╗");
+                    player.sendMessage("§r§2║O Servidor agora esta seguro agora.║");
+                    player.sendMessage("§r§2╚════════════╡⚠ AVISO ⚠╞════════════╝");
+                });
+            }
+            ctx.getSource().getSender().sendMessage("§2O expurgo foi definido como:"+exp);
+            return Command.SINGLE_SUCCESS;
+        })));
         root.then(Commands.literal("receber").then(Commands.argument("jogadores", ArgumentTypes.players()).requires(sender -> sender.getSender().isOp()).executes(ctx -> {
             final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogadores", PlayerSelectorArgumentResolver.class);
             final List<Player> targets = targetResolver.resolve(ctx.getSource());

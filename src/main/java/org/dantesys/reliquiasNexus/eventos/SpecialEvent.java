@@ -73,7 +73,7 @@ public class SpecialEvent implements Listener {
                                 event.setCancelled(true);
                             }
                         }
-                        if(!item.getNome().equals("protetor") || !item.getNome().equals("mago")){
+                        if(!item.getNome().equals("protetor") && !item.getNome().equals("mago")){
                             dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,120);
                         }
                     }
@@ -188,7 +188,7 @@ public class SpecialEvent implements Listener {
                                     wd.dropItemNaturally(ld,new ItemStack(Material.TOTEM_OF_UNDYING));
                                     vivo.setHealth(0);
                                 }else{
-                                    vivo.damage(l+5,player);
+                                    vivo.damage(l+5);
                                 }
                             }
                         }else{
@@ -198,7 +198,7 @@ public class SpecialEvent implements Listener {
                                 wd.dropItemNaturally(ld,new ItemStack(Material.TOTEM_OF_UNDYING));
                                 vivo.setHealth(0);
                             }else{
-                                vivo.damage(l+5,player);
+                                vivo.damage(l+5);
                             }
                         }
                     }
@@ -240,10 +240,10 @@ public class SpecialEvent implements Listener {
                     atingidos.add(vivo);
                     if(vivo instanceof Player p){
                         if(p!=player) {
-                            vivo.damage(damage,player);
+                            vivo.damage(damage);
                         }
                     }else{
-                        vivo.damage(damage,player);
+                        vivo.damage(damage);
                     }
                     Location locV = vivo.getLocation();
                     world.dropItemNaturally(locV,new ItemStack(finalM,l));
@@ -283,10 +283,10 @@ public class SpecialEvent implements Listener {
                     atingidos.add(vivo);
                     if(vivo instanceof Player pl){
                         if(pl != player){
-                            vivo.damage(finalDamage,player);
+                            vivo.damage(finalDamage);
                         }
                     }else{
-                        vivo.damage(finalDamage,player);
+                        vivo.damage(finalDamage);
                     }
                 }
                 pressf.remove(surdo);
@@ -326,11 +326,11 @@ public class SpecialEvent implements Listener {
                     if(vivo instanceof Player p){
                         if(p!=player){
                             vivo.setRemainingAir(0);
-                            vivo.damage(damage,player);
+                            vivo.damage(damage);
                         }
                     }else{
                         vivo.setRemainingAir(0);
-                        vivo.damage(damage,player);
+                        vivo.damage(damage);
                     }
                 }
                 pressf.remove(surdo);
@@ -401,10 +401,10 @@ public class SpecialEvent implements Listener {
                     vworld.strikeLightning(vloc);
                     if(vivo instanceof Player p){
                         if(p!=player){
-                            vivo.damage(damage,player);
+                            vivo.damage(damage);
                         }
                     }else{
-                        vivo.damage(damage,player);
+                        vivo.damage(damage);
                     }
                 }
                 pressf.remove(surdo);
@@ -448,7 +448,7 @@ public class SpecialEvent implements Listener {
                                     ld.getBlock().setType(finalM);
                                     vivo.setHealth(0);
                                 }else{
-                                    vivo.damage(damage,player);
+                                    vivo.damage(damage);
                                     world.dropItemNaturally(ld,new ItemStack(finalM));
                                 }
                             }
@@ -457,7 +457,7 @@ public class SpecialEvent implements Listener {
                                 ld.getBlock().setType(finalM);
                                 vivo.setHealth(0);
                             }else{
-                                vivo.damage(damage,player);
+                                vivo.damage(damage);
                                 world.dropItemNaturally(ld,new ItemStack(finalM));
                             }
                         }
@@ -497,11 +497,11 @@ public class SpecialEvent implements Listener {
                     if(at != null){
                         if(vivo instanceof Player pl){
                             if(pl != player){
-                                vivo.damage(damage,player);
+                                vivo.damage(damage);
                                 vivo.setFireTicks(20+l);
                             }
                         }else{
-                            vivo.damage(damage,player);
+                            vivo.damage(damage);
                             vivo.setFireTicks(20+l);
                         }
                     }
@@ -558,10 +558,10 @@ public class SpecialEvent implements Listener {
                     if(at != null){
                         if(vivo instanceof Player pl){
                             if(pl != player){
-                                vivo.damage(damage,player);
+                                vivo.damage(damage);
                             }
                         }else{
-                            vivo.damage(damage,player);
+                            vivo.damage(damage);
                         }
                     }
                 }
@@ -611,10 +611,10 @@ public class SpecialEvent implements Listener {
                 if(surdo instanceof LivingEntity vivo){
                     if(vivo instanceof Player pl){
                         if(pl != player){
-                            vivo.damage(finalDamage,player);
+                            vivo.damage(finalDamage);
                         }
                     }else{
-                        vivo.damage(finalDamage,player);
+                        vivo.damage(finalDamage);
                     }
                 }
                 pressf.remove(surdo);
@@ -650,7 +650,7 @@ public class SpecialEvent implements Listener {
             Collection<Entity> pressf = location.getWorld().getNearbyEntities(location,2,2,2);
             while(pressf.iterator().hasNext()){
                 Entity surdo = pressf.iterator().next();
-                if(surdo instanceof LivingEntity vivo){
+                if(surdo instanceof LivingEntity vivo && atingidos.contains(vivo)){
                     AttributeInstance at = vivo.getAttribute(Attribute.MAX_HEALTH);
                     atingidos.add(vivo);
                     if(at != null){
@@ -666,7 +666,7 @@ public class SpecialEvent implements Listener {
                                     vivo.getPersistentDataContainer().set(PROTECAO.key,PersistentDataType.STRING,e.getName());
                                     vivo.setHealth(0);
                                 }else{
-                                    vivo.damage(finalDamage,player);
+                                    vivo.damage(finalDamage);
                                 }
                             }
                         }else{
@@ -678,7 +678,7 @@ public class SpecialEvent implements Listener {
                                 wd.spawn(ld,et.getEntityClass());
                                 vivo.setHealth(0);
                             }else{
-                                vivo.damage(finalDamage,player);
+                                vivo.damage(finalDamage);
                             }
                         }
                     }
@@ -694,9 +694,10 @@ public class SpecialEvent implements Listener {
     }
     private void ladrao(Player player, Nexus item){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(HULK.key,PersistentDataType.INTEGER,1);
+        int l = dataPlayer.getOrDefault(LADRAO.key,PersistentDataType.INTEGER,1);
         item.setLevel(l);
         Location loc = player.getRespawnLocation();
+        if(loc==null)loc=player.getWorld().getSpawnLocation();
         player.teleport(loc);
     }
     private void domador(Player player,Nexus item){
@@ -710,14 +711,13 @@ public class SpecialEvent implements Listener {
         wolf.getAttribute(Attribute.ARMOR_TOUGHNESS).setBaseValue(l);
         wolf.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(l);
         wolf.getAttribute(Attribute.MAX_HEALTH).setBaseValue(l);
-        wolf.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(l);
         wolf.getAttribute(Attribute.SCALE).setBaseValue(1.25);
     }
     private void mago(Player player,Nexus item){
         int tempo=120;
         PlayerInventory inv = player.getInventory();
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(DOMADOR.key,PersistentDataType.INTEGER,1);
+        int l = dataPlayer.getOrDefault(MAGO.key,PersistentDataType.INTEGER,1);
         item.setLevel(l);
         int pos=0;
         for (int i = 0; i <= 8; i++) {
@@ -792,10 +792,10 @@ public class SpecialEvent implements Listener {
                         if(surdo instanceof LivingEntity vivo){
                             if(vivo instanceof Player pl){
                                 if(pl != player){
-                                    vivo.damage(finalDamage,player);
+                                    vivo.damage(finalDamage);
                                 }
                             }else{
-                                vivo.damage(finalDamage,player);
+                                vivo.damage(finalDamage);
                             }
                         }
                         pressf.remove(surdo);
@@ -842,12 +842,12 @@ public class SpecialEvent implements Listener {
                             }else{
                                 vivo.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION,20+l,l));
                             }
-                            Location locV = vivo.getLocation();
                         }
                         pressf.remove(surdo);
                     }
                 });
                 timer.scheduleTimer(1L);
+                tempo=60;
             }
             case 8 -> {
                 World w = player.getWorld();
@@ -879,10 +879,10 @@ public class SpecialEvent implements Listener {
                             vworld.strikeLightning(vloc);
                             if(vivo instanceof Player p){
                                 if(p!=player){
-                                    vivo.damage(damage,player);
+                                    vivo.damage(damage);
                                 }
                             }else{
-                                vivo.damage(damage,player);
+                                vivo.damage(damage);
                             }
                         }
                         pressf.remove(surdo);
@@ -994,13 +994,13 @@ public class SpecialEvent implements Listener {
                 damage+=l;
                 Entity e = event.getDamager();
                 if(e instanceof LivingEntity atacante){
-                    atacante.damage(damage,e);
+                    atacante.damage(damage);
                 }else if(e instanceof Projectile projetil){
                     UUID uuid = projetil.getOwnerUniqueId();
                     if(uuid!=null){
                         Entity atirador = e.getWorld().getEntity(uuid);
                         if(atirador instanceof LivingEntity atacante){
-                            atacante.damage(damage,e);
+                            atacante.damage(damage);
                         }
                     }
                 }

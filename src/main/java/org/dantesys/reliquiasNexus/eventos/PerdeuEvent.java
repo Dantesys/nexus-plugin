@@ -3,7 +3,6 @@ package org.dantesys.reliquiasNexus.eventos;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.DecoratedPot;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -106,21 +105,12 @@ public class PerdeuEvent implements Listener {
                 player.sendMessage("§cVocê não pode colocar a reliquia num suporte de armadura");
             }
         }
-        if(e instanceof DecoratedPot){
-            ItemStack stack = player.getInventory().getItemInMainHand();
-            ItemMeta meta = stack.getItemMeta();
-            PersistentDataContainer data = meta.getPersistentDataContainer();
-            if(data.has(NEXUS.key,PersistentDataType.STRING)){
-                event.setCancelled(true);
-                player.sendMessage("§cVocê não pode colocar a reliquia num pote");
-            }
-        }
     }
     @EventHandler
     public void vaso(PlayerInteractEvent event){
         Player player = event.getPlayer();
         Block b = event.getClickedBlock();
-        if(b instanceof DecoratedPot){
+        if(b!=null && b.getType() == Material.DECORATED_POT){
             ItemStack stack = player.getInventory().getItemInMainHand();
             ItemMeta meta = stack.getItemMeta();
             PersistentDataContainer data = meta.getPersistentDataContainer();

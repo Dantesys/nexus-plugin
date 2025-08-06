@@ -7,6 +7,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -34,6 +35,7 @@ import java.util.UUID;
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 
 public class EvoluirEvent implements Listener {
+    FileConfiguration config = ReliquiasNexus.getPlugin(ReliquiasNexus.class).getConfig();
     public void tentarEvoluir(Player player, ItemStack nexusItem, int levelAtual,int slot) {
         ItemMeta meta = nexusItem.getItemMeta();
         PersistentDataContainer data = meta.getPersistentDataContainer();
@@ -43,97 +45,97 @@ public class EvoluirEvent implements Listener {
             if(nome!=null && !nome.isBlank()){
                 String condicao = podeEvoluir(player,nome,levelAtual);
                 int level = player.getLevel();
-                if(condicao.isEmpty()){
+                if(!condicao.isBlank()){
                     if(level>=levelAtual*10){
                         player.setLevel(player.getLevel()-(10*levelAtual));
                         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-                        switch (nome){
-                            case "barbaro" -> {
-                                dataPlayer.set(MISSAOBARBARO.key, PersistentDataType.INTEGER, 0);
-                                dataPlayer.set(BARBARO.key,PersistentDataType.INTEGER,levelAtual+1);
-                            }
-                            case "ceifador" -> {
-                                dataPlayer.set(MISSAOCEIFADOR.key, PersistentDataType.DOUBLE, 0d);
-                                dataPlayer.set(CEIFADOR.key,PersistentDataType.INTEGER,levelAtual+1);
-                            }
-                            case "fazendeiro" -> {
-                                dataPlayer.set(MISSAOFAZENDEIRO.key, PersistentDataType.INTEGER, 0);
-                                dataPlayer.set(FAZENDEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
-                            }
-                            case "guerreiro" -> {
-                                dataPlayer.set(MISSAOGUERREIRO.key, PersistentDataType.INTEGER, 0);
-                                dataPlayer.set(GUERREIRO.key,PersistentDataType.INTEGER,levelAtual+1);
-                            }
-                            case "mares" -> {
-                                dataPlayer.set(MISSAOMARES.key, PersistentDataType.INTEGER, 0);
-                                dataPlayer.set(MARES.key,PersistentDataType.INTEGER,levelAtual+1);
-                            }
-                            case "vida" -> {
-                                dataPlayer.set(MISSAOVIDA.key, PersistentDataType.DOUBLE, 0d);
-                                dataPlayer.set(VIDA.key,PersistentDataType.INTEGER,levelAtual+1);
-                            }
-                            case "espiao" -> {
-                                dataPlayer.set(MISSAOESPIAO.key, PersistentDataType.INTEGER, 0);
-                                dataPlayer.set(ESPIAO.key,PersistentDataType.INTEGER,levelAtual+1);
-                            }
-                            case "arqueiro" -> {
-                                dataPlayer.set(MISSAOARQUEIRO.key, PersistentDataType.INTEGER, 0);
-                                dataPlayer.set(ARQUEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
-                            }
-                            case "cacador" -> {
-                                dataPlayer.set(MISSAOCACADOR.key, PersistentDataType.INTEGER, 0);
-                                dataPlayer.set(CACADOR.key,PersistentDataType.INTEGER,levelAtual+1);
-                            }
-                            case "tempestade" -> {
-                                dataPlayer.set(MISSAOTEMPESTADE.key, PersistentDataType.INTEGER, 0);
-                                dataPlayer.set(TEMPESTADE.key,PersistentDataType.INTEGER,levelAtual+1);
-                            }
-                            case "mineiro" -> {
-                                dataPlayer.set(MISSAOMINEIRO.key, PersistentDataType.INTEGER, 0);
-                                dataPlayer.set(MINEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
-                            }
-                            case "fenix" -> {
-                                dataPlayer.set(MISSAOFENIX.key, PersistentDataType.INTEGER, 0);
-                                dataPlayer.set(FENIX.key,PersistentDataType.INTEGER,levelAtual+1);
-                            }
-                            case "protetor" -> {
-                                dataPlayer.set(MISSAOPROTETOR.key, PersistentDataType.INTEGER, 0);
-                                dataPlayer.set(PROTETOR.key,PersistentDataType.INTEGER,levelAtual+1);
-                            }
-                            case "hulk" -> {
-                                dataPlayer.set(MISSAOHULK.key, PersistentDataType.DOUBLE, 0d);
-                                dataPlayer.set(HULK.key,PersistentDataType.INTEGER,levelAtual+1);
-                            }
-                            case "sculk" -> {
-                                dataPlayer.set(MISSAOSCULK.key, PersistentDataType.INTEGER, 0);
-                                dataPlayer.set(SCULK.key,PersistentDataType.INTEGER,levelAtual+1);
-                            }
-                            case "pescador" -> {
-                                dataPlayer.set(MISSAOPESCADOR.key, PersistentDataType.INTEGER, 0);
-                                dataPlayer.set(PESCADOR.key,PersistentDataType.INTEGER,levelAtual+1);
-                            }
-                            case "flash" -> {
-                                dataPlayer.set(MISSAOFLASH.key, PersistentDataType.INTEGER, 0);
-                                dataPlayer.set(FLASH.key,PersistentDataType.INTEGER,levelAtual+1);
-                            }
-                            case "mago" -> {
-                                dataPlayer.set(MISSAOMAGO.key, PersistentDataType.INTEGER, 0);
-                                dataPlayer.set(MAGO.key,PersistentDataType.INTEGER,levelAtual+1);
-                            }
-                            case "ladrao" -> {
-                                dataPlayer.set(MISSAOLADRAO.key, PersistentDataType.INTEGER, 0);
-                                dataPlayer.set(LADRAO.key,PersistentDataType.INTEGER,levelAtual+1);
-                            }
-                            case "domador" -> {
-                                dataPlayer.set(MISSAODOMADOR.key, PersistentDataType.INTEGER, 0);
-                                dataPlayer.set(DOMADOR.key,PersistentDataType.INTEGER,levelAtual+1);
-                            }
-                        }
                         Nexus n = ItemsRegistro.getFromNome(nome);
                         if(n!=null){
                             nexusItem=n.getItem(levelAtual+1);
                             if(meta.hasEnchants()){
                                 meta.getEnchants().forEach((nexusItem::addEnchantment));
+                            }
+                            switch (nome){
+                                case "barbaro" -> {
+                                    dataPlayer.set(MISSAOBARBARO.key, PersistentDataType.INTEGER, 0);
+                                    dataPlayer.set(BARBARO.key,PersistentDataType.INTEGER,levelAtual+1);
+                                }
+                                case "ceifador" -> {
+                                    dataPlayer.set(MISSAOCEIFADOR.key, PersistentDataType.DOUBLE, 0d);
+                                    dataPlayer.set(CEIFADOR.key,PersistentDataType.INTEGER,levelAtual+1);
+                                }
+                                case "fazendeiro" -> {
+                                    dataPlayer.set(MISSAOFAZENDEIRO.key, PersistentDataType.INTEGER, 0);
+                                    dataPlayer.set(FAZENDEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
+                                }
+                                case "guerreiro" -> {
+                                    dataPlayer.set(MISSAOGUERREIRO.key, PersistentDataType.INTEGER, 0);
+                                    dataPlayer.set(GUERREIRO.key,PersistentDataType.INTEGER,levelAtual+1);
+                                }
+                                case "mares" -> {
+                                    dataPlayer.set(MISSAOMARES.key, PersistentDataType.INTEGER, 0);
+                                    dataPlayer.set(MARES.key,PersistentDataType.INTEGER,levelAtual+1);
+                                }
+                                case "vida" -> {
+                                    dataPlayer.set(MISSAOVIDA.key, PersistentDataType.DOUBLE, 0d);
+                                    dataPlayer.set(VIDA.key,PersistentDataType.INTEGER,levelAtual+1);
+                                }
+                                case "espiao" -> {
+                                    dataPlayer.set(MISSAOESPIAO.key, PersistentDataType.INTEGER, 0);
+                                    dataPlayer.set(ESPIAO.key,PersistentDataType.INTEGER,levelAtual+1);
+                                }
+                                case "arqueiro" -> {
+                                    dataPlayer.set(MISSAOARQUEIRO.key, PersistentDataType.INTEGER, 0);
+                                    dataPlayer.set(ARQUEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
+                                }
+                                case "cacador" -> {
+                                    dataPlayer.set(MISSAOCACADOR.key, PersistentDataType.INTEGER, 0);
+                                    dataPlayer.set(CACADOR.key,PersistentDataType.INTEGER,levelAtual+1);
+                                }
+                                case "tempestade" -> {
+                                    dataPlayer.set(MISSAOTEMPESTADE.key, PersistentDataType.INTEGER, 0);
+                                    dataPlayer.set(TEMPESTADE.key,PersistentDataType.INTEGER,levelAtual+1);
+                                }
+                                case "mineiro" -> {
+                                    dataPlayer.set(MISSAOMINEIRO.key, PersistentDataType.INTEGER, 0);
+                                    dataPlayer.set(MINEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
+                                }
+                                case "fenix" -> {
+                                    dataPlayer.set(MISSAOFENIX.key, PersistentDataType.INTEGER, 0);
+                                    dataPlayer.set(FENIX.key,PersistentDataType.INTEGER,levelAtual+1);
+                                }
+                                case "protetor" -> {
+                                    dataPlayer.set(MISSAOPROTETOR.key, PersistentDataType.INTEGER, 0);
+                                    dataPlayer.set(PROTETOR.key,PersistentDataType.INTEGER,levelAtual+1);
+                                }
+                                case "hulk" -> {
+                                    dataPlayer.set(MISSAOHULK.key, PersistentDataType.DOUBLE, 0d);
+                                    dataPlayer.set(HULK.key,PersistentDataType.INTEGER,levelAtual+1);
+                                }
+                                case "sculk" -> {
+                                    dataPlayer.set(MISSAOSCULK.key, PersistentDataType.INTEGER, 0);
+                                    dataPlayer.set(SCULK.key,PersistentDataType.INTEGER,levelAtual+1);
+                                }
+                                case "pescador" -> {
+                                    dataPlayer.set(MISSAOPESCADOR.key, PersistentDataType.INTEGER, 0);
+                                    dataPlayer.set(PESCADOR.key,PersistentDataType.INTEGER,levelAtual+1);
+                                }
+                                case "flash" -> {
+                                    dataPlayer.set(MISSAOFLASH.key, PersistentDataType.INTEGER, 0);
+                                    dataPlayer.set(FLASH.key,PersistentDataType.INTEGER,levelAtual+1);
+                                }
+                                case "mago" -> {
+                                    dataPlayer.set(MISSAOMAGO.key, PersistentDataType.INTEGER, 0);
+                                    dataPlayer.set(MAGO.key,PersistentDataType.INTEGER,levelAtual+1);
+                                }
+                                case "ladrao" -> {
+                                    dataPlayer.set(MISSAOLADRAO.key, PersistentDataType.INTEGER, 0);
+                                    dataPlayer.set(LADRAO.key,PersistentDataType.INTEGER,levelAtual+1);
+                                }
+                                case "domador" -> {
+                                    dataPlayer.set(MISSAODOMADOR.key, PersistentDataType.INTEGER, 0);
+                                    dataPlayer.set(DOMADOR.key,PersistentDataType.INTEGER,levelAtual+1);
+                                }
                             }
                             player.getInventory().setItem(slot,nexusItem);
                             msg = "§aSeu Nexus do "+nome+" evoluiu para o nível " + (levelAtual + 1) + "!";
@@ -154,7 +156,7 @@ public class EvoluirEvent implements Listener {
 
     }
     private String podeEvoluir(Player player, String nome,int level){
-        String condicao="Não";
+        String condicao="";
         switch (nome){
             case "barbaro" -> {
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAOBARBARO.key, PersistentDataType.INTEGER, 0);
@@ -561,9 +563,25 @@ public class EvoluirEvent implements Listener {
                             PlayerInventory pinv = roubado.getInventory();
                             int escolhido = rd.nextInt(0,pinv.getContents().length);
                             roubar = pinv.getItem(escolhido);
-                            while(roubar==null || !roubar.getPersistentDataContainer().has(NEXUS.key,PersistentDataType.STRING)){
+                            boolean continua=true;
+                            while(continua){
                                 escolhido = rd.nextInt(0,pinv.getContents().length);
                                 roubar = pinv.getItem(escolhido);
+                                if(roubar!=null && !roubar.isEmpty()){
+                                    continua=false;
+                                    if(roubar.getPersistentDataContainer().has(NEXUS.key,PersistentDataType.STRING) && config.getBoolean("expurgo")){
+                                        PersistentDataContainer container = player.getPersistentDataContainer();
+                                        String rnome = roubar.getPersistentDataContainer().get(NEXUS.key,PersistentDataType.STRING);
+                                        roubar.getItemMeta().getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,player.getUniqueId().toString());
+                                        config.set("nexus."+rnome,player.getUniqueId().toString());
+                                        int qtd = container.getOrDefault(QTD.key, PersistentDataType.INTEGER,1);
+                                        qtd++;
+                                        container.set(QTD.key, PersistentDataType.INTEGER,qtd);
+                                        LimitadorEvent.checkLimit(player);
+                                    }else{
+                                        continua=true;
+                                    }
+                                }
                             }
                             pinv.setItem(escolhido,new ItemStack(Material.AIR));
                         }else{
@@ -583,7 +601,7 @@ public class EvoluirEvent implements Listener {
                             }
                         }
                         Nexus n = ItemsRegistro.getFromNome(nome);
-                        if(n!=null && roubar!=null){
+                        if(n!=null && roubar!=null && !roubar.isEmpty()){
                             BundleMeta meta = (BundleMeta) stack.getItemMeta();
                             meta.addItem(roubar);
                             stack.setItemMeta(meta);
