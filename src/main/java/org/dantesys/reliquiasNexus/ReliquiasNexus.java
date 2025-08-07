@@ -2,6 +2,7 @@ package org.dantesys.reliquiasNexus;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -18,6 +19,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -26,42 +28,23 @@ import org.dantesys.reliquiasNexus.eventos.*;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
 import org.dantesys.reliquiasNexus.util.NexusKeys;
+import org.dantesys.reliquiasNexus.util.Troca;
 
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
-import static org.dantesys.reliquiasNexus.util.NexusKeys.DONO;
-import static org.dantesys.reliquiasNexus.util.NexusKeys.QTD;
+import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 
 public final class ReliquiasNexus extends JavaPlugin {
-    FileConfiguration config = getConfig();
+    private static final Map<UUID, Troca> trocas = new HashMap<>();
+    private static FileConfiguration config;
+    final List<String> names = List.of("guerreiro","ceifador","vida","mares","barbaro",
+            "fazendeiro","espiao","arqueiro","cacador","tempestade","mineiro","fenix","protetor",
+            "hulk","sculk","pescador","flash","mago","ladrao","domador");
     @Override
     public void onEnable() {
         ItemsRegistro.init();
-        config.addDefault("expurgo",false);
-        config.createSection("nexus");
-        config.addDefault("nexus.guerreiro","");
-        config.addDefault("nexus.ceifador","");
-        config.addDefault("nexus.vida","");
-        config.addDefault("nexus.mares","");
-        config.addDefault("nexus.barbaro","");
-        config.addDefault("nexus.fazendeiro","");
-        config.addDefault("nexus.espiao","");
-        config.addDefault("nexus.arqueiro","");
-        config.addDefault("nexus.cacador","");
-        config.addDefault("nexus.tempestade","");
-        config.addDefault("nexus.mineiro","");
-        config.addDefault("nexus.fenix","");
-        config.addDefault("nexus.protetor","");
-        config.addDefault("nexus.hulk","");
-        config.addDefault("nexus.sculk","");
-        config.addDefault("nexus.pescador","");
-        config.addDefault("nexus.flash","");
-        config.addDefault("nexus.mago","");
-        config.addDefault("nexus.ladrao","");
-        config.addDefault("nexus.domador","");
-        config.options().copyDefaults(true);
+        saveDefaultConfig();
+        config = getConfig();
         saveConfig();
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("nexus").executes(ctx -> {
             ctx.getSource().getSender().sendMessage("§rUsando Nexus");
@@ -71,17 +54,117 @@ public final class ReliquiasNexus extends JavaPlugin {
             ctx.getSource().getSender().sendMessage("§r-Mostrar seus niveis de reliquias.");
             ctx.getSource().getSender().sendMessage("§r/nexus expurgo");
             ctx.getSource().getSender().sendMessage("§r-Mostrar seu o servidor está em expurgo.");
+            ctx.getSource().getSender().sendMessage("§r/nexus trocar <jogador>");
+            ctx.getSource().getSender().sendMessage("§r-Envia um pedido de troca para o jogador escolhido.");
+            ctx.getSource().getSender().sendMessage("§r/nexus troca-aceitar");
+            ctx.getSource().getSender().sendMessage("§r-Aceita um pedido de troca.");
+            ctx.getSource().getSender().sendMessage("§r/nexus troca-cancelar");
+            ctx.getSource().getSender().sendMessage("§r-Cancela um pedido de troca.");
             if(ctx.getSource().getSender().isOp()){
+                int limite = config.getInt("limite");
                 ctx.getSource().getSender().sendMessage("§r/nexus receber <jogador/jogadores>");
-                ctx.getSource().getSender().sendMessage("§r-Envia reliquias não utilizadas aleatoriamente para jogadores que não tenha 3 ou mais reliquias.");
+                ctx.getSource().getSender().sendMessage("§r-Envia reliquias não utilizadas aleatoriamente para jogadores que não tenha "+limite+" ou mais reliquias.");
+                ctx.getSource().getSender().sendMessage("§r/nexus reliquia <jogador> <reliquia>");
+                ctx.getSource().getSender().sendMessage("§r-Envia reliquias não utilizadas da sua escolhar para um jogador que não tenha mais de "+limite+" reliquias.");
                 ctx.getSource().getSender().sendMessage("§r/nexus expurgar <true/false>");
                 ctx.getSource().getSender().sendMessage("§r-Define se está em expurgo ou não");
             }
             return Command.SINGLE_SUCCESS;
         });
+        root.then(Commands.literal("trocar").then(Commands.argument("jogador", ArgumentTypes.player()).executes(ctx -> {
+            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogador", PlayerSelectorArgumentResolver.class);
+            final Player p = targetResolver.resolve(ctx.getSource()).getFirst();
+            final CommandSender sender = ctx.getSource().getSender();
+            if(ctx.getSource().getExecutor() instanceof Player player){
+                ItemStack stack = player.getInventory().getItemInMainHand();
+                ItemMeta meta = stack.getItemMeta();
+                PersistentDataContainer data = meta.getPersistentDataContainer();
+                if(data.has(NEXUS.key,PersistentDataType.STRING)){
+                    String nome = data.get(NEXUS.key,PersistentDataType.STRING);
+                    Troca t = new Troca(player.getUniqueId(),nome);
+                    trocas.put(p.getUniqueId(),t);
+                    p.sendMessage("§0Você recebeu 1 pedido de troca!");
+                    p.sendMessage("§0O jogador "+player.getName()+" está querendo trocar o nexus "+nome+"!");
+                    p.sendMessage("§2Use o comando /nexus troca-aceitar para aceitar o pedido de troca!");
+                    p.sendMessage("§cUse o comando /nexus troca-cancelar para cancelar o pedido de troca!");
+                    sender.sendMessage("§2Pedido de troca enviado com sucesso, aguarde "+p.getName()+" aceitar ou cancelar a troca!");
+                }else{
+                    sender.sendMessage("§cVocê precisa estar segurando a reliquia para solicitar a troca!");
+                }
+            }else{
+                sender.sendMessage("§cApenas jogadores podem fazer trocas!");
+            }
+            return Command.SINGLE_SUCCESS;
+        })));
+        root.then(Commands.literal("troca-aceitar").executes(ctx -> {
+            final CommandSender sender = ctx.getSource().getSender();
+            if(ctx.getSource().getExecutor() instanceof Player player){
+                ItemStack stack = player.getInventory().getItemInMainHand();
+                ItemMeta meta = stack.getItemMeta();
+                PersistentDataContainer data = meta.getPersistentDataContainer();
+                if(data.has(NEXUS.key,PersistentDataType.STRING)){
+                    String nome = data.get(NEXUS.key,PersistentDataType.STRING);
+                    Troca t = trocas.remove(player.getUniqueId());
+                    Player p = Bukkit.getPlayer(t.uuid());
+                    if(p!=null && nome!=null){
+                        PlayerInventory inv = p.getInventory();
+                        for(ItemStack s:inv.getContents()){
+                            if(s!=null){
+                                ItemMeta m = s.getItemMeta();
+                                PersistentDataContainer d = m.getPersistentDataContainer();
+                                if(d.has(NEXUS.key,PersistentDataType.STRING)){
+                                    String n = d.get(NEXUS.key,PersistentDataType.STRING);
+                                    if(n!=null && n.equals(t.stack())){
+                                        Nexus nex = ItemsRegistro.getFromNome(n);
+                                        if(nex!=null){
+                                            PersistentDataContainer container = player.getPersistentDataContainer();
+                                            NamespacedKey key = NexusKeys.getKey(nex.getNome());
+                                            int level=1;
+                                            if(key!=null && container.has(key,PersistentDataType.INTEGER)){
+                                                level=container.getOrDefault(key,PersistentDataType.INTEGER,1);
+                                            }else if(key!=null){
+                                                container.set(key,PersistentDataType.INTEGER,1);
+                                            }
+                                            ItemStack aux = nex.getItem(level);
+                                            player.getInventory().setItemInMainHand(aux);
+                                            config.set("nexus."+n,player.getUniqueId().toString());
+                                            nex = ItemsRegistro.getFromNome(nome);
+                                            if(nex!=null){
+                                                PersistentDataContainer pc = p.getPersistentDataContainer();
+                                                key = NexusKeys.getKey(nex.getNome());
+                                                level=1;
+                                                if(key!=null && pc.has(key,PersistentDataType.INTEGER)){
+                                                    level=pc.getOrDefault(key,PersistentDataType.INTEGER,1);
+                                                }else if(key!=null){
+                                                    pc.set(key,PersistentDataType.INTEGER,1);
+                                                }
+                                                aux = nex.getItem(level);
+                                                config.set("nexus."+nome,p.getUniqueId().toString());
+                                                inv.remove(s);
+                                                inv.addItem(aux);
+                                                p.sendMessage("§0Troca feita com sucesso!");
+                                                sender.sendMessage("§0Troca feita com sucesso!");
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }else{
+                        sender.sendMessage("§cO jogador não está online cancelando a troca.");
+                    }
+                }else{
+                    sender.sendMessage("§cVocê precisa estar segurando a reliquia para aceitar a troca!");
+                }
+            }else{
+                sender.sendMessage("§cApenas jogadores podem fazer aceitar trocas!");
+            }
+            return Command.SINGLE_SUCCESS;
+        }));
         root.then(Commands.literal("expurgo").executes(ctx -> {
             boolean expurgo = config.getBoolean("expurgo");
-            String msg = "§r§2O servidor não está em expurgo!";
+            String msg = "§r§2O servidor está seguto!";
             if(expurgo){
                 msg = "§r§cO servidor está em expurgo!";
                 if(ctx.getSource().getExecutor() instanceof Player){
@@ -133,15 +216,15 @@ public final class ReliquiasNexus extends JavaPlugin {
             saveConfig();
             if(exp){
                 Bukkit.getOnlinePlayers().forEach(player -> {
-                    player.sendMessage("§r§c╔═══════════╡⚠ AVISO ⚠╞═══════════╗");
-                    player.sendMessage("§r§c║O Servidor agora está em expurgo.║");
-                    player.sendMessage("§r§c╚═══════════╡⚠ AVISO ⚠╞═══════════╝");
+                    player.sendMessage("§r§c+=============|AVISO|=============+");
+                    player.sendMessage("§r§c|O Servidor agora está em expurgo.|");
+                    player.sendMessage("§r§c+=============|AVISO|=============+");
                 });
             }else{
                 Bukkit.getOnlinePlayers().forEach(player -> {
-                    player.sendMessage("§r§2╔════════════╡⚠ AVISO ⚠╞════════════╗");
-                    player.sendMessage("§r§2║O Servidor agora esta seguro agora.║");
-                    player.sendMessage("§r§2╚════════════╡⚠ AVISO ⚠╞════════════╝");
+                    player.sendMessage("§r§2+==============|AVISO|==============+");
+                    player.sendMessage("§r§2|O Servidor agora esta seguro agora.|");
+                    player.sendMessage("§r§2+==============|AVISO|==============+");
                 });
             }
             ctx.getSource().getSender().sendMessage("§2O expurgo foi definido como:"+exp);
@@ -151,10 +234,11 @@ public final class ReliquiasNexus extends JavaPlugin {
             final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogadores", PlayerSelectorArgumentResolver.class);
             final List<Player> targets = targetResolver.resolve(ctx.getSource());
             final CommandSender sender = ctx.getSource().getSender();
+            int limite = config.getInt("limite");
             for (final Player p : targets) {
                 PersistentDataContainer dataPlayer = p.getPersistentDataContainer();
                 int qtd = dataPlayer.getOrDefault(QTD.key, PersistentDataType.INTEGER,0);
-                if(qtd>=3){
+                if(qtd>=limite){
                     ctx.getSource().getSender().sendMessage("§cO jogador "+p.getName()+" não pode receber a reliquia!");
                 }else{
                     qtd++;
@@ -163,7 +247,7 @@ public final class ReliquiasNexus extends JavaPlugin {
                     int escolhido = rng.nextInt(reliquias.size());
                     Nexus n = reliquias.get(escolhido);
                     String nome = n.getNome();
-                    config.set("nexus."+nome,p.getUniqueId());
+                    config.set("nexus."+nome,p.getUniqueId().toString());
                     saveConfig();
                     dataPlayer.set(QTD.key,PersistentDataType.INTEGER,qtd);
                     int level =1;
@@ -178,12 +262,58 @@ public final class ReliquiasNexus extends JavaPlugin {
                     meta.getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,p.getUniqueId().toString());
                     stack.setItemMeta(meta);
                     p.getInventory().addItem(stack);
-                    p.sendMessage(Component.text("§2 Você recebeu a reliquia "+nome));
-                    sender.sendMessage(Component.text("§2 O jogador "+p.getName()+" recebeu a reliquia "+nome));
+                    p.sendMessage(Component.text("§2Você recebeu a reliquia "+nome));
+                    sender.sendMessage(Component.text("§2O jogador "+p.getName()+" recebeu a reliquia "+nome));
                 }
             }
             return Command.SINGLE_SUCCESS;
         })));
+        root.then(Commands.literal("reliquia").then(Commands.argument("jogador", ArgumentTypes.player()).then(Commands.argument("reliquia", StringArgumentType.word()).suggests((ctx, builder) -> {
+            names.stream().filter(entry -> entry.toLowerCase().startsWith(builder.getRemainingLowerCase())).forEach(builder::suggest);
+            return builder.buildFuture();
+        }).requires(sender -> sender.getSender().isOp()).executes(ctx -> {
+            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogador", PlayerSelectorArgumentResolver.class);
+            final Player p = targetResolver.resolve(ctx.getSource()).getFirst();
+            final CommandSender sender = ctx.getSource().getSender();
+            final String reliquia = ctx.getArgument("reliquia",String.class).toLowerCase();
+            Nexus n = ItemsRegistro.getFromNome(reliquia);
+            if(n!=null){
+                int limite = config.getInt("limite");
+                PersistentDataContainer dataPlayer = p.getPersistentDataContainer();
+                int qtd = dataPlayer.getOrDefault(QTD.key, PersistentDataType.INTEGER,0);
+                if(qtd>=limite){
+                    ctx.getSource().getSender().sendMessage("§cO jogador "+p.getName()+" não pode receber a reliquia!");
+                }else{
+                    qtd++;
+                    String nome = n.getNome();
+                    String uuidStr = config.getString("nexus"+nome);
+                    if(uuidStr==null || uuidStr.isBlank()){
+                        config.set("nexus."+nome,p.getUniqueId().toString());
+                        saveConfig();
+                        dataPlayer.set(QTD.key,PersistentDataType.INTEGER,qtd);
+                        int level =1;
+                        NamespacedKey key = NexusKeys.getKey(nome);
+                        if(key!=null && dataPlayer.has(key,PersistentDataType.INTEGER)){
+                            level=dataPlayer.getOrDefault(key,PersistentDataType.INTEGER,1);
+                        }else if(key!=null){
+                            dataPlayer.set(key,PersistentDataType.INTEGER,1);
+                        }
+                        ItemStack stack = n.getItem(level);
+                        ItemMeta meta = stack.getItemMeta();
+                        meta.getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,p.getUniqueId().toString());
+                        stack.setItemMeta(meta);
+                        p.getInventory().addItem(stack);
+                        p.sendMessage(Component.text("§2Você recebeu a reliquia "+nome));
+                        sender.sendMessage(Component.text("§2O jogador "+p.getName()+" recebeu a reliquia "+nome));
+                    }else{
+                        sender.sendMessage(Component.text("§cA reliquia "+reliquia+" já possui dono!"));
+                    }
+                }
+            }else{
+                sender.sendMessage("§cA reliquia "+reliquia+" não existe!");
+            }
+            return Command.SINGLE_SUCCESS;
+        }))));
         LiteralCommandNode<CommandSourceStack> buildCommand = root.build();
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> commands.registrar().register(buildCommand));
         getServer().getPluginManager().registerEvents(new JoinQuitEvent(), this);
@@ -198,5 +328,15 @@ public final class ReliquiasNexus extends JavaPlugin {
     @Override
     public void onDisable() {
         getServer().getConsoleSender().sendMessage("§4[Nexus]: Plugin Desativado!");
+    }
+    public static FileConfiguration getNexusConfig(){
+        return config;
+    }
+    public static void saiu(Player p){
+        Troca t = trocas.remove(p.getUniqueId());
+        Player player = Bukkit.getPlayer(t.uuid());
+        if(player!=null){
+            player.sendMessage("§cO jogador"+p.getName()+" saiu sem aceitar ou cancelar a troca!");
+        }
     }
 }

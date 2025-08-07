@@ -63,6 +63,7 @@ public class JoinQuitEvent implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
+        ReliquiasNexus.saiu(player);
         event.quitMessage(Component.text("§4O Jogador "+player.getName()+" saiu do jogo!"));
     }
 }

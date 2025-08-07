@@ -1,0 +1,23 @@
+expurgo: false
+limite: 3
+nexus:
+  guerreiro: ""
+  ceifador: ""
+  vida: ""
+  mares: ""
+  barbaro: ""
+  fazendeiro: ""
+  espiao: ""
+  arqueiro: ""
+  cacador: ""
+  tempestade: ""
+  mineiro: ""
+  fenix: ""
+  protetor: ""
+  hulk: ""
+  sculk: ""
+  pescador: ""
+  flash: ""
+  mago: ""
+  ladrao: ""
+  domador: ""
