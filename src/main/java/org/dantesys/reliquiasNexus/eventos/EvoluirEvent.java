@@ -35,7 +35,11 @@ import java.util.UUID;
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 
 public class EvoluirEvent implements Listener {
-    FileConfiguration config = ReliquiasNexus.getPlugin(ReliquiasNexus.class).getConfig();
+    private final ReliquiasNexus plugin;
+
+    public EvoluirEvent(ReliquiasNexus plugin) {
+        this.plugin = plugin;
+    }
     public void tentarEvoluir(Player player, ItemStack nexusItem, int levelAtual,int slot) {
         ItemMeta meta = nexusItem.getItemMeta();
         PersistentDataContainer data = meta.getPersistentDataContainer();
@@ -564,14 +568,15 @@ public class EvoluirEvent implements Listener {
                             ItemStack p = pinv.getItemInOffHand();
                             if(p.getPersistentDataContainer().has(NEXUS.key,PersistentDataType.STRING)){
                                 String pnome = p.getPersistentDataContainer().get(NEXUS.key,PersistentDataType.STRING);
-                                if(p.equals("protetor")){
+                                if(pnome.equals("protetor")){
                                     player.sendMessage("Você não pode roubar de quem tem a reliquia do protetor!");
                                 }else{
                                     int escolhido = rd.nextInt(0,pinv.getContents().length);
                                     roubar = pinv.getItem(escolhido);
                                     if(roubar!=null && !roubar.isEmpty()){
-                                        if(roubar.getPersistentDataContainer().has(NEXUS.key,PersistentDataType.STRING) && config.getBoolean("expurgo")){
-                                            if(config.getBoolean("expurgo")){
+                                        boolean expurgo = ReliquiasNexus.getNexusConfig().getBoolean("expurgo");
+                                        if(roubar.getPersistentDataContainer().has(NEXUS.key,PersistentDataType.STRING)){
+                                            if(expurgo){
                                                 PersistentDataContainer container = player.getPersistentDataContainer();
                                                 String rnome = roubar.getPersistentDataContainer().get(NEXUS.key,PersistentDataType.STRING);
                                                 roubar.getItemMeta().getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,player.getUniqueId().toString());

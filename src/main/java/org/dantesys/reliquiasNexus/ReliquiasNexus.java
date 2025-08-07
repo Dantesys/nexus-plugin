@@ -162,6 +162,20 @@ public final class ReliquiasNexus extends JavaPlugin {
             }
             return Command.SINGLE_SUCCESS;
         }));
+        root.then(Commands.literal("troca-cancelar").executes(ctx -> {
+            final CommandSender sender = ctx.getSource().getSender();
+            if(ctx.getSource().getExecutor() instanceof Player player){
+                Troca t = trocas.remove(player.getUniqueId());
+                Player p = Bukkit.getPlayer(t.uuid());
+                if(p!=null){
+                    p.sendMessage("§cSeu pedido de troca para "+player.getName()+" foi cancelaro!");
+                }
+                sender.sendMessage("§cVocê cancelou o pedido de troca!");
+            }else{
+                sender.sendMessage("§cApenas jogadores podem fazer cancelar trocas!");
+            }
+            return Command.SINGLE_SUCCESS;
+        }));
         root.then(Commands.literal("expurgo").executes(ctx -> {
             boolean expurgo = config.getBoolean("expurgo");
             String msg = "§r§2O servidor está seguto!";
@@ -320,7 +334,7 @@ public final class ReliquiasNexus extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new LimitadorEvent(), this);
         getServer().getPluginManager().registerEvents(new PassivaEvent(), this);
         getServer().getPluginManager().registerEvents(new PerdeuEvent(), this);
-        getServer().getPluginManager().registerEvents(new EvoluirEvent(), this);
+        getServer().getPluginManager().registerEvents(new EvoluirEvent(this), this);
         getServer().getPluginManager().registerEvents(new SpecialEvent(), this);
         getServer().getConsoleSender().sendMessage("§2[Nexus]: Plugin Ativado!");
     }
@@ -331,6 +345,9 @@ public final class ReliquiasNexus extends JavaPlugin {
     }
     public static FileConfiguration getNexusConfig(){
         return config;
+    }
+    public static void setConfigSave(String path,Object value){
+        config.set(path,value);
     }
     public static void saiu(Player p){
         Troca t = trocas.remove(p.getUniqueId());
