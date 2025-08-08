@@ -7,7 +7,6 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -392,7 +391,7 @@ public class EvoluirEvent implements Listener {
                                 Location loc = player.getLocation();
                                 usos++;
                                 Component comp = player.playerListName();
-                                Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class),
+                                Temporizador timer = new Temporizador(plugin,
                                         9+l,
                                         () -> {
                                             player.sendActionBar(Component.text("Habilidade do Nexus do Espião Ativado!"));
@@ -568,7 +567,7 @@ public class EvoluirEvent implements Listener {
                             ItemStack p = pinv.getItemInOffHand();
                             if(p.getPersistentDataContainer().has(NEXUS.key,PersistentDataType.STRING)){
                                 String pnome = p.getPersistentDataContainer().get(NEXUS.key,PersistentDataType.STRING);
-                                if(pnome.equals("protetor")){
+                                if(pnome!=null && pnome.equals("protetor")){
                                     player.sendMessage("Você não pode roubar de quem tem a reliquia do protetor!");
                                 }else{
                                     int escolhido = rd.nextInt(0,pinv.getContents().length);
@@ -580,8 +579,8 @@ public class EvoluirEvent implements Listener {
                                                 PersistentDataContainer container = player.getPersistentDataContainer();
                                                 String rnome = roubar.getPersistentDataContainer().get(NEXUS.key,PersistentDataType.STRING);
                                                 roubar.getItemMeta().getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,player.getUniqueId().toString());
-                                                config.set("nexus."+rnome,player.getUniqueId().toString());
-                                                ReliquiasNexus.getPlugin(ReliquiasNexus.class).saveConfig();
+                                                ReliquiasNexus.setConfigSave("nexus."+rnome,player.getUniqueId().toString());
+                                                plugin.saveConfig();
                                                 int qtd = container.getOrDefault(QTD.key, PersistentDataType.INTEGER,1);
                                                 qtd++;
                                                 container.set(QTD.key, PersistentDataType.INTEGER,qtd);
@@ -623,7 +622,7 @@ public class EvoluirEvent implements Listener {
                             }
                         }
                         Nexus n = ItemsRegistro.getFromNome(nome);
-                        if(n!=null && roubar!=null && !roubar.isEmpty()){
+                        if(n!=null && roubar!=null && !roubar.isEmpty() && stack!=null){
                             BundleMeta meta = (BundleMeta) stack.getItemMeta();
                             meta.addItem(roubar);
                             stack.setItemMeta(meta);

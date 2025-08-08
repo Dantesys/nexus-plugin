@@ -2,7 +2,6 @@ package org.dantesys.reliquiasNexus.eventos;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -25,7 +24,10 @@ import java.util.*;
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 
 public class LimitadorEvent implements Listener {
-    FileConfiguration config = ReliquiasNexus.getPlugin(ReliquiasNexus.class).getConfig();
+    private final ReliquiasNexus plugin;
+    public LimitadorEvent(ReliquiasNexus plugin){
+        this.plugin=plugin;
+    }
     private final Map<UUID, List<ItemStack>> reliquiasSalvas = new HashMap<>();
     public static void checkLimit(Player player){
         if(passou(player)){
@@ -38,7 +40,8 @@ public class LimitadorEvent implements Listener {
         PersistentDataContainer container = player.getPersistentDataContainer();
         if(container.has(QTD.key, PersistentDataType.INTEGER)){
             int qtd = container.getOrDefault(QTD.key, PersistentDataType.INTEGER,0);
-            return qtd > 3;
+            int limite = ReliquiasNexus.getNexusConfig().getInt("limite");
+            return qtd > limite;
         }
         return false;
     }
@@ -66,8 +69,8 @@ public class LimitadorEvent implements Listener {
                         data = meta.getPersistentDataContainer();
                         data.set(DONO.key,PersistentDataType.STRING,player.getUniqueId().toString());
                         playerData.set(QTD.key,PersistentDataType.INTEGER,qtd);
-                        config.set("nexus."+nome,player.getUniqueId().toString());
-                        ReliquiasNexus.getPlugin(ReliquiasNexus.class).saveConfig();
+                        ReliquiasNexus.setConfigSave("nexus."+nome,player.getUniqueId().toString());
+                        plugin.saveConfig();
                         checkLimit(player);
                     }
                 }
@@ -85,12 +88,12 @@ public class LimitadorEvent implements Listener {
                 PersistentDataContainer data = meta.getPersistentDataContainer();
                 if(data.has(NEXUS.key,PersistentDataType.STRING)){
                     Player assasino = player.getKiller();
-                    boolean expurgo = config.getBoolean("expurgo");
+                    boolean expurgo = ReliquiasNexus.getNexusConfig().getBoolean("expurgo");
                     if(assasino!=null && expurgo){
                         String nome = data.get(NEXUS.key,PersistentDataType.STRING);
                         data.set(DONO.key,PersistentDataType.STRING,assasino.getUniqueId().toString());
-                        config.set("nexus."+nome,assasino.getUniqueId().toString());
-                        ReliquiasNexus.getPlugin(ReliquiasNexus.class).saveConfig();
+                        ReliquiasNexus.setConfigSave("nexus."+nome,assasino.getUniqueId().toString());
+                        plugin.saveConfig();
                         assasino.getInventory().addItem(item);
                         int qa = assasino.getPersistentDataContainer().getOrDefault(QTD.key,PersistentDataType.INTEGER,0);
                         qa++;
@@ -127,8 +130,8 @@ public class LimitadorEvent implements Listener {
                     if(data.has(NEXUS.key,PersistentDataType.STRING)){
                         String nome = data.get(NEXUS.key,PersistentDataType.STRING);
                         data.set(DONO.key,PersistentDataType.STRING,"");
-                        config.set("nexus."+nome,"");
-                        ReliquiasNexus.getPlugin(ReliquiasNexus.class).saveConfig();
+                        ReliquiasNexus.setConfigSave("nexus."+nome,"");
+                        plugin.saveConfig();
                     }
                 }
             });
@@ -147,7 +150,7 @@ public class LimitadorEvent implements Listener {
         List<ItemStack> reliquias = reliquiasSalvas.remove(player.getUniqueId());
 
         if (reliquias != null) {
-            Bukkit.getScheduler().runTaskLater(ReliquiasNexus.getPlugin(ReliquiasNexus.class), () -> {
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 for (ItemStack item : reliquias) {
                     player.getInventory().addItem(item);
                 }

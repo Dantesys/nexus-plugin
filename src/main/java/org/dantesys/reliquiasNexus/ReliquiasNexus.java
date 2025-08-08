@@ -330,17 +330,18 @@ public final class ReliquiasNexus extends JavaPlugin {
         }))));
         LiteralCommandNode<CommandSourceStack> buildCommand = root.build();
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> commands.registrar().register(buildCommand));
-        getServer().getPluginManager().registerEvents(new JoinQuitEvent(), this);
-        getServer().getPluginManager().registerEvents(new LimitadorEvent(), this);
+        getServer().getPluginManager().registerEvents(new JoinQuitEvent(this), this);
+        getServer().getPluginManager().registerEvents(new LimitadorEvent(this), this);
         getServer().getPluginManager().registerEvents(new PassivaEvent(), this);
         getServer().getPluginManager().registerEvents(new PerdeuEvent(), this);
         getServer().getPluginManager().registerEvents(new EvoluirEvent(this), this);
-        getServer().getPluginManager().registerEvents(new SpecialEvent(), this);
+        getServer().getPluginManager().registerEvents(new SpecialEvent(this), this);
         getServer().getConsoleSender().sendMessage("§2[Nexus]: Plugin Ativado!");
     }
 
     @Override
     public void onDisable() {
+        saveConfig();
         getServer().getConsoleSender().sendMessage("§4[Nexus]: Plugin Desativado!");
     }
     public static FileConfiguration getNexusConfig(){

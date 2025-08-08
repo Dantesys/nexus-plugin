@@ -2,7 +2,6 @@ package org.dantesys.reliquiasNexus.eventos;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.NamespacedKey;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -23,7 +22,10 @@ import java.util.Random;
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 
 public class JoinQuitEvent implements Listener {
-    FileConfiguration config = ReliquiasNexus.getPlugin(ReliquiasNexus.class).getConfig();
+    private final ReliquiasNexus plugin;
+    public JoinQuitEvent(ReliquiasNexus plugin){
+        this.plugin=plugin;
+    }
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
@@ -34,13 +36,13 @@ public class JoinQuitEvent implements Listener {
         player.sendActionBar(Component.text("Special OK"));
         if(qtd==0 && novato){
             container.set(new NamespacedKey("nexus_novato","novato"),PersistentDataType.BOOLEAN,false);
-            List<Nexus> reliquias = ItemsRegistro.getValidReliquia(config);
+            List<Nexus> reliquias = ItemsRegistro.getValidReliquia(ReliquiasNexus.getNexusConfig());
             Random rng = new Random();
             int escolhido = rng.nextInt(reliquias.size());
             Nexus n = reliquias.get(escolhido);
             String nome = n.getNome();
-            config.set("nexus."+nome,player.getUniqueId().toString());
-            ReliquiasNexus.getPlugin(ReliquiasNexus.class).saveConfig();
+            ReliquiasNexus.setConfigSave("nexus."+nome,player.getUniqueId().toString());
+            plugin.saveConfig();
             container.set(QTD.key,PersistentDataType.INTEGER,1);
             int level =1;
             NamespacedKey key = NexusKeys.getKey(nome);

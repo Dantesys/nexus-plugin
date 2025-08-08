@@ -32,6 +32,10 @@ import java.util.*;
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 
 public class SpecialEvent implements Listener {
+    private final ReliquiasNexus plugin;
+    public SpecialEvent(ReliquiasNexus plugin){
+        this.plugin=plugin;
+    }
     @EventHandler
     public void special(PlayerInteractEvent event){
         Player player = event.getPlayer();
@@ -161,7 +165,7 @@ public class SpecialEvent implements Listener {
         final Vector direction = location.getDirection().normalize();
         final double[] tp = {0};
         final List<LivingEntity> atingidos = new ArrayList<>();
-        Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 10,
+        Temporizador timer = new Temporizador(plugin, 10,
                 ()->{
                 },()-> {
         },(t)->{
@@ -222,7 +226,7 @@ public class SpecialEvent implements Listener {
         final double damage = 5+l;
         Material finalM = getPlanta();
         final List<LivingEntity> atingidos = new ArrayList<>();
-        Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 10,
+        Temporizador timer = new Temporizador(plugin, 10,
                 ()->{
                 },()-> {
         },(t)->{
@@ -265,7 +269,7 @@ public class SpecialEvent implements Listener {
         final Vector direction = location.getDirection().normalize();
         final double[] tp = {0};
         final List<LivingEntity> atingidos = new ArrayList<>();
-        Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 10,
+        Temporizador timer = new Temporizador(plugin, 10,
                 ()->{
                 },()-> {
         },(t)->{
@@ -307,7 +311,7 @@ public class SpecialEvent implements Listener {
         final Location location = player.getLocation();
         final World world = player.getWorld();
         final List<LivingEntity> atingidos = new ArrayList<>();
-        Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 10,
+        Temporizador timer = new Temporizador(plugin, 10,
                 ()->{
                 },()-> {
         },(t)->{
@@ -353,7 +357,7 @@ public class SpecialEvent implements Listener {
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(CACADOR.key,PersistentDataType.INTEGER,1);
         item.setLevel(l);
-        Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 10+l,
+        Temporizador timer = new Temporizador(plugin, 10+l,
                 ()->player.sendActionBar(Component.text("Modo Minigum Ativado!")),
                 ()->{},
                 (t)->{
@@ -380,7 +384,7 @@ public class SpecialEvent implements Listener {
         final Location location = player.getLocation();
         final World world = player.getWorld();
         final List<LivingEntity> atingidos = new ArrayList<>();
-        Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 10,
+        Temporizador timer = new Temporizador(plugin, 10,
                 ()->{
                 },()-> {
         },(t)->{
@@ -422,7 +426,7 @@ public class SpecialEvent implements Listener {
         final double damage = 5+l;
         Material finalM = getMinerio();
         final List<LivingEntity> atingidos = new ArrayList<>();
-        Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 10,
+        Temporizador timer = new Temporizador(plugin, 10,
                 ()->{
                 },()-> {
         },(t)->{
@@ -477,7 +481,7 @@ public class SpecialEvent implements Listener {
         final World world = player.getWorld();
         final double damage = 5+l;
         final List<LivingEntity> atingidos = new ArrayList<>();
-        Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 10,
+        Temporizador timer = new Temporizador(plugin, 10,
                 ()->{
                 },()-> {
         },(t)->{
@@ -515,7 +519,7 @@ public class SpecialEvent implements Listener {
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l=dataPlayer.getOrDefault(PROTETOR.key,PersistentDataType.INTEGER,1);
         item.setLevel(l);
-        Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 9+l,
+        Temporizador timer = new Temporizador(plugin, 9+l,
                 () -> {
                     player.sendActionBar(Component.text("Habilidade do Nexus do Protetor Ativado!"));
                     dataPlayer.set(PROTECAO.key,PersistentDataType.BOOLEAN,true);
@@ -540,7 +544,7 @@ public class SpecialEvent implements Listener {
         final List<LivingEntity> atingidos = new ArrayList<>();
         double baseD=player.getAttribute(Attribute.ATTACK_DAMAGE).getBaseValue();
         double baseT=player.getAttribute(Attribute.SCALE).getBaseValue();
-        Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 10,
+        Temporizador timer = new Temporizador(plugin, 10,
                 ()->{},()-> {},(t)->{
             double area = (double) finalRange /(t.getSegundosRestantes());
             for (double i = 0; i <= 2*Math.PI*area; i += 0.05) {
@@ -569,7 +573,7 @@ public class SpecialEvent implements Listener {
             }
         });
         timer.scheduleTimer(1L);
-        Temporizador timer2 = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 10+l,
+        Temporizador timer2 = new Temporizador(plugin, 10+l,
                 ()->{
                     player.sendActionBar(Component.text("Modo Hulk Ativado!"));
                     player.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(baseD+l);
@@ -594,7 +598,7 @@ public class SpecialEvent implements Listener {
         final Location location = player.getLocation();
         final Vector direction = location.getDirection().normalize();
         final double[] tp = {0};
-        Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 10,
+        Temporizador timer = new Temporizador(plugin, 10,
                 ()->{
                 },()-> {
         },(t)->{
@@ -636,7 +640,7 @@ public class SpecialEvent implements Listener {
         final Vector direction = location.getDirection().normalize();
         final double[] tp = {0};
         final List<LivingEntity> atingidos = new ArrayList<>();
-        Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 10,
+        Temporizador timer = new Temporizador(plugin, 10,
                 ()->{
                 },()-> {
         },(t)->{
@@ -775,7 +779,7 @@ public class SpecialEvent implements Listener {
                 final Location location = player.getLocation();
                 final Vector direction = location.getDirection().normalize();
                 final double[] tp = {0};
-                Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 10,
+                Temporizador timer = new Temporizador(plugin, 10,
                         ()->{
                         },()-> {
                 },(t)->{
@@ -819,7 +823,7 @@ public class SpecialEvent implements Listener {
                 final Location location = player.getLocation();
                 final World world = player.getWorld();
                 final List<LivingEntity> atingidos = new ArrayList<>();
-                Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 10,
+                Temporizador timer = new Temporizador(plugin, 10,
                         ()->{
                         },()-> {
                 },(t)->{
@@ -858,7 +862,7 @@ public class SpecialEvent implements Listener {
                 final Location location = player.getLocation();
                 final World world = player.getWorld();
                 final List<LivingEntity> atingidos = new ArrayList<>();
-                Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 10,
+                Temporizador timer = new Temporizador(plugin, 10,
                         ()->{
                         },()-> {
                 },(t)->{
@@ -965,7 +969,7 @@ public class SpecialEvent implements Listener {
                     int tempo = 120;
                     player.getInventory().setItemInMainHand(item);
                     player.getInventory().setItemInOffHand(item2);
-                    Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class),
+                    Temporizador timer = new Temporizador(plugin,
                             tempo,
                             () -> {
                                 player.sendActionBar(Component.text("Habilidade do Nexus da Vida Ativado!"));

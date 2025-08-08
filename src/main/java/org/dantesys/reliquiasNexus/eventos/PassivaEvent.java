@@ -92,7 +92,7 @@ public class PassivaEvent implements Listener {
         });
     }
     private void aplicaEfeito(PersistentDataContainerView data, Player player){
-        if(data.has(NEXUS.key)){
+        if(data.has(NEXUS.key,PersistentDataType.STRING)){
             String nome = data.get(NEXUS.key,PersistentDataType.STRING);
             Nexus nexus = ItemsRegistro.getFromNome(nome!=null?nome:"");
             if(nexus!=null){
