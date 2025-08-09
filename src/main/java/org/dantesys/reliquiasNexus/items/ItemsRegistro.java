@@ -8,6 +8,7 @@ import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemRarity;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffectType;
@@ -39,6 +40,7 @@ public class ItemsRegistro {
     public static Nexus mago;
     public static Nexus ladrao;
     public static Nexus domador;
+    public static Nexus livro;
     private static final List<Nexus> reliquias = new ArrayList<>();
     public static void init(){
         createGuerreiro();
@@ -81,6 +83,7 @@ public class ItemsRegistro {
         reliquias.add(ladrao);
         createDomador();
         reliquias.add(domador);
+        createLivro();
     }
     private static void createGuerreiro(){
         List<PotionEffectType> efeitos = new ArrayList<>();
@@ -220,7 +223,7 @@ public class ItemsRegistro {
         efeitos.add(PotionEffectType.JUMP_BOOST);
         ItemStack item = new ItemStack(Material.MACE,1);
         ItemMeta meta = item.getItemMeta();
-        meta.displayName(Component.text("§6Nexus do Caçador"));
+        meta.displayName(Component.text("§6Nexus da Tempestade"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -381,6 +384,19 @@ public class ItemsRegistro {
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
         item.setItemMeta(meta);
         domador = new Nexus(item,efeitos,"domador", Attribute.ENTITY_INTERACTION_RANGE);
+    }
+    private static void createLivro(){
+        List<PotionEffectType> efeitos = new ArrayList<>();
+        ItemStack item = new ItemStack(Material.WRITTEN_BOOK,1);
+        BookMeta meta = (BookMeta) item.getItemMeta();
+        meta.displayName(Component.text("§6Tutorial"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.setItemModel(Material.KNOWLEDGE_BOOK.getKey());
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"nexus");
+        item.setItemMeta(meta);
+        livro = new Nexus(item,efeitos,"livro", Attribute.SUBMERGED_MINING_SPEED);
     }
     public static List<Nexus> getValidReliquia(FileConfiguration config){
         List<Nexus> validos = new ArrayList<>();

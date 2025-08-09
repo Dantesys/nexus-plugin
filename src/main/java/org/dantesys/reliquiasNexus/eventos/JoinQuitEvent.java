@@ -56,6 +56,7 @@ public class JoinQuitEvent implements Listener {
             meta.getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,player.getUniqueId().toString());
             stack.setItemMeta(meta);
             player.getInventory().addItem(stack);
+            player.getInventory().addItem(ItemsRegistro.livro.getItem(1));
             event.joinMessage(Component.text("§2 Bem-vindo ao jogo, Jogador "+player.getName()));
             player.sendMessage(Component.text("§2 Você recebeu a reliquia "+nome));
         }else{

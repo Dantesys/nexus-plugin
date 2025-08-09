@@ -83,8 +83,8 @@ public final class ReliquiasNexus extends JavaPlugin {
                     String nome = data.get(NEXUS.key,PersistentDataType.STRING);
                     Troca t = new Troca(player.getUniqueId(),nome);
                     trocas.put(p.getUniqueId(),t);
-                    p.sendMessage("§0Você recebeu 1 pedido de troca!");
-                    p.sendMessage("§0O jogador "+player.getName()+" está querendo trocar o nexus "+nome+"!");
+                    p.sendMessage("§rVocê recebeu 1 pedido de troca!");
+                    p.sendMessage("§rO jogador "+player.getName()+" está querendo trocar o nexus "+nome+"!");
                     p.sendMessage("§2Use o comando /nexus troca-aceitar para aceitar o pedido de troca!");
                     p.sendMessage("§cUse o comando /nexus troca-cancelar para cancelar o pedido de troca!");
                     sender.sendMessage("§2Pedido de troca enviado com sucesso, aguarde "+p.getName()+" aceitar ou cancelar a troca!");
@@ -142,8 +142,8 @@ public final class ReliquiasNexus extends JavaPlugin {
                                                 config.set("nexus."+nome,p.getUniqueId().toString());
                                                 inv.remove(s);
                                                 inv.addItem(aux);
-                                                p.sendMessage("§0Troca feita com sucesso!");
-                                                sender.sendMessage("§0Troca feita com sucesso!");
+                                                p.sendMessage("§2Troca feita com sucesso!");
+                                                sender.sendMessage("§2Troca feita com sucesso!");
                                                 break;
                                             }
                                         }
@@ -352,6 +352,7 @@ public final class ReliquiasNexus extends JavaPlugin {
     }
     public static void saiu(Player p){
         Troca t = trocas.remove(p.getUniqueId());
+        if(t==null)return;
         Player player = Bukkit.getPlayer(t.uuid());
         if(player!=null){
             player.sendMessage("§cO jogador"+p.getName()+" saiu sem aceitar ou cancelar a troca!");

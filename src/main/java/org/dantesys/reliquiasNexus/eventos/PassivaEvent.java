@@ -37,30 +37,12 @@ public class PassivaEvent implements Listener {
                     conteiner.set(SPECIAL.key, PersistentDataType.INTEGER,0);
                 }
                 PlayerInventory pinv = player.getInventory();
-                PersistentDataContainerView data = pinv.getItemInMainHand().getPersistentDataContainer();
-                aplicaEfeito(data,player);
-                data = pinv.getItemInOffHand().getPersistentDataContainer();
-                aplicaEfeito(data,player);
-                ItemStack stack = pinv.getHelmet();
-                if(stack!=null){
-                    data = pinv.getItemInOffHand().getPersistentDataContainer();
-                    aplicaEfeito(data,player);
-                }
-                stack = pinv.getChestplate();
-                if(stack!=null){
-                    data = pinv.getItemInOffHand().getPersistentDataContainer();
-                    aplicaEfeito(data,player);
-                }
-                stack = pinv.getLeggings();
-                if(stack!=null){
-                    data = pinv.getItemInOffHand().getPersistentDataContainer();
-                    aplicaEfeito(data,player);
-                }
-                stack = pinv.getBoots();
-                if(stack!=null){
-                    data = pinv.getItemInOffHand().getPersistentDataContainer();
-                    aplicaEfeito(data,player);
-                }
+                pinv.forEach(stack -> {
+                    if(stack!=null){
+                        PersistentDataContainerView data = stack.getPersistentDataContainer();
+                        aplicaEfeito(data,player);
+                    }
+                });
             });
         }
         Bukkit.getServer().getOnlinePlayers().forEach(player -> {

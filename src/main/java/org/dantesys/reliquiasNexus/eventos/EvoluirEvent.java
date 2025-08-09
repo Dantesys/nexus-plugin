@@ -598,8 +598,35 @@ public class EvoluirEvent implements Listener {
                                         player.sendMessage("Você não conseguiu roubar nada!");
                                     }
                                 }
+                            }else{
+                                int escolhido = rd.nextInt(0,pinv.getContents().length);
+                                roubar = pinv.getItem(escolhido);
+                                if(roubar!=null && !roubar.isEmpty()){
+                                    boolean expurgo = ReliquiasNexus.getNexusConfig().getBoolean("expurgo");
+                                    if(roubar.getPersistentDataContainer().has(NEXUS.key,PersistentDataType.STRING)){
+                                        if(expurgo){
+                                            PersistentDataContainer container = player.getPersistentDataContainer();
+                                            String rnome = roubar.getPersistentDataContainer().get(NEXUS.key,PersistentDataType.STRING);
+                                            roubar.getItemMeta().getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,player.getUniqueId().toString());
+                                            ReliquiasNexus.setConfigSave("nexus."+rnome,player.getUniqueId().toString());
+                                            plugin.saveConfig();
+                                            int qtd = container.getOrDefault(QTD.key, PersistentDataType.INTEGER,1);
+                                            qtd++;
+                                            container.set(QTD.key, PersistentDataType.INTEGER,qtd);
+                                            pinv.setItem(escolhido,new ItemStack(Material.AIR));
+                                            player.sendMessage("Você roubou uma reliquia!");
+                                            LimitadorEvent.checkLimit(player);
+                                        }else{
+                                            stack=null;
+                                            player.sendMessage("Você não pode roubar uma reliquia fora do expurgo!");
+                                        }
+                                    }else{
+                                        player.sendMessage("Você roubou uma item!");
+                                    }
+                                }else{
+                                    player.sendMessage("Você não conseguiu roubar nada!");
+                                }
                             }
-
                         }else{
                             EntityEquipment equipa = furto.getEquipment();
                             if (equipa != null) {

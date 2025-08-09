@@ -6,6 +6,7 @@ import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -16,6 +17,7 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
@@ -117,7 +119,26 @@ public class SpecialEvent implements Listener {
             }
         }
         ItemStack stack = player.getInventory().getItemInMainHand();
-        if (stack.getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)) {
+        if(stack.getPersistentDataContainer().has(DONO.key, PersistentDataType.STRING) && stack.getType()==Material.WRITTEN_BOOK){
+            String d = stack.getPersistentDataContainer().get(DONO.key, PersistentDataType.STRING);
+            if(d!=null && d.equals("nexus")){
+                BookMeta meta = (BookMeta) stack.getItemMeta();
+                meta.setGeneration(BookMeta.Generation.ORIGINAL);
+                meta.pages(Collections.emptyList());
+                meta.addPages(Component.text("Todas as Reliquias precisam de Xp para evoluir\nAs que possuem Special Manual para ativar tem que está agachado"));
+                ConfigurationSection secao = ReliquiasNexus.getNexusConfig().getConfigurationSection("nexus");
+                if(secao!=null){
+                    for(String nexus: secao.getKeys(false)){
+                        String uuidStr = ReliquiasNexus.getNexusConfig().getString("nexus."+nexus);
+                        if(uuidStr != null && uuidStr.equals(player.getUniqueId().toString())){
+                            meta.addPages(Component.text(getDesc(nexus)));
+                        }
+                    }
+                }
+                stack.setItemMeta(meta);
+            }
+        }
+        if(stack.getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)) {
             String nome = stack.getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING);
             if (nome != null && nome.equals("mineiro")) {
                 Block bloco = event.getClickedBlock();
@@ -149,6 +170,32 @@ public class SpecialEvent implements Listener {
                 }
             }
         }
+    }
+    private String getDesc(String nome){
+        String desc="";
+        switch (nome){
+            case "guerreiro" -> desc="§l§6Relíquia do Guerreiro\n§r§0Special (Manual):\nUm corte especial que atravessa blocos chega até 50 blocos de distância!\nPara evoluir precisa derrotar Monstros ou Bosses";
+            case "ceifador" -> desc="§l§6Relíquia do Ceifador\n§r§0Special (Manual):\nUm ataque especial que atravessa blocos chega até 50 blocos de distância e pode coletar a alma dos fracos!\nPara evoluir precisa roubar vida!";
+            case "vida" -> desc="§l§6Relíquia da Vida\n§r§0Special (Automatico):\nUma segunda vida!\nPara evoluir precisa recuperar vida";
+            case "mares" -> desc="§l§6Relíquia dos Mares\n§r§0Special (Manual):\nCria uma onda em area de vacuo removendo a respiração de todos!\nPara evoluir precisa derrotar criaturas marinha, monstros ou bosses";
+            case "barbaro" -> desc="§l§6Relíquia do Barbaro\n§r§0Special (Manual):\nAtiva um efeito de furia!\nPara evoluir precisa derrotar Monstros ou Bosses";
+            case "fazendeiro" -> desc="§l§6Relíquia do Fazendeiro\n§r§0Special (Manual):\nCria uma onda em area que transforma parte da vida dos inimigos em alimento!\nPara evoluir precisa colher plantações";
+            case "espiao" -> desc="§l§6Relíquia do Espião\n§r§0Special (Manual):\nVocê separa sua alma do seu corpo para espiar lugares secreto!\nPara evoluir precisa usar a habilidade";
+            case "arqueiro" -> desc="§l§6Relíquia do Arqueiro\n§r§0Special (Manual):\nCria e dispara uma flecha com uma velocidade de uma bala!\nPara evoluir precisa acerta a flecha em monstros ou bosses";
+            case "cacador" -> desc="§l§6Relíquia do Caçador\n§r§0Special (Manual):\nCria e dispara uma sequencia de flechas!\nPara evoluir precisa acerta a flecha em monstros ou bosses";
+            case "tempestade" -> desc="§l§6Relíquia da Tempestade\n§r§0Special (Manual):\nCria uma tempestade dee raios a sua volta!\nPara evoluir precisa derrotar Monstros ou Bosses";
+            case "mineiro" -> desc="§l§6Relíquia do Mineiro\n§r§0Special (Manual):\nCria uma onda em area que transforma parte da vida dos enemigos em minerio!\nPara evoluir precisa minerar minerios";
+            case "fenix" -> desc="§l§6Relíquia da Fenix\n§r§0Special (Manual):\nCria uma onda de calor que queima os inimigos proximos!\nPara evoluir precisa voar com fogos de artificios";
+            case "protetor" -> desc="§l§6Relíquia do Protetor\n§r§0Special (Manual):\nCria um campo de reflexão que faz seus atacantes receberem o dano de volta!\nPara evoluir precisa se defender usando o escudo";
+            case "hulk" -> desc="§l§6Relíquia do Hulk\n§r§0Special (Manual):\nCria uma explosão e você fica maior e mais forte!\nPara evoluir precisa receber dano de monstros ou bosses";
+            case "sculk" -> desc="§l§6Relíquia do Sculk\n§r§0Special (Manual):\nCria uma explosão sonica igual a do Warden!\nPara evoluir precisa ser atacado pelo Warden e sobreviver";
+            case "pescador" -> desc="§l§6Relíquia do Pescador\n§r§0Special (Manual):\nCria um peixe a partir da vida no alvo!\nPara evoluir precisa acertar o anzol em animais marinhos";
+            case "flash" -> desc="§l§6Relíquia do Flash\n§r§0Special (Manual):\nUm teleporte para alguns blocos a frente!\nPara evoluir precisa usar a habilidade";
+            case "mago" -> desc="§l§6Relíquia do Mago\n§r§0Special (Manual):\nA habilidade pode variar dependendo do slot que ele vai esta!\nPara evoluir precisa beber poções";
+            case "ladrao" -> desc="§l§6Relíquia do Ladrão\n§r§0Special (Manual):\nVocê foge para seu ponto de spawn!\nPara evoluir precisa roubar itens com a reliquia";
+            case "domador" -> desc="§l§6Relíquia do Domador\n§r§0Special (Manual):\nVocê cria um lobo companheiro!\nPara evoluir precisa domesticas animais/pets";
+        }
+        return desc;
     }
     private void barbaro(Player player,Nexus item){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
@@ -402,13 +449,14 @@ public class SpecialEvent implements Listener {
                     atingidos.add(vivo);
                     Location vloc = vivo.getLocation();
                     World vworld = vivo.getWorld();
-                    vworld.strikeLightning(vloc);
                     if(vivo instanceof Player p){
                         if(p!=player){
                             vivo.damage(damage);
+                            vworld.strikeLightning(vloc);
                         }
                     }else{
                         vivo.damage(damage);
+                        vworld.strikeLightning(vloc);
                     }
                 }
                 pressf.remove(surdo);
