@@ -26,6 +26,7 @@ public class PassivaEvent implements Listener {
         if(tick%20==0){
             Bukkit.getServer().getOnlinePlayers().forEach(player -> {
                 PersistentDataContainer conteiner = player.getPersistentDataContainer();
+                LimitadorEvent.checkLimit(player);
                 if(conteiner.has(SPECIAL.key,PersistentDataType.INTEGER)){
                     int tempo = conteiner.getOrDefault(SPECIAL.key,PersistentDataType.INTEGER,0);
                     if(tempo>0){

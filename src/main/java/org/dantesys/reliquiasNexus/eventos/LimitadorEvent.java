@@ -85,25 +85,27 @@ public class LimitadorEvent implements Listener {
         for(ItemStack item: inv.getContents()){
             if(item!=null){
                 ItemMeta meta = item.getItemMeta();
-                PersistentDataContainer data = meta.getPersistentDataContainer();
-                if(data.has(NEXUS.key,PersistentDataType.STRING)){
-                    Player assasino = player.getKiller();
-                    boolean expurgo = ReliquiasNexus.getNexusConfig().getBoolean("expurgo");
-                    if(assasino!=null && expurgo){
-                        String nome = data.get(NEXUS.key,PersistentDataType.STRING);
-                        data.set(DONO.key,PersistentDataType.STRING,assasino.getUniqueId().toString());
-                        ReliquiasNexus.setConfigSave("nexus."+nome,assasino.getUniqueId().toString());
-                        plugin.saveConfig();
-                        assasino.getInventory().addItem(item);
-                        int qa = assasino.getPersistentDataContainer().getOrDefault(QTD.key,PersistentDataType.INTEGER,0);
-                        qa++;
-                        assasino.getPersistentDataContainer().set(QTD.key,PersistentDataType.INTEGER,qa);
-                        checkLimit(player);
-                        event.getDrops().remove(item);
-                    }
-                    else{
-                        manterRelics.add(item);
-                        event.getDrops().remove(item);
+                if(meta!=null){
+                    PersistentDataContainer data = meta.getPersistentDataContainer();
+                    if(data.has(NEXUS.key,PersistentDataType.STRING)){
+                        Player assasino = player.getKiller();
+                        boolean expurgo = ReliquiasNexus.getNexusConfig().getBoolean("expurgo");
+                        if(assasino!=null && expurgo){
+                            String nome = data.get(NEXUS.key,PersistentDataType.STRING);
+                            data.set(DONO.key,PersistentDataType.STRING,assasino.getUniqueId().toString());
+                            ReliquiasNexus.setConfigSave("nexus."+nome,assasino.getUniqueId().toString());
+                            plugin.saveConfig();
+                            assasino.getInventory().addItem(item);
+                            int qa = assasino.getPersistentDataContainer().getOrDefault(QTD.key,PersistentDataType.INTEGER,0);
+                            qa++;
+                            assasino.getPersistentDataContainer().set(QTD.key,PersistentDataType.INTEGER,qa);
+                            checkLimit(player);
+                            event.getDrops().remove(item);
+                        }
+                        else{
+                            manterRelics.add(item);
+                            event.getDrops().remove(item);
+                        }
                     }
                 }
             }
