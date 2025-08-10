@@ -96,6 +96,62 @@ public final class ReliquiasNexus extends JavaPlugin {
             }
             return Command.SINGLE_SUCCESS;
         })));
+        root.then(Commands.literal("livro").executes(ctx -> {
+            final CommandSender sender = ctx.getSource().getSender();
+            if(ctx.getSource().getExecutor() instanceof Player player){
+                player.getInventory().addItem(ItemsRegistro.livro.getItem(1));
+                sender.sendMessage("§2Você recebeu o livro!");
+            }else{
+                sender.sendMessage("§cApenas jogadores podem receber o livro!");
+            }
+            return Command.SINGLE_SUCCESS;
+        }));
+        root.then(Commands.literal("evoluir").executes(ctx -> {
+            final CommandSender sender = ctx.getSource().getSender();
+            if(ctx.getSource().getExecutor() instanceof Player player){
+                ItemStack stack = player.getInventory().getItemInMainHand();
+                ItemMeta meta = stack.getItemMeta();
+                PersistentDataContainer data = meta.getPersistentDataContainer();
+                if(data.has(NEXUS.key,PersistentDataType.STRING)){
+                    EvoluirEvent evo = new EvoluirEvent(this);
+                    String nome = data.get(NEXUS.key,PersistentDataType.STRING);
+                    if(nome!=null){
+                        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+                        int level=switch (nome){
+                            case "barbaro" -> dataPlayer.getOrDefault(BARBARO.key,PersistentDataType.INTEGER,1);
+                            case "ceifador" -> dataPlayer.getOrDefault(CEIFADOR.key,PersistentDataType.INTEGER,1);
+                            case "fazendeiro" -> dataPlayer.getOrDefault(FAZENDEIRO.key,PersistentDataType.INTEGER,1);
+                            case "guerreiro" -> dataPlayer.getOrDefault(GUERREIRO.key,PersistentDataType.INTEGER,1);
+                            case "mares" -> dataPlayer.getOrDefault(MARES.key,PersistentDataType.INTEGER,1);
+                            case "vida" -> dataPlayer.getOrDefault(VIDA.key,PersistentDataType.INTEGER,1);
+                            case "espiao" -> dataPlayer.getOrDefault(ESPIAO.key,PersistentDataType.INTEGER,1);
+                            case "arqueiro" -> dataPlayer.getOrDefault(ARQUEIRO.key,PersistentDataType.INTEGER,1);
+                            case "cacador" -> dataPlayer.getOrDefault(CACADOR.key,PersistentDataType.INTEGER,1);
+                            case "tempestade" -> dataPlayer.getOrDefault(TEMPESTADE.key,PersistentDataType.INTEGER,1);
+                            case "mineiro" -> dataPlayer.getOrDefault(MINEIRO.key,PersistentDataType.INTEGER,1);
+                            case "fenix" -> dataPlayer.getOrDefault(FENIX.key,PersistentDataType.INTEGER,1);
+                            case "protetor" -> dataPlayer.getOrDefault(PROTETOR.key,PersistentDataType.INTEGER,1);
+                            case "hulk" -> dataPlayer.getOrDefault(HULK.key,PersistentDataType.INTEGER,1);
+                            case "sculk" -> dataPlayer.getOrDefault(SCULK.key,PersistentDataType.INTEGER,1);
+                            case "pescador" -> dataPlayer.getOrDefault(PESCADOR.key,PersistentDataType.INTEGER,1);
+                            case "flash" -> dataPlayer.getOrDefault(FLASH.key,PersistentDataType.INTEGER,1);
+                            case "mago" -> dataPlayer.getOrDefault(MAGO.key,PersistentDataType.INTEGER,1);
+                            case "ladrao" -> dataPlayer.getOrDefault(LADRAO.key,PersistentDataType.INTEGER,1);
+                            case "domador" -> dataPlayer.getOrDefault(DOMADOR.key,PersistentDataType.INTEGER,1);
+                            default -> 1;
+                        };
+                        evo.tentarEvoluir(player,stack,level,evo.getSlotOfItem(player,stack));
+                    }else{
+                        sender.sendMessage("§cVocê precisa estar segurando a reliquia para tentar evoluir!");
+                    }
+                }else{
+                    sender.sendMessage("§cVocê precisa estar segurando a reliquia para tentar evoluir!");
+                }
+            }else{
+                sender.sendMessage("§cApenas jogadores podem fazer evolução!");
+            }
+            return Command.SINGLE_SUCCESS;
+        }));
         root.then(Commands.literal("troca-aceitar").executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
             if(ctx.getSource().getExecutor() instanceof Player player){

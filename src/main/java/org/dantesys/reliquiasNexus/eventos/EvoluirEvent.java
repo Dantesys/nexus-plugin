@@ -48,7 +48,7 @@ public class EvoluirEvent implements Listener {
             if(nome!=null && !nome.isBlank()){
                 String condicao = podeEvoluir(player,nome,levelAtual);
                 int level = player.getLevel();
-                if(!condicao.isEmpty()){
+                if(condicao==null){
                     if(level>=levelAtual*10){
                         player.setLevel(player.getLevel()-(10*levelAtual));
                         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
@@ -159,22 +159,18 @@ public class EvoluirEvent implements Listener {
 
     }
     private String podeEvoluir(Player player, String nome,int level){
-        String condicao="";
+        String condicao=null;
         switch (nome){
             case "barbaro" -> {
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAOBARBARO.key, PersistentDataType.INTEGER, 0);
-                if(kills >= level){
-                    condicao="";
-                }else{
+                if(kills < level){
                     condicao="derrotar mais "+(level-kills)+" monstros ou bosses";
                 }
             }
             case "ceifador" -> {
                 double recuperacaoN=10*level;
                 double recuperacao = player.getPersistentDataContainer().getOrDefault(MISSAOCEIFADOR.key, PersistentDataType.DOUBLE, 0d);
-                if(recuperacao>=recuperacaoN){
-                    condicao="";
-                }else{
+                if(recuperacao<recuperacaoN){
                     int qtd = (int) ((recuperacaoN)-recuperacao);
                     condicao="roube mais "+qtd+" pontos de vida";
                 }
@@ -182,9 +178,7 @@ public class EvoluirEvent implements Listener {
             case "fazendeiro" -> {
                 int colheitasN = 5 * level;
                 int colheitas = player.getPersistentDataContainer().getOrDefault(MISSAOFAZENDEIRO.key, PersistentDataType.INTEGER, 0);
-                if(colheitas>=colheitasN){
-                    condicao="";
-                }else{
+                if(colheitas<colheitasN){
                     int qtd = colheitasN-colheitas;
                     condicao="colha mais "+qtd+" plantações";
                 }
@@ -192,72 +186,56 @@ public class EvoluirEvent implements Listener {
             case "guerreiro" -> {
                 int killsN = 5 * level;
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAOGUERREIRO.key, PersistentDataType.INTEGER, 0);
-                if(kills >= killsN){
-                    condicao="";
-                }else{
+                if(kills < killsN){
                     condicao="derrotar mais "+(killsN-kills)+" monstros ou bosses";
                 }
             }
             case "mares" -> {
                 int killsN = 10 * level;
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAOMARES.key, PersistentDataType.INTEGER, 0);
-                if(kills >= killsN){
-                    condicao="";
-                }else{
+                if(kills < killsN){
                     condicao="derrotar mais "+(killsN-kills)+" seres aquaticos, monstros ou bosses";
                 }
             }
             case "vida" -> {
                 double recuperacaoN=10*level;
                 double recuperacao = player.getPersistentDataContainer().getOrDefault(MISSAOVIDA.key, PersistentDataType.DOUBLE, 0d);
-                if(recuperacao>=recuperacaoN){
-                    condicao="";
-                }else{
+                if(recuperacao<recuperacaoN){
                     int qtd = (int) ((recuperacaoN)-recuperacao);
                     condicao="recupere mais "+qtd+" pontos de vida";
                 }
             }
             case "espiao" -> {
                 int hab = player.getPersistentDataContainer().getOrDefault(MISSAOESPIAO.key, PersistentDataType.INTEGER, 0);
-                if(hab >= level){
-                    condicao="";
-                }else{
+                if(hab < level){
                     condicao="use a habilidade mais "+(level-hab)+" vezes";
                 }
             }
             case "arqueiro" -> {
                 int killsN = 5 * level;
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAOARQUEIRO.key, PersistentDataType.INTEGER, 0);
-                if(kills >= killsN){
-                    condicao="";
-                }else{
+                if(kills < killsN){
                     condicao="atingir mais "+(killsN-kills)+" monstros ou bosses";
                 }
             }
             case "cacador" -> {
                 int killsN = 5 * level;
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAOCACADOR.key, PersistentDataType.INTEGER, 0);
-                if(kills >= killsN){
-                    condicao="";
-                }else{
+                if(kills < killsN){
                     condicao="atingir mais "+(killsN-kills)+" monstros ou bosses";
                 }
             }
             case "tempestade" -> {
                 int killsN = 5 * level;
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAOTEMPESTADE.key, PersistentDataType.INTEGER, 0);
-                if(kills >= killsN){
-                    condicao="";
-                }else{
+                if(kills < killsN){
                     condicao="derrotar mais "+(killsN-kills)+" monstros ou bosses";
                 }
             }
             case "mineiro" -> {
                 int colheitasN = 5 * level;
                 int colheitas = player.getPersistentDataContainer().getOrDefault(MISSAOMINEIRO.key, PersistentDataType.INTEGER, 0);
-                if(colheitas>=colheitasN){
-                    condicao="";
-                }else{
+                if(colheitas<colheitasN){
                     int qtd = colheitasN-colheitas;
                     condicao="quebre mais "+qtd+" minerios";
                 }
@@ -265,9 +243,7 @@ public class EvoluirEvent implements Listener {
             case "fenix" -> {
                 int colheitasN = 5 * level;
                 int colheitas = player.getPersistentDataContainer().getOrDefault(MISSAOFENIX.key, PersistentDataType.INTEGER, 0);
-                if(colheitas>=colheitasN){
-                    condicao="";
-                }else{
+                if(colheitas<colheitasN){
                     int qtd = colheitasN-colheitas;
                     condicao="use mais "+qtd+" foguetes";
                 }
@@ -275,9 +251,7 @@ public class EvoluirEvent implements Listener {
             case "protetor" -> {
                 int colheitasN = 5 * level;
                 int colheitas = player.getPersistentDataContainer().getOrDefault(MISSAOPROTETOR.key, PersistentDataType.INTEGER, 0);
-                if(colheitas>=colheitasN){
-                    condicao="";
-                }else{
+                if(colheitas<colheitasN){
                     int qtd = colheitasN-colheitas;
                     condicao="se proteja com o escudo mais "+qtd+" vezes";
                 }
@@ -294,49 +268,37 @@ public class EvoluirEvent implements Listener {
             }
             case "sculk" -> {
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAOSCULK.key, PersistentDataType.INTEGER, 0);
-                if(kills >= level){
-                    condicao="";
-                }else{
+                if(kills < level){
                     condicao="seja atacado mais "+(level-kills)+" vezes por um Warden";
                 }
             }
             case "pescador" -> {
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAOPESCADOR.key, PersistentDataType.INTEGER, 0);
-                if(kills >= level){
-                    condicao="";
-                }else{
+                if(kills < level){
                     condicao="pesque mais "+(level-kills)+" vezes";
                 }
             }
             case "flash" -> {
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAOFLASH.key, PersistentDataType.INTEGER, 0);
-                if(kills >= level){
-                    condicao="";
-                }else{
+                if(kills < level){
                     condicao="use a habilidade mais "+(level-kills)+" vezes";
                 }
             }
             case "mago" -> {
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAOMAGO.key, PersistentDataType.INTEGER, 0);
-                if(kills >= level){
-                    condicao="";
-                }else{
+                if(kills < level){
                     condicao="beba mais "+(level-kills)+" poções";
                 }
             }
             case "ladrao" -> {
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAOLADRAO.key, PersistentDataType.INTEGER, 0);
-                if(kills >= level){
-                    condicao="";
-                }else{
+                if(kills < level){
                     condicao="roube mais "+(level-kills)+" itens!";
                 }
             }
             case "domador" -> {
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAODOMADOR.key, PersistentDataType.INTEGER, 0);
-                if(kills >= level){
-                    condicao="";
-                }else{
+                if(kills < level){
                     condicao="dome mais "+(level-kills)+" animais/pets!";
                 }
             }
@@ -852,7 +814,7 @@ public class EvoluirEvent implements Listener {
             }
         }
     }
-    private int getSlotOfItem(Player player, ItemStack targetItem) {
+    public int getSlotOfItem(Player player, ItemStack targetItem) {
         ItemStack[] contents = player.getInventory().getContents();
         for (int i = 0; i < contents.length; i++) {
             if (contents[i] != null && contents[i].isSimilar(targetItem)) {

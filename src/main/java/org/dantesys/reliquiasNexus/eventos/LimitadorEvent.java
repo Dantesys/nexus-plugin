@@ -32,8 +32,6 @@ public class LimitadorEvent implements Listener {
     public static void checkLimit(Player player){
         if(passou(player)){
             player.setHealth(0);
-        }else{
-            player.sendActionBar(Component.text("§cNão seja um colecionador"));
         }
     }
     private static boolean passou(Player player){

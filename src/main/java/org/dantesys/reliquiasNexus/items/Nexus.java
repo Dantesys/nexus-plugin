@@ -28,7 +28,7 @@ public class Nexus{
     public List<PotionEffect> getEfeitos(){
         List<PotionEffect> efeitos = new ArrayList<>();
         for(PotionEffectType efeito:passiva){
-            efeitos.add(new PotionEffect(efeito,(level*20)+20,2));
+            efeitos.add(new PotionEffect(efeito,(level*20)+200,2));
         }
         return efeitos;
     }
