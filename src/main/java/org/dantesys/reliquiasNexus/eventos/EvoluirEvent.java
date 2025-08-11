@@ -154,7 +154,7 @@ public class EvoluirEvent implements Listener {
                     }
                 }
             }
-            player.sendMessage(msg);
+            player.sendActionBar(Component.text(msg));
         }
 
     }

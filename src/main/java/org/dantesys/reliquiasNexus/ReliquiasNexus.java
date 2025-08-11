@@ -48,6 +48,10 @@ public final class ReliquiasNexus extends JavaPlugin {
         saveConfig();
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("nexus").executes(ctx -> {
             ctx.getSource().getSender().sendMessage("§rUsando Nexus");
+            ctx.getSource().getSender().sendMessage("§r/nexus livro");
+            ctx.getSource().getSender().sendMessage("§r-Você recebe o livro tutorial");
+            ctx.getSource().getSender().sendMessage("§r/nexus evoluir");
+            ctx.getSource().getSender().sendMessage("§r-Tenta evoluir sua reliquia");
             ctx.getSource().getSender().sendMessage("§r/nexus list");
             ctx.getSource().getSender().sendMessage("§r-Mostrar quem está com qual reliquia.");
             ctx.getSource().getSender().sendMessage("§r/nexus level");
