@@ -1,0 +1,79 @@
+comandos:
+  nexus:
+    - "--Using Nexus--"
+    - "/nexus livro"
+    - "-You receive the tutorial book."
+    - "/nexus evoluir"
+    - "-Try to evolve your relic."
+    - "/nexus list"
+    - "-Show who has which relic."
+    - "/nexus level"
+    - "-Show your relic levels."
+    - "/nexus expurgo"
+    - "-Show your server is in purge."
+    - "/nexus trocar <player>"
+    - "-Send a trade request to the chosen player."
+    - "/nexus troca-aceitar"
+    - "-Accept a trade request."
+    - "/nexus troca-cancelar"
+    - "-Cancels a trade request."
+    - "--OPs only--"
+    - "/nexus receber <player/players>"
+    - "-Sends unused relics randomly to players who haven't reached the relic limit."
+    - "/nexus reliquia <player> <relic>"
+    - "-Sends unused relics of your choice to a player who hasn't reached the relic limit."
+    - "/nexus expurgar <true/false>"
+    - "-Sets whether the purge is ongoing or not."
+    - "/nexus limite <int>"
+    - "-Sets the limit on the number of relics players can have."
+  troca:
+    envio:
+      - "You have received 1 trade request!"
+      - "Player <player> wants to trade nexus <relic>!"
+      - "Use the /nexus troca-aceitar command to accept the trade request!"
+      - "Use the /nexus troca-cancelar command to cancel the trade request!"
+    recebido: "Trade request sent successfully, please wait for <player> to accept or cancel the trade!"
+    erro1: "You must be holding the relic to request the exchange!"
+    erro2: "Only players can trade!"
+    erro3: "Player <player> left without accepting or canceling the trade!"
+    aceita:
+      sucesso: "Exchange made successfully!"
+      erro1: "The player is not online canceling the trade."
+      erro2: "You must be holding the relic to accept the trade!"
+      erro3: "Only players can accept trades!"
+    cancela:
+      envio: "Your trade request for <player> has been canceled!"
+      recebido: "You have canceled the exchange order!"
+      erro: "Only players can cancel trades!"
+  livro:
+    sucesso: "You received the book!"
+    erro: "Only players can receive the book!"
+  evoluir:
+    erro1: "You need to be holding the relic to try to evolve!"
+    erro2: "Only players can evolve!"
+  expurgo:
+    seguro: "The server is secure!"
+    perigo: "The server is being purged!"
+  list:
+    sem: "No owner"
+    desco: "Unknown"
+    comro: "Corrupted Player"
+    erro: "No Nexus found"
+  level:
+    msg: "Your relic levels"
+    sem: "Never used"
+    erro: "Only players can use"
+  expurgar:
+    msg:
+      aviso: "=============|WARNING|============"
+      perigo: "The Server is now in purge."
+      seguro: "The Server is now secure now."
+    log: "The purge was defined as:"
+  receber:
+    limite: "Player <player> cannot receive the relic!"
+    sucesso: "You received the relic"
+    slog: "Player <player> received the relic"
+    erro: "The relic <relic> already has an owner!"
+  limite:
+    erro: "The value cannot be less than 1"
+    sucesso: "Updated limit for"

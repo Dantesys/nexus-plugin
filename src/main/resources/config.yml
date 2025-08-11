@@ -1,4 +1,8 @@
+#Linguagens suportadas (en-us,pt-br)
+lang: pt-br
+#Se o servidor está em expurgo, permite roubo de reliquia se verdadeiro
 expurgo: false
+#Limite de reliquias que um jogador pode ter, se o jogador passar disso ele é derrotado e fica com apenas 1 reliquia
 limite: 3
 nexus:
   guerreiro: ""

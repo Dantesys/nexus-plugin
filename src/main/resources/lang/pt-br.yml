@@ -1,0 +1,79 @@
+comandos:
+  nexus:
+    - "Usando Nexus"
+    - "/nexus livro"
+    - "-Você recebe o livro tutorial."
+    - "/nexus evoluir"
+    - "-Tenta evoluir sua reliquia."
+    - "/nexus list"
+    - "-Mostrar quem está com qual reliquia."
+    - "/nexus level"
+    - "-Mostrar seus niveis de reliquias."
+    - "/nexus expurgo"
+    - "-Mostrar seu o servidor está em expurgo."
+    - "/nexus trocar <jogador>"
+    - "-Envia um pedido de troca para o jogador escolhido."
+    - "/nexus troca-aceitar"
+    - "-Aceita um pedido de troca."
+    - "/nexus troca-cancelar"
+    - "-Cancela um pedido de troca."
+    - "--Apenas OPs--"
+    - "/nexus receber <jogador/jogadores>"
+    - "-Envia reliquias não utilizadas aleatoriamente para jogadores que não tenha atingido o limite de reliquias."
+    - "/nexus reliquia <jogador> <reliquia>"
+    - "-Envia reliquias não utilizadas da sua escolhar para um jogador que não tenha atingido o limite de reliquias."
+    - "/nexus expurgar <true/false>"
+    - "-Define se está em expurgo ou não."
+    - "/nexus limite <int>"
+    - "-Define o limite de reliquias que os jogadores podem ter."
+  troca:
+    envio:
+      - "Você recebeu 1 pedido de troca!"
+      - "O jogador <player> está querendo trocar o nexus <relic>!"
+      - "Use o comando /nexus troca-aceitar para aceitar o pedido de troca!"
+      - "Use o comando /nexus troca-cancelar para cancelar o pedido de troca!"
+    recebido: "Pedido de troca enviado com sucesso, aguarde <player> aceitar ou cancelar a troca!"
+    erro1: "Você precisa estar segurando a reliquia para solicitar a troca!"
+    erro2: "Apenas jogadores podem fazer trocas!"
+    erro3: "O jogador <player> saiu sem aceitar ou cancelar a troca!"
+    aceita:
+      sucesso: "Troca feita com sucesso!"
+      erro1: "O jogador não está online cancelando a troca."
+      erro2: "Você precisa estar segurando a reliquia para aceitar a troca!"
+      erro3: "Apenas jogadores podem fazer aceitar trocas!"
+    cancela:
+      envio: "Seu pedido de troca para <player> foi cancelaro!"
+      recebido: "Você cancelou o pedido de troca!"
+      erro: "Apenas jogadores podem fazer cancelar trocas!"
+  livro:
+    sucesso: "Você recebeu o livro!"
+    erro: "Apenas jogadores podem receber o livro!"
+  evoluir:
+    erro1: "Você precisa estar segurando a reliquia para tentar evoluir!"
+    erro2: "Apenas jogadores podem fazer evolução!"
+  expurgo:
+    seguro: "O servidor está seguro!"
+    perigo: "O servidor está em expurgo!"
+  list:
+    sem: "Sem dono"
+    desco: "Desconhecido"
+    comro: "Jogador Corrompido"
+    erro: "Não foi encontrado nenhum Nexus"
+  level:
+    msg: "Seus leveis de reliquias"
+    sem: "Nunca usou"
+    erro: "Apenas jogadores podem usar"
+  expurgar:
+    msg:
+      aviso: "=============|AVISO|============="
+      perigo: "O Servidor agora está em expurgo."
+      seguro: "O Servidor agora esta seguro agora."
+    log: "O expurgo foi definido como:"
+  receber:
+    limite: "O jogador <player> não pode receber a reliquia!"
+    sucesso: "Você recebeu a reliquia"
+    slog: "O jogador <player> recebeu a reliquia"
+    erro: "A reliquia <relic> já possui dono!"
+  limite:
+    erro: "O valor não pode ser menor que 1"
+    sucesso: "Limite atualizado para"
