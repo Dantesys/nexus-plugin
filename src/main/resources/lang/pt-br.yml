@@ -102,26 +102,26 @@ special:
 livro:
   reliquia: "Reliquia do"
   base: "Todas as Reliquias precisam de Xp para evoluir.<break>As que possuem Special Manual para ativar tem que está agachado"
-  guerreiro: "Um corte especial que atravessa blocos chega até 50 blocos de distância!<break>Para evoluir precisa derrotar Monstros ou Bosses";
-  ceifador: "Um ataque especial que atravessa blocos chega até 50 blocos de distância e pode coletar a alma dos fracos!<break>Para evoluir precisa roubar vida!";
-  vida: "Uma segunda vida!<break>Para evoluir precisa recuperar vida";
-  mares: "Cria uma onda em area de vacuo removendo a respiração de todos!<break>Para evoluir precisa derrotar criaturas marinha, monstros ou bosses";
-  barbaro: "Ativa um efeito de furia!<break>Para evoluir precisa derrotar Monstros ou Bosses";
-  fazendeiro: "Cria uma onda em area que transforma parte da vida dos inimigos em alimento!<break>Para evoluir precisa colher plantações";
-  espiao: "Você separa sua alma do seu corpo para espiar lugares secreto!<break>Para evoluir precisa usar a habilidade";
-  arqueiro: "Cria e dispara uma flecha com uma velocidade de uma bala!<break>Para evoluir precisa acerta a flecha em monstros ou bosses";
-  cacador: "Cria e dispara uma sequencia de flechas!<break>Para evoluir precisa acerta a flecha em monstros ou bosses";
-  tempestade: "Cria uma tempestade dee raios a sua volta!<break>Para evoluir precisa derrotar Monstros ou Bosses";
-  mineiro: "Cria uma onda em area que transforma parte da vida dos enemigos em minerio!<break>Para evoluir precisa minerar minerios";
-  fenix: "Cria uma onda de calor que queima os inimigos proximos!<break>Para evoluir precisa voar com fogos de artificios";
-  protetor: "Cria um campo de reflexão que faz seus atacantes receberem o dano de volta!<break>Para evoluir precisa se defender usando o escudo";
-  hulk: "Cria uma explosão e você fica maior e mais forte!<break>Para evoluir precisa receber dano de monstros ou bosses";
-  sculk: "Cria uma explosão sonica igual a do Warden!<break>Para evoluir precisa ser atacado pelo Warden e sobreviver";
-  pescador: "Cria um peixe a partir da vida no alvo!<break>Para evoluir precisa acertar o anzol em animais marinhos";
-  flash: "Um teleporte para alguns blocos a frente!<break>Para evoluir precisa usar a habilidade";
-  mago: "A habilidade pode variar dependendo do slot que ele vai esta!<break>Para evoluir precisa beber poções";
-  ladrao: "Você foge para seu ponto de spawn!<break>Para evoluir precisa roubar itens com a reliquia";
-  domador: "Você cria um lobo companheiro!<break>Para evoluir precisa domesticas animais/pets";
+  guerreiro: "Um corte especial que atravessa blocos chega até 50 blocos de distância!<break>Para evoluir precisa derrotar Monstros ou Bosses"
+  ceifador: "Um ataque especial que atravessa blocos chega até 50 blocos de distância e pode coletar a alma dos fracos!<break>Para evoluir precisa roubar vida!"
+  vida: "Uma segunda vida!<break>Para evoluir precisa recuperar vida"
+  mares: "Cria uma onda em area de vacuo removendo a respiração de todos!<break>Para evoluir precisa derrotar criaturas marinha, monstros ou bosses"
+  barbaro: "Ativa um efeito de furia!<break>Para evoluir precisa derrotar Monstros ou Bosses"
+  fazendeiro: "Cria uma onda em area que transforma parte da vida dos inimigos em alimento!<break>Para evoluir precisa colher plantações"
+  espiao: "Você separa sua alma do seu corpo para espiar lugares secreto!<break>Para evoluir precisa usar a habilidade"
+  arqueiro: "Cria e dispara uma flecha com uma velocidade de uma bala!<break>Para evoluir precisa acerta a flecha em monstros ou bosses"
+  cacador: "Cria e dispara uma sequencia de flechas!<break>Para evoluir precisa acerta a flecha em monstros ou bosses"
+  tempestade: "Cria uma tempestade dee raios a sua volta!<break>Para evoluir precisa derrotar Monstros ou Bosses"
+  mineiro: "Cria uma onda em area que transforma parte da vida dos enemigos em minerio!<break>Para evoluir precisa minerar minerios"
+  fenix: "Cria uma onda de calor que queima os inimigos proximos!<break>Para evoluir precisa voar com fogos de artificios"
+  protetor: "Cria um campo de reflexão que faz seus atacantes receberem o dano de volta!<break>Para evoluir precisa se defender usando o escudo"
+  hulk: "Cria uma explosão e você fica maior e mais forte!<break>Para evoluir precisa receber dano de monstros ou bosses"
+  sculk: "Cria uma explosão sonica igual a do Warden!<break>Para evoluir precisa ser atacado pelo Warden e sobreviver"
+  pescador: "Cria um peixe a partir da vida no alvo!<break>Para evoluir precisa acertar o anzol em animais marinhos"
+  flash: "Um teleporte para alguns blocos a frente!<break>Para evoluir precisa usar a habilidade"
+  mago: "A habilidade pode variar dependendo do slot que ele vai esta!<break>Para evoluir precisa beber poções"
+  ladrao: "Você foge para seu ponto de spawn!<break>Para evoluir precisa roubar itens com a reliquia"
+  domador: "Você cria um lobo companheiro!<break>Para evoluir precisa domesticas animais/pets"
 perdeu:
   drop: "Você não pode jogar fora uma relíquia, está doido?"
   armor: "Você não pode colocar a reliquia num suporte de armadura."
@@ -164,3 +164,12 @@ condicao:
   ceifador: "roube mais <cond> pontos de vida"
   vida: "recupere mais <cond> pontos de vida"
   farme: "colha mais <cond> plantações"
+  mine: "quebre mais <cond> minerios"
+  fenix: "use mais <cond> foguetes"
+  protetor: "se proteja com a reliquia mais <cond> vezes"
+  hulk: "receba mais <cond> de dano por monstros ou bosses"
+  sculk: "seja atacado mais <cond> vezes por um Warden"
+  pescador: "pesque mais <cond> vezes"
+  mago: "beba mais <cond> poções"
+  ladrao: "roube mais <cond> itens"
+  domador: "dome mais <cond> animais/pets"

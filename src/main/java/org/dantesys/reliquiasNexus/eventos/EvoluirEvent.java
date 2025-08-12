@@ -302,7 +302,11 @@ public class EvoluirEvent implements Listener {
                 int colheitas = player.getPersistentDataContainer().getOrDefault(MISSAOMINEIRO.key, PersistentDataType.INTEGER, 0);
                 if(colheitas<colheitasN){
                     int qtd = colheitasN-colheitas;
-                    condicao="quebre mais "+qtd+" minerios";
+                    condicao = ReliquiasNexus.getLang().getString("condicao.mine");
+                    if(condicao==null){
+                        condicao="quebre mais <cond> minerios";
+                    }
+                    condicao=condicao.replace("<cond>",""+qtd);
                 }
             }
             case "fenix" -> {
@@ -310,7 +314,11 @@ public class EvoluirEvent implements Listener {
                 int colheitas = player.getPersistentDataContainer().getOrDefault(MISSAOFENIX.key, PersistentDataType.INTEGER, 0);
                 if(colheitas<colheitasN){
                     int qtd = colheitasN-colheitas;
-                    condicao="use mais "+qtd+" foguetes";
+                    condicao = ReliquiasNexus.getLang().getString("condicao.fenix");
+                    if(condicao==null){
+                        condicao="use mais <cond> foguetes";
+                    }
+                    condicao=condicao.replace("<cond>",""+qtd);
                 }
             }
             case "protetor" -> {
@@ -318,7 +326,11 @@ public class EvoluirEvent implements Listener {
                 int colheitas = player.getPersistentDataContainer().getOrDefault(MISSAOPROTETOR.key, PersistentDataType.INTEGER, 0);
                 if(colheitas<colheitasN){
                     int qtd = colheitasN-colheitas;
-                    condicao="se proteja com o escudo mais "+qtd+" vezes";
+                    condicao = ReliquiasNexus.getLang().getString("condicao.protetor");
+                    if(condicao==null){
+                        condicao="se proteja com a reliquia mais <cond> vezes";
+                    }
+                    condicao=condicao.replace("<cond>",""+qtd);
                 }
             }
             case "hulk" -> {
@@ -328,19 +340,31 @@ public class EvoluirEvent implements Listener {
                     condicao="";
                 }else{
                     int qtd = (int) (colheitasN-colheitas);
-                    condicao="receba mais "+qtd+" de dano por monstros ou bosses";
+                    condicao = ReliquiasNexus.getLang().getString("condicao.hulk");
+                    if(condicao==null){
+                        condicao="receba mais <cond> de dano por monstros ou bosses";
+                    }
+                    condicao=condicao.replace("<cond>",""+qtd);
                 }
             }
             case "sculk" -> {
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAOSCULK.key, PersistentDataType.INTEGER, 0);
                 if(kills < level){
-                    condicao="seja atacado mais "+(level-kills)+" vezes por um Warden";
+                    condicao = ReliquiasNexus.getLang().getString("condicao.sculk");
+                    if(condicao==null){
+                        condicao="seja atacado mais <cond> vezes por um Warden";
+                    }
+                    condicao=condicao.replace("<cond>",""+(level-kills));
                 }
             }
             case "pescador" -> {
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAOPESCADOR.key, PersistentDataType.INTEGER, 0);
                 if(kills < level){
-                    condicao="pesque mais "+(level-kills)+" vezes";
+                    condicao = ReliquiasNexus.getLang().getString("condicao.pescador");
+                    if(condicao==null){
+                        condicao="pesque mais <cond> vezes";
+                    }
+                    condicao=condicao.replace("<cond>",""+(level-kills));
                 }
             }
             case "flash" -> {
@@ -356,19 +380,31 @@ public class EvoluirEvent implements Listener {
             case "mago" -> {
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAOMAGO.key, PersistentDataType.INTEGER, 0);
                 if(kills < level){
-                    condicao="beba mais "+(level-kills)+" poções";
+                    condicao = ReliquiasNexus.getLang().getString("condicao.mago");
+                    if(condicao==null){
+                        condicao="beba mais <cond> poções";
+                    }
+                    condicao=condicao.replace("<cond>",""+(level-kills));
                 }
             }
             case "ladrao" -> {
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAOLADRAO.key, PersistentDataType.INTEGER, 0);
                 if(kills < level){
-                    condicao="roube mais "+(level-kills)+" itens!";
+                    condicao = ReliquiasNexus.getLang().getString("condicao.ladrao");
+                    if(condicao==null){
+                        condicao="roube mais <cond> itens";
+                    }
+                    condicao=condicao.replace("<cond>",""+(level-kills));
                 }
             }
             case "domador" -> {
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAODOMADOR.key, PersistentDataType.INTEGER, 0);
                 if(kills < level){
-                    condicao="dome mais "+(level-kills)+" animais/pets!";
+                    condicao = ReliquiasNexus.getLang().getString("condicao.domador");
+                    if(condicao==null){
+                        condicao="dome mais <cond> animais/pets";
+                    }
+                    condicao=condicao.replace("<cond>",""+(level-kills));
                 }
             }
         }

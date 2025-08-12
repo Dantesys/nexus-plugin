@@ -33,6 +33,7 @@ import org.dantesys.reliquiasNexus.util.NexusKeys;
 import org.dantesys.reliquiasNexus.util.Troca;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
@@ -47,12 +48,26 @@ public final class ReliquiasNexus extends JavaPlugin {
     @Override
     public void onEnable() {
         ItemsRegistro.init();
+        saveResource("lang/pt-br.yml",true);
+        saveResource("lang/en-us.yml",true);
         saveDefaultConfig();
         config = getConfig();
-        File file = new File(this.getDataFolder(), "/lang/"+config.getString("lang")+".yml");
+        String tipo = config.getString("lang");
+        if(tipo==null){
+            tipo="en-us";
+            config.set("lang","en-us");
+        }
+        File file = new File(this.getDataFolder(), "/lang/"+tipo+".yml");
         lang = YamlConfiguration.loadConfiguration(file);
         saveConfig();
+        try {
+            lang.save(file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         List<String> cmd = lang.getStringList("comandos.comando");
+        getServer().getConsoleSender().sendMessage(""+this.getDataFolder());
+        getServer().getConsoleSender().sendMessage(""+cmd);
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("nexus").executes(ctx -> {
             List<String> msgs = lang.getStringList("comandos.nexus");
             msgs.forEach(m -> ctx.getSource().getSender().sendMessage("§r"+m));

@@ -102,26 +102,26 @@ special:
 livro:
   reliquia: "Relic of"
   base: "All Relics need XP to evolve.<break>Those that have a Special Manual to activate must be crouched"
-  guerreiro: "A special cut that goes through blocks reaches up to 50 blocks away!<break>To evolve you need to defeat Monsters or Bosses";
-  ceifador: "A special attack that passes through blocks, reaches up to 50 blocks away and can collect the souls of the weak!<break>To evolve you need to steal life!";
-  vida: "A second life!<break>To evolve you need to recover life";
-  mares: "Creates a wave in a vacuum area removing everyone's breath! <break>To evolve you need to defeat sea creatures, monsters or bosses";
-  barbaro: "Activates a fury effect!<break>To evolve you need to defeat Monsters or Bosses";
-  fazendeiro: "Creates an area wave that turns part of the enemies' health into food!<break>To evolve you need to harvest crops";
-  espiao: "You separate your soul from your body to spy on secret places!<break>To evolve you need to use the skill";
-  arqueiro: "Creates and fires an arrow at the speed of a bullet!<break>To evolve you need to hit the arrow at monsters or bosses";
-  cacador: "Creates and fires a sequence of arrows!<break>To evolve you need to hit the arrow on monsters or bosses";
-  tempestade: "Creates a lightning storm around you!<break>To evolve you need to defeat Monsters or Bosses";
-  mineiro: "Creates a wave in the area that transforms part of the enemies' health into minerals! <break>To evolve you need to mine minerals";
-  fenix: "Creates a heat wave that burns nearby enemies!<break>To evolve you need to fly with fireworks";
-  protetor: "Creates a reflection field that makes your attackers take damage back!<break>To evolve you need to defend yourself using the shield";
-  hulk: "Creates an explosion and you become bigger and stronger!<break>To evolve you need to receive damage from monsters or bosses";
-  sculk: "Creates a sonic explosion like the Warden!<break>To evolve you need to be attacked by the Warden and survive";
-  pescador: "Creates a fish from the life on the target!<break>To evolve you need to hit the hook on marine animals";
-  flash: "A teleport to a few blocks ahead!<break>To evolve you need to use the skill";
-  mago: "The skill may vary depending on the slot it is in!<break>To evolve you need to drink potions";
-  ladrao: "You run away to your spawn point!<break>To evolve you need to steal items with the relic";
-  domador: "You create a wolf companion!<break>To evolve you need to tame animals/pets";
+  guerreiro: "A special cut that goes through blocks reaches up to 50 blocks away!<break>To evolve you need to defeat Monsters or Bosses"
+  ceifador: "A special attack that passes through blocks, reaches up to 50 blocks away and can collect the souls of the weak!<break>To evolve you need to steal life!"
+  vida: "A second life!<break>To evolve you need to recover life"
+  mares: "Creates a wave in a vacuum area removing everyone's breath! <break>To evolve you need to defeat sea creatures, monsters or bosses"
+  barbaro: "Activates a fury effect!<break>To evolve you need to defeat Monsters or Bosses"
+  fazendeiro: "Creates an area wave that turns part of the enemies' health into food!<break>To evolve you need to harvest crops"
+  espiao: "You separate your soul from your body to spy on secret places!<break>To evolve you need to use the skill"
+  arqueiro: "Creates and fires an arrow at the speed of a bullet!<break>To evolve you need to hit the arrow at monsters or bosses"
+  cacador: "Creates and fires a sequence of arrows!<break>To evolve you need to hit the arrow on monsters or bosses"
+  tempestade: "Creates a lightning storm around you!<break>To evolve you need to defeat Monsters or Bosses"
+  mineiro: "Creates a wave in the area that transforms part of the enemies' health into minerals! <break>To evolve you need to mine minerals"
+  fenix: "Creates a heat wave that burns nearby enemies!<break>To evolve you need to fly with fireworks"
+  protetor: "Creates a reflection field that makes your attackers take damage back!<break>To evolve you need to defend yourself using the shield"
+  hulk: "Creates an explosion and you become bigger and stronger!<break>To evolve you need to receive damage from monsters or bosses"
+  sculk: "Creates a sonic explosion like the Warden!<break>To evolve you need to be attacked by the Warden and survive"
+  pescador: "Creates a fish from the life on the target!<break>To evolve you need to hit the hook on marine animals"
+  flash: "A teleport to a few blocks ahead!<break>To evolve you need to use the skill"
+  mago: "The skill may vary depending on the slot it is in!<break>To evolve you need to drink potions"
+  ladrao: "You run away to your spawn point!<break>To evolve you need to steal items with the relic"
+  domador: "You create a wolf companion!<break>To evolve you need to tame animals/pets"
 perdeu:
   drop: "You can't throw away a relic, are you crazy?"
   armor: "You cannot place the relic on an armor stand."
@@ -164,3 +164,12 @@ condicao:
   ceifador: "steal more <cond> life points"
   vida: "recover more <cond> life points"
   farme: "harvest more <cond> crops"
+  mine: "break more <cond> ores"
+  fenix: "use more <cond> rockets"
+  protetor: "protect yourself with the relic more <cond> times"
+  hulk: "take more <cond> damage from monsters or bosses"
+  sculk: "be attacked more <cond> times by a Warden"
+  pescador: "fish more <cond> times"
+  mago: "drink more <cond> potions"
+  ladrao: "steal more <cond> items"
+  domador: "tame more <cond> animals/pets"
