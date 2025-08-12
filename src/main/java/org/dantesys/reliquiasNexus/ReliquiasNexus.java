@@ -52,12 +52,13 @@ public final class ReliquiasNexus extends JavaPlugin {
         File file = new File(this.getDataFolder(), "/lang/"+config.getString("lang")+".yml");
         lang = YamlConfiguration.loadConfiguration(file);
         saveConfig();
+        List<String> cmd = lang.getStringList("comandos.comando");
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("nexus").executes(ctx -> {
             List<String> msgs = lang.getStringList("comandos.nexus");
             msgs.forEach(m -> ctx.getSource().getSender().sendMessage("§r"+m));
             return Command.SINGLE_SUCCESS;
         });
-        root.then(Commands.literal("trocar").then(Commands.argument("jogador", ArgumentTypes.player()).executes(ctx -> {
+        root.then(Commands.literal(cmd.get(3)).then(Commands.argument("jogador", ArgumentTypes.player()).executes(ctx -> {
             final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogador", PlayerSelectorArgumentResolver.class);
             final Player p = targetResolver.resolve(ctx.getSource()).getFirst();
             final CommandSender sender = ctx.getSource().getSender();
@@ -90,7 +91,7 @@ public final class ReliquiasNexus extends JavaPlugin {
             }
             return Command.SINGLE_SUCCESS;
         })));
-        root.then(Commands.literal("livro").executes(ctx -> {
+        root.then(Commands.literal(cmd.get(0)).executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
             if(ctx.getSource().getExecutor() instanceof Player player){
                 player.getInventory().addItem(ItemsRegistro.livro.getItem(1));
@@ -100,7 +101,7 @@ public final class ReliquiasNexus extends JavaPlugin {
             }
             return Command.SINGLE_SUCCESS;
         }));
-        root.then(Commands.literal("evoluir").executes(ctx -> {
+        root.then(Commands.literal(cmd.get(1)).executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
             if(ctx.getSource().getExecutor() instanceof Player player){
                 ItemStack stack = player.getInventory().getItemInMainHand();
@@ -146,7 +147,7 @@ public final class ReliquiasNexus extends JavaPlugin {
             }
             return Command.SINGLE_SUCCESS;
         }));
-        root.then(Commands.literal("troca-aceitar").executes(ctx -> {
+        root.then(Commands.literal(cmd.get(4)).executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
             if(ctx.getSource().getExecutor() instanceof Player player){
                 ItemStack stack = player.getInventory().getItemInMainHand();
@@ -217,7 +218,7 @@ public final class ReliquiasNexus extends JavaPlugin {
             }
             return Command.SINGLE_SUCCESS;
         }));
-        root.then(Commands.literal("troca-cancelar").executes(ctx -> {
+        root.then(Commands.literal(cmd.get(5)).executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
             if(ctx.getSource().getExecutor() instanceof Player player){
                 Troca t = trocas.remove(player.getUniqueId());
@@ -235,7 +236,7 @@ public final class ReliquiasNexus extends JavaPlugin {
             }
             return Command.SINGLE_SUCCESS;
         }));
-        root.then(Commands.literal("expurgo").executes(ctx -> {
+        root.then(Commands.literal(cmd.get(2)).executes(ctx -> {
             boolean expurgo = config.getBoolean("expurgo");
             String msg = "§r§2"+lang.getString("comandos.expurgo.seguro");
             if(expurgo){
@@ -280,7 +281,7 @@ public final class ReliquiasNexus extends JavaPlugin {
             }else ctx.getSource().getSender().sendMessage("§c"+lang.getString("comandos.level.erro"));
             return Command.SINGLE_SUCCESS;
         }));
-        root.then(Commands.literal("expurgar").then(Commands.argument("exp", BoolArgumentType.bool()).requires(sender -> sender.getSender().isOp()).executes(ctx -> {
+        root.then(Commands.literal(cmd.get(8)).then(Commands.argument("exp", BoolArgumentType.bool()).requires(sender -> sender.getSender().isOp()).executes(ctx -> {
             boolean exp = ctx.getArgument("exp", boolean.class);
             config.set("expurgo",exp);
             saveConfig();
@@ -300,7 +301,7 @@ public final class ReliquiasNexus extends JavaPlugin {
             ctx.getSource().getSender().sendMessage("§2"+lang.getString("comandos.expurgar.log")+" "+exp);
             return Command.SINGLE_SUCCESS;
         })));
-        root.then(Commands.literal("receber").then(Commands.argument("jogadores", ArgumentTypes.players()).requires(sender -> sender.getSender().isOp()).executes(ctx -> {
+        root.then(Commands.literal(cmd.get(6)).then(Commands.argument("jogadores", ArgumentTypes.players()).requires(sender -> sender.getSender().isOp()).executes(ctx -> {
             final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogadores", PlayerSelectorArgumentResolver.class);
             final List<Player> targets = targetResolver.resolve(ctx.getSource());
             final CommandSender sender = ctx.getSource().getSender();
@@ -346,7 +347,7 @@ public final class ReliquiasNexus extends JavaPlugin {
             }
             return Command.SINGLE_SUCCESS;
         })));
-        root.then(Commands.literal("reliquia").then(Commands.argument("jogador", ArgumentTypes.player()).then(Commands.argument("reliquia", StringArgumentType.word()).suggests((ctx, builder) -> {
+        root.then(Commands.literal(cmd.get(7)).then(Commands.argument("jogador", ArgumentTypes.player()).then(Commands.argument("reliquia", StringArgumentType.word()).suggests((ctx, builder) -> {
             names.stream().filter(entry -> entry.toLowerCase().startsWith(builder.getRemainingLowerCase())).forEach(builder::suggest);
             return builder.buildFuture();
         }).requires(sender -> sender.getSender().isOp()).executes(ctx -> {
@@ -399,12 +400,10 @@ public final class ReliquiasNexus extends JavaPlugin {
                         }
                     }
                 }
-            }else{
-                sender.sendMessage("§cA reliquia "+reliquia+" não existe!");
             }
             return Command.SINGLE_SUCCESS;
         }))));
-        root.then(Commands.literal("limite").then(Commands.argument("valor", IntegerArgumentType.integer()).requires(sender -> sender.getSender().isOp()).executes(ctx -> {
+        root.then(Commands.literal(cmd.get(9)).then(Commands.argument("valor", IntegerArgumentType.integer()).requires(sender -> sender.getSender().isOp()).executes(ctx -> {
             final Integer valor = ctx.getArgument("valor", Integer.class);
             final CommandSender sender = ctx.getSource().getSender();
             if(valor<1){

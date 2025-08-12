@@ -32,7 +32,7 @@ public class PassivaEvent implements Listener {
                     if(tempo>0){
                         tempo--;
                         conteiner.set(SPECIAL.key,PersistentDataType.INTEGER,tempo);
-                        player.sendActionBar(Component.text("Special em "+tempo+"s"));
+                        player.sendActionBar(Component.text("Special "+tempo+"s"));
                     }
                 }else{
                     conteiner.set(SPECIAL.key, PersistentDataType.INTEGER,0);

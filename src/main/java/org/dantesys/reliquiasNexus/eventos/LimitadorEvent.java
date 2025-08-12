@@ -111,14 +111,34 @@ public class LimitadorEvent implements Listener {
         if(player.getPersistentDataContainer().has(PROTECAO.key,PersistentDataType.STRING)){
             String peixe = player.getPersistentDataContainer().get(PROTECAO.key,PersistentDataType.STRING);
             if(peixe!=null && !peixe.isBlank()){
-                event.deathMessage(Component.text("§cO Jogador "+player.getName()+" foi tranformado em um "+peixe+"!"));
-                event.deathScreenMessageOverride(Component.text("§cVocê foi tranformado em um "+peixe+"!"));
+                String msgAll = ReliquiasNexus.getLang().getString("morreumsg.peixe.all");
+                if(msgAll==null){
+                    msgAll="O Jogador <player> foi tranformado em um <fish>!";
+                }
+                msgAll=msgAll.replace("<player>",player.getName());
+                msgAll=msgAll.replace("<fish>",peixe);
+                String msg = ReliquiasNexus.getLang().getString("morreumsg.peixe.player");
+                if(msg==null){
+                    msg="Você foi tranformado em um <fish>!";
+                }
+                msg=msg.replace("<fish>",peixe);
+                event.deathMessage(Component.text("§c"+msgAll));
+                event.deathScreenMessageOverride(Component.text("§c"+msg));
 
             }
         }
         if(passou(player)){
-            event.deathMessage(Component.text("§cO Jogador "+player.getName()+" foi eliminado por ter reliquias demais!"));
-            event.deathScreenMessageOverride(Component.text("§cVocê foi eliminado por ter reliquias demais, se controla cara!"));
+            String msgAll = ReliquiasNexus.getLang().getString("morreumsg.limite.all");
+            if(msgAll==null){
+                msgAll="O Jogador <player> foi eliminado por ter reliquias demais!";
+            }
+            msgAll=msgAll.replace("<player>",player.getName());
+            String msg = ReliquiasNexus.getLang().getString("morreumsg.limite.player");
+            if(msg==null){
+                msg="Você foi eliminado por ter reliquias demais, se controla cara!";
+            }
+            event.deathMessage(Component.text("§c"+msgAll));
+            event.deathScreenMessageOverride(Component.text("§c"+msg));
             player.getPersistentDataContainer().set(QTD.key,PersistentDataType.INTEGER,1);
             Random rd = new Random();
             int i = rd.nextInt(0, manterRelics.size()-1);

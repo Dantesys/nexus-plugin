@@ -1,4 +1,15 @@
 comandos:
+  comando:
+    - "livro"
+    - "evoluir"
+    - "expurgo"
+    - "trocar"
+    - "troca-aceitar"
+    - "troca-cancelar"
+    - "receber"
+    - "reliquia"
+    - "expurgar"
+    - "limite"
   nexus:
     - "Usando Nexus"
     - "/nexus livro"
@@ -77,3 +88,79 @@ comandos:
   limite:
     erro: "O valor não pode ser menor que 1"
     sucesso: "Limite atualizado para"
+special:
+  vida: "Habilidade do Nexus da Vida Ativado!"
+  hulk:
+    ativado: "Modo Hulk Ativado!"
+    tempo: "Modo Hulk acaba em <tempo> segundos!"
+  protetor:
+    ativado: "Habilidade do Nexus do Protetor Ativado!"
+    tempo: "Modo Reversão acaba em <tempo> segundos!"
+  cacador:
+    ativado: "Modo Minigum Ativado!"
+    tempo: "Modo Minigun acaba em <tempo> segundos!"
+livro:
+  reliquia: "Reliquia do"
+  base: "Todas as Reliquias precisam de Xp para evoluir.<break>As que possuem Special Manual para ativar tem que está agachado"
+  guerreiro: "Um corte especial que atravessa blocos chega até 50 blocos de distância!<break>Para evoluir precisa derrotar Monstros ou Bosses";
+  ceifador: "Um ataque especial que atravessa blocos chega até 50 blocos de distância e pode coletar a alma dos fracos!<break>Para evoluir precisa roubar vida!";
+  vida: "Uma segunda vida!<break>Para evoluir precisa recuperar vida";
+  mares: "Cria uma onda em area de vacuo removendo a respiração de todos!<break>Para evoluir precisa derrotar criaturas marinha, monstros ou bosses";
+  barbaro: "Ativa um efeito de furia!<break>Para evoluir precisa derrotar Monstros ou Bosses";
+  fazendeiro: "Cria uma onda em area que transforma parte da vida dos inimigos em alimento!<break>Para evoluir precisa colher plantações";
+  espiao: "Você separa sua alma do seu corpo para espiar lugares secreto!<break>Para evoluir precisa usar a habilidade";
+  arqueiro: "Cria e dispara uma flecha com uma velocidade de uma bala!<break>Para evoluir precisa acerta a flecha em monstros ou bosses";
+  cacador: "Cria e dispara uma sequencia de flechas!<break>Para evoluir precisa acerta a flecha em monstros ou bosses";
+  tempestade: "Cria uma tempestade dee raios a sua volta!<break>Para evoluir precisa derrotar Monstros ou Bosses";
+  mineiro: "Cria uma onda em area que transforma parte da vida dos enemigos em minerio!<break>Para evoluir precisa minerar minerios";
+  fenix: "Cria uma onda de calor que queima os inimigos proximos!<break>Para evoluir precisa voar com fogos de artificios";
+  protetor: "Cria um campo de reflexão que faz seus atacantes receberem o dano de volta!<break>Para evoluir precisa se defender usando o escudo";
+  hulk: "Cria uma explosão e você fica maior e mais forte!<break>Para evoluir precisa receber dano de monstros ou bosses";
+  sculk: "Cria uma explosão sonica igual a do Warden!<break>Para evoluir precisa ser atacado pelo Warden e sobreviver";
+  pescador: "Cria um peixe a partir da vida no alvo!<break>Para evoluir precisa acertar o anzol em animais marinhos";
+  flash: "Um teleporte para alguns blocos a frente!<break>Para evoluir precisa usar a habilidade";
+  mago: "A habilidade pode variar dependendo do slot que ele vai esta!<break>Para evoluir precisa beber poções";
+  ladrao: "Você foge para seu ponto de spawn!<break>Para evoluir precisa roubar itens com a reliquia";
+  domador: "Você cria um lobo companheiro!<break>Para evoluir precisa domesticas animais/pets";
+perdeu:
+  drop: "Você não pode jogar fora uma relíquia, está doido?"
+  armor: "Você não pode colocar a reliquia num suporte de armadura."
+  chest: "Você não pode colocar a relíquia para um container!"
+  bundle: "Você não pode guardar uma relíquia dentro de uma trouxa."
+  frame: "Você não pode colocar a reliquia numa moldura."
+  pote: "Você não pode colocar a reliquia num pote."
+  sifht: "Relíquias não podem ser movidas com shift!"
+morreumsg:
+  peixe:
+    all: "O Jogador <player> foi tranformado em um <fish>!"
+    player: "Você foi tranformado em um <fish>!"
+  limite:
+    all: "O Jogador <player> foi eliminado por ter reliquias demais!"
+    player: "Você foi eliminado por ter reliquias demais, se controla cara!"
+joinquit:
+  joinnew: "Bem-vindo ao jogo, Jogador <player>"
+  join: "Bem-vindo devolta, Jogador <player>"
+  relic: "Você recebeu a reliquia do <relic>"
+  quit: "O Jogador <player> saiu do jogo!"
+ladrao:
+  item: "Você roubou uma item!"
+  nada: "Você não conseguiu roubar nada!"
+  reliquia: "Você roubou uma reliquia!"
+  expurgo: "Você não pode roubar uma reliquia fora do expurgo!"
+  protetor: "Você não pode roubar de quem tem a reliquia do protetor!"
+espiao:
+  ativado: "Habilidade do Espião Ativado!"
+  tempo: "Modo Fantasma acaba em <tempo> segundos!"
+evo:
+  sucesso: "Sua Reliquia do <relic> evoluiu para o nível <level>!"
+  needxp: "Você precisa de mais <xp> leveis XP para evoluir sua reliquia do <relic>!"
+  cond: "Você precisa <condicao> para evoluir sua reliquia do <relic>!"
+  condexp: "Você precisa de mais <xp> leveis XP e <condicao> para evoluir sua reliquia do <relic>!"
+condicao:
+  demb: "derrotar mais <cond> monstros ou bosses"
+  deamb: "derrotar mais <cond> seres aquaticos, monstros ou bosses"
+  special: "use o Special mais <cond> vezes"
+  arrow: "atingir mais <cond> monstros ou bosses"
+  ceifador: "roube mais <cond> pontos de vida"
+  vida: "recupere mais <cond> pontos de vida"
+  farme: "colha mais <cond> plantações"

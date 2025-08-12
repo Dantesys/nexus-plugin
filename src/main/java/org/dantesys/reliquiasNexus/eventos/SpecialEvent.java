@@ -125,7 +125,12 @@ public class SpecialEvent implements Listener {
                 BookMeta meta = (BookMeta) stack.getItemMeta();
                 meta.setGeneration(BookMeta.Generation.ORIGINAL);
                 meta.pages(Collections.emptyList());
-                meta.addPages(Component.text("Todas as Reliquias precisam de Xp para evoluir\nAs que possuem Special Manual para ativar tem que está agachado"));
+                String msg = ReliquiasNexus.getLang().getString("livro.base");
+                if(msg==null){
+                    msg="Todas as Reliquias precisam de Xp para evoluir.<break>As que possuem Special Manual para ativar tem que está agachado";
+                }
+                msg=msg.replace("<break>","\n");
+                meta.addPages(Component.text(msg));
                 ConfigurationSection secao = ReliquiasNexus.getNexusConfig().getConfigurationSection("nexus");
                 if(secao!=null){
                     for(String nexus: secao.getKeys(false)){
@@ -173,27 +178,135 @@ public class SpecialEvent implements Listener {
     }
     private String getDesc(String nome){
         String desc="";
+        String msg=ReliquiasNexus.getLang().getString("livro."+nome);
+        String r=ReliquiasNexus.getLang().getString("livro.reliquia");
+        if(msg!=null){
+            msg=msg.replace("<break>","\n");
+        }
+        if(r==null){
+            r="Reliquia do";
+        }
         switch (nome){
-            case "guerreiro" -> desc="§l§6Relíquia do Guerreiro\n§r§0Special (Manual):\nUm corte especial que atravessa blocos chega até 50 blocos de distância!\nPara evoluir precisa derrotar Monstros ou Bosses";
-            case "ceifador" -> desc="§l§6Relíquia do Ceifador\n§r§0Special (Manual):\nUm ataque especial que atravessa blocos chega até 50 blocos de distância e pode coletar a alma dos fracos!\nPara evoluir precisa roubar vida!";
-            case "vida" -> desc="§l§6Relíquia da Vida\n§r§0Special (Automatico):\nUma segunda vida!\nPara evoluir precisa recuperar vida";
-            case "mares" -> desc="§l§6Relíquia dos Mares\n§r§0Special (Manual):\nCria uma onda em area de vacuo removendo a respiração de todos!\nPara evoluir precisa derrotar criaturas marinha, monstros ou bosses";
-            case "barbaro" -> desc="§l§6Relíquia do Barbaro\n§r§0Special (Manual):\nAtiva um efeito de furia!\nPara evoluir precisa derrotar Monstros ou Bosses";
-            case "fazendeiro" -> desc="§l§6Relíquia do Fazendeiro\n§r§0Special (Manual):\nCria uma onda em area que transforma parte da vida dos inimigos em alimento!\nPara evoluir precisa colher plantações";
-            case "espiao" -> desc="§l§6Relíquia do Espião\n§r§0Special (Manual):\nVocê separa sua alma do seu corpo para espiar lugares secreto!\nPara evoluir precisa usar a habilidade";
-            case "arqueiro" -> desc="§l§6Relíquia do Arqueiro\n§r§0Special (Manual):\nCria e dispara uma flecha com uma velocidade de uma bala!\nPara evoluir precisa acerta a flecha em monstros ou bosses";
-            case "cacador" -> desc="§l§6Relíquia do Caçador\n§r§0Special (Manual):\nCria e dispara uma sequencia de flechas!\nPara evoluir precisa acerta a flecha em monstros ou bosses";
-            case "tempestade" -> desc="§l§6Relíquia da Tempestade\n§r§0Special (Manual):\nCria uma tempestade dee raios a sua volta!\nPara evoluir precisa derrotar Monstros ou Bosses";
-            case "mineiro" -> desc="§l§6Relíquia do Mineiro\n§r§0Special (Manual):\nCria uma onda em area que transforma parte da vida dos enemigos em minerio!\nPara evoluir precisa minerar minerios";
-            case "fenix" -> desc="§l§6Relíquia da Fenix\n§r§0Special (Manual):\nCria uma onda de calor que queima os inimigos proximos!\nPara evoluir precisa voar com fogos de artificios";
-            case "protetor" -> desc="§l§6Relíquia do Protetor\n§r§0Special (Manual):\nCria um campo de reflexão que faz seus atacantes receberem o dano de volta!\nPara evoluir precisa se defender usando o escudo";
-            case "hulk" -> desc="§l§6Relíquia do Hulk\n§r§0Special (Manual):\nCria uma explosão e você fica maior e mais forte!\nPara evoluir precisa receber dano de monstros ou bosses";
-            case "sculk" -> desc="§l§6Relíquia do Sculk\n§r§0Special (Manual):\nCria uma explosão sonica igual a do Warden!\nPara evoluir precisa ser atacado pelo Warden e sobreviver";
-            case "pescador" -> desc="§l§6Relíquia do Pescador\n§r§0Special (Manual):\nCria um peixe a partir da vida no alvo!\nPara evoluir precisa acertar o anzol em animais marinhos";
-            case "flash" -> desc="§l§6Relíquia do Flash\n§r§0Special (Manual):\nUm teleporte para alguns blocos a frente!\nPara evoluir precisa usar a habilidade";
-            case "mago" -> desc="§l§6Relíquia do Mago\n§r§0Special (Manual):\nA habilidade pode variar dependendo do slot que ele vai esta!\nPara evoluir precisa beber poções";
-            case "ladrao" -> desc="§l§6Relíquia do Ladrão\n§r§0Special (Manual):\nVocê foge para seu ponto de spawn!\nPara evoluir precisa roubar itens com a reliquia";
-            case "domador" -> desc="§l§6Relíquia do Domador\n§r§0Special (Manual):\nVocê cria um lobo companheiro!\nPara evoluir precisa domesticas animais/pets";
+            case "guerreiro" -> {
+                if(msg==null){
+                    msg="Um corte especial que atravessa blocos chega até 50 blocos de distância!\nPara evoluir precisa derrotar Monstros ou Bosses";
+                }
+                desc="§l§6"+r+" Guerreiro\n§r§0Special (Manual):\n"+msg;
+            }
+            case "ceifador" -> {
+                if(msg==null){
+                    msg="Um corte especial que atravessa blocos chega até 50 blocos de distância!\nPara evoluir precisa derrotar Monstros ou Bosses";
+                }
+                desc="§l§6"+r+" Ceifador\n§r§0Special (Manual):\n"+msg;
+            }
+            case "vida" -> {
+                if(msg==null){
+                    msg="Uma segunda vida!\nPara evoluir precisa recuperar vida";
+                }
+                desc="§l§6"+r+" Vida\n§r§0Special (Automatico):\n"+msg;
+            }
+            case "mares" -> {
+                if(msg==null){
+                    msg="Cria uma onda em area de vacuo removendo a respiração de todos!\nPara evoluir precisa derrotar criaturas marinha, monstros ou bosses";
+                }
+                desc="§l§6"+r+" Mares\n§r§0Special (Manual):\n"+msg;
+            }
+            case "barbaro" -> {
+                if(msg==null){
+                    msg="Ativa um efeito de furia!\nPara evoluir precisa derrotar Monstros ou Bosses";
+                }
+                desc="§l§6"+r+" Barbaro\n§r§0Special (Manual):\n"+msg;
+            }
+            case "fazendeiro" -> {
+                if(msg==null){
+                    msg="Cria uma onda em area que transforma parte da vida dos inimigos em alimento!\nPara evoluir precisa colher plantações";
+                }
+                desc="§l§6"+r+" Fazendeiro\n§r§0Special (Manual):\n"+msg;
+            }
+            case "espiao" -> {
+                if(msg==null){
+                    msg="Você separa sua alma do seu corpo para espiar lugares secreto!\nPara evoluir precisa usar a habilidade";
+                }
+                desc="§l§6"+r+" Espião\n§r§0Special (Manual):\n"+msg;
+            }
+            case "arqueiro" -> {
+                if(msg==null){
+                    msg="Cria e dispara uma flecha com uma velocidade de uma bala!\nPara evoluir precisa acerta a flecha em monstros ou bosses";
+                }
+                desc="§l§6"+r+" Arqueiro\n§r§0Special (Manual):\n"+msg;
+            }
+            case "cacador" -> {
+                if(msg==null){
+                    msg="Cria e dispara uma sequencia de flechas!\nPara evoluir precisa acerta a flecha em monstros ou bosses";
+                }
+                desc="§l§6"+r+" Caçador\n§r§0Special (Manual):\n"+msg;
+            }
+            case "tempestade" -> {
+                if(msg==null){
+                    msg="Cria uma tempestade dee raios a sua volta!\nPara evoluir precisa derrotar Monstros ou Bosses";
+                }
+                desc="§l§6"+r+" Tempestade\n§r§0Special (Manual):\n"+msg;
+            }
+            case "mineiro" -> {
+                if(msg==null){
+                    msg="Cria uma onda em area que transforma parte da vida dos enemigos em minerio!\nPara evoluir precisa minerar minerios";
+                }
+                desc="§l§6"+r+" Mineiro\n§r§0Special (Manual):\n"+msg;
+            }
+            case "fenix" -> {
+                if(msg==null){
+                    msg="Cria uma onda de calor que queima os inimigos proximos!\nPara evoluir precisa voar com fogos de artificios";
+                }
+                desc="§l§6"+r+" Fenix\n§r§0Special (Manual):\n"+msg;
+            }
+            case "protetor" -> {
+                if(msg==null){
+                    msg="Cria um campo de reflexão que faz seus atacantes receberem o dano de volta!\nPara evoluir precisa se defender usando o escudo";
+                }
+                desc="§l§6"+r+" Protetor\n§r§0Special (Manual):\n"+msg;
+            }
+            case "hulk" -> {
+                if(msg==null){
+                    msg="Cria uma explosão e você fica maior e mais forte!\nPara evoluir precisa receber dano de monstros ou bosses";
+                }
+                desc="§l§6"+r+" Hulk\n§r§0Special (Manual):\n"+msg;
+            }
+            case "sculk" -> {
+                if(msg==null){
+                    msg="Cria uma explosão sonica igual a do Warden!\nPara evoluir precisa ser atacado pelo Warden e sobreviver";
+                }
+                desc="§l§6"+r+" Sculk\n§r§0Special (Manual):\n"+msg;
+            }
+            case "pescador" -> {
+                if(msg==null){
+                    msg="Cria um peixe a partir da vida no alvo!\nPara evoluir precisa acertar o anzol em animais marinhos";
+                }
+                desc="§l§6"+r+" Pescador\n§r§0Special (Manual):\n"+msg;
+            }
+            case "flash" -> {
+                if(msg==null){
+                    msg="Um teleporte para alguns blocos a frente!\nPara evoluir precisa usar a habilidade";
+                }
+                desc="§l§6"+r+" Flash\n§r§0Special (Manual):\n"+msg;
+            }
+            case "mago" -> {
+                if(msg==null){
+                    msg="A habilidade pode variar dependendo do slot que ele vai esta!\nPara evoluir precisa beber poções";
+                }
+                desc="§l§6"+r+" Mago\n§r§0Special (Manual):\n"+msg;
+            }
+            case "ladrao" -> {
+                if(msg==null){
+                    msg="Você foge para seu ponto de spawn!\nPara evoluir precisa roubar itens com a reliquia";
+                }
+                desc="§l§6"+r+" Ladrão\n§r§0Special (Manual):\n"+msg;
+            }
+            case "domador" -> {
+                if(msg==null){
+                    msg="Você cria um lobo companheiro!\nPara evoluir precisa domesticas animais/pets";
+                }
+                desc="§l§6"+r+" Domador\n§r§0Special (Manual):\n"+msg;
+            }
         }
         return desc;
     }
@@ -405,10 +518,21 @@ public class SpecialEvent implements Listener {
         int l = dataPlayer.getOrDefault(CACADOR.key,PersistentDataType.INTEGER,1);
         item.setLevel(l);
         Temporizador timer = new Temporizador(plugin, 10+l,
-                ()->player.sendActionBar(Component.text("Modo Minigum Ativado!")),
+                ()->{
+                    String msg = ReliquiasNexus.getLang().getString("special.cacador.ativado");
+                    if(msg==null){
+                        msg="Modo Minigum Ativado!";
+                    }
+                    player.sendActionBar(Component.text(msg));
+                },
                 ()->{},
                 (t)->{
-                    player.sendActionBar(Component.text("Modo Minigun acaba em "+(t.getSegundosRestantes())+" segundos"));
+                    String msg = ReliquiasNexus.getLang().getString("special.cacador.tempo");
+                    if(msg==null){
+                        msg="Modo Minigun acaba em <tempo> segundos!";
+                    }
+                    msg=msg.replace("<tempo>",""+t.getSegundosRestantes());
+                    player.sendActionBar(Component.text(msg));
                     Vector vec = player.getEyeLocation().getDirection();
                     Arrow flecha = player.launchProjectile(Arrow.class);
                     flecha.setCritical(true);
@@ -569,14 +693,25 @@ public class SpecialEvent implements Listener {
         item.setLevel(l);
         Temporizador timer = new Temporizador(plugin, 9+l,
                 () -> {
-                    player.sendActionBar(Component.text("Habilidade do Nexus do Protetor Ativado!"));
+                    String msg = ReliquiasNexus.getLang().getString("special.protetor.ativado");
+                    if(msg==null){
+                        msg="Habilidade do Nexus do Protetor Ativado!";
+                    }
+                    player.sendActionBar(Component.text(msg));
                     dataPlayer.set(PROTECAO.key,PersistentDataType.BOOLEAN,true);
                 },
                 () -> {
                     player.setGameMode(GameMode.SURVIVAL);
                     dataPlayer.set(PROTECAO.key,PersistentDataType.BOOLEAN,false);
                 },
-                (t) -> player.sendActionBar(Component.text("Modo Reversão acaba em "+t.getSegundosRestantes()+" segundos!"))
+                (t) -> {
+                    String msg = ReliquiasNexus.getLang().getString("special.protetor.tempo");
+                    if(msg==null){
+                        msg="Modo Reversão acaba em <tempo> segundos!";
+                    }
+                    msg=msg.replace("<tempo>",""+t.getSegundosRestantes());
+                    player.sendActionBar(Component.text(msg));
+                }
         );
         timer.scheduleTimer(20L);
         dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,120+l+9);
@@ -623,7 +758,11 @@ public class SpecialEvent implements Listener {
         timer.scheduleTimer(1L);
         Temporizador timer2 = new Temporizador(plugin, 10+l,
                 ()->{
-                    player.sendActionBar(Component.text("Modo Hulk Ativado!"));
+                    String msg = ReliquiasNexus.getLang().getString("special.hulk.ativado");
+                    if(msg==null){
+                        msg="Modo Hulk Ativado!";
+                    }
+                    player.sendActionBar(Component.text(msg));
                     player.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(baseD+l);
                     player.getAttribute(Attribute.SCALE).setBaseValue(baseT+0.25);
                 },
@@ -632,7 +771,13 @@ public class SpecialEvent implements Listener {
                     player.getAttribute(Attribute.SCALE).setBaseValue(baseT);
                 },
                 (t)->{
-                    player.sendActionBar(Component.text("Modo Hulk acaba em "+(t.getSegundosRestantes())+" segundos"));
+                    String msg = ReliquiasNexus.getLang().getString("special.hulk.tempo");
+                    if(msg==null){
+                        msg="Modo Hulk acaba em <tempo> segundos!";
+                    }
+                    msg = msg.replace("<tempo>",""+t.getSegundosRestantes());
+                    player.sendActionBar(Component.text(msg));
+                    player.sendActionBar(Component.text(msg));
                 }
         );
         timer2.scheduleTimer(20L);
@@ -928,13 +1073,14 @@ public class SpecialEvent implements Listener {
                             atingidos.add(vivo);
                             Location vloc = vivo.getLocation();
                             World vworld = vivo.getWorld();
-                            vworld.strikeLightning(vloc);
                             if(vivo instanceof Player p){
                                 if(p!=player){
                                     vivo.damage(damage);
+                                    vworld.strikeLightning(vloc);
                                 }
                             }else{
                                 vivo.damage(damage);
+                                vworld.strikeLightning(vloc);
                             }
                         }
                         pressf.remove(surdo);
@@ -1020,7 +1166,11 @@ public class SpecialEvent implements Listener {
                     Temporizador timer = new Temporizador(plugin,
                             tempo,
                             () -> {
-                                player.sendActionBar(Component.text("Habilidade do Nexus da Vida Ativado!"));
+                                String msg = ReliquiasNexus.getLang().getString("special.vida");
+                                if(msg==null){
+                                    msg = "Habilidade do Nexus da Vida Ativado!";
+                                }
+                                player.sendActionBar(Component.text(msg));
                                 player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION,20+l, l));
                                 player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE,20+l, 2));
                             },

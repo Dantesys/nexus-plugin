@@ -1,9 +1,15 @@
 #Linguagens suportadas (en-us,pt-br)
+#Supported languages (en-us,pt-br)
 lang: pt-br
 #Se o servidor está em expurgo, permite roubo de reliquia se verdadeiro
+#If the server is in purge, allow relic stealing if true
 expurgo: false
 #Limite de reliquias que um jogador pode ter, se o jogador passar disso ele é derrotado e fica com apenas 1 reliquia
+#Limit of relics that a player can have, if the player exceeds this he is defeated and is left with only 1 relic
 limite: 3
+#Level maximo que as reliquias podem evoluir, se definido como 1 ou menor desabilida o level maximo
+#Maximum level that relics can evolve, if set to 1 or lower, it disables the maximum level
+levelMax: 20
 nexus:
   guerreiro: ""
   ceifador: ""

@@ -33,7 +33,6 @@ public class JoinQuitEvent implements Listener {
         int qtd = container.getOrDefault(QTD.key, PersistentDataType.INTEGER,0);
         boolean novato = container.getOrDefault(new NamespacedKey("nexus_novato","novato"),PersistentDataType.BOOLEAN,true);
         container.set(SPECIAL.key,PersistentDataType.INTEGER,qtd);
-        player.sendActionBar(Component.text("Special OK"));
         if(qtd==0 && novato){
             container.set(new NamespacedKey("nexus_novato","novato"),PersistentDataType.BOOLEAN,false);
             List<Nexus> reliquias = ItemsRegistro.getValidReliquia(ReliquiasNexus.getNexusConfig());
@@ -57,16 +56,36 @@ public class JoinQuitEvent implements Listener {
             stack.setItemMeta(meta);
             player.getInventory().addItem(stack);
             player.getInventory().addItem(ItemsRegistro.livro.getItem(1));
-            event.joinMessage(Component.text("§2 Bem-vindo ao jogo, Jogador "+player.getName()));
-            player.sendMessage(Component.text("§2 Você recebeu a reliquia "+nome));
+            String msg=ReliquiasNexus.getLang().getString("joinquit.joinnew");
+            if(msg==null){
+                msg="Bem-vindo ao jogo, Jogador <player>";
+            }
+            msg=msg.replace("<player>",player.getName());
+            event.joinMessage(Component.text("§2"+msg));
+            String r=ReliquiasNexus.getLang().getString("joinquit.relic");
+            if(r==null){
+                r="Você recebeu a reliquia do <relic>";
+            }
+            r=r.replace("<relic>",nome);
+            player.sendMessage(Component.text("§2"+r));
         }else{
-            event.joinMessage(Component.text("§2 Bem-vindo devolta, Jogador "+player.getName()));
+            String msg=ReliquiasNexus.getLang().getString("joinquit.join");
+            if(msg==null){
+                msg="Bem-vindo devolta, Jogador <player>";
+            }
+            msg=msg.replace("<player>",player.getName());
+            event.joinMessage(Component.text("§2"+msg));
         }
     }
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         ReliquiasNexus.saiu(player);
-        event.quitMessage(Component.text("§4O Jogador "+player.getName()+" saiu do jogo!"));
+        String msg=ReliquiasNexus.getLang().getString("joinquit.quit");
+        if(msg==null){
+            msg="O Jogador <player> saiu do jogo!";
+        }
+        msg=msg.replace("<player>",player.getName());
+        event.quitMessage(Component.text("§4"+msg));
     }
 }

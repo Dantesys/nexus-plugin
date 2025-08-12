@@ -6,9 +6,6 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByBlockEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -20,69 +17,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.dantesys.reliquiasNexus.ReliquiasNexus;
 
 import java.util.List;
-import java.util.UUID;
-
-import static org.bukkit.Bukkit.getServer;
-import static org.dantesys.reliquiasNexus.util.NexusKeys.DONO;
 import static org.dantesys.reliquiasNexus.util.NexusKeys.NEXUS;
 
 public class PerdeuEvent implements Listener {
-    @EventHandler
-    public void onItemDamage(EntityDamageEvent event) {
-        if (!(event.getEntity() instanceof Item itemEntity)) return;
-        if (event.getCause() == EntityDamageEvent.DamageCause.LAVA || event.getCause() == EntityDamageEvent.DamageCause.FIRE) {
-            ItemStack item = itemEntity.getItemStack();
-            PersistentDataContainerView data = item.getPersistentDataContainer();
-            if (data.has(NEXUS.key, PersistentDataType.STRING) && data.has(DONO.key,PersistentDataType.STRING)) {
-                String uuidStr = data.get(DONO.key,PersistentDataType.STRING);
-                if(uuidStr!=null && !uuidStr.isBlank()){
-                    UUID uuid = UUID.fromString(uuidStr);
-                    Player player = getServer().getPlayer(uuid);
-                    if(player!=null){
-                        player.getInventory().addItem(item);
-                        itemEntity.remove();
-                    }
-                }
-            }
-        }
-    }
-    @EventHandler
-    public void onItemDanoPorBloco(EntityDamageByBlockEvent event) {
-        if (!(event.getEntity() instanceof Item itemEntity)) return;
-        if (event.getDamager()!=null && event.getDamager().getType() == Material.CACTUS) {
-            ItemStack item = itemEntity.getItemStack();
-            PersistentDataContainerView data = item.getPersistentDataContainer();
-            if (data.has(NEXUS.key, PersistentDataType.STRING) && data.has(DONO.key,PersistentDataType.STRING)) {
-                String uuidStr = data.get(DONO.key,PersistentDataType.STRING);
-                if(uuidStr!=null && !uuidStr.isBlank()){
-                    UUID uuid = UUID.fromString(uuidStr);
-                    Player player = getServer().getPlayer(uuid);
-                    if(player!=null){
-                        player.getInventory().addItem(item);
-                        itemEntity.remove();
-                    }
-                }
-            }
-        }
-    }
-    @EventHandler
-    public void onItemDespawn(ItemDespawnEvent event) {
-        ItemStack item = event.getEntity().getItemStack();
-        PersistentDataContainerView data = item.getPersistentDataContainer();
-        if (data.has(NEXUS.key, PersistentDataType.STRING) && data.has(DONO.key,PersistentDataType.STRING)) {
-            String uuidStr = data.get(DONO.key,PersistentDataType.STRING);
-            if(uuidStr!=null && !uuidStr.isBlank()){
-                UUID uuid = UUID.fromString(uuidStr);
-                Player player = getServer().getPlayer(uuid);
-                if(player!=null){
-                    player.getInventory().addItem(item);
-                    event.getEntity().remove();
-                }
-            }
-        }
-    }
     @EventHandler
     public void itemFrame(PlayerInteractEntityEvent event){
         Player player = event.getPlayer();
@@ -93,7 +33,11 @@ public class PerdeuEvent implements Listener {
             PersistentDataContainer data = meta.getPersistentDataContainer();
             if(data.has(NEXUS.key,PersistentDataType.STRING)){
                 event.setCancelled(true);
-                player.sendMessage("§cVocê não pode colocar a reliquia numa moldura");
+                String msg = ReliquiasNexus.getLang().getString("perdeu.frame");
+                if(msg==null){
+                    msg="Você não pode colocar a reliquia numa moldura.";
+                }
+                player.sendMessage("§c"+msg);
             }
         }
         if(e instanceof ArmorStand){
@@ -102,7 +46,11 @@ public class PerdeuEvent implements Listener {
             PersistentDataContainer data = meta.getPersistentDataContainer();
             if(data.has(NEXUS.key,PersistentDataType.STRING)){
                 event.setCancelled(true);
-                player.sendMessage("§cVocê não pode colocar a reliquia num suporte de armadura");
+                String msg = ReliquiasNexus.getLang().getString("perdeu.armor");
+                if(msg==null){
+                    msg="Você não pode colocar a reliquia num suporte de armadura.";
+                }
+                player.sendMessage("§c"+msg);
             }
         }
     }
@@ -116,7 +64,11 @@ public class PerdeuEvent implements Listener {
             PersistentDataContainer data = meta.getPersistentDataContainer();
             if(data.has(NEXUS.key,PersistentDataType.STRING)){
                 event.setCancelled(true);
-                player.sendMessage("§cVocê não pode colocar a reliquia num pote");
+                String msg = ReliquiasNexus.getLang().getString("perdeu.pote");
+                if(msg==null){
+                    msg="Você não pode colocar a reliquia num pote.";
+                }
+                player.sendMessage("§c"+msg);
             }
         }
     }
@@ -126,7 +78,11 @@ public class PerdeuEvent implements Listener {
         PersistentDataContainerView data = item.getPersistentDataContainer();
         if (data.has(NEXUS.key, PersistentDataType.STRING)) {
             event.setCancelled(true);
-            event.getPlayer().sendMessage("§cVocê não pode jogar fora uma relíquia, está doido?");
+            String msg = ReliquiasNexus.getLang().getString("perdeu.drop");
+            if(msg==null){
+                msg="Você não pode jogar fora uma relíquia, está doido?";
+            }
+            event.getPlayer().sendMessage("§c"+msg);
         }
     }
     @EventHandler
@@ -139,7 +95,11 @@ public class PerdeuEvent implements Listener {
             InventoryType inv = event.getInventory().getType();
             if(inv!= InventoryType.CRAFTING && inv!=InventoryType.PLAYER && inv!=InventoryType.ENCHANTING && inv!=InventoryType.ANVIL && inv!=InventoryType.GRINDSTONE) {
                 event.setCancelled(true);
-                event.getWhoClicked().sendMessage("§cVocê não pode arrastar uma relíquia para um container!");
+                String msg = ReliquiasNexus.getLang().getString("perdeu.chest");
+                if(msg==null){
+                    msg="Você não pode colocar a relíquia para um container!";
+                }
+                event.getWhoClicked().sendMessage("§c"+msg);
             }
         }
     }
@@ -153,7 +113,11 @@ public class PerdeuEvent implements Listener {
                 PersistentDataContainerView data = item.getPersistentDataContainer();
                 if (event.getClick().isShiftClick() && data.has(NEXUS.key, PersistentDataType.STRING) && inv!=InventoryType.PLAYER && inv!=InventoryType.ENCHANTING && inv!=InventoryType.ANVIL && inv!=InventoryType.GRINDSTONE) {
                     event.setCancelled(true);
-                    event.getWhoClicked().sendMessage("§cRelíquias não podem ser movidas com shift!");
+                    String msg = ReliquiasNexus.getLang().getString("perdeu.shift");
+                    if(msg==null){
+                        msg="Relíquias não podem ser movidas com shift!";
+                    }
+                    event.getWhoClicked().sendMessage("§c"+msg);
                 }
             }
         }
@@ -164,14 +128,18 @@ public class PerdeuEvent implements Listener {
 
         ItemStack clickedItem = event.getCurrentItem();
         ItemStack cursorItem = event.getCursor();
+        String msg = ReliquiasNexus.getLang().getString("perdeu.bundle");
+        if(msg==null){
+            msg="Você não pode guardar uma relíquia dentro de uma trouxa.";
+        }
         if(clickedItem != null){
             if (isBundle(cursorItem.getType()) && clickedItem.getPersistentDataContainer().has(NEXUS.key,PersistentDataType.STRING)) {
                 event.setCancelled(true);
-                player.sendMessage("§cVocê não pode mover uma relíquia para dentro de uma trouxa.");
+                player.sendMessage("§c"+msg);
             }
             if (isBundle(clickedItem.getType()) && cursorItem.getPersistentDataContainer().has(NEXUS.key,PersistentDataType.STRING)) {
                 event.setCancelled(true);
-                player.sendMessage("§cVocê não pode guardar uma relíquia dentro de uma trouxa.");
+                player.sendMessage("§c"+msg);
             }
         }
     }
@@ -204,7 +172,11 @@ public class PerdeuEvent implements Listener {
             PersistentDataContainerView data = item.getPersistentDataContainer();
             if (data.has(NEXUS.key, PersistentDataType.STRING) && inv!=InventoryType.PLAYER && inv!=InventoryType.ENCHANTING && inv!=InventoryType.ANVIL && inv!=InventoryType.GRINDSTONE && inv!= InventoryType.CRAFTING) {
                 event.setCancelled(true);
-                event.getWhoClicked().sendMessage("§cVocê não pode arrastar uma relíquia para um container!");
+                String msg = ReliquiasNexus.getLang().getString("perdeu.chest");
+                if(msg==null){
+                    msg="Você não pode colocar a relíquia para um container!";
+                }
+                event.getWhoClicked().sendMessage("§c"+msg);
             }
         }
     }

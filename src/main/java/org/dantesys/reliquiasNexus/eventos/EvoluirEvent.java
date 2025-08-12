@@ -141,16 +141,41 @@ public class EvoluirEvent implements Listener {
                                 }
                             }
                             player.getInventory().setItem(slot,nexusItem);
-                            msg = "§aSeu Nexus do "+nome+" evoluiu para o nível " + (levelAtual + 1) + "!";
+                            msg = ReliquiasNexus.getLang().getString("evo.sucesso");
+                            if(msg==null){
+                                msg="Sua Reliquia do <relic> evoluiu para o nível <level>!";
+                            }
+                            msg=msg.replace("<relic>",nome);
+                            msg=msg.replace("<level>",""+(levelAtual+1));
+                            msg="§a"+msg;
                         }
                     }else{
-                        msg = "§cVocê precisa de mais "+(levelAtual*10-level)+" leveis XP para evoluir sua reliquia do "+nome+"!";
+                        msg = ReliquiasNexus.getLang().getString("evo.needxp");
+                        if(msg==null){
+                            msg="Você precisa de mais <xp> leveis XP para evoluir sua reliquia do <relic>!";
+                        }
+                        msg=msg.replace("<relic>",nome);
+                        msg=msg.replace("<xp>",""+(levelAtual*10-level));
+                        msg="§c"+msg;
                     }
                 }else{
                     if(level>=levelAtual*10){
-                        msg = "§cVocê precisa "+condicao+" para evoluir sua reliquia do "+nome+"!";
+                        msg = ReliquiasNexus.getLang().getString("evo.cond");
+                        if(msg==null){
+                            msg="Você precisa <condicao> para evoluir sua reliquia do <relic>!";
+                        }
+                        msg=msg.replace("<relic>",nome);
+                        msg=msg.replace("<condicao>",condicao);
+                        msg="§c"+msg;
                     }else{
-                        msg = "§cVocê precisa de mais "+(levelAtual*10-level)+" leveis XP e "+condicao+" para evoluir sua reliquia do "+nome+"!";
+                        msg = ReliquiasNexus.getLang().getString("evo.condexp");
+                        if(msg==null){
+                            msg="Você precisa de mais <xp> leveis XP e <condicao> para evoluir sua reliquia do <relic>!";
+                        }
+                        msg=msg.replace("<relic>",nome);
+                        msg=msg.replace("<condicao>",condicao);
+                        msg=msg.replace("<xp>",""+(levelAtual*10-level));
+                        msg="§c"+msg;
                     }
                 }
             }
@@ -164,7 +189,11 @@ public class EvoluirEvent implements Listener {
             case "barbaro" -> {
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAOBARBARO.key, PersistentDataType.INTEGER, 0);
                 if(kills < level){
-                    condicao="derrotar mais "+(level-kills)+" monstros ou bosses";
+                    condicao = ReliquiasNexus.getLang().getString("condicao.demb");
+                    if(condicao==null){
+                        condicao="derrotar mais <cond> monstros ou bosses";
+                    }
+                    condicao=condicao.replace("<cond>",""+(level-kills));
                 }
             }
             case "ceifador" -> {
@@ -172,7 +201,11 @@ public class EvoluirEvent implements Listener {
                 double recuperacao = player.getPersistentDataContainer().getOrDefault(MISSAOCEIFADOR.key, PersistentDataType.DOUBLE, 0d);
                 if(recuperacao<recuperacaoN){
                     int qtd = (int) ((recuperacaoN)-recuperacao);
-                    condicao="roube mais "+qtd+" pontos de vida";
+                    condicao = ReliquiasNexus.getLang().getString("condicao.ceifador");
+                    if(condicao==null){
+                        condicao="roube mais <cond> pontos de vida";
+                    }
+                    condicao=condicao.replace("<cond>",""+(qtd));
                 }
             }
             case "fazendeiro" -> {
@@ -180,21 +213,33 @@ public class EvoluirEvent implements Listener {
                 int colheitas = player.getPersistentDataContainer().getOrDefault(MISSAOFAZENDEIRO.key, PersistentDataType.INTEGER, 0);
                 if(colheitas<colheitasN){
                     int qtd = colheitasN-colheitas;
-                    condicao="colha mais "+qtd+" plantações";
+                    condicao = ReliquiasNexus.getLang().getString("condicao.farme");
+                    if(condicao==null){
+                        condicao="colha mais <cond> plantações";
+                    }
+                    condicao=condicao.replace("<cond>",""+(qtd));
                 }
             }
             case "guerreiro" -> {
                 int killsN = 5 * level;
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAOGUERREIRO.key, PersistentDataType.INTEGER, 0);
                 if(kills < killsN){
-                    condicao="derrotar mais "+(killsN-kills)+" monstros ou bosses";
+                    condicao = ReliquiasNexus.getLang().getString("condicao.demb");
+                    if(condicao==null){
+                        condicao="derrotar mais <cond> monstros ou bosses";
+                    }
+                    condicao=condicao.replace("<cond>",""+(killsN-kills));
                 }
             }
             case "mares" -> {
                 int killsN = 10 * level;
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAOMARES.key, PersistentDataType.INTEGER, 0);
                 if(kills < killsN){
-                    condicao="derrotar mais "+(killsN-kills)+" seres aquaticos, monstros ou bosses";
+                    condicao = ReliquiasNexus.getLang().getString("condicao.deamb");
+                    if(condicao==null){
+                        condicao="derrotar mais <cond> seres aquaticos, monstros ou bosses";
+                    }
+                    condicao=condicao.replace("<cond>",""+(killsN-kills));
                 }
             }
             case "vida" -> {
@@ -202,34 +247,54 @@ public class EvoluirEvent implements Listener {
                 double recuperacao = player.getPersistentDataContainer().getOrDefault(MISSAOVIDA.key, PersistentDataType.DOUBLE, 0d);
                 if(recuperacao<recuperacaoN){
                     int qtd = (int) ((recuperacaoN)-recuperacao);
-                    condicao="recupere mais "+qtd+" pontos de vida";
+                    condicao = ReliquiasNexus.getLang().getString("condicao.vida");
+                    if(condicao==null){
+                        condicao="recupere mais <cond> pontos de vida";
+                    }
+                    condicao=condicao.replace("<cond>",""+(qtd));
                 }
             }
             case "espiao" -> {
                 int hab = player.getPersistentDataContainer().getOrDefault(MISSAOESPIAO.key, PersistentDataType.INTEGER, 0);
                 if(hab < level){
-                    condicao="use a habilidade mais "+(level-hab)+" vezes";
+                    condicao = ReliquiasNexus.getLang().getString("condicao.special");
+                    if(condicao==null){
+                        condicao="use o Special mais <cond> vezes";
+                    }
+                    condicao=condicao.replace("<cond>",""+(level-hab));
                 }
             }
             case "arqueiro" -> {
                 int killsN = 5 * level;
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAOARQUEIRO.key, PersistentDataType.INTEGER, 0);
                 if(kills < killsN){
-                    condicao="atingir mais "+(killsN-kills)+" monstros ou bosses";
+                    condicao = ReliquiasNexus.getLang().getString("condicao.arrow");
+                    if(condicao==null){
+                        condicao="atingir mais <cond> monstros ou bosses";
+                    }
+                    condicao=condicao.replace("<cond>",""+(killsN-kills));
                 }
             }
             case "cacador" -> {
                 int killsN = 5 * level;
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAOCACADOR.key, PersistentDataType.INTEGER, 0);
                 if(kills < killsN){
-                    condicao="atingir mais "+(killsN-kills)+" monstros ou bosses";
+                    condicao = ReliquiasNexus.getLang().getString("condicao.arrow");
+                    if(condicao==null){
+                        condicao="atingir mais <cond> monstros ou bosses";
+                    }
+                    condicao=condicao.replace("<cond>",""+(killsN-kills));
                 }
             }
             case "tempestade" -> {
                 int killsN = 5 * level;
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAOTEMPESTADE.key, PersistentDataType.INTEGER, 0);
                 if(kills < killsN){
-                    condicao="derrotar mais "+(killsN-kills)+" monstros ou bosses";
+                    condicao = ReliquiasNexus.getLang().getString("condicao.demb");
+                    if(condicao==null){
+                        condicao="derrotar mais <cond> monstros ou bosses";
+                    }
+                    condicao=condicao.replace("<cond>",""+(killsN-kills));
                 }
             }
             case "mineiro" -> {
@@ -279,9 +344,13 @@ public class EvoluirEvent implements Listener {
                 }
             }
             case "flash" -> {
-                int kills = player.getPersistentDataContainer().getOrDefault(MISSAOFLASH.key, PersistentDataType.INTEGER, 0);
-                if(kills < level){
-                    condicao="use a habilidade mais "+(level-kills)+" vezes";
+                int hab = player.getPersistentDataContainer().getOrDefault(MISSAOFLASH.key, PersistentDataType.INTEGER, 0);
+                if(hab < level){
+                    condicao = ReliquiasNexus.getLang().getString("condicao.special");
+                    if(condicao==null){
+                        condicao="use o Special mais <cond> vezes";
+                    }
+                    condicao=condicao.replace("<cond>",""+(level-hab));
                 }
             }
             case "mago" -> {
@@ -356,7 +425,11 @@ public class EvoluirEvent implements Listener {
                                 Temporizador timer = new Temporizador(plugin,
                                         9+l,
                                         () -> {
-                                            player.sendActionBar(Component.text("Habilidade do Nexus do Espião Ativado!"));
+                                            String msg = ReliquiasNexus.getLang().getString("espiao.ativado");
+                                            if(msg==null){
+                                                msg="Habilidade do Espião Ativado!";
+                                            }
+                                            player.sendActionBar(Component.text(msg));
                                             player.setGameMode(GameMode.SPECTATOR);
                                             player.playerListName(Component.text(""));
                                         },
@@ -365,7 +438,14 @@ public class EvoluirEvent implements Listener {
                                             player.teleport(loc);
                                             player.playerListName(comp);
                                         },
-                                        (t) -> player.sendActionBar(Component.text("Modo Fantasma acaba em "+t.getSegundosRestantes()+" segundos!"))
+                                        (t) -> {
+                                            String msg = ReliquiasNexus.getLang().getString("espiao.tempo");
+                                            if(msg==null){
+                                                msg="Modo Fantasma acaba em <tempo> segundos!";
+                                            }
+                                            msg=msg.replace("<tempo>",""+t.getSegundosRestantes());
+                                            player.sendActionBar(Component.text(msg));
+                                        }
                                 );
                                 timer.scheduleTimer(20L);
                                 dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,120+l+9);
@@ -530,64 +610,16 @@ public class EvoluirEvent implements Listener {
                             if(p.getPersistentDataContainer().has(NEXUS.key,PersistentDataType.STRING)){
                                 String pnome = p.getPersistentDataContainer().get(NEXUS.key,PersistentDataType.STRING);
                                 if(pnome!=null && pnome.equals("protetor")){
-                                    player.sendMessage("Você não pode roubar de quem tem a reliquia do protetor!");
-                                }else{
-                                    int escolhido = rd.nextInt(0,pinv.getContents().length);
-                                    roubar = pinv.getItem(escolhido);
-                                    if(roubar!=null && !roubar.isEmpty()){
-                                        boolean expurgo = ReliquiasNexus.getNexusConfig().getBoolean("expurgo");
-                                        if(roubar.getPersistentDataContainer().has(NEXUS.key,PersistentDataType.STRING)){
-                                            if(expurgo){
-                                                PersistentDataContainer container = player.getPersistentDataContainer();
-                                                String rnome = roubar.getPersistentDataContainer().get(NEXUS.key,PersistentDataType.STRING);
-                                                roubar.getItemMeta().getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,player.getUniqueId().toString());
-                                                ReliquiasNexus.setConfigSave("nexus."+rnome,player.getUniqueId().toString());
-                                                plugin.saveConfig();
-                                                int qtd = container.getOrDefault(QTD.key, PersistentDataType.INTEGER,1);
-                                                qtd++;
-                                                container.set(QTD.key, PersistentDataType.INTEGER,qtd);
-                                                pinv.setItem(escolhido,new ItemStack(Material.AIR));
-                                                player.sendMessage("Você roubou uma reliquia!");
-                                                LimitadorEvent.checkLimit(player);
-                                            }else{
-                                                stack=null;
-                                                player.sendMessage("Você não pode roubar uma reliquia fora do expurgo!");
-                                            }
-                                        }else{
-                                            player.sendMessage("Você roubou uma item!");
-                                        }
-                                    }else{
-                                        player.sendMessage("Você não conseguiu roubar nada!");
+                                    String msg = ReliquiasNexus.getLang().getString("ladrao.protetor");
+                                    if(msg==null){
+                                        msg="Você não pode roubar de quem tem a reliquia do protetor!";
                                     }
+                                    player.sendMessage(msg);
+                                }else{
+                                    roubar=rouboPlayer(player,pinv);
                                 }
                             }else{
-                                int escolhido = rd.nextInt(0,pinv.getContents().length);
-                                roubar = pinv.getItem(escolhido);
-                                if(roubar!=null && !roubar.isEmpty()){
-                                    boolean expurgo = ReliquiasNexus.getNexusConfig().getBoolean("expurgo");
-                                    if(roubar.getPersistentDataContainer().has(NEXUS.key,PersistentDataType.STRING)){
-                                        if(expurgo){
-                                            PersistentDataContainer container = player.getPersistentDataContainer();
-                                            String rnome = roubar.getPersistentDataContainer().get(NEXUS.key,PersistentDataType.STRING);
-                                            roubar.getItemMeta().getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,player.getUniqueId().toString());
-                                            ReliquiasNexus.setConfigSave("nexus."+rnome,player.getUniqueId().toString());
-                                            plugin.saveConfig();
-                                            int qtd = container.getOrDefault(QTD.key, PersistentDataType.INTEGER,1);
-                                            qtd++;
-                                            container.set(QTD.key, PersistentDataType.INTEGER,qtd);
-                                            pinv.setItem(escolhido,new ItemStack(Material.AIR));
-                                            player.sendMessage("Você roubou uma reliquia!");
-                                            LimitadorEvent.checkLimit(player);
-                                        }else{
-                                            stack=null;
-                                            player.sendMessage("Você não pode roubar uma reliquia fora do expurgo!");
-                                        }
-                                    }else{
-                                        player.sendMessage("Você roubou uma item!");
-                                    }
-                                }else{
-                                    player.sendMessage("Você não conseguiu roubar nada!");
-                                }
+                                roubar=rouboPlayer(player,pinv);
                             }
                         }else{
                             EntityEquipment equipa = furto.getEquipment();
@@ -603,15 +635,23 @@ public class EvoluirEvent implements Listener {
                                 };
                                 roubar = equipa.getItem(slot);
                                 if(!roubar.isEmpty()){
-                                    player.sendMessage("Você roubou uma item!");
+                                    String msg = ReliquiasNexus.getLang().getString("ladrao.item");
+                                    if(msg==null){
+                                        msg="Você roubou uma item!";
+                                    }
+                                    player.sendMessage(msg);
                                     equipa.setItem(slot,new ItemStack(Material.AIR));
                                 }else{
-                                    player.sendMessage("Você não conseguiu roubar nada!");
+                                    String msg = ReliquiasNexus.getLang().getString("ladrao.nada");
+                                    if(msg==null){
+                                        msg="Você não conseguiu roubar nada!";
+                                    }
+                                    player.sendMessage(msg);
                                 }
                             }
                         }
                         Nexus n = ItemsRegistro.getFromNome(nome);
-                        if(n!=null && roubar!=null && !roubar.isEmpty() && stack!=null){
+                        if(n != null && roubar != null && !roubar.isEmpty()){
                             BundleMeta meta = (BundleMeta) stack.getItemMeta();
                             meta.addItem(roubar);
                             stack.setItemMeta(meta);
@@ -699,6 +739,56 @@ public class EvoluirEvent implements Listener {
                 }
             }
         }
+    }
+    private ItemStack rouboPlayer(Player player,PlayerInventory pinv){
+        Random rd = new Random();
+        int escolhido = rd.nextInt(0,pinv.getContents().length);
+        ItemStack roubar = pinv.getItem(escolhido);
+        if(roubar!=null && !roubar.isEmpty()){
+            boolean expurgo = ReliquiasNexus.getNexusConfig().getBoolean("expurgo");
+            if(roubar.getPersistentDataContainer().has(NEXUS.key,PersistentDataType.STRING)){
+                if(expurgo){
+                    PersistentDataContainer container = player.getPersistentDataContainer();
+                    String rnome = roubar.getPersistentDataContainer().get(NEXUS.key,PersistentDataType.STRING);
+                    roubar.getItemMeta().getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,player.getUniqueId().toString());
+                    ReliquiasNexus.setConfigSave("nexus."+rnome,player.getUniqueId().toString());
+                    plugin.saveConfig();
+                    int qtd = container.getOrDefault(QTD.key, PersistentDataType.INTEGER,1);
+                    qtd++;
+                    container.set(QTD.key, PersistentDataType.INTEGER,qtd);
+                    pinv.setItem(escolhido,new ItemStack(Material.AIR));
+                    String msg = ReliquiasNexus.getLang().getString("ladrao.reliquia");
+                    if(msg==null){
+                        msg="Você roubou uma reliquia!";
+                    }
+                    player.sendMessage(msg);
+                    LimitadorEvent.checkLimit(player);
+                }
+                else{
+                    String msg = ReliquiasNexus.getLang().getString("ladrao.expurgo");
+                    if(msg==null){
+                        msg="Você não pode roubar uma reliquia fora do expurgo!";
+                    }
+                    player.sendMessage(msg);
+                    return null;
+                }
+            }
+            else{
+                String msg = ReliquiasNexus.getLang().getString("ladrao.item");
+                if(msg==null){
+                    msg="Você roubou uma item!";
+                }
+                player.sendMessage(msg);
+            }
+        }
+        else{
+            String msg = ReliquiasNexus.getLang().getString("ladrao.nada");
+            if(msg==null){
+                msg="Você não conseguiu roubar nada!";
+            }
+            player.sendMessage(msg);
+        }
+        return roubar;
     }
     @EventHandler
     public void colher(BlockBreakEvent event){
