@@ -39,6 +39,7 @@ import java.util.*;
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 
 public final class ReliquiasNexus extends JavaPlugin {
+    private final String UPDATEURI = "https://github.com/Dantesys/nexus-plugin/releases/latest/download/nexus.jar";
     private static final Map<UUID, Troca> trocas = new HashMap<>();
     private static FileConfiguration config;
     private static YamlConfiguration lang;
