@@ -31,6 +31,7 @@ import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
 import org.dantesys.reliquiasNexus.util.NexusKeys;
 import org.dantesys.reliquiasNexus.util.Troca;
+import org.dantesys.reliquiasNexus.util.UpdaterCheck;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,7 +40,6 @@ import java.util.*;
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 
 public final class ReliquiasNexus extends JavaPlugin {
-    private final String UPDATEURI = "https://github.com/Dantesys/nexus-plugin/releases/latest/download/nexus.jar";
     private static final Map<UUID, Troca> trocas = new HashMap<>();
     private static FileConfiguration config;
     private static YamlConfiguration lang;
@@ -66,6 +66,7 @@ public final class ReliquiasNexus extends JavaPlugin {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        new UpdaterCheck(this, "dantesys/nexus-plugin").checkForUpdates();
         List<String> cmd = lang.getStringList("comandos.comando");
         getServer().getConsoleSender().sendMessage(""+this.getDataFolder());
         getServer().getConsoleSender().sendMessage(""+cmd);

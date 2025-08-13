@@ -156,6 +156,7 @@ evo:
   needxp: "Você precisa de mais <xp> leveis XP para evoluir sua reliquia do <relic>!"
   cond: "Você precisa <condicao> para evoluir sua reliquia do <relic>!"
   condexp: "Você precisa de mais <xp> leveis XP e <condicao> para evoluir sua reliquia do <relic>!"
+  max: "Você chegou ao level máximo da sua reliquia <relic>!"
 condicao:
   demb: "derrotar mais <cond> monstros ou bosses"
   deamb: "derrotar mais <cond> seres aquaticos, monstros ou bosses"
@@ -173,3 +174,8 @@ condicao:
   mago: "beba mais <cond> poções"
   ladrao: "roube mais <cond> itens"
   domador: "dome mais <cond> animais/pets"
+updater:
+  new: "Nova versão disponível no GitHub: <new> (você está usando <used>)"
+  download: "Baixe em: <link>"
+  current: "Você está usando a versão mais recente!"
+  erro: "Não foi possível verificar atualizações:"

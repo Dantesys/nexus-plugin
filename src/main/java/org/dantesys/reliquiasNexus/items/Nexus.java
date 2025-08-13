@@ -39,7 +39,7 @@ public class Nexus{
     }
     public ItemStack getItem(int level){
         int max = ReliquiasNexus.getNexusConfig().getInt("levelMax");
-        if(max>1){
+        if(max>1 && level>max){
             level=max;
         }
         if(level==1){
@@ -52,7 +52,11 @@ public class Nexus{
         return this.item;
     }
     public void setLevel(int l){
+        int max = ReliquiasNexus.getNexusConfig().getInt("levelMax");
         if(l>level){
+            if(l>max && max>1){
+                l=max;
+            }
             for(int i=level;i<l;i++){
                 upgrade();
             }
@@ -70,9 +74,9 @@ public class Nexus{
     }
     public void upgrade(){
         this.level=level+1;
-        ItemMeta item = this.item.getItemMeta();
+        ItemMeta meta = this.item.getItemMeta();
         NamespacedKey key = new NamespacedKey("nexus_leveled", "boost_lvl_" + this.level);
-        item.addAttributeModifier(attribute, new AttributeModifier(key, level, AttributeModifier.Operation.ADD_NUMBER));
-        this.item.setItemMeta(item);
+        meta.addAttributeModifier(attribute, new AttributeModifier(key, level, AttributeModifier.Operation.ADD_NUMBER));
+        this.item.setItemMeta(meta);
     }
 }

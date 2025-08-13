@@ -156,6 +156,7 @@ evo:
   needxp: "You need more <xp> XP levels to evolve your <relic> relic!"
   cond: "You need <condicao> to evolve your <relic> relic!"
   condexp: "You need more <xp> XP and <condicao> levels to evolve your <relic> relic!"
+  max: "You have reached the maximum level of your relic <relic>!"
 condicao:
   demb: "defeat more <cond> monsters or bosses"
   deamb: "defeat more <cond> aquatic creatures, monsters or bosses"
@@ -173,3 +174,8 @@ condicao:
   mago: "drink more <cond> potions"
   ladrao: "steal more <cond> items"
   domador: "tame more <cond> animals/pets"
+updater:
+  new: "New version available on GitHub: <new> (you are using <used>)"
+  download: "Download at: <link>"
+  current: "You are using the latest version!"
+  erro: "Unable to check for updates:"
