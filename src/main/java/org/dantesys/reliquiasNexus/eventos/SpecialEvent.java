@@ -407,7 +407,16 @@ public class SpecialEvent implements Listener {
                             vivo.damage(damage);
                         }
                     }else{
-                        vivo.damage(damage);
+                        if(eFazenda(vivo)){
+                            Material egg = EntityToEgg.getEntityEgg(vivo.getType());
+                            if(egg!=null){
+                                Location loc = vivo.getEyeLocation();
+                                vivo.getWorld().dropItemNaturally(loc,new ItemStack(egg));
+                                vivo.remove();
+                            }
+                        }else{
+                            vivo.damage(damage);
+                        }
                     }
                     Location locV = vivo.getLocation();
                     world.dropItemNaturally(locV,new ItemStack(finalM,l));
@@ -1311,5 +1320,28 @@ public class SpecialEvent implements Listener {
                 }
             }
         }
+    }
+    public boolean eFazenda(LivingEntity entity){
+        List<EntityType> entities = List.of(
+                EntityType.BEE,
+                EntityType.CAMEL,
+                EntityType.CAT,
+                EntityType.CHICKEN,
+                EntityType.COW,
+                EntityType.DONKEY,
+                EntityType.FOX,
+                EntityType.FROG,
+                EntityType.GOAT,
+                EntityType.HORSE,
+                EntityType.LLAMA,
+                EntityType.MOOSHROOM,
+                EntityType.MULE,
+                EntityType.PARROT,
+                EntityType.PIG,
+                EntityType.RABBIT,
+                EntityType.SHEEP,
+                EntityType.WOLF
+        );
+        return entities.contains(entity.getType());
     }
 }
