@@ -100,27 +100,15 @@ public class JoinQuitEvent implements Listener {
                 switch (nome){
                     case "barbaro", "guerreiro" -> player.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(level-1);
                     case "ceifador" -> player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20+level-1);
-                    case "fazendeiro" -> {
-                        dataPlayer.set(MISSAOFAZENDEIRO.key, PersistentDataType.INTEGER, 0);
-                        dataPlayer.set(FAZENDEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
-                    }
+                    case "fazendeiro" -> player.getAttribute(Attribute.LUCK).setBaseValue(level);
                     case "mares" -> {
-                        dataPlayer.set(MISSAOMARES.key, PersistentDataType.INTEGER, 0);
-                        dataPlayer.set(MARES.key,PersistentDataType.INTEGER,levelAtual+1);
+                        player.getAttribute(Attribute.SUBMERGED_MINING_SPEED).setBaseValue(0.2+(level/10));
+                        player.getAttribute(Attribute.WATER_MOVEMENT_EFFICIENCY).setBaseValue(level/10);
                     }
                     case "vida" -> player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20+((level-1)*2));
-                    case "espiao" -> {
-                        dataPlayer.set(MISSAOESPIAO.key, PersistentDataType.INTEGER, 0);
-                        dataPlayer.set(ESPIAO.key,PersistentDataType.INTEGER,levelAtual+1);
-                    }
-                    case "arqueiro" -> {
-                        dataPlayer.set(MISSAOARQUEIRO.key, PersistentDataType.INTEGER, 0);
-                        dataPlayer.set(ARQUEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
-                    }
-                    case "cacador" -> {
-                        dataPlayer.set(MISSAOCACADOR.key, PersistentDataType.INTEGER, 0);
-                        dataPlayer.set(CACADOR.key,PersistentDataType.INTEGER,levelAtual+1);
-                    }
+                    case "espiao" -> player.getAttribute(Attribute.SCALE).setBaseValue(1-(level*0.025));
+                    case "arqueiro" -> player.getAttribute(Attribute.SNEAKING_SPEED).setBaseValue(0.3+(level*0.035));
+                    case "cacador" -> player.getAttribute(Attribute.SNEAKING_SPEED).setBaseValue(0.6+(level*0.7));
                     case "tempestade" -> {
                         dataPlayer.set(MISSAOTEMPESTADE.key, PersistentDataType.INTEGER, 0);
                         dataPlayer.set(TEMPESTADE.key,PersistentDataType.INTEGER,levelAtual+1);

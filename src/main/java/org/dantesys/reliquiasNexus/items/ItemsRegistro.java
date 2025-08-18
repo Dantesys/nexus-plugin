@@ -123,8 +123,6 @@ public class ItemsRegistro {
         vida = new Nexus(item,"vida");
     }
     private static void createMares(){
-        List<PotionEffectType> efeitos = new ArrayList<>();
-        efeitos.add(PotionEffectType.CONDUIT_POWER);
         ItemStack item = new ItemStack(Material.TRIDENT,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus dos Mares"));
@@ -134,12 +132,9 @@ public class ItemsRegistro {
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"mares");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
         item.setItemMeta(meta);
-        mares = new Nexus(item,efeitos,"mares", Attribute.ATTACK_DAMAGE);
+        mares = new Nexus(item,"mares");
     }
     private static void createBarbaro(){
-        List<PotionEffectType> efeitos = new ArrayList<>();
-        efeitos.add(PotionEffectType.STRENGTH);
-        efeitos.add(PotionEffectType.SPEED);
         ItemStack item = new ItemStack(Material.NETHERITE_AXE,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Barbaro"));
@@ -149,11 +144,9 @@ public class ItemsRegistro {
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"barbaro");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
         item.setItemMeta(meta);
-        barbaro = new Nexus(item,efeitos,"barbaro", Attribute.ATTACK_DAMAGE);
+        barbaro = new Nexus(item,"barbaro");
     }
     private static void createFazendeiro(){
-        List<PotionEffectType> efeitos = new ArrayList<>();
-        efeitos.add(PotionEffectType.LUCK);
         ItemStack item = new ItemStack(Material.NETHERITE_HOE,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Fazendeiro"));
@@ -163,11 +156,9 @@ public class ItemsRegistro {
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"fazendeiro");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
         item.setItemMeta(meta);
-        fazendeiro = new Nexus(item,efeitos,"fazendeiro", Attribute.BLOCK_INTERACTION_RANGE);
+        fazendeiro = new Nexus(item,"fazendeiro");
     }
     private static void createEspiao(){
-        List<PotionEffectType> efeitos = new ArrayList<>();
-        efeitos.add(PotionEffectType.SPEED);
         ItemStack item = new ItemStack(Material.NETHERITE_HELMET,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Espiao"));
@@ -176,14 +167,10 @@ public class ItemsRegistro {
         meta.setRarity(ItemRarity.RARE);
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"espiao");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
-        meta.addAttributeModifier(Attribute.SCALE,new AttributeModifier(new NamespacedKey("nexus_atributo","tamanho"),-0.75, AttributeModifier.Operation.ADD_NUMBER));
         item.setItemMeta(meta);
-        espiao = new Nexus(item,efeitos,"espiao", Attribute.ARMOR);
+        espiao = new Nexus(item,"espiao");
     }
     private static void createArqueiro(){
-        List<PotionEffectType> efeitos = new ArrayList<>();
-        efeitos.add(PotionEffectType.INVISIBILITY);
-        efeitos.add(PotionEffectType.NIGHT_VISION);
         ItemStack item = new ItemStack(Material.BOW,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Arqueiro"));
@@ -193,11 +180,9 @@ public class ItemsRegistro {
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"arqueiro");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
         item.setItemMeta(meta);
-        arqueiro = new Nexus(item,efeitos,"arqueiro", Attribute.SNEAKING_SPEED);
+        arqueiro = new Nexus(item,"arqueiro");
     }
     private static void createCacador(){
-        List<PotionEffectType> efeitos = new ArrayList<>();
-        efeitos.add(PotionEffectType.RESISTANCE);
         ItemStack item = new ItemStack(Material.CROSSBOW,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Caçador"));
@@ -207,7 +192,7 @@ public class ItemsRegistro {
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"cacador");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
         item.setItemMeta(meta);
-        cacador = new Nexus(item,efeitos,"cacador", Attribute.STEP_HEIGHT);
+        cacador = new Nexus(item,"cacador");
     }
     private static void createTempestade(){
         List<PotionEffectType> efeitos = new ArrayList<>();

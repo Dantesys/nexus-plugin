@@ -34,7 +34,7 @@ public class Ceifador {
             deathfear(level,player);
         }else if(level<16){//11-15
             nigthslash(level,player);
-        }else if(level<21){//16-20
+        }else{//16-20
             soulcolector(level,player);
         }
     }

@@ -22,9 +22,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
-import org.dantesys.reliquiasNexus.SpeciaisPassivas.Ceifador;
-import org.dantesys.reliquiasNexus.SpeciaisPassivas.Guerreiro;
-import org.dantesys.reliquiasNexus.SpeciaisPassivas.Vida;
+import org.dantesys.reliquiasNexus.SpeciaisPassivas.*;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
 import org.dantesys.reliquiasNexus.util.EntityToEgg;
@@ -52,18 +50,18 @@ public class SpecialEvent implements Listener {
                     Nexus item = ItemsRegistro.getFromNome(nome);
                     if(item!=null){
                         switch (item.getNome()) {
-                            case "barbaro" -> barbaro(player,item);
+                            case "barbaro" -> barbaro(player);
                             case "ceifador" -> ceifador(player);
-                            case "fazendeiro" -> fazendeiro(player,item);
+                            case "fazendeiro" -> fazendeiro(player);
                             case "guerreiro" -> guerreiro(player);
                             case "vida" -> vida(player);
-                            case "mares" -> mares(player,item);
+                            case "mares" -> mares(player);
                             case "arqueiro" -> {
-                                arqueiro(player,item);
+                                arqueiro(player);
                                 event.setCancelled(true);
                             }
                             case "cacador" -> {
-                                cacador(player,item);
+                                cacador(player);
                                 event.setCancelled(true);
                             }
                             case "tempestade" -> tempestade(player,item);
@@ -316,11 +314,10 @@ public class SpecialEvent implements Listener {
         }
         return desc;
     }
-    private void barbaro(Player player,Nexus item){
+    private void barbaro(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(BARBARO.key,PersistentDataType.INTEGER,1);
-        item.setLevel(l);
-        player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH,200*l,9));
+        Barbaro.getSpecialbyLevel(l,player);
     }
     private void ceifador(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
@@ -332,141 +329,30 @@ public class SpecialEvent implements Listener {
         int l = dataPlayer.getOrDefault(VIDA.key,PersistentDataType.INTEGER,1);
         Vida.getSpecialbyLevel(l,player);
     }
-    private void fazendeiro(Player player,Nexus item){
+    private void fazendeiro(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(FAZENDEIRO.key,PersistentDataType.INTEGER,1);
-        item.setLevel(l);
-        final int finalRange = 30;
-        final Location location = player.getLocation();
-        final World world = player.getWorld();
-        final double damage = 5+l;
-        Material finalM = getPlanta();
-        final List<LivingEntity> atingidos = new ArrayList<>();
-        Temporizador timer = new Temporizador(plugin, 10,
-                ()->{
-                },()-> {
-        },(t)->{
-            double area = (double) finalRange /(t.getSegundosRestantes());
-            for (double i = 0; i <= 2*Math.PI*area; i += 0.05) {
-                double x = (area * Math.cos(i)) + location.getX();
-                double z = (location.getZ() + area * Math.sin(i));
-                Location particle = new Location(world, x, location.getY() + 1, z);
-                world.spawnParticle(Particle.COMPOSTER,particle,1);
-            }
-            Collection<Entity> pressf = location.getWorld().getNearbyEntities(location,area,2,area);
-            while(pressf.iterator().hasNext()){
-                Entity surdo = pressf.iterator().next();
-                if(surdo instanceof LivingEntity vivo && !atingidos.contains(vivo)){
-                    atingidos.add(vivo);
-                    if(vivo instanceof Player p){
-                        if(p!=player) {
-                            vivo.damage(damage);
-                        }
-                    }else{
-                        if(eFazenda(vivo)){
-                            Material egg = EntityToEgg.getEntityEgg(vivo.getType());
-                            if(egg!=null){
-                                Location loc = vivo.getEyeLocation();
-                                vivo.getWorld().dropItemNaturally(loc,new ItemStack(egg));
-                                vivo.remove();
-                            }
-                        }else{
-                            vivo.damage(damage);
-                        }
-                    }
-                    Location locV = vivo.getLocation();
-                    world.dropItemNaturally(locV,new ItemStack(finalM,l));
-                }
-                pressf.remove(surdo);
-            }
-        });
-        timer.scheduleTimer(1L);
+        Fazendeiro.getSpecialbyLevel(l,player);
     }
     private void guerreiro(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(GUERREIRO.key,PersistentDataType.INTEGER,1);
         Guerreiro.getSpecialbyLevel(l,player);
     }
-    private void mares(Player player,Nexus item){
+    private void mares(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(MARES.key,PersistentDataType.INTEGER,1);
-        item.setLevel(l);
-        final int finalRange = 50;
-        final double damage = 5+l;
-        final Location location = player.getLocation();
-        final World world = player.getWorld();
-        final List<LivingEntity> atingidos = new ArrayList<>();
-        Temporizador timer = new Temporizador(plugin, 10,
-                ()->{
-                },()-> {
-        },(t)->{
-            double area = (double) finalRange /(t.getSegundosRestantes());
-            for (double i = 0; i <= 2*Math.PI*area; i += 0.05) {
-                double x = (area * Math.cos(i)) + location.getX();
-                double z = (location.getZ() + area * Math.sin(i));
-                Location particle = new Location(world, x, location.getY() + 1, z);
-                world.spawnParticle(Particle.END_ROD,particle,1);
-            }
-            Collection<Entity> pressf = location.getWorld().getNearbyEntities(location,area,2,area);
-            while(pressf.iterator().hasNext()){
-                Entity surdo = pressf.iterator().next();
-                if(surdo instanceof LivingEntity vivo && !atingidos.contains(vivo)){
-                    atingidos.add(vivo);
-                    if(vivo instanceof Player p){
-                        if(p!=player){
-                            vivo.setRemainingAir(0);
-                            vivo.damage(damage);
-                        }
-                    }else{
-                        vivo.setRemainingAir(0);
-                        vivo.damage(damage);
-                    }
-                }
-                pressf.remove(surdo);
-            }
-        });
-        timer.scheduleTimer(1L);
+        Mares.getSpecialbyLevel(l,player);
     }
-    private void arqueiro(Player player, Nexus item){
+    private void arqueiro(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(ARQUEIRO.key,PersistentDataType.INTEGER,1);
-        item.setLevel(l);
-        Arrow arrow = player.launchProjectile(Arrow.class);
-        arrow.setCritical(true);
-        arrow.setGlowing(true);
-        arrow.setColor(Color.YELLOW);
-        Vector vec = player.getLocation().getDirection();
-        arrow.setVelocity(vec.multiply(20+l));
+        Arqueiro.getSpecialbyLevel(l,player);
     }
-    private void cacador(Player player, Nexus item){
+    private void cacador(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(CACADOR.key,PersistentDataType.INTEGER,1);
-        item.setLevel(l);
-        Temporizador timer = new Temporizador(plugin, 10+l,
-                ()->{
-                    String msg = ReliquiasNexus.getLang().getString("special.cacador.ativado");
-                    if(msg==null){
-                        msg="Modo Minigum Ativado!";
-                    }
-                    player.sendActionBar(Component.text(msg));
-                },
-                ()->{},
-                (t)->{
-                    String msg = ReliquiasNexus.getLang().getString("special.cacador.tempo");
-                    if(msg==null){
-                        msg="Modo Minigun acaba em <tempo> segundos!";
-                    }
-                    msg=msg.replace("<tempo>",""+t.getSegundosRestantes());
-                    player.sendActionBar(Component.text(msg));
-                    Vector vec = player.getEyeLocation().getDirection();
-                    Arrow flecha = player.launchProjectile(Arrow.class);
-                    flecha.setCritical(true);
-                    flecha.setGlowing(true);
-                    flecha.setColor(Color.YELLOW);
-                    flecha.setVelocity(vec.multiply(10+l));
-                }
-        );
-        timer.scheduleTimer(5L);
+        Cacador.getSpecialbyLevel(l,player);
     }
     private void tempestade(Player player,Nexus item){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
@@ -1016,23 +902,6 @@ public class SpecialEvent implements Listener {
         }
         dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,tempo);
     }
-    private Material getPlanta(){
-        List<Material> m = List.of(
-                Material.WHEAT,
-                Material.CARROT,
-                Material.BEETROOT,
-                Material.POTATO,
-                Material.PUMPKIN,
-                Material.MELON,
-                Material.GLOW_BERRIES,
-                Material.SWEET_BERRIES,
-                Material.CACTUS,
-                Material.SUGAR_CANE
-        );
-        Random r = new Random();
-        int i = r.nextInt(0,m.size()-1);
-        return m.get(i);
-    }
     private Material getMinerio(){
         List<Material> m = List.of(
                 Material.COAL_ORE,
@@ -1152,6 +1021,13 @@ public class SpecialEvent implements Listener {
     }
     @EventHandler
     public void acertou(ProjectileHitEvent event){
+        if(event.getEntity() instanceof Arrow arrow){
+            if (arrow.hasMetadata(SPECIAL.key.getKey())){
+                int forca = arrow.getMetadata(SPECIAL.key.getKey()).getFirst().asInt();
+                World w = arrow.getWorld();
+                w.createExplosion(arrow,forca,false,false);
+            }
+        }
         if(event.getEntity() instanceof WindCharge bola){
             if(bola.getPersistentDataContainer().has(SPECIAL.key,PersistentDataType.INTEGER)){
                 int efeito = bola.getPersistentDataContainer().getOrDefault(SPECIAL.key,PersistentDataType.INTEGER,1);
@@ -1184,28 +1060,5 @@ public class SpecialEvent implements Listener {
                 }
             }
         }
-    }
-    public boolean eFazenda(LivingEntity entity){
-        List<EntityType> entities = List.of(
-                EntityType.BEE,
-                EntityType.CAMEL,
-                EntityType.CAT,
-                EntityType.CHICKEN,
-                EntityType.COW,
-                EntityType.DONKEY,
-                EntityType.FOX,
-                EntityType.FROG,
-                EntityType.GOAT,
-                EntityType.HORSE,
-                EntityType.LLAMA,
-                EntityType.MOOSHROOM,
-                EntityType.MULE,
-                EntityType.PARROT,
-                EntityType.PIG,
-                EntityType.RABBIT,
-                EntityType.SHEEP,
-                EntityType.WOLF
-        );
-        return entities.contains(entity.getType());
     }
 }

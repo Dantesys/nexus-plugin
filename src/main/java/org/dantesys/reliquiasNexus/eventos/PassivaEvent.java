@@ -16,9 +16,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.dantesys.reliquiasNexus.SpeciaisPassivas.Ceifador;
-import org.dantesys.reliquiasNexus.SpeciaisPassivas.Guerreiro;
-import org.dantesys.reliquiasNexus.SpeciaisPassivas.Vida;
+import org.dantesys.reliquiasNexus.SpeciaisPassivas.*;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
 
@@ -52,7 +50,6 @@ public class PassivaEvent implements Listener {
                         e.setCancelled(true);
                         return;
                     }
-                    int l=dataPlayer.getOrDefault(VIDA.key,PersistentDataType.INTEGER,1);
                     int tempo = 120;
                     player.getInventory().setItemInMainHand(item);
                     player.getInventory().setItemInOffHand(item2);
@@ -152,6 +149,30 @@ public class PassivaEvent implements Listener {
                     case "vida" -> {
                         int level = player.getPersistentDataContainer().getOrDefault(VIDA.key,PersistentDataType.INTEGER,1);
                         Vida.getPassivabyLevel(level,player);
+                    }
+                    case "mares" -> {
+                        int level = player.getPersistentDataContainer().getOrDefault(MARES.key,PersistentDataType.INTEGER,1);
+                        Mares.getPassivabyLevel(level,player);
+                    }
+                    case "barbaro" -> {
+                        int level = player.getPersistentDataContainer().getOrDefault(BARBARO.key,PersistentDataType.INTEGER,1);
+                        Barbaro.getPassivabyLevel(level,player);
+                    }
+                    case "fazendeiro" -> {
+                        int level = player.getPersistentDataContainer().getOrDefault(FAZENDEIRO.key,PersistentDataType.INTEGER,1);
+                        Fazendeiro.getPassivabyLevel(level,player);
+                    }
+                    case "espiao" -> {
+                        int level = player.getPersistentDataContainer().getOrDefault(ESPIAO.key,PersistentDataType.INTEGER,1);
+                        Espiao.getPassivabyLevel(level,player);
+                    }
+                    case "arqueiro" -> {
+                        int level = player.getPersistentDataContainer().getOrDefault(ARQUEIRO.key,PersistentDataType.INTEGER,1);
+                        Arqueiro.getPassivabyLevel(level,player);
+                    }
+                    case "cacador" -> {
+                        int level = player.getPersistentDataContainer().getOrDefault(CACADOR.key,PersistentDataType.INTEGER,1);
+                        Cacador.getPassivabyLevel(level,player);
                     }
                 }
             }

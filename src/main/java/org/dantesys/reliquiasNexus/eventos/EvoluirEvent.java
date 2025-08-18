@@ -24,6 +24,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
+import org.dantesys.reliquiasNexus.SpeciaisPassivas.Espiao;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
 import org.dantesys.reliquiasNexus.util.Temporizador;
@@ -76,6 +77,7 @@ public class EvoluirEvent implements Listener {
                                     case "fazendeiro" -> {
                                         dataPlayer.set(MISSAOFAZENDEIRO.key, PersistentDataType.INTEGER, 0);
                                         dataPlayer.set(FAZENDEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
+                                        player.getAttribute(Attribute.LUCK).setBaseValue(levelAtual);
                                     }
                                     case "guerreiro" -> {
                                         dataPlayer.set(MISSAOGUERREIRO.key, PersistentDataType.INTEGER, 0);
@@ -85,6 +87,8 @@ public class EvoluirEvent implements Listener {
                                     case "mares" -> {
                                         dataPlayer.set(MISSAOMARES.key, PersistentDataType.INTEGER, 0);
                                         dataPlayer.set(MARES.key,PersistentDataType.INTEGER,levelAtual+1);
+                                        player.getAttribute(Attribute.SUBMERGED_MINING_SPEED).setBaseValue(0.2+(levelAtual/10));
+                                        player.getAttribute(Attribute.WATER_MOVEMENT_EFFICIENCY).setBaseValue(levelAtual/10);
                                     }
                                     case "vida" -> {
                                         dataPlayer.set(MISSAOVIDA.key, PersistentDataType.DOUBLE, 0d);
@@ -94,14 +98,17 @@ public class EvoluirEvent implements Listener {
                                     case "espiao" -> {
                                         dataPlayer.set(MISSAOESPIAO.key, PersistentDataType.INTEGER, 0);
                                         dataPlayer.set(ESPIAO.key,PersistentDataType.INTEGER,levelAtual+1);
+                                        player.getAttribute(Attribute.SCALE).setBaseValue(1-(levelAtual*0.025));
                                     }
                                     case "arqueiro" -> {
                                         dataPlayer.set(MISSAOARQUEIRO.key, PersistentDataType.INTEGER, 0);
                                         dataPlayer.set(ARQUEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
+                                        player.getAttribute(Attribute.SNEAKING_SPEED).setBaseValue(0.3+(levelAtual*0.035));
                                     }
                                     case "cacador" -> {
                                         dataPlayer.set(MISSAOCACADOR.key, PersistentDataType.INTEGER, 0);
                                         dataPlayer.set(CACADOR.key,PersistentDataType.INTEGER,levelAtual+1);
+                                        player.getAttribute(Attribute.SNEAKING_SPEED).setBaseValue(0.6+(levelAtual*0.7));
                                     }
                                     case "tempestade" -> {
                                         dataPlayer.set(MISSAOTEMPESTADE.key, PersistentDataType.INTEGER, 0);
@@ -564,36 +571,9 @@ public class EvoluirEvent implements Listener {
                             if(item.getNome().equals("espiao")){
                                 int l=dataPlayer.getOrDefault(ESPIAO.key,PersistentDataType.INTEGER,1);
                                 int usos=dataPlayer.getOrDefault(MISSAOESPIAO.key,PersistentDataType.INTEGER,0);
-                                Location loc = player.getLocation();
                                 usos++;
-                                Component comp = player.playerListName();
-                                Temporizador timer = new Temporizador(plugin,
-                                        9+l,
-                                        () -> {
-                                            String msg = ReliquiasNexus.getLang().getString("espiao.ativado");
-                                            if(msg==null){
-                                                msg="Habilidade do Espião Ativado!";
-                                            }
-                                            player.sendActionBar(Component.text(msg));
-                                            player.setGameMode(GameMode.SPECTATOR);
-                                            player.playerListName(Component.text(""));
-                                        },
-                                        () -> {
-                                            player.setGameMode(GameMode.SURVIVAL);
-                                            player.teleport(loc);
-                                            player.playerListName(comp);
-                                        },
-                                        (t) -> {
-                                            String msg = ReliquiasNexus.getLang().getString("espiao.tempo");
-                                            if(msg==null){
-                                                msg="Modo Fantasma acaba em <tempo> segundos!";
-                                            }
-                                            msg=msg.replace("<tempo>",""+t.getSegundosRestantes());
-                                            player.sendActionBar(Component.text(msg));
-                                        }
-                                );
-                                timer.scheduleTimer(20L);
-                                dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,120+l+9);
+                                Espiao.getPassivabyLevel(l,player);
+                                dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,120);
                                 dataPlayer.set(MISSAOESPIAO.key,PersistentDataType.INTEGER,usos);
                                 tentarEvoluir(player,stack,l,getSlotOfItem(player,stack));
                             }

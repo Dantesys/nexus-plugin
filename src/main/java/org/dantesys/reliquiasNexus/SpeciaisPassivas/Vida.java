@@ -19,7 +19,7 @@ public class Vida {
             resistance(level,player);
         }else if(level<16){//11-15
             instaheal(level,player);
-        }else if(level<21){//16-20
+        }else{//16-20
             imunity(level,player);
         }
     }
