@@ -8,6 +8,8 @@ import java.util.List;
 
 public enum NexusKeys {
     NEXUS(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"nexus")),
+    DRENO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"dreno")),
+    TOTEM(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"totem")),
     PROTECAO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"protecao")),
     SPECIAL(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"special")),
     QTD(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"qtd_nexus")),

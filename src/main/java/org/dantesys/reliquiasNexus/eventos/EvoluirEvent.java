@@ -5,6 +5,7 @@ import io.papermc.paper.event.entity.FishHookStateChangeEvent;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.entity.*;
@@ -42,6 +43,7 @@ public class EvoluirEvent implements Listener {
     public void tentarEvoluir(Player player, ItemStack nexusItem, int levelAtual,int slot) {
         ItemMeta meta = nexusItem.getItemMeta();
         PersistentDataContainer data = meta.getPersistentDataContainer();
+        int xp = ReliquiasNexus.getNexusConfig().getInt("xptolevel");
         if(data.has(NEXUS.key,PersistentDataType.STRING)){
             String msg = "";
             String nome = data.get(NEXUS.key,PersistentDataType.STRING);
@@ -49,8 +51,8 @@ public class EvoluirEvent implements Listener {
                 String condicao = podeEvoluir(player,nome,levelAtual);
                 int level = player.getLevel();
                 if(condicao==null){
-                    if(level>=levelAtual*10){
-                        player.setLevel(player.getLevel()-(10*levelAtual));
+                    if(level>=levelAtual*xp){
+                        player.setLevel(player.getLevel()-(xp*levelAtual));
                         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
                         Nexus n = ItemsRegistro.getFromNome(nome);
                         if(n!=null){
@@ -64,10 +66,12 @@ public class EvoluirEvent implements Listener {
                                     case "barbaro" -> {
                                         dataPlayer.set(MISSAOBARBARO.key, PersistentDataType.INTEGER, 0);
                                         dataPlayer.set(BARBARO.key,PersistentDataType.INTEGER,levelAtual+1);
+                                        player.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(2+levelAtual);
                                     }
                                     case "ceifador" -> {
                                         dataPlayer.set(MISSAOCEIFADOR.key, PersistentDataType.DOUBLE, 0d);
                                         dataPlayer.set(CEIFADOR.key,PersistentDataType.INTEGER,levelAtual+1);
+                                        player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20+levelAtual);
                                     }
                                     case "fazendeiro" -> {
                                         dataPlayer.set(MISSAOFAZENDEIRO.key, PersistentDataType.INTEGER, 0);
@@ -76,6 +80,7 @@ public class EvoluirEvent implements Listener {
                                     case "guerreiro" -> {
                                         dataPlayer.set(MISSAOGUERREIRO.key, PersistentDataType.INTEGER, 0);
                                         dataPlayer.set(GUERREIRO.key,PersistentDataType.INTEGER,levelAtual+1);
+                                        player.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(2+levelAtual);
                                     }
                                     case "mares" -> {
                                         dataPlayer.set(MISSAOMARES.key, PersistentDataType.INTEGER, 0);
@@ -84,6 +89,7 @@ public class EvoluirEvent implements Listener {
                                     case "vida" -> {
                                         dataPlayer.set(MISSAOVIDA.key, PersistentDataType.DOUBLE, 0d);
                                         dataPlayer.set(VIDA.key,PersistentDataType.INTEGER,levelAtual+1);
+                                        player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20+(levelAtual*2));
                                     }
                                     case "espiao" -> {
                                         dataPlayer.set(MISSAOESPIAO.key, PersistentDataType.INTEGER, 0);
@@ -150,7 +156,8 @@ public class EvoluirEvent implements Listener {
                                 msg=msg.replace("<relic>",nome);
                                 msg=msg.replace("<level>",""+(levelAtual+1));
                                 msg="§a"+msg;
-                            }else{
+                            }
+                            else{
                                 if(levelAtual+1==max){
                                     nexusItem=n.getItem(levelAtual+1);
                                     if(meta.hasEnchants()){
@@ -248,17 +255,19 @@ public class EvoluirEvent implements Listener {
                                 msg="§2"+msg;
                             }
                         }
-                    }else{
+                    }
+                    else{
                         msg = ReliquiasNexus.getLang().getString("evo.needxp");
                         if(msg==null){
                             msg="Você precisa de mais <xp> leveis XP para evoluir sua reliquia do <relic>!";
                         }
                         msg=msg.replace("<relic>",nome);
-                        msg=msg.replace("<xp>",""+(levelAtual*10-level));
+                        msg=msg.replace("<xp>",""+(levelAtual*xp-level));
                         msg="§c"+msg;
                     }
-                }else{
-                    if(level>=levelAtual*10){
+                }
+                else{
+                    if(level>=levelAtual*xp){
                         msg = ReliquiasNexus.getLang().getString("evo.cond");
                         if(msg==null){
                             msg="Você precisa <condicao> para evoluir sua reliquia do <relic>!";
@@ -266,14 +275,15 @@ public class EvoluirEvent implements Listener {
                         msg=msg.replace("<relic>",nome);
                         msg=msg.replace("<condicao>",condicao);
                         msg="§c"+msg;
-                    }else{
+                    }
+                    else{
                         msg = ReliquiasNexus.getLang().getString("evo.condexp");
                         if(msg==null){
                             msg="Você precisa de mais <xp> leveis XP e <condicao> para evoluir sua reliquia do <relic>!";
                         }
                         msg=msg.replace("<relic>",nome);
                         msg=msg.replace("<condicao>",condicao);
-                        msg=msg.replace("<xp>",""+(levelAtual*10-level));
+                        msg=msg.replace("<xp>",""+(levelAtual*xp-level));
                         msg="§c"+msg;
                     }
                 }
@@ -728,7 +738,17 @@ public class EvoluirEvent implements Listener {
                         double dano = event.getDamage();
                         double recuperacao = player.getPersistentDataContainer().getOrDefault(MISSAOCEIFADOR.key, PersistentDataType.DOUBLE, 0d);
                         int level = player.getPersistentDataContainer().getOrDefault(CEIFADOR.key,PersistentDataType.INTEGER,1);
-                        double cura = dano/2;
+                        double cura = 0;
+                        if(level<6){
+                            if(player.getPersistentDataContainer().has(DRENO.key,PersistentDataType.INTEGER)){
+                                int tempo = player.getPersistentDataContainer().getOrDefault(SPECIAL.key,PersistentDataType.INTEGER,0);
+                                if(tempo<=0){
+                                    cura=dano/2;
+                                }
+                            }
+                        }else{
+                            cura = dano/2;
+                        }
                         player.heal(cura);
                         recuperacao+=cura;
                         player.getPersistentDataContainer().set(MISSAOCEIFADOR.key, PersistentDataType.DOUBLE, recuperacao);

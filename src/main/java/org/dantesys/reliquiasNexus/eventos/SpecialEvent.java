@@ -1,6 +1,5 @@
 package org.dantesys.reliquiasNexus.eventos;
 
-import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
@@ -11,7 +10,6 @@ import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -24,6 +22,9 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
+import org.dantesys.reliquiasNexus.SpeciaisPassivas.Ceifador;
+import org.dantesys.reliquiasNexus.SpeciaisPassivas.Guerreiro;
+import org.dantesys.reliquiasNexus.SpeciaisPassivas.Vida;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
 import org.dantesys.reliquiasNexus.util.EntityToEgg;
@@ -52,9 +53,10 @@ public class SpecialEvent implements Listener {
                     if(item!=null){
                         switch (item.getNome()) {
                             case "barbaro" -> barbaro(player,item);
-                            case "ceifador" -> ceifador(player,item);
+                            case "ceifador" -> ceifador(player);
                             case "fazendeiro" -> fazendeiro(player,item);
-                            case "guerreiro" -> guerreiro(player,item);
+                            case "guerreiro" -> guerreiro(player);
+                            case "vida" -> vida(player);
                             case "mares" -> mares(player,item);
                             case "arqueiro" -> {
                                 arqueiro(player,item);
@@ -99,10 +101,14 @@ public class SpecialEvent implements Listener {
             stack = player.getInventory().getItemInOffHand();
             if (stack.getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)) {
                 String nome = stack.getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING);
-                if (nome != null && nome.equals("protetor")) {
-                    Nexus item = ItemsRegistro.getFromNome(nome);
-                    if(item!=null){
-                        protetor(player,item);
+                if(nome!=null){
+                    if (nome.equals("protetor")) {
+                        Nexus item = ItemsRegistro.getFromNome(nome);
+                        if(item!=null){
+                            protetor(player,item);
+                        }
+                    }else if(nome.equals("vida")){
+                        vida(player);
                     }
                 }
             }
@@ -184,7 +190,7 @@ public class SpecialEvent implements Listener {
             msg=msg.replace("<break>","\n");
         }
         if(r==null){
-            r="Reliquia do";
+            r="Nexus do";
         }
         switch (nome){
             case "guerreiro" -> {
@@ -316,65 +322,15 @@ public class SpecialEvent implements Listener {
         item.setLevel(l);
         player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH,200*l,9));
     }
-    private void ceifador(Player player,Nexus item){
+    private void ceifador(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(CEIFADOR.key,PersistentDataType.INTEGER,1);
-        item.setLevel(l);
-        final int finalRange = 50;
-        final Location location = player.getLocation();
-        final Vector direction = location.getDirection().normalize();
-        final double[] tp = {0};
-        final List<LivingEntity> atingidos = new ArrayList<>();
-        Temporizador timer = new Temporizador(plugin, 10,
-                ()->{
-                },()-> {
-        },(t)->{
-            tp[0] = tp[0]+3.4;
-            double x = direction.getX()*tp[0];
-            double y = direction.getY()*tp[0]+1.4;
-            double z = direction.getZ()*tp[0];
-            location.add(x,y,z);
-            location.getWorld().spawnParticle(Particle.SOUL,location,10,0,0,0,0);
-            location.getWorld().playSound(location, Sound.BLOCK_SOUL_SOIL_STEP,0.5f,0.7f);
-            Collection<Entity> pressf = location.getWorld().getNearbyEntities(location,2,2,2);
-            while(pressf.iterator().hasNext()){
-                Entity surdo = pressf.iterator().next();
-                if(surdo instanceof LivingEntity vivo && !atingidos.contains(vivo)){
-                    AttributeInstance at = vivo.getAttribute(Attribute.MAX_HEALTH);
-                    atingidos.add(vivo);
-                    if(at != null){
-                        double max = at.getBaseValue();
-                        if(vivo instanceof Player pl){
-                            if(pl != player){
-                                if(vivo.getHealth()/max<=0.2){
-                                    Location ld = vivo.getLocation();
-                                    World wd = vivo.getWorld();
-                                    wd.dropItemNaturally(ld,new ItemStack(Material.TOTEM_OF_UNDYING));
-                                    vivo.setHealth(0);
-                                }else{
-                                    vivo.damage(l+5);
-                                }
-                            }
-                        }else{
-                            if(vivo.getHealth()/max<=0.2){
-                                Location ld = vivo.getLocation();
-                                World wd = vivo.getWorld();
-                                wd.dropItemNaturally(ld,new ItemStack(Material.TOTEM_OF_UNDYING));
-                                vivo.setHealth(0);
-                            }else{
-                                vivo.damage(l+5);
-                            }
-                        }
-                    }
-                }
-                pressf.remove(surdo);
-            }
-            location.subtract(x,y,z);
-            if(t.getSegundosRestantes()>finalRange){
-                t.stop();
-            }
-        });
-        timer.scheduleTimer(1L);
+        Ceifador.getSpecialbyLevel(l,player);
+    }
+    private void vida(Player player){
+        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+        int l = dataPlayer.getOrDefault(VIDA.key,PersistentDataType.INTEGER,1);
+        Vida.getSpecialbyLevel(l,player);
     }
     private void fazendeiro(Player player,Nexus item){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
@@ -426,50 +382,10 @@ public class SpecialEvent implements Listener {
         });
         timer.scheduleTimer(1L);
     }
-    private void guerreiro(Player player,Nexus item){
+    private void guerreiro(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(GUERREIRO.key,PersistentDataType.INTEGER,1);
-        item.setLevel(l);
-        int range = 50;
-        double damage = 10+l;
-        final int finalRange = range;
-        final double finalDamage = damage;
-        final Location location = player.getLocation();
-        final Vector direction = location.getDirection().normalize();
-        final double[] tp = {0};
-        final List<LivingEntity> atingidos = new ArrayList<>();
-        Temporizador timer = new Temporizador(plugin, 10,
-                ()->{
-                },()-> {
-        },(t)->{
-            tp[0] = tp[0]+3.4;
-            double x = direction.getX()*tp[0];
-            double y = direction.getY()*tp[0]+1.4;
-            double z = direction.getZ()*tp[0];
-            location.add(x,y,z);
-            location.getWorld().spawnParticle(Particle.SWEEP_ATTACK,location,1,0,0,0,0);
-            location.getWorld().playSound(location, Sound.ENTITY_PLAYER_ATTACK_SWEEP,0.5f,0.7f);
-            Collection<Entity> pressf = location.getWorld().getNearbyEntities(location,2,2,2);
-            while(pressf.iterator().hasNext()){
-                Entity surdo = pressf.iterator().next();
-                if(surdo instanceof LivingEntity vivo && !atingidos.contains(vivo)){
-                    atingidos.add(vivo);
-                    if(vivo instanceof Player pl){
-                        if(pl != player){
-                            vivo.damage(finalDamage);
-                        }
-                    }else{
-                        vivo.damage(finalDamage);
-                    }
-                }
-                pressf.remove(surdo);
-            }
-            location.subtract(x,y,z);
-            if(t.getSegundosRestantes()>finalRange){
-                t.stop();
-            }
-        });
-        timer.scheduleTimer(1L);
+        Guerreiro.getSpecialbyLevel(l,player);
     }
     private void mares(Player player,Nexus item){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
@@ -1140,58 +1056,6 @@ public class SpecialEvent implements Listener {
         Random r = new Random();
         int i = r.nextInt(0,m.size()-1);
         return m.get(i);
-    }
-    @EventHandler
-    public void reviver(EntityResurrectEvent e) {
-        LivingEntity deadEntity = e.getEntity();
-        if(deadEntity instanceof Player player){
-            player.getPersistentDataContainer().set(PROTECAO.key,PersistentDataType.STRING,"");
-            PlayerInventory pinv = player.getInventory();
-            ItemStack item = pinv.getItemInMainHand();
-            ItemStack item2 = pinv.getItemInOffHand();
-            PersistentDataContainerView data = item.getPersistentDataContainer();
-            PersistentDataContainerView data2 = item2.getPersistentDataContainer();
-            if(data.has(NEXUS.key,PersistentDataType.STRING) || data2.has(NEXUS.key,PersistentDataType.STRING)){
-                String nome = data.get(NEXUS.key,PersistentDataType.STRING);
-                if(nome==null || nome.isBlank() || !nome.equals("vida")){
-                    nome = data2.get(NEXUS.key,PersistentDataType.STRING);
-                    if(nome==null || nome.isBlank()|| !nome.equals("vida")){
-                        return;
-                    }
-                }
-                PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-                Nexus n = ItemsRegistro.getFromNome(nome);
-                if(n==null)return;
-                if(dataPlayer.has(SPECIAL.key, PersistentDataType.INTEGER)){
-                    int countDown = dataPlayer.getOrDefault(SPECIAL.key, PersistentDataType.INTEGER,0);
-                    if(countDown>0){
-                        e.setCancelled(true);
-                        return;
-                    }
-                    int l=dataPlayer.getOrDefault(VIDA.key,PersistentDataType.INTEGER,1);
-                    int tempo = 120;
-                    player.getInventory().setItemInMainHand(item);
-                    player.getInventory().setItemInOffHand(item2);
-                    Temporizador timer = new Temporizador(plugin,
-                            tempo,
-                            () -> {
-                                String msg = ReliquiasNexus.getLang().getString("special.vida");
-                                if(msg==null){
-                                    msg = "Habilidade do Nexus da Vida Ativado!";
-                                }
-                                player.sendActionBar(Component.text(msg));
-                                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION,20+l, l));
-                                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE,20+l, 2));
-                            },
-                            () -> {
-                            },
-                            (t) -> {}
-                    );
-                    timer.scheduleTimer(20L);
-                    dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,tempo);
-                }
-            }
-        }
     }
     @EventHandler
     public void reversao(EntityDamageByEntityEvent event){

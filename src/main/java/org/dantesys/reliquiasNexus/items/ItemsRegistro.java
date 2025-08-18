@@ -86,9 +86,6 @@ public class ItemsRegistro {
         createLivro();
     }
     private static void createGuerreiro(){
-        List<PotionEffectType> efeitos = new ArrayList<>();
-        efeitos.add(PotionEffectType.RESISTANCE);
-        efeitos.add(PotionEffectType.STRENGTH);
         ItemStack item = new ItemStack(Material.NETHERITE_SWORD,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Guerreiro"));
@@ -98,12 +95,9 @@ public class ItemsRegistro {
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"guerreiro");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
         item.setItemMeta(meta);
-        guerreiro = new Nexus(item,efeitos,"guerreiro", Attribute.ATTACK_DAMAGE);
+        guerreiro = new Nexus(item,"guerreiro");
     }
     private static void createCeifador(){
-        List<PotionEffectType> efeitos = new ArrayList<>();
-        efeitos.add(PotionEffectType.NIGHT_VISION);
-        efeitos.add(PotionEffectType.INVISIBILITY);
         ItemStack item = new ItemStack(Material.NETHERITE_SWORD,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Ceifador"));
@@ -114,12 +108,9 @@ public class ItemsRegistro {
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"ceifador");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
         item.setItemMeta(meta);
-        ceifador = new Nexus(item,efeitos,"ceifador", Attribute.ATTACK_DAMAGE);
+        ceifador = new Nexus(item,"ceifador");
     }
     private static void createVida(){
-        List<PotionEffectType> efeitos = new ArrayList<>();
-        efeitos.add(PotionEffectType.REGENERATION);
-        efeitos.add(PotionEffectType.LUCK);
         ItemStack item = new ItemStack(Material.TOTEM_OF_UNDYING,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus da vida"));
@@ -129,7 +120,7 @@ public class ItemsRegistro {
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"vida");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
         item.setItemMeta(meta);
-        vida = new Nexus(item,efeitos,"vida", Attribute.MAX_HEALTH);
+        vida = new Nexus(item,"vida");
     }
     private static void createMares(){
         List<PotionEffectType> efeitos = new ArrayList<>();
@@ -386,7 +377,6 @@ public class ItemsRegistro {
         domador = new Nexus(item,efeitos,"domador", Attribute.ENTITY_INTERACTION_RANGE);
     }
     private static void createLivro(){
-        List<PotionEffectType> efeitos = new ArrayList<>();
         ItemStack item = new ItemStack(Material.WRITTEN_BOOK,1);
         BookMeta meta = (BookMeta) item.getItemMeta();
         meta.displayName(Component.text("§6Tutorial"));
@@ -396,7 +386,7 @@ public class ItemsRegistro {
         meta.setItemModel(Material.KNOWLEDGE_BOOK.getKey());
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"nexus");
         item.setItemMeta(meta);
-        livro = new Nexus(item,efeitos,"livro", Attribute.SUBMERGED_MINING_SPEED);
+        livro = new Nexus(item,"livro");
     }
     public static List<Nexus> getValidReliquia(FileConfiguration config){
         List<Nexus> validos = new ArrayList<>();

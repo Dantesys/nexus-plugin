@@ -2,6 +2,7 @@ package org.dantesys.reliquiasNexus.eventos;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -76,6 +77,7 @@ public class JoinQuitEvent implements Listener {
             msg=msg.replace("<player>",player.getName());
             event.joinMessage(Component.text("§2"+msg));
         }
+        setAtributoJoin(player);
     }
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
@@ -87,5 +89,84 @@ public class JoinQuitEvent implements Listener {
         }
         msg=msg.replace("<player>",player.getName());
         event.quitMessage(Component.text("§4"+msg));
+    }
+    private void setAtributoJoin(Player player){
+        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+        List<NamespacedKey> keys = NexusKeys.getKeyLevel();
+        for(NamespacedKey key: keys){
+            if(dataPlayer.has(key,PersistentDataType.INTEGER)){
+                String nome = key.getKey();
+                int level = dataPlayer.getOrDefault(key,PersistentDataType.INTEGER,1);
+                switch (nome){
+                    case "barbaro", "guerreiro" -> player.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(level-1);
+                    case "ceifador" -> player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20+level-1);
+                    case "fazendeiro" -> {
+                        dataPlayer.set(MISSAOFAZENDEIRO.key, PersistentDataType.INTEGER, 0);
+                        dataPlayer.set(FAZENDEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
+                    }
+                    case "mares" -> {
+                        dataPlayer.set(MISSAOMARES.key, PersistentDataType.INTEGER, 0);
+                        dataPlayer.set(MARES.key,PersistentDataType.INTEGER,levelAtual+1);
+                    }
+                    case "vida" -> player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20+((level-1)*2));
+                    case "espiao" -> {
+                        dataPlayer.set(MISSAOESPIAO.key, PersistentDataType.INTEGER, 0);
+                        dataPlayer.set(ESPIAO.key,PersistentDataType.INTEGER,levelAtual+1);
+                    }
+                    case "arqueiro" -> {
+                        dataPlayer.set(MISSAOARQUEIRO.key, PersistentDataType.INTEGER, 0);
+                        dataPlayer.set(ARQUEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
+                    }
+                    case "cacador" -> {
+                        dataPlayer.set(MISSAOCACADOR.key, PersistentDataType.INTEGER, 0);
+                        dataPlayer.set(CACADOR.key,PersistentDataType.INTEGER,levelAtual+1);
+                    }
+                    case "tempestade" -> {
+                        dataPlayer.set(MISSAOTEMPESTADE.key, PersistentDataType.INTEGER, 0);
+                        dataPlayer.set(TEMPESTADE.key,PersistentDataType.INTEGER,levelAtual+1);
+                    }
+                    case "mineiro" -> {
+                        dataPlayer.set(MISSAOMINEIRO.key, PersistentDataType.INTEGER, 0);
+                        dataPlayer.set(MINEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
+                    }
+                    case "fenix" -> {
+                        dataPlayer.set(MISSAOFENIX.key, PersistentDataType.INTEGER, 0);
+                        dataPlayer.set(FENIX.key,PersistentDataType.INTEGER,levelAtual+1);
+                    }
+                    case "protetor" -> {
+                        dataPlayer.set(MISSAOPROTETOR.key, PersistentDataType.INTEGER, 0);
+                        dataPlayer.set(PROTETOR.key,PersistentDataType.INTEGER,levelAtual+1);
+                    }
+                    case "hulk" -> {
+                        dataPlayer.set(MISSAOHULK.key, PersistentDataType.DOUBLE, 0d);
+                        dataPlayer.set(HULK.key,PersistentDataType.INTEGER,levelAtual+1);
+                    }
+                    case "sculk" -> {
+                        dataPlayer.set(MISSAOSCULK.key, PersistentDataType.INTEGER, 0);
+                        dataPlayer.set(SCULK.key,PersistentDataType.INTEGER,levelAtual+1);
+                    }
+                    case "pescador" -> {
+                        dataPlayer.set(MISSAOPESCADOR.key, PersistentDataType.INTEGER, 0);
+                        dataPlayer.set(PESCADOR.key,PersistentDataType.INTEGER,levelAtual+1);
+                    }
+                    case "flash" -> {
+                        dataPlayer.set(MISSAOFLASH.key, PersistentDataType.INTEGER, 0);
+                        dataPlayer.set(FLASH.key,PersistentDataType.INTEGER,levelAtual+1);
+                    }
+                    case "mago" -> {
+                        dataPlayer.set(MISSAOMAGO.key, PersistentDataType.INTEGER, 0);
+                        dataPlayer.set(MAGO.key,PersistentDataType.INTEGER,levelAtual+1);
+                    }
+                    case "ladrao" -> {
+                        dataPlayer.set(MISSAOLADRAO.key, PersistentDataType.INTEGER, 0);
+                        dataPlayer.set(LADRAO.key,PersistentDataType.INTEGER,levelAtual+1);
+                    }
+                    case "domador" -> {
+                        dataPlayer.set(MISSAODOMADOR.key, PersistentDataType.INTEGER, 0);
+                        dataPlayer.set(DOMADOR.key,PersistentDataType.INTEGER,levelAtual+1);
+                    }
+                }
+            }
+        }
     }
 }

@@ -1,6 +1,6 @@
 #Linguagens suportadas (en-us,pt-br)
 #Supported languages (en-us,pt-br)
-lang: pt-br
+lang: en-us
 #Se o servidor está em expurgo, permite roubo de reliquia se verdadeiro
 #If the server is in purge, allow relic stealing if true
 expurgo: false
@@ -10,6 +10,9 @@ limite: 3
 #Level maximo que as reliquias podem evoluir, se definido como 1 ou menor desabilida o level maximo
 #Maximum level that relics can evolve, if set to 1 or lower, it disables the maximum level
 levelMax: 20
+#Quantidade de xp que precisa para evoluir, o calculo é xp*level
+#Amount of xp you need to evolve, the calculation is xp*level
+xptolevel: 10
 #Registro das reliquias, quando algum jogador possui fica registrado o UUID dele
 #Registration of relics, when a player has one, his UUID is registered
 nexus:
