@@ -109,13 +109,11 @@ public class JoinQuitEvent implements Listener {
                     case "espiao" -> player.getAttribute(Attribute.SCALE).setBaseValue(1-(level*0.025));
                     case "arqueiro" -> player.getAttribute(Attribute.SNEAKING_SPEED).setBaseValue(0.3+(level*0.035));
                     case "cacador" -> player.getAttribute(Attribute.SNEAKING_SPEED).setBaseValue(0.6+(level*0.7));
-                    case "tempestade" -> {
-                        dataPlayer.set(MISSAOTEMPESTADE.key, PersistentDataType.INTEGER, 0);
-                        dataPlayer.set(TEMPESTADE.key,PersistentDataType.INTEGER,levelAtual+1);
-                    }
+                    case "tempestade" -> player.getAttribute(Attribute.SAFE_FALL_DISTANCE).setBaseValue(3+level);
                     case "mineiro" -> {
-                        dataPlayer.set(MISSAOMINEIRO.key, PersistentDataType.INTEGER, 0);
-                        dataPlayer.set(MINEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
+                        player.getAttribute(Attribute.MINING_EFFICIENCY).setBaseValue(level);
+                        player.getAttribute(Attribute.BLOCK_BREAK_SPEED).setBaseValue(1+level);
+                        player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE).setBaseValue(4.5+level);
                     }
                     case "fenix" -> {
                         dataPlayer.set(MISSAOFENIX.key, PersistentDataType.INTEGER, 0);

@@ -64,8 +64,8 @@ public class SpecialEvent implements Listener {
                                 cacador(player);
                                 event.setCancelled(true);
                             }
-                            case "tempestade" -> tempestade(player,item);
-                            case "mineiro" -> mineiro(player,item);
+                            case "tempestade" -> tempestade(player);
+                            case "mineiro" -> mineiro(player);
                             case "sculk" -> sculk(player,item);
                             case "protetor" -> protetor(player,item);
                             case "pescador" -> pescador(player,item);
@@ -354,106 +354,15 @@ public class SpecialEvent implements Listener {
         int l = dataPlayer.getOrDefault(CACADOR.key,PersistentDataType.INTEGER,1);
         Cacador.getSpecialbyLevel(l,player);
     }
-    private void tempestade(Player player,Nexus item){
+    private void tempestade(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(TEMPESTADE.key,PersistentDataType.INTEGER,1);
-        item.setLevel(l);
-        World w = player.getWorld();
-        w.setStorm(true);
-        w.setThundering(true);
-        final int finalRange = 30;
-        final double damage = 2+l;
-        final Location location = player.getLocation();
-        final World world = player.getWorld();
-        final List<LivingEntity> atingidos = new ArrayList<>();
-        Temporizador timer = new Temporizador(plugin, 10,
-                ()->{
-                },()-> {
-        },(t)->{
-            double area = (double) finalRange /(t.getSegundosRestantes());
-            for (double i = 0; i <= 2*Math.PI*area; i += 0.05) {
-                double x = (area * Math.cos(i)) + location.getX();
-                double z = (location.getZ() + area * Math.sin(i));
-                Location particle = new Location(world, x, location.getY() + 1, z);
-                world.spawnParticle(Particle.FALLING_WATER,particle,1);
-            }
-            Collection<Entity> pressf = location.getWorld().getNearbyEntities(location,area,2,area);
-            while(pressf.iterator().hasNext()){
-                Entity surdo = pressf.iterator().next();
-                if(surdo instanceof LivingEntity vivo && !atingidos.contains(vivo)){
-                    atingidos.add(vivo);
-                    Location vloc = vivo.getLocation();
-                    World vworld = vivo.getWorld();
-                    if(vivo instanceof Player p){
-                        if(p!=player){
-                            vivo.damage(damage);
-                            vworld.strikeLightning(vloc);
-                        }
-                    }else{
-                        vivo.damage(damage);
-                        vworld.strikeLightning(vloc);
-                    }
-                }
-                pressf.remove(surdo);
-            }
-        });
-        timer.scheduleTimer(1L);
+        Tempestade.getSpecialbyLevel(l,player);
     }
-    private void mineiro(Player player,Nexus item){
+    private void mineiro(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(MINEIRO.key,PersistentDataType.INTEGER,1);
-        item.setLevel(l);
-        final int finalRange = 30;
-        final Location location = player.getLocation();
-        final World world = player.getWorld();
-        final double damage = 5+l;
-        Material finalM = getMinerio();
-        final List<LivingEntity> atingidos = new ArrayList<>();
-        Temporizador timer = new Temporizador(plugin, 10,
-                ()->{
-                },()-> {
-        },(t)->{
-            double area = (double) finalRange /(t.getSegundosRestantes());
-            for (double i = 0; i <= 2*Math.PI*area; i += 0.05) {
-                double x = (area * Math.cos(i)) + location.getX();
-                double z = (location.getZ() + area * Math.sin(i));
-                Location particle = new Location(world, x, location.getY() + 1, z);
-                world.spawnParticle(Particle.COMPOSTER,particle,1);
-            }
-            Collection<Entity> pressf = location.getWorld().getNearbyEntities(location,area,2,area);
-            while(pressf.iterator().hasNext()){
-                Entity surdo = pressf.iterator().next();
-                if(surdo instanceof LivingEntity vivo && !atingidos.contains(vivo)){
-                    atingidos.add(vivo);
-                    AttributeInstance at = vivo.getAttribute(Attribute.MAX_HEALTH);
-                    if(at != null){
-                        double max = at.getBaseValue();
-                        Location ld = vivo.getLocation();
-                        if(vivo instanceof Player pl){
-                            if(pl != player){
-                                if(vivo.getHealth()/max<=0.2){
-                                    ld.getBlock().setType(finalM);
-                                    vivo.setHealth(0);
-                                }else{
-                                    vivo.damage(damage);
-                                    world.dropItemNaturally(ld,new ItemStack(finalM));
-                                }
-                            }
-                        }else{
-                            if(vivo.getHealth()/max<=0.2){
-                                ld.getBlock().setType(finalM);
-                                vivo.setHealth(0);
-                            }else{
-                                vivo.damage(damage);
-                                world.dropItemNaturally(ld,new ItemStack(finalM));
-                            }
-                        }
-                    }
-                }
-                pressf.remove(surdo);
-            }
-        });
-        timer.scheduleTimer(1L);
+        Mineiro.getSpecialbyLevel(l,player);
     }
     private void fenix(Player player, Nexus item){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();

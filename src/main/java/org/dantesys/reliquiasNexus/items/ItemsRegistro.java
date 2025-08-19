@@ -195,8 +195,6 @@ public class ItemsRegistro {
         cacador = new Nexus(item,"cacador");
     }
     private static void createTempestade(){
-        List<PotionEffectType> efeitos = new ArrayList<>();
-        efeitos.add(PotionEffectType.JUMP_BOOST);
         ItemStack item = new ItemStack(Material.MACE,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus da Tempestade"));
@@ -206,12 +204,9 @@ public class ItemsRegistro {
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"tempestade");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
         item.setItemMeta(meta);
-        tempestade = new Nexus(item,efeitos,"tempestade", Attribute.SAFE_FALL_DISTANCE);
+        tempestade = new Nexus(item,"tempestade");
     }
     private static void createMineiro(){
-        List<PotionEffectType> efeitos = new ArrayList<>();
-        efeitos.add(PotionEffectType.HASTE);
-        efeitos.add(PotionEffectType.NIGHT_VISION);
         ItemStack item = new ItemStack(Material.NETHERITE_PICKAXE,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Mineiro"));
@@ -222,7 +217,7 @@ public class ItemsRegistro {
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"mineiro");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
         item.setItemMeta(meta);
-        mineiro = new Nexus(item,efeitos,"mineiro", Attribute.BLOCK_BREAK_SPEED);
+        mineiro = new Nexus(item,"mineiro");
     }
     private static void createFenix(){
         List<PotionEffectType> efeitos = new ArrayList<>();

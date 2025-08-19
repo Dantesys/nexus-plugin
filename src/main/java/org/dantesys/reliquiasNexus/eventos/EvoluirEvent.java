@@ -27,7 +27,6 @@ import org.dantesys.reliquiasNexus.ReliquiasNexus;
 import org.dantesys.reliquiasNexus.SpeciaisPassivas.Espiao;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
-import org.dantesys.reliquiasNexus.util.Temporizador;
 
 import java.util.List;
 import java.util.Random;
@@ -113,10 +112,14 @@ public class EvoluirEvent implements Listener {
                                     case "tempestade" -> {
                                         dataPlayer.set(MISSAOTEMPESTADE.key, PersistentDataType.INTEGER, 0);
                                         dataPlayer.set(TEMPESTADE.key,PersistentDataType.INTEGER,levelAtual+1);
+                                        player.getAttribute(Attribute.SAFE_FALL_DISTANCE).setBaseValue(3+levelAtual);
                                     }
                                     case "mineiro" -> {
                                         dataPlayer.set(MISSAOMINEIRO.key, PersistentDataType.INTEGER, 0);
                                         dataPlayer.set(MINEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
+                                        player.getAttribute(Attribute.MINING_EFFICIENCY).setBaseValue(levelAtual);
+                                        player.getAttribute(Attribute.BLOCK_BREAK_SPEED).setBaseValue(1+levelAtual);
+                                        player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE).setBaseValue(4.5+levelAtual);
                                     }
                                     case "fenix" -> {
                                         dataPlayer.set(MISSAOFENIX.key, PersistentDataType.INTEGER, 0);

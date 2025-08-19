@@ -174,6 +174,14 @@ public class PassivaEvent implements Listener {
                         int level = player.getPersistentDataContainer().getOrDefault(CACADOR.key,PersistentDataType.INTEGER,1);
                         Cacador.getPassivabyLevel(level,player);
                     }
+                    case "tempestade" -> {
+                        int level = player.getPersistentDataContainer().getOrDefault(TEMPESTADE.key,PersistentDataType.INTEGER,1);
+                        Tempestade.getPassivabyLevel(level,player);
+                    }
+                    case "mineiro" -> {
+                        int level = player.getPersistentDataContainer().getOrDefault(MINEIRO.key,PersistentDataType.INTEGER,1);
+                        Mineiro.getPassivabyLevel(level,player);
+                    }
                 }
             }
         }
