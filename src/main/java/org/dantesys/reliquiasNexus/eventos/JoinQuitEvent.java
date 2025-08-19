@@ -116,16 +116,21 @@ public class JoinQuitEvent implements Listener {
                         player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE).setBaseValue(4.5+level);
                     }
                     case "fenix" -> {
-                        dataPlayer.set(MISSAOFENIX.key, PersistentDataType.INTEGER, 0);
-                        dataPlayer.set(FENIX.key,PersistentDataType.INTEGER,levelAtual+1);
+                        player.getAttribute(Attribute.ARMOR).setBaseValue(level);
+                        player.getAttribute(Attribute.ARMOR_TOUGHNESS).setBaseValue(level);
                     }
-                    case "protetor" -> {
-                        dataPlayer.set(MISSAOPROTETOR.key, PersistentDataType.INTEGER, 0);
-                        dataPlayer.set(PROTETOR.key,PersistentDataType.INTEGER,levelAtual+1);
-                    }
+                    case "protetor" -> player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20+level);
                     case "hulk" -> {
-                        dataPlayer.set(MISSAOHULK.key, PersistentDataType.DOUBLE, 0d);
-                        dataPlayer.set(HULK.key,PersistentDataType.INTEGER,levelAtual+1);
+                        player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20+(level/2));
+                        player.getAttribute(Attribute.ARMOR).setBaseValue(level/2);
+                        player.getAttribute(Attribute.ARMOR_TOUGHNESS).setBaseValue(level/2);
+                        player.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(2+(level/2));
+                        player.getAttribute(Attribute.ATTACK_KNOCKBACK).setBaseValue((level/10));
+                        player.getAttribute(Attribute.JUMP_STRENGTH).setBaseValue(0.42+(level/10));
+                        player.getAttribute(Attribute.JUMP_STRENGTH).setBaseValue((level/20));
+                        player.getAttribute(Attribute.SAFE_FALL_DISTANCE).setBaseValue(3+(level*2));
+                        player.getAttribute(Attribute.SCALE).setBaseValue(1+(level*0.025));
+                        player.getAttribute(Attribute.SCALE).setBaseValue(level*0.05);
                     }
                     case "sculk" -> {
                         dataPlayer.set(MISSAOSCULK.key, PersistentDataType.INTEGER, 0);

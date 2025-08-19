@@ -13,6 +13,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.BookMeta;
@@ -67,7 +68,7 @@ public class SpecialEvent implements Listener {
                             case "tempestade" -> tempestade(player);
                             case "mineiro" -> mineiro(player);
                             case "sculk" -> sculk(player,item);
-                            case "protetor" -> protetor(player,item);
+                            case "protetor" -> protetor(player);
                             case "pescador" -> pescador(player,item);
                             case "ladrao" -> {
                                 ladrao(player,item);
@@ -91,7 +92,7 @@ public class SpecialEvent implements Listener {
                 if (nome != null && nome.equals("fenix")) {
                     Nexus item = ItemsRegistro.getFromNome(nome);
                     if(item!=null){
-                        fenix(player,item);
+                        fenix(player);
                         dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,120);
                     }
                 }
@@ -103,7 +104,8 @@ public class SpecialEvent implements Listener {
                     if (nome.equals("protetor")) {
                         Nexus item = ItemsRegistro.getFromNome(nome);
                         if(item!=null){
-                            protetor(player,item);
+                            protetor(player);
+                            dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,120);
                         }
                     }else if(nome.equals("vida")){
                         vida(player);
@@ -116,7 +118,7 @@ public class SpecialEvent implements Listener {
                 if (nome != null && nome.equals("hulk")) {
                     Nexus item = ItemsRegistro.getFromNome(nome);
                     if(item!=null){
-                        hulk(player,item);
+                        hulk(player);
                         dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,120);
                     }
                 }
@@ -364,143 +366,20 @@ public class SpecialEvent implements Listener {
         int l = dataPlayer.getOrDefault(MINEIRO.key,PersistentDataType.INTEGER,1);
         Mineiro.getSpecialbyLevel(l,player);
     }
-    private void fenix(Player player, Nexus item){
+    private void fenix(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(FENIX.key,PersistentDataType.INTEGER,1);
-        item.setLevel(l);
-        final int finalRange = 30;
-        final Location location = player.getLocation();
-        final World world = player.getWorld();
-        final double damage = 5+l;
-        final List<LivingEntity> atingidos = new ArrayList<>();
-        Temporizador timer = new Temporizador(plugin, 10,
-                ()->{
-                },()-> {
-        },(t)->{
-            double area = (double) finalRange /(t.getSegundosRestantes());
-            for (double i = 0; i <= 2*Math.PI*area; i += 0.05) {
-                double x = (area * Math.cos(i)) + location.getX();
-                double z = (location.getZ() + area * Math.sin(i));
-                Location particle = new Location(world, x, location.getY() + 1, z);
-                world.spawnParticle(Particle.FLAME,particle,1);
-            }
-            Collection<Entity> pressf = location.getWorld().getNearbyEntities(location,area,2,area);
-            while(pressf.iterator().hasNext()){
-                Entity surdo = pressf.iterator().next();
-                if(surdo instanceof LivingEntity vivo && !atingidos.contains(vivo)){
-                    atingidos.add(vivo);
-                    AttributeInstance at = vivo.getAttribute(Attribute.MAX_HEALTH);
-                    if(at != null){
-                        if(vivo instanceof Player pl){
-                            if(pl != player){
-                                vivo.damage(damage);
-                                vivo.setFireTicks(20+l);
-                            }
-                        }else{
-                            vivo.damage(damage);
-                            vivo.setFireTicks(20+l);
-                        }
-                    }
-                }
-                pressf.remove(surdo);
-            }
-        });
-        timer.scheduleTimer(1L);
+        Fenix.getSpecialbyLevel(l,player);
     }
-    private void protetor(Player player, Nexus item){
+    private void protetor(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l=dataPlayer.getOrDefault(PROTETOR.key,PersistentDataType.INTEGER,1);
-        item.setLevel(l);
-        Temporizador timer = new Temporizador(plugin, 9+l,
-                () -> {
-                    String msg = ReliquiasNexus.getLang().getString("special.protetor.ativado");
-                    if(msg==null){
-                        msg="Habilidade do Nexus do Protetor Ativado!";
-                    }
-                    player.sendActionBar(Component.text(msg));
-                    dataPlayer.set(PROTECAO.key,PersistentDataType.BOOLEAN,true);
-                },
-                () -> {
-                    player.setGameMode(GameMode.SURVIVAL);
-                    dataPlayer.set(PROTECAO.key,PersistentDataType.BOOLEAN,false);
-                },
-                (t) -> {
-                    String msg = ReliquiasNexus.getLang().getString("special.protetor.tempo");
-                    if(msg==null){
-                        msg="Modo Reversão acaba em <tempo> segundos!";
-                    }
-                    msg=msg.replace("<tempo>",""+t.getSegundosRestantes());
-                    player.sendActionBar(Component.text(msg));
-                }
-        );
-        timer.scheduleTimer(20L);
-        dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,120+l+9);
+        Protetor.getSpecialbyLevel(l,player);
     }
-    private void hulk(Player player, Nexus item){
+    private void hulk(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(HULK.key,PersistentDataType.INTEGER,1);
-        item.setLevel(l);
-        final int finalRange = 20;
-        final Location location = player.getLocation();
-        final World world = player.getWorld();
-        final double damage = 10+l;
-        final List<LivingEntity> atingidos = new ArrayList<>();
-        double baseD=player.getAttribute(Attribute.ATTACK_DAMAGE).getBaseValue();
-        double baseT=player.getAttribute(Attribute.SCALE).getBaseValue();
-        Temporizador timer = new Temporizador(plugin, 10,
-                ()->{},()-> {},(t)->{
-            double area = (double) finalRange /(t.getSegundosRestantes());
-            for (double i = 0; i <= 2*Math.PI*area; i += 0.05) {
-                double x = (area * Math.cos(i)) + location.getX();
-                double z = (location.getZ() + area * Math.sin(i));
-                Location particle = new Location(world, x, location.getY() + 1, z);
-                world.spawnParticle(Particle.SMOKE,particle,1);
-            }
-            Collection<Entity> pressf = location.getWorld().getNearbyEntities(location,area,2,area);
-            while(pressf.iterator().hasNext()){
-                Entity surdo = pressf.iterator().next();
-                if(surdo instanceof LivingEntity vivo && !atingidos.contains(vivo)){
-                    atingidos.add(vivo);
-                    AttributeInstance at = vivo.getAttribute(Attribute.MAX_HEALTH);
-                    if(at != null){
-                        if(vivo instanceof Player pl){
-                            if(pl != player){
-                                vivo.damage(damage);
-                            }
-                        }else{
-                            vivo.damage(damage);
-                        }
-                    }
-                }
-                pressf.remove(surdo);
-            }
-        });
-        timer.scheduleTimer(1L);
-        Temporizador timer2 = new Temporizador(plugin, 10+l,
-                ()->{
-                    String msg = ReliquiasNexus.getLang().getString("special.hulk.ativado");
-                    if(msg==null){
-                        msg="Modo Hulk Ativado!";
-                    }
-                    player.sendActionBar(Component.text(msg));
-                    player.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(baseD+l);
-                    player.getAttribute(Attribute.SCALE).setBaseValue(baseT+0.25);
-                },
-                ()->{
-                    player.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(baseD);
-                    player.getAttribute(Attribute.SCALE).setBaseValue(baseT);
-                },
-                (t)->{
-                    String msg = ReliquiasNexus.getLang().getString("special.hulk.tempo");
-                    if(msg==null){
-                        msg="Modo Hulk acaba em <tempo> segundos!";
-                    }
-                    msg = msg.replace("<tempo>",""+t.getSegundosRestantes());
-                    player.sendActionBar(Component.text(msg));
-                    player.sendActionBar(Component.text(msg));
-                }
-        );
-        timer2.scheduleTimer(20L);
+        Hulk.getSpecialbyLevel(l,player);
     }
     private void sculk(Player player,Nexus item){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
@@ -811,30 +690,6 @@ public class SpecialEvent implements Listener {
         }
         dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,tempo);
     }
-    private Material getMinerio(){
-        List<Material> m = List.of(
-                Material.COAL_ORE,
-                Material.COPPER_ORE,
-                Material.DIAMOND_ORE,
-                Material.LAPIS_ORE,
-                Material.GOLD_ORE,
-                Material.EMERALD_ORE,
-                Material.IRON_ORE,
-                Material.REDSTONE_ORE,
-                Material.DEEPSLATE_COAL_ORE,
-                Material.DEEPSLATE_COPPER_ORE,
-                Material.DEEPSLATE_DIAMOND_ORE,
-                Material.DEEPSLATE_LAPIS_ORE,
-                Material.DEEPSLATE_GOLD_ORE,
-                Material.DEEPSLATE_EMERALD_ORE,
-                Material.DEEPSLATE_IRON_ORE,
-                Material.DEEPSLATE_REDSTONE_ORE,
-                Material.ANCIENT_DEBRIS
-        );
-        Random r = new Random();
-        int i = r.nextInt(0,m.size()-1);
-        return m.get(i);
-    }
     @EventHandler
     public void reversao(EntityDamageByEntityEvent event){
         Entity atacado = event.getEntity();
@@ -860,6 +715,12 @@ public class SpecialEvent implements Listener {
                         }
                     }
                 }
+            }
+            if(dataPlayer.has(CHARGE.key,PersistentDataType.FLOAT)){
+                float explosion = dataPlayer.getOrDefault(CHARGE.key,PersistentDataType.FLOAT,0f);
+                explosion += (float) event.getDamage()/2;
+                dataPlayer.set(CHARGE.key,PersistentDataType.FLOAT,explosion);
+                event.setDamage(event.getDamage()/2);
             }
         }
         Entity atacante = event.getDamager();
@@ -966,6 +827,43 @@ public class SpecialEvent implements Listener {
                         vivo.getWorld().dropItemNaturally(loc,new ItemStack(egg));
                         vivo.remove();
                     }
+                }
+            }
+        }
+    }
+    @EventHandler
+    public void onPlayerLand(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
+        Location loc = player.getLocation();
+        loc.subtract(0,1,0);
+        if (player.getWorld().getBlockAt(loc).isSolid() && player.hasMetadata("saltoColossal")) {
+            player.removeMetadata("saltoColossal", plugin);
+            player.getWorld().createExplosion(player.getLocation(), 0F, false, false);
+            double radius = 5.0;
+            for (Entity entity : player.getNearbyEntities(radius, radius, radius)) {
+                if (entity instanceof LivingEntity && entity != player) {
+                    ((LivingEntity) entity).damage(8.0, player);
+                    entity.setVelocity(entity.getLocation().toVector()
+                            .subtract(player.getLocation().toVector())
+                            .normalize().multiply(1.0));
+                }
+            }
+        }
+        if (player.getWorld().getBlockAt(loc).isSolid() && player.hasMetadata("hulkUltimate")) {
+            player.removeMetadata("hulkUltimate", plugin);
+            player.getWorld().spawnParticle(Particle.EXPLOSION, player.getLocation(), 50, 1, 0.5, 1, 0.1);
+            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1f, 0.8f);
+            double raio = 15;
+            for (Entity entity : player.getNearbyEntities(raio, 3, raio)) {
+                if (entity instanceof LivingEntity && entity != player) {
+                    ((LivingEntity) entity).damage(50, player);
+                    Vector knockback = entity.getLocation().toVector()
+                            .subtract(player.getLocation().toVector())
+                            .normalize()
+                            .multiply(1.5);
+                    knockback.setY(1.0);
+                    entity.setVelocity(knockback);
+                    ((LivingEntity) entity).addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 60, 1));
                 }
             }
         }

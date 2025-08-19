@@ -6,10 +6,13 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -76,25 +79,32 @@ public class PassivaEvent implements Listener {
                     conteiner.set(SPECIAL.key, PersistentDataType.INTEGER,0);
                 }
                 if(conteiner.has(DRENO.key,PersistentDataType.INTEGER)){
-                    int tempo = conteiner.getOrDefault(SPECIAL.key,PersistentDataType.INTEGER,0);
+                    int tempo = conteiner.getOrDefault(DRENO.key,PersistentDataType.INTEGER,0);
                     if(tempo>0){
                         tempo--;
                         conteiner.set(DRENO.key,PersistentDataType.INTEGER,tempo);
                         player.sendActionBar(Component.text("♡ "+tempo+"s"));
                     }
-                }else{
-                    conteiner.set(DRENO.key, PersistentDataType.INTEGER,0);
                 }
                 if(conteiner.has(TOTEM.key,PersistentDataType.INTEGER)){
-                    int tempo = conteiner.getOrDefault(SPECIAL.key,PersistentDataType.INTEGER,0);
+                    int tempo = conteiner.getOrDefault(TOTEM.key,PersistentDataType.INTEGER,0);
                     if(tempo>0){
                         tempo--;
                         conteiner.set(TOTEM.key,PersistentDataType.INTEGER,tempo);
                         player.sendActionBar(Component.text("♡ "+tempo+"s"));
                     }
-                }else{
-                    conteiner.set(TOTEM.key, PersistentDataType.INTEGER,0);
                 }
+                if(conteiner.has(RENASCER.key,PersistentDataType.INTEGER)){
+                    int tempo = conteiner.getOrDefault(RENASCER.key,PersistentDataType.INTEGER,0);
+                    if(tempo>0){
+                        tempo--;
+                        conteiner.set(RENASCER.key,PersistentDataType.INTEGER,tempo);
+                        player.sendActionBar(Component.text("\uD83D\uDC26\u200D\uD83D\uDD25 "+tempo+"s"));
+                    }else{
+                        player.getAttribute(Attribute.SCALE).setBaseValue(1);
+                    }
+                }
+
                 PlayerInventory pinv = player.getInventory();
                 pinv.forEach(stack -> {
                     if(stack!=null){
@@ -131,6 +141,18 @@ public class PassivaEvent implements Listener {
                 }
             }
         });
+    }
+    @EventHandler
+    public void recuperacaoFenix(EntityDamageEvent event){
+        Entity e = event.getEntity();
+        if(e instanceof Player player){
+            if(player.getInventory().contains(ItemsRegistro.fenix.getItem(1))){
+                if(event.getCause().equals(EntityDamageEvent.DamageCause.FIRE) || event.getCause().equals(EntityDamageEvent.DamageCause.FIRE_TICK)){
+                    player.heal(2d);
+                    event.setCancelled(true);
+                }
+            }
+        }
     }
     private void aplicaEfeito(PersistentDataContainerView data, Player player){
         if(data.has(NEXUS.key,PersistentDataType.STRING)){
@@ -181,6 +203,17 @@ public class PassivaEvent implements Listener {
                     case "mineiro" -> {
                         int level = player.getPersistentDataContainer().getOrDefault(MINEIRO.key,PersistentDataType.INTEGER,1);
                         Mineiro.getPassivabyLevel(level,player);
+                    }
+                    case "fenix" -> {
+                        int level = player.getPersistentDataContainer().getOrDefault(FENIX.key,PersistentDataType.INTEGER,1);
+                        Fenix.getPassivabyLevel(level,player);
+                        if(player.isInLava() || player.getFireTicks()>0){
+                            player.heal(1d);
+                        }
+                    }
+                    case "hulk" -> {
+                        int level = player.getPersistentDataContainer().getOrDefault(HULK.key,PersistentDataType.INTEGER,1);
+                        Hulk.getPassivabyLevel(level,player);
                     }
                 }
             }

@@ -220,9 +220,6 @@ public class ItemsRegistro {
         mineiro = new Nexus(item,"mineiro");
     }
     private static void createFenix(){
-        List<PotionEffectType> efeitos = new ArrayList<>();
-        efeitos.add(PotionEffectType.JUMP_BOOST);
-        efeitos.add(PotionEffectType.FIRE_RESISTANCE);
         ItemStack item = new ItemStack(Material.ELYTRA,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus da Fenix"));
@@ -233,12 +230,9 @@ public class ItemsRegistro {
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"fenix");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
         item.setItemMeta(meta);
-        fenix = new Nexus(item,efeitos,"fenix", Attribute.ARMOR);
+        fenix = new Nexus(item,"fenix");
     }
     private static void createProtetor(){
-        List<PotionEffectType> efeitos = new ArrayList<>();
-        efeitos.add(PotionEffectType.RESISTANCE);
-        efeitos.add(PotionEffectType.FIRE_RESISTANCE);
         ItemStack item = new ItemStack(Material.SHIELD,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Protetor"));
@@ -248,12 +242,9 @@ public class ItemsRegistro {
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"protetor");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
         item.setItemMeta(meta);
-        protetor = new Nexus(item,efeitos,"protetor", Attribute.MAX_HEALTH);
+        protetor = new Nexus(item,"protetor");
     }
     private static void createHulk(){
-        List<PotionEffectType> efeitos = new ArrayList<>();
-        efeitos.add(PotionEffectType.RESISTANCE);
-        efeitos.add(PotionEffectType.STRENGTH);
         ItemStack item = new ItemStack(Material.NETHERITE_LEGGINGS,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Hulk"));
@@ -264,7 +255,7 @@ public class ItemsRegistro {
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"hulk");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
         item.setItemMeta(meta);
-        hulk = new Nexus(item,efeitos,"hulk", Attribute.ATTACK_DAMAGE);
+        hulk = new Nexus(item,"hulk");
     }
     private static void createSculk(){
         List<PotionEffectType> efeitos = new ArrayList<>();

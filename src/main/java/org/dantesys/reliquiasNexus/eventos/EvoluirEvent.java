@@ -40,6 +40,118 @@ public class EvoluirEvent implements Listener {
     public EvoluirEvent(ReliquiasNexus plugin) {
         this.plugin = plugin;
     }
+    private void evo(String nome, int levelAtual,Player player){
+        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+        switch (nome){
+            case "barbaro" -> {
+                dataPlayer.set(MISSAOBARBARO.key, PersistentDataType.INTEGER, 0);
+                dataPlayer.set(BARBARO.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(2+levelAtual);
+            }
+            case "ceifador" -> {
+                dataPlayer.set(MISSAOCEIFADOR.key, PersistentDataType.DOUBLE, 0d);
+                dataPlayer.set(CEIFADOR.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20+levelAtual);
+            }
+            case "fazendeiro" -> {
+                dataPlayer.set(MISSAOFAZENDEIRO.key, PersistentDataType.INTEGER, 0);
+                dataPlayer.set(FAZENDEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.LUCK).setBaseValue(levelAtual);
+            }
+            case "guerreiro" -> {
+                dataPlayer.set(MISSAOGUERREIRO.key, PersistentDataType.INTEGER, 0);
+                dataPlayer.set(GUERREIRO.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(2+levelAtual);
+            }
+            case "mares" -> {
+                dataPlayer.set(MISSAOMARES.key, PersistentDataType.INTEGER, 0);
+                dataPlayer.set(MARES.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.SUBMERGED_MINING_SPEED).setBaseValue(0.2+(levelAtual/10));
+                player.getAttribute(Attribute.WATER_MOVEMENT_EFFICIENCY).setBaseValue(levelAtual/10);
+            }
+            case "vida" -> {
+                dataPlayer.set(MISSAOVIDA.key, PersistentDataType.DOUBLE, 0d);
+                dataPlayer.set(VIDA.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20+(levelAtual*2));
+            }
+            case "espiao" -> {
+                dataPlayer.set(MISSAOESPIAO.key, PersistentDataType.INTEGER, 0);
+                dataPlayer.set(ESPIAO.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.SCALE).setBaseValue(1-(levelAtual*0.025));
+            }
+            case "arqueiro" -> {
+                dataPlayer.set(MISSAOARQUEIRO.key, PersistentDataType.INTEGER, 0);
+                dataPlayer.set(ARQUEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.SNEAKING_SPEED).setBaseValue(0.3+(levelAtual*0.035));
+            }
+            case "cacador" -> {
+                dataPlayer.set(MISSAOCACADOR.key, PersistentDataType.INTEGER, 0);
+                dataPlayer.set(CACADOR.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.SNEAKING_SPEED).setBaseValue(0.6+(levelAtual*0.7));
+            }
+            case "tempestade" -> {
+                dataPlayer.set(MISSAOTEMPESTADE.key, PersistentDataType.INTEGER, 0);
+                dataPlayer.set(TEMPESTADE.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.SAFE_FALL_DISTANCE).setBaseValue(3+levelAtual);
+            }
+            case "mineiro" -> {
+                dataPlayer.set(MISSAOMINEIRO.key, PersistentDataType.INTEGER, 0);
+                dataPlayer.set(MINEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.MINING_EFFICIENCY).setBaseValue(levelAtual);
+                player.getAttribute(Attribute.BLOCK_BREAK_SPEED).setBaseValue(1+levelAtual);
+                player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE).setBaseValue(4.5+levelAtual);
+            }
+            case "fenix" -> {
+                dataPlayer.set(MISSAOFENIX.key, PersistentDataType.INTEGER, 0);
+                dataPlayer.set(FENIX.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.ARMOR).setBaseValue(levelAtual);
+                player.getAttribute(Attribute.ARMOR_TOUGHNESS).setBaseValue(levelAtual);
+            }
+            case "protetor" -> {
+                dataPlayer.set(MISSAOPROTETOR.key, PersistentDataType.INTEGER, 0);
+                dataPlayer.set(PROTETOR.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20+levelAtual);
+            }
+            case "hulk" -> {
+                dataPlayer.set(MISSAOHULK.key, PersistentDataType.DOUBLE, 0d);
+                dataPlayer.set(HULK.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20+(levelAtual/2));
+                player.getAttribute(Attribute.ARMOR).setBaseValue(levelAtual/2);
+                player.getAttribute(Attribute.ARMOR_TOUGHNESS).setBaseValue(levelAtual/2);
+                player.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(2+(levelAtual/2));
+                player.getAttribute(Attribute.ATTACK_KNOCKBACK).setBaseValue((levelAtual/10));
+                player.getAttribute(Attribute.JUMP_STRENGTH).setBaseValue(0.42+(levelAtual/10));
+                player.getAttribute(Attribute.JUMP_STRENGTH).setBaseValue((levelAtual/20));
+                player.getAttribute(Attribute.SAFE_FALL_DISTANCE).setBaseValue(3+(levelAtual*2));
+                player.getAttribute(Attribute.SCALE).setBaseValue(1+(levelAtual*0.025));
+                player.getAttribute(Attribute.SCALE).setBaseValue(levelAtual*0.05);
+            }
+            case "sculk" -> {
+                dataPlayer.set(MISSAOSCULK.key, PersistentDataType.INTEGER, 0);
+                dataPlayer.set(SCULK.key,PersistentDataType.INTEGER,levelAtual+1);
+            }
+            case "pescador" -> {
+                dataPlayer.set(MISSAOPESCADOR.key, PersistentDataType.INTEGER, 0);
+                dataPlayer.set(PESCADOR.key,PersistentDataType.INTEGER,levelAtual+1);
+            }
+            case "flash" -> {
+                dataPlayer.set(MISSAOFLASH.key, PersistentDataType.INTEGER, 0);
+                dataPlayer.set(FLASH.key,PersistentDataType.INTEGER,levelAtual+1);
+            }
+            case "mago" -> {
+                dataPlayer.set(MISSAOMAGO.key, PersistentDataType.INTEGER, 0);
+                dataPlayer.set(MAGO.key,PersistentDataType.INTEGER,levelAtual+1);
+            }
+            case "ladrao" -> {
+                dataPlayer.set(MISSAOLADRAO.key, PersistentDataType.INTEGER, 0);
+                dataPlayer.set(LADRAO.key,PersistentDataType.INTEGER,levelAtual+1);
+            }
+            case "domador" -> {
+                dataPlayer.set(MISSAODOMADOR.key, PersistentDataType.INTEGER, 0);
+                dataPlayer.set(DOMADOR.key,PersistentDataType.INTEGER,levelAtual+1);
+            }
+        }
+    }
     public void tentarEvoluir(Player player, ItemStack nexusItem, int levelAtual,int slot) {
         ItemMeta meta = nexusItem.getItemMeta();
         PersistentDataContainer data = meta.getPersistentDataContainer();
@@ -53,7 +165,6 @@ public class EvoluirEvent implements Listener {
                 if(condicao==null){
                     if(level>=levelAtual*xp){
                         player.setLevel(player.getLevel()-(xp*levelAtual));
-                        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
                         Nexus n = ItemsRegistro.getFromNome(nome);
                         if(n!=null){
                             int max = ReliquiasNexus.getNexusConfig().getInt("levelMax");
@@ -62,102 +173,7 @@ public class EvoluirEvent implements Listener {
                                 if(meta.hasEnchants()){
                                     meta.getEnchants().forEach((nexusItem::addEnchantment));
                                 }
-                                switch (nome){
-                                    case "barbaro" -> {
-                                        dataPlayer.set(MISSAOBARBARO.key, PersistentDataType.INTEGER, 0);
-                                        dataPlayer.set(BARBARO.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        player.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(2+levelAtual);
-                                    }
-                                    case "ceifador" -> {
-                                        dataPlayer.set(MISSAOCEIFADOR.key, PersistentDataType.DOUBLE, 0d);
-                                        dataPlayer.set(CEIFADOR.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20+levelAtual);
-                                    }
-                                    case "fazendeiro" -> {
-                                        dataPlayer.set(MISSAOFAZENDEIRO.key, PersistentDataType.INTEGER, 0);
-                                        dataPlayer.set(FAZENDEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        player.getAttribute(Attribute.LUCK).setBaseValue(levelAtual);
-                                    }
-                                    case "guerreiro" -> {
-                                        dataPlayer.set(MISSAOGUERREIRO.key, PersistentDataType.INTEGER, 0);
-                                        dataPlayer.set(GUERREIRO.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        player.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(2+levelAtual);
-                                    }
-                                    case "mares" -> {
-                                        dataPlayer.set(MISSAOMARES.key, PersistentDataType.INTEGER, 0);
-                                        dataPlayer.set(MARES.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        player.getAttribute(Attribute.SUBMERGED_MINING_SPEED).setBaseValue(0.2+(levelAtual/10));
-                                        player.getAttribute(Attribute.WATER_MOVEMENT_EFFICIENCY).setBaseValue(levelAtual/10);
-                                    }
-                                    case "vida" -> {
-                                        dataPlayer.set(MISSAOVIDA.key, PersistentDataType.DOUBLE, 0d);
-                                        dataPlayer.set(VIDA.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20+(levelAtual*2));
-                                    }
-                                    case "espiao" -> {
-                                        dataPlayer.set(MISSAOESPIAO.key, PersistentDataType.INTEGER, 0);
-                                        dataPlayer.set(ESPIAO.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        player.getAttribute(Attribute.SCALE).setBaseValue(1-(levelAtual*0.025));
-                                    }
-                                    case "arqueiro" -> {
-                                        dataPlayer.set(MISSAOARQUEIRO.key, PersistentDataType.INTEGER, 0);
-                                        dataPlayer.set(ARQUEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        player.getAttribute(Attribute.SNEAKING_SPEED).setBaseValue(0.3+(levelAtual*0.035));
-                                    }
-                                    case "cacador" -> {
-                                        dataPlayer.set(MISSAOCACADOR.key, PersistentDataType.INTEGER, 0);
-                                        dataPlayer.set(CACADOR.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        player.getAttribute(Attribute.SNEAKING_SPEED).setBaseValue(0.6+(levelAtual*0.7));
-                                    }
-                                    case "tempestade" -> {
-                                        dataPlayer.set(MISSAOTEMPESTADE.key, PersistentDataType.INTEGER, 0);
-                                        dataPlayer.set(TEMPESTADE.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        player.getAttribute(Attribute.SAFE_FALL_DISTANCE).setBaseValue(3+levelAtual);
-                                    }
-                                    case "mineiro" -> {
-                                        dataPlayer.set(MISSAOMINEIRO.key, PersistentDataType.INTEGER, 0);
-                                        dataPlayer.set(MINEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        player.getAttribute(Attribute.MINING_EFFICIENCY).setBaseValue(levelAtual);
-                                        player.getAttribute(Attribute.BLOCK_BREAK_SPEED).setBaseValue(1+levelAtual);
-                                        player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE).setBaseValue(4.5+levelAtual);
-                                    }
-                                    case "fenix" -> {
-                                        dataPlayer.set(MISSAOFENIX.key, PersistentDataType.INTEGER, 0);
-                                        dataPlayer.set(FENIX.key,PersistentDataType.INTEGER,levelAtual+1);
-                                    }
-                                    case "protetor" -> {
-                                        dataPlayer.set(MISSAOPROTETOR.key, PersistentDataType.INTEGER, 0);
-                                        dataPlayer.set(PROTETOR.key,PersistentDataType.INTEGER,levelAtual+1);
-                                    }
-                                    case "hulk" -> {
-                                        dataPlayer.set(MISSAOHULK.key, PersistentDataType.DOUBLE, 0d);
-                                        dataPlayer.set(HULK.key,PersistentDataType.INTEGER,levelAtual+1);
-                                    }
-                                    case "sculk" -> {
-                                        dataPlayer.set(MISSAOSCULK.key, PersistentDataType.INTEGER, 0);
-                                        dataPlayer.set(SCULK.key,PersistentDataType.INTEGER,levelAtual+1);
-                                    }
-                                    case "pescador" -> {
-                                        dataPlayer.set(MISSAOPESCADOR.key, PersistentDataType.INTEGER, 0);
-                                        dataPlayer.set(PESCADOR.key,PersistentDataType.INTEGER,levelAtual+1);
-                                    }
-                                    case "flash" -> {
-                                        dataPlayer.set(MISSAOFLASH.key, PersistentDataType.INTEGER, 0);
-                                        dataPlayer.set(FLASH.key,PersistentDataType.INTEGER,levelAtual+1);
-                                    }
-                                    case "mago" -> {
-                                        dataPlayer.set(MISSAOMAGO.key, PersistentDataType.INTEGER, 0);
-                                        dataPlayer.set(MAGO.key,PersistentDataType.INTEGER,levelAtual+1);
-                                    }
-                                    case "ladrao" -> {
-                                        dataPlayer.set(MISSAOLADRAO.key, PersistentDataType.INTEGER, 0);
-                                        dataPlayer.set(LADRAO.key,PersistentDataType.INTEGER,levelAtual+1);
-                                    }
-                                    case "domador" -> {
-                                        dataPlayer.set(MISSAODOMADOR.key, PersistentDataType.INTEGER, 0);
-                                        dataPlayer.set(DOMADOR.key,PersistentDataType.INTEGER,levelAtual+1);
-                                    }
-                                }
+                                evo(nome,levelAtual,player);
                                 player.getInventory().setItem(slot,nexusItem);
                                 msg = ReliquiasNexus.getLang().getString("evo.sucesso");
                                 if(msg==null){
@@ -173,88 +189,7 @@ public class EvoluirEvent implements Listener {
                                     if(meta.hasEnchants()){
                                         meta.getEnchants().forEach((nexusItem::addEnchantment));
                                     }
-                                    switch (nome){
-                                        case "barbaro" -> {
-                                            dataPlayer.set(MISSAOBARBARO.key, PersistentDataType.INTEGER, 0);
-                                            dataPlayer.set(BARBARO.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        }
-                                        case "ceifador" -> {
-                                            dataPlayer.set(MISSAOCEIFADOR.key, PersistentDataType.DOUBLE, 0d);
-                                            dataPlayer.set(CEIFADOR.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        }
-                                        case "fazendeiro" -> {
-                                            dataPlayer.set(MISSAOFAZENDEIRO.key, PersistentDataType.INTEGER, 0);
-                                            dataPlayer.set(FAZENDEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        }
-                                        case "guerreiro" -> {
-                                            dataPlayer.set(MISSAOGUERREIRO.key, PersistentDataType.INTEGER, 0);
-                                            dataPlayer.set(GUERREIRO.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        }
-                                        case "mares" -> {
-                                            dataPlayer.set(MISSAOMARES.key, PersistentDataType.INTEGER, 0);
-                                            dataPlayer.set(MARES.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        }
-                                        case "vida" -> {
-                                            dataPlayer.set(MISSAOVIDA.key, PersistentDataType.DOUBLE, 0d);
-                                            dataPlayer.set(VIDA.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        }
-                                        case "espiao" -> {
-                                            dataPlayer.set(MISSAOESPIAO.key, PersistentDataType.INTEGER, 0);
-                                            dataPlayer.set(ESPIAO.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        }
-                                        case "arqueiro" -> {
-                                            dataPlayer.set(MISSAOARQUEIRO.key, PersistentDataType.INTEGER, 0);
-                                            dataPlayer.set(ARQUEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        }
-                                        case "cacador" -> {
-                                            dataPlayer.set(MISSAOCACADOR.key, PersistentDataType.INTEGER, 0);
-                                            dataPlayer.set(CACADOR.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        }
-                                        case "tempestade" -> {
-                                            dataPlayer.set(MISSAOTEMPESTADE.key, PersistentDataType.INTEGER, 0);
-                                            dataPlayer.set(TEMPESTADE.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        }
-                                        case "mineiro" -> {
-                                            dataPlayer.set(MISSAOMINEIRO.key, PersistentDataType.INTEGER, 0);
-                                            dataPlayer.set(MINEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        }
-                                        case "fenix" -> {
-                                            dataPlayer.set(MISSAOFENIX.key, PersistentDataType.INTEGER, 0);
-                                            dataPlayer.set(FENIX.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        }
-                                        case "protetor" -> {
-                                            dataPlayer.set(MISSAOPROTETOR.key, PersistentDataType.INTEGER, 0);
-                                            dataPlayer.set(PROTETOR.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        }
-                                        case "hulk" -> {
-                                            dataPlayer.set(MISSAOHULK.key, PersistentDataType.DOUBLE, 0d);
-                                            dataPlayer.set(HULK.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        }
-                                        case "sculk" -> {
-                                            dataPlayer.set(MISSAOSCULK.key, PersistentDataType.INTEGER, 0);
-                                            dataPlayer.set(SCULK.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        }
-                                        case "pescador" -> {
-                                            dataPlayer.set(MISSAOPESCADOR.key, PersistentDataType.INTEGER, 0);
-                                            dataPlayer.set(PESCADOR.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        }
-                                        case "flash" -> {
-                                            dataPlayer.set(MISSAOFLASH.key, PersistentDataType.INTEGER, 0);
-                                            dataPlayer.set(FLASH.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        }
-                                        case "mago" -> {
-                                            dataPlayer.set(MISSAOMAGO.key, PersistentDataType.INTEGER, 0);
-                                            dataPlayer.set(MAGO.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        }
-                                        case "ladrao" -> {
-                                            dataPlayer.set(MISSAOLADRAO.key, PersistentDataType.INTEGER, 0);
-                                            dataPlayer.set(LADRAO.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        }
-                                        case "domador" -> {
-                                            dataPlayer.set(MISSAODOMADOR.key, PersistentDataType.INTEGER, 0);
-                                            dataPlayer.set(DOMADOR.key,PersistentDataType.INTEGER,levelAtual+1);
-                                        }
-                                    }
+                                    evo(nome,levelAtual,player);
                                     player.getInventory().setItem(slot,nexusItem);
                                 }
                                 msg = ReliquiasNexus.getLang().getString("evo.max");

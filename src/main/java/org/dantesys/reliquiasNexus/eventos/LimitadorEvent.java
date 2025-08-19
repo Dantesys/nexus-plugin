@@ -80,6 +80,13 @@ public class LimitadorEvent implements Listener {
         Player player = event.getPlayer();
         PlayerInventory inv = player.getInventory();
         List<ItemStack> manterRelics = new ArrayList<>();
+        if(player.getPersistentDataContainer().has(RENASCER.key,PersistentDataType.INTEGER)){
+            int tempo = player.getPersistentDataContainer().getOrDefault(RENASCER.key,PersistentDataType.INTEGER,0);
+            if(tempo>0){
+                player.setHealth(20d);
+                event.setCancelled(true);
+            }
+        }
         for(ItemStack item: inv.getContents()){
             if(item!=null){
                 ItemMeta meta = item.getItemMeta();
