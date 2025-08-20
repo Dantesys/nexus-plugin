@@ -23,10 +23,13 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.Vector;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
 import org.dantesys.reliquiasNexus.SpeciaisPassivas.Espiao;
+import org.dantesys.reliquiasNexus.SpeciaisPassivas.Flash;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
+import org.dantesys.reliquiasNexus.util.Temporizador;
 
 import java.util.List;
 import java.util.Random;
@@ -121,22 +124,30 @@ public class EvoluirEvent implements Listener {
                 player.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(2+(levelAtual/2));
                 player.getAttribute(Attribute.ATTACK_KNOCKBACK).setBaseValue((levelAtual/10));
                 player.getAttribute(Attribute.JUMP_STRENGTH).setBaseValue(0.42+(levelAtual/10));
-                player.getAttribute(Attribute.JUMP_STRENGTH).setBaseValue((levelAtual/20));
+                player.getAttribute(Attribute.KNOCKBACK_RESISTANCE).setBaseValue((levelAtual/20));
                 player.getAttribute(Attribute.SAFE_FALL_DISTANCE).setBaseValue(3+(levelAtual*2));
                 player.getAttribute(Attribute.SCALE).setBaseValue(1+(levelAtual*0.025));
-                player.getAttribute(Attribute.SCALE).setBaseValue(levelAtual*0.05);
+                player.getAttribute(Attribute.SWEEPING_DAMAGE_RATIO).setBaseValue(levelAtual*0.05);
             }
             case "sculk" -> {
                 dataPlayer.set(MISSAOSCULK.key, PersistentDataType.INTEGER, 0);
                 dataPlayer.set(SCULK.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.SNEAKING_SPEED).setBaseValue(0.3+(levelAtual*0.035));
+                player.getAttribute(Attribute.WAYPOINT_TRANSMIT_RANGE).setBaseValue(60000000-(levelAtual*3000000));
             }
             case "pescador" -> {
                 dataPlayer.set(MISSAOPESCADOR.key, PersistentDataType.INTEGER, 0);
                 dataPlayer.set(PESCADOR.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.LUCK).setBaseValue(levelAtual*51);
             }
             case "flash" -> {
                 dataPlayer.set(MISSAOFLASH.key, PersistentDataType.INTEGER, 0);
                 dataPlayer.set(FLASH.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.ATTACK_SPEED).setBaseValue(4+levelAtual);
+                player.getAttribute(Attribute.MOVEMENT_EFFICIENCY).setBaseValue(levelAtual*0.05);
+                player.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.245*levelAtual+0.7);
+                player.getAttribute(Attribute.SNEAKING_SPEED).setBaseValue(0.035*levelAtual+0.3);
+                player.getAttribute(Attribute.STEP_HEIGHT).setBaseValue(0.007*levelAtual+0.6);
             }
             case "mago" -> {
                 dataPlayer.set(MISSAOMAGO.key, PersistentDataType.INTEGER, 0);
@@ -498,6 +509,44 @@ public class EvoluirEvent implements Listener {
         Player player = event.getPlayer();
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int cd = dataPlayer.getOrDefault(SPECIAL.key, PersistentDataType.INTEGER, 0);
+        if(player.hasMetadata("arpao")){
+            ItemStack stack = player.getInventory().getItemInMainHand();
+            if(stack.getPersistentDataContainer().has(NEXUS.key,PersistentDataType.STRING)){
+                String nome = stack.getPersistentDataContainer().getOrDefault(NEXUS.key,PersistentDataType.STRING,"");
+                if(nome.equals("pescador")){
+                    player.removeMetadata("arpao",plugin);
+                    event.setCancelled(true);
+                    FishHook hook = player.launchProjectile(FishHook.class);
+                    hook.setShooter(player);
+                    Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 10,
+                            ()->{},()-> {},(t)->{
+                        if (hook.isDead() || !hook.isValid()) {
+                            t.stop();
+                            return;
+                        }
+                        if (hook.getHookedEntity() != null) {
+                            Entity alvo = hook.getHookedEntity();
+                            Vector puxar = player.getLocation().toVector().subtract(alvo.getLocation().toVector()).normalize().multiply(1.5);
+                            alvo.setVelocity(puxar);
+                            alvo.getWorld().playSound(alvo.getLocation(), Sound.ENTITY_FISHING_BOBBER_RETRIEVE, 1f, 1f);
+                            hook.remove();
+                            t.stop();
+                        }
+
+                        // Se bateu em bloco (hook landed)
+                        if (hook.isOnGround()) {
+                            Location destino = hook.getLocation();
+                            Vector puxar = destino.toVector().subtract(player.getLocation().toVector()).normalize().multiply(1.5);
+                            player.setVelocity(puxar);
+                            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_SPLASH, 1f, 1f);
+                            hook.remove();
+                            t.stop();
+                        }
+                    });
+                    timer.scheduleTimer(2L);
+                }
+            }
+        }
         if (player.isSneaking() && cd <= 0) {
             ItemStack stack = player.getInventory().getHelmet();
             if(stack!=null){
@@ -530,17 +579,7 @@ public class EvoluirEvent implements Listener {
                                 int l=dataPlayer.getOrDefault(FLASH.key,PersistentDataType.INTEGER,1);
                                 int usos=dataPlayer.getOrDefault(MISSAOFLASH.key,PersistentDataType.INTEGER,0);
                                 usos++;
-                                Block bloco = player.getTargetBlockExact(10+l);
-                                if(bloco==null)return;
-                                Location loc = bloco.getLocation();
-                                World w = player.getWorld();
-                                Location loc1 = loc.add(0d,1d,0d);
-                                Location loc2 = loc1.add(0d,1d,0d);
-                                while(!w.getBlockAt(loc1).getType().equals(Material.AIR) && !w.getBlockAt(loc2).getType().equals(Material.AIR)){
-                                    loc1 = loc1.add(0d,1d,0d);
-                                    loc2 = loc2.add(0d,1d,0d);
-                                }
-                                player.teleport(loc);
+                                Flash.getSpecialbyLevel(l,player);
                                 dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,120);
                                 dataPlayer.set(MISSAOFLASH.key,PersistentDataType.INTEGER,usos);
                                 tentarEvoluir(player,stack,l,getSlotOfItem(player,stack));
@@ -804,8 +843,11 @@ public class EvoluirEvent implements Listener {
                         int protecao = player.getPersistentDataContainer().getOrDefault(MISSAOSCULK.key, PersistentDataType.INTEGER, 0);
                         int level = player.getPersistentDataContainer().getOrDefault(SCULK.key,PersistentDataType.INTEGER,1);
                         protecao++;
-                        event.setDamage(0);
-                        war.setAnger(player,0);
+                        if(player.hasMetadata("wardenImunity")){
+                            event.setDamage(0);
+                            war.setAnger(player,0);
+                            player.removeMetadata("wardenImunity",plugin);
+                        }
                         player.getPersistentDataContainer().set(MISSAOSCULK.key, PersistentDataType.INTEGER, protecao);
                         tentarEvoluir(player,n.getItem(level),level,getSlotOfItem(player,stack));
                     }

@@ -215,6 +215,18 @@ public class PassivaEvent implements Listener {
                         int level = player.getPersistentDataContainer().getOrDefault(HULK.key,PersistentDataType.INTEGER,1);
                         Hulk.getPassivabyLevel(level,player);
                     }
+                    case "sculk" -> {
+                        int level = player.getPersistentDataContainer().getOrDefault(SCULK.key,PersistentDataType.INTEGER,1);
+                        Sculk.getPassivabyLevel(level,player);
+                    }
+                    case "pescador" -> {
+                        int level = player.getPersistentDataContainer().getOrDefault(PESCADOR.key,PersistentDataType.INTEGER,1);
+                        Pescador.getPassivabyLevel(level,player);
+                    }
+                    case "flash" -> {
+                        int level = player.getPersistentDataContainer().getOrDefault(FLASH.key,PersistentDataType.INTEGER,1);
+                        Flash.getPassivabyLevel(level,player);
+                    }
                 }
             }
         }

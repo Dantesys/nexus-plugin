@@ -1,18 +1,14 @@
 package org.dantesys.reliquiasNexus.SpeciaisPassivas;
 
-import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
-import org.dantesys.reliquiasNexus.util.Temporizador;
 
 public class Hulk {
     public static void getPassivabyLevel(int level, Player player){

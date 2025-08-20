@@ -3,7 +3,6 @@ package org.dantesys.reliquiasNexus.eventos;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.*;
@@ -67,9 +66,9 @@ public class SpecialEvent implements Listener {
                             }
                             case "tempestade" -> tempestade(player);
                             case "mineiro" -> mineiro(player);
-                            case "sculk" -> sculk(player,item);
+                            case "sculk" -> sculk(player);
                             case "protetor" -> protetor(player);
-                            case "pescador" -> pescador(player,item);
+                            case "pescador" -> pescador(player);
                             case "ladrao" -> {
                                 ladrao(player,item);
                                 event.setCancelled(true);
@@ -80,7 +79,7 @@ public class SpecialEvent implements Listener {
                                 event.setCancelled(true);
                             }
                         }
-                        if(!item.getNome().equals("protetor") && !item.getNome().equals("mago")){
+                        if(!item.getNome().equals("mago")){
                             dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,120);
                         }
                     }
@@ -381,112 +380,15 @@ public class SpecialEvent implements Listener {
         int l = dataPlayer.getOrDefault(HULK.key,PersistentDataType.INTEGER,1);
         Hulk.getSpecialbyLevel(l,player);
     }
-    private void sculk(Player player,Nexus item){
+    private void sculk(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(SCULK.key,PersistentDataType.INTEGER,1);
-        item.setLevel(l);
-        final int finalRange = 50;
-        final double finalDamage = 20+l;
-        final Location location = player.getLocation();
-        final Vector direction = location.getDirection().normalize();
-        final double[] tp = {0};
-        Temporizador timer = new Temporizador(plugin, 10,
-                ()->{
-                },()-> {
-        },(t)->{
-            tp[0] = tp[0]+3.4;
-            double x = direction.getX()*tp[0];
-            double y = direction.getY()*tp[0]+1.4;
-            double z = direction.getZ()*tp[0];
-            location.add(x,y,z);
-            location.getWorld().spawnParticle(Particle.SONIC_BOOM,location,1,0,0,0,0);
-            location.getWorld().playSound(location, Sound.ENTITY_WARDEN_SONIC_BOOM,0.5f,0.7f);
-            Collection<Entity> pressf = location.getWorld().getNearbyEntities(location,2,2,2);
-            while(pressf.iterator().hasNext()){
-                Entity surdo = pressf.iterator().next();
-                if(surdo instanceof LivingEntity vivo){
-                    if(vivo instanceof Player pl){
-                        if(pl != player){
-                            vivo.damage(finalDamage);
-                        }
-                    }else{
-                        vivo.damage(finalDamage);
-                    }
-                }
-                pressf.remove(surdo);
-            }
-            location.subtract(x,y,z);
-            if(t.getSegundosRestantes()>finalRange){
-                t.stop();
-            }
-        });
-        timer.scheduleTimer(1L);
+        Sculk.getSpecialbyLevel(l,player);
     }
-    private void pescador(Player player,Nexus item){
+    private void pescador(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(PESCADOR.key,PersistentDataType.INTEGER,1);
-        item.setLevel(l);
-        final int finalRange = 50;
-        final double finalDamage = l;
-        final Location location = player.getLocation();
-        final Vector direction = location.getDirection().normalize();
-        final double[] tp = {0};
-        final List<LivingEntity> atingidos = new ArrayList<>();
-        Temporizador timer = new Temporizador(plugin, 10,
-                ()->{
-                },()-> {
-        },(t)->{
-            tp[0] = tp[0]+3.4;
-            double x = direction.getX()*tp[0];
-            double y = direction.getY()*tp[0]+1.4;
-            double z = direction.getZ()*tp[0];
-            location.add(x,y,z);
-            location.getWorld().spawnParticle(Particle.BUBBLE_POP,location,1,0,0,0,0);
-            location.getWorld().playSound(location, Sound.BLOCK_WATER_AMBIENT,0.5f,0.7f);
-            Collection<Entity> pressf = location.getWorld().getNearbyEntities(location,2,2,2);
-            while(pressf.iterator().hasNext()){
-                Entity surdo = pressf.iterator().next();
-                if(surdo instanceof LivingEntity vivo && atingidos.contains(vivo)){
-                    AttributeInstance at = vivo.getAttribute(Attribute.MAX_HEALTH);
-                    atingidos.add(vivo);
-                    if(at != null){
-                        double max = at.getBaseValue();
-                        if(vivo instanceof Player pl){
-                            if(pl != player){
-                                if(vivo.getHealth()/max<=0.5){
-                                    Location ld = vivo.getLocation();
-                                    World wd = vivo.getWorld();
-                                    EntityType et = peixe();
-                                    if(et.getEntityClass()==null)return;
-                                    Entity e = wd.spawn(ld,et.getEntityClass());
-                                    vivo.getPersistentDataContainer().set(PROTECAO.key,PersistentDataType.STRING,e.getName());
-                                    vivo.setHealth(0);
-                                }else{
-                                    vivo.damage(finalDamage);
-                                }
-                            }
-                        }else{
-                            if(vivo.getHealth()/max<=0.2){
-                                Location ld = vivo.getLocation();
-                                World wd = vivo.getWorld();
-                                EntityType et = peixe();
-                                if(et.getEntityClass()==null)return;
-                                wd.spawn(ld,et.getEntityClass());
-                                vivo.setHealth(0);
-                            }else{
-                                vivo.damage(finalDamage);
-                            }
-                        }
-                    }
-                }
-                pressf.remove(surdo);
-            }
-            location.subtract(x,y,z);
-            if(t.getSegundosRestantes()>finalRange){
-                t.stop();
-            }
-        });
-        timer.scheduleTimer(1L);
+        Pescador.getSpecialbyLevel(l,player);
     }
     private void ladrao(Player player, Nexus item){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
@@ -721,58 +623,6 @@ public class SpecialEvent implements Listener {
                 explosion += (float) event.getDamage()/2;
                 dataPlayer.set(CHARGE.key,PersistentDataType.FLOAT,explosion);
                 event.setDamage(event.getDamage()/2);
-            }
-        }
-        Entity atacante = event.getDamager();
-        if(atacante instanceof FishHook vara){
-            UUID uuid = vara.getOwnerUniqueId();
-            if(uuid!=null){
-                Player player = Bukkit.getPlayer(uuid);
-                if(player!=null){
-                    lancaPeixe(player,atacado);
-                }
-            }
-        }else if(atacante instanceof Player player){
-            lancaPeixe(player,atacado);
-        }
-    }
-    private EntityType peixe(){
-        List<EntityType> m = List.of(
-                EntityType.SQUID,
-                EntityType.COD,
-                EntityType.DOLPHIN,
-                EntityType.PUFFERFISH,
-                EntityType.SALMON,
-                EntityType.TROPICAL_FISH,
-                EntityType.AXOLOTL,
-                EntityType.GLOW_SQUID,
-                EntityType.TADPOLE,
-                EntityType.TURTLE
-        );
-        Random r = new Random();
-        int i = r.nextInt(0,m.size()-1);
-        return m.get(i);
-    }
-    private void lancaPeixe(Player player,Entity atacado){
-        ItemStack stack = player.getInventory().getItemInMainHand();
-        if(stack.getPersistentDataContainer().has(NEXUS.key,PersistentDataType.STRING)){
-            String nome = stack.getPersistentDataContainer().get(NEXUS.key,PersistentDataType.STRING);
-            if(nome!=null && nome.equals("pescador")){
-                Nexus n = ItemsRegistro.getFromNome(nome);
-                if(n!=null){
-                    PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-                    int level = dataPlayer.getOrDefault(PESCADOR.key,PersistentDataType.INTEGER,1);
-                    n.setLevel(level);
-                    World w = player.getWorld();
-                    EntityType et = peixe();
-                    if(et.getEntityClass()==null)return;
-                    Entity en = w.spawn(atacado.getLocation(),et.getEntityClass());
-                    if(!et.hasDefaultAttributes() && et.getDefaultAttributes().getAttribute(Attribute.MAX_HEALTH)==null)return;
-                    double dano = et.getDefaultAttributes().getAttribute(Attribute.MAX_HEALTH).getBaseValue();
-                    if(atacado instanceof LivingEntity vivo){
-                        vivo.damage(dano,en);
-                    }
-                }
             }
         }
     }

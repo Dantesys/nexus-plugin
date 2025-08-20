@@ -258,8 +258,6 @@ public class ItemsRegistro {
         hulk = new Nexus(item,"hulk");
     }
     private static void createSculk(){
-        List<PotionEffectType> efeitos = new ArrayList<>();
-        efeitos.add(PotionEffectType.NIGHT_VISION);
         ItemStack item = new ItemStack(Material.ECHO_SHARD,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Sculk"));
@@ -269,12 +267,9 @@ public class ItemsRegistro {
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"sculk");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
         item.setItemMeta(meta);
-        sculk = new Nexus(item,efeitos,"sculk", Attribute.LUCK);
+        sculk = new Nexus(item,"sculk");
     }
     private static void createPescador(){
-        List<PotionEffectType> efeitos = new ArrayList<>();
-        efeitos.add(PotionEffectType.LUCK);
-        efeitos.add(PotionEffectType.WATER_BREATHING);
         ItemStack item = new ItemStack(Material.FISHING_ROD,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Pescador"));
@@ -284,11 +279,9 @@ public class ItemsRegistro {
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"pescador");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
         item.setItemMeta(meta);
-        pescador = new Nexus(item,efeitos,"pescador", Attribute.WATER_MOVEMENT_EFFICIENCY);
+        pescador = new Nexus(item,"pescador");
     }
     private static void createFlash(){
-        List<PotionEffectType> efeitos = new ArrayList<>();
-        efeitos.add(PotionEffectType.SPEED);
         ItemStack item = new ItemStack(Material.NETHERITE_BOOTS,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Flash"));
@@ -298,7 +291,7 @@ public class ItemsRegistro {
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"flash");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
         item.setItemMeta(meta);
-        flash = new Nexus(item,efeitos,"flash", Attribute.ATTACK_SPEED);
+        flash = new Nexus(item,"flash");
     }
     private static void createMago(){
         List<PotionEffectType> efeitos = new ArrayList<>();

@@ -127,22 +127,22 @@ public class JoinQuitEvent implements Listener {
                         player.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(2+(level/2));
                         player.getAttribute(Attribute.ATTACK_KNOCKBACK).setBaseValue((level/10));
                         player.getAttribute(Attribute.JUMP_STRENGTH).setBaseValue(0.42+(level/10));
-                        player.getAttribute(Attribute.JUMP_STRENGTH).setBaseValue((level/20));
+                        player.getAttribute(Attribute.KNOCKBACK_RESISTANCE).setBaseValue((level/20));
                         player.getAttribute(Attribute.SAFE_FALL_DISTANCE).setBaseValue(3+(level*2));
                         player.getAttribute(Attribute.SCALE).setBaseValue(1+(level*0.025));
-                        player.getAttribute(Attribute.SCALE).setBaseValue(level*0.05);
+                        player.getAttribute(Attribute.SWEEPING_DAMAGE_RATIO).setBaseValue(level*0.05);
                     }
                     case "sculk" -> {
-                        dataPlayer.set(MISSAOSCULK.key, PersistentDataType.INTEGER, 0);
-                        dataPlayer.set(SCULK.key,PersistentDataType.INTEGER,levelAtual+1);
+                        player.getAttribute(Attribute.SNEAKING_SPEED).setBaseValue(0.3+(level*0.035));
+                        player.getAttribute(Attribute.WAYPOINT_TRANSMIT_RANGE).setBaseValue(60000000-(level*3000000));
                     }
-                    case "pescador" -> {
-                        dataPlayer.set(MISSAOPESCADOR.key, PersistentDataType.INTEGER, 0);
-                        dataPlayer.set(PESCADOR.key,PersistentDataType.INTEGER,levelAtual+1);
-                    }
+                    case "pescador" -> player.getAttribute(Attribute.LUCK).setBaseValue(level*51);
                     case "flash" -> {
-                        dataPlayer.set(MISSAOFLASH.key, PersistentDataType.INTEGER, 0);
-                        dataPlayer.set(FLASH.key,PersistentDataType.INTEGER,levelAtual+1);
+                        player.getAttribute(Attribute.ATTACK_SPEED).setBaseValue(4+level);
+                        player.getAttribute(Attribute.MOVEMENT_EFFICIENCY).setBaseValue(level*0.05);
+                        player.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.245*level+0.7);
+                        player.getAttribute(Attribute.SNEAKING_SPEED).setBaseValue(0.035*level+0.3);
+                        player.getAttribute(Attribute.STEP_HEIGHT).setBaseValue(0.007*level+0.6);
                     }
                     case "mago" -> {
                         dataPlayer.set(MISSAOMAGO.key, PersistentDataType.INTEGER, 0);

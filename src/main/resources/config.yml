@@ -12,7 +12,7 @@ limite: 3
 levelMax: 20
 #Quantidade de xp que precisa para evoluir, o calculo é xp*level
 #Amount of xp you need to evolve, the calculation is xp*level
-xptolevel: 10
+xptolevel: 7
 #Registro das reliquias, quando algum jogador possui fica registrado o UUID dele
 #Registration of relics, when a player has one, his UUID is registered
 nexus:
