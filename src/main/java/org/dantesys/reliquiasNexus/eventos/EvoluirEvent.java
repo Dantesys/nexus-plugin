@@ -152,6 +152,7 @@ public class EvoluirEvent implements Listener {
             case "mago" -> {
                 dataPlayer.set(MISSAOMAGO.key, PersistentDataType.INTEGER, 0);
                 dataPlayer.set(MAGO.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.MAX_ABSORPTION).setBaseValue(levelAtual);
             }
             case "ladrao" -> {
                 dataPlayer.set(MISSAOLADRAO.key, PersistentDataType.INTEGER, 0);

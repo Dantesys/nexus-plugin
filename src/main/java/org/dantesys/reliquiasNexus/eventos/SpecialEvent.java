@@ -75,7 +75,7 @@ public class SpecialEvent implements Listener {
                             }
                             case "domador" -> domador(player,item);
                             case "mago" -> {
-                                mago(player,item);
+                                mago(player);
                                 event.setCancelled(true);
                             }
                         }
@@ -411,12 +411,10 @@ public class SpecialEvent implements Listener {
         wolf.getAttribute(Attribute.MAX_HEALTH).setBaseValue(l);
         wolf.getAttribute(Attribute.SCALE).setBaseValue(1.25);
     }
-    private void mago(Player player,Nexus item){
-        int tempo=120;
+    private void mago(Player player){
         PlayerInventory inv = player.getInventory();
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(MAGO.key,PersistentDataType.INTEGER,1);
-        item.setLevel(l);
         int pos=0;
         for (int i = 0; i <= 8; i++) {
             ItemStack stack = inv.getItem(i);
@@ -428,169 +426,7 @@ public class SpecialEvent implements Listener {
                 }
             }
         }
-        switch (pos){
-            case 0 -> {
-                Fireball bola = player.launchProjectile(Fireball.class);
-                bola.setGlowing(true);
-                Vector vec = player.getEyeLocation().getDirection();
-                bola.setVelocity(vec.multiply(l));
-                tempo=60;
-            }
-            case 1 -> {
-                WindCharge bola = player.launchProjectile(WindCharge.class);
-                bola.setGlowing(true);
-                Vector vec = player.getEyeLocation().getDirection();
-                bola.getPersistentDataContainer().set(SPECIAL.key,PersistentDataType.INTEGER,l);
-                bola.setVelocity(vec.multiply(l));
-                tempo=20;
-            }
-            case 2 -> {
-                Snowball bola = player.launchProjectile(Snowball.class);
-                bola.setGlowing(true);
-                Vector vec = player.getEyeLocation().getDirection();
-                bola.getPersistentDataContainer().set(SPECIAL.key,PersistentDataType.INTEGER,l);
-                bola.setVelocity(vec.multiply(l));
-                tempo=10;
-            }
-            case 3 -> {
-                Egg bola = player.launchProjectile(Egg.class);
-                bola.setGlowing(true);
-                Vector vec = player.getEyeLocation().getDirection();
-                bola.getPersistentDataContainer().set(SPECIAL.key,PersistentDataType.INTEGER,l);
-                bola.setVelocity(vec.multiply(l));
-                tempo=20;
-            }
-            case 4 -> {
-                SpectralArrow bola = player.launchProjectile(SpectralArrow.class);
-                bola.setGlowing(true);
-                Vector vec = player.getEyeLocation().getDirection();
-                bola.setVelocity(vec.multiply(l));
-                tempo=30;
-            }
-            case 5 -> {
-                final int finalRange = 50;
-                final double finalDamage = 20+l;
-                final Location location = player.getLocation();
-                final Vector direction = location.getDirection().normalize();
-                final double[] tp = {0};
-                Temporizador timer = new Temporizador(plugin, 10,
-                        ()->{
-                        },()-> {
-                },(t)->{
-                    tp[0] = tp[0]+3.4;
-                    double x = direction.getX()*tp[0];
-                    double y = direction.getY()*tp[0]+1.4;
-                    double z = direction.getZ()*tp[0];
-                    location.add(x,y,z);
-                    location.getWorld().spawnParticle(Particle.SONIC_BOOM,location,1,0,0,0,0);
-                    location.getWorld().playSound(location, Sound.ENTITY_WARDEN_SONIC_BOOM,0.5f,0.7f);
-                    Collection<Entity> pressf = location.getWorld().getNearbyEntities(location,2,2,2);
-                    while(pressf.iterator().hasNext()){
-                        Entity surdo = pressf.iterator().next();
-                        if(surdo instanceof LivingEntity vivo){
-                            if(vivo instanceof Player pl){
-                                if(pl != player){
-                                    vivo.damage(finalDamage);
-                                }
-                            }else{
-                                vivo.damage(finalDamage);
-                            }
-                        }
-                        pressf.remove(surdo);
-                    }
-                    location.subtract(x,y,z);
-                    if(t.getSegundosRestantes()>finalRange){
-                        t.stop();
-                    }
-                });
-                timer.scheduleTimer(1L);
-            }
-            case 6 -> {
-                EnderPearl bola = player.launchProjectile(EnderPearl.class);
-                bola.setGlowing(true);
-                Vector vec = player.getEyeLocation().getDirection();
-                bola.setVelocity(vec.multiply(l));
-                tempo=10;
-            }
-            case 7 -> {
-                final int finalRange = 30;
-                final Location location = player.getLocation();
-                final World world = player.getWorld();
-                final List<LivingEntity> atingidos = new ArrayList<>();
-                Temporizador timer = new Temporizador(plugin, 10,
-                        ()->{
-                        },()-> {
-                },(t)->{
-                    double area = (double) finalRange /(t.getSegundosRestantes());
-                    for (double i = 0; i <= 2*Math.PI*area; i += 0.05) {
-                        double x = (area * Math.cos(i)) + location.getX();
-                        double z = (location.getZ() + area * Math.sin(i));
-                        Location particle = new Location(world, x, location.getY() + 1, z);
-                        world.spawnParticle(Particle.COMPOSTER,particle,1);
-                    }
-                    Collection<Entity> pressf = location.getWorld().getNearbyEntities(location,area,2,area);
-                    while(pressf.iterator().hasNext()){
-                        Entity surdo = pressf.iterator().next();
-                        if(surdo instanceof LivingEntity vivo && !atingidos.contains(vivo)){
-                            atingidos.add(vivo);
-                            if(vivo instanceof Player p){
-                                if(p!=player) {
-                                    vivo.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION,20+l,l));
-                                }
-                            }else{
-                                vivo.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION,20+l,l));
-                            }
-                        }
-                        pressf.remove(surdo);
-                    }
-                });
-                timer.scheduleTimer(1L);
-                tempo=60;
-            }
-            case 8 -> {
-                World w = player.getWorld();
-                w.setStorm(true);
-                w.setThundering(true);
-                final int finalRange = 30;
-                final double damage = 10+l;
-                final Location location = player.getLocation();
-                final World world = player.getWorld();
-                final List<LivingEntity> atingidos = new ArrayList<>();
-                Temporizador timer = new Temporizador(plugin, 10,
-                        ()->{
-                        },()-> {
-                },(t)->{
-                    double area = (double) finalRange /(t.getSegundosRestantes());
-                    for (double i = 0; i <= 2*Math.PI*area; i += 0.05) {
-                        double x = (area * Math.cos(i)) + location.getX();
-                        double z = (location.getZ() + area * Math.sin(i));
-                        Location particle = new Location(world, x, location.getY() + 1, z);
-                        world.spawnParticle(Particle.FALLING_WATER,particle,1);
-                    }
-                    Collection<Entity> pressf = location.getWorld().getNearbyEntities(location,area,2,area);
-                    while(pressf.iterator().hasNext()){
-                        Entity surdo = pressf.iterator().next();
-                        if(surdo instanceof LivingEntity vivo && !atingidos.contains(vivo)){
-                            atingidos.add(vivo);
-                            Location vloc = vivo.getLocation();
-                            World vworld = vivo.getWorld();
-                            if(vivo instanceof Player p){
-                                if(p!=player){
-                                    vivo.damage(damage);
-                                    vworld.strikeLightning(vloc);
-                                }
-                            }else{
-                                vivo.damage(damage);
-                                vworld.strikeLightning(vloc);
-                            }
-                        }
-                        pressf.remove(surdo);
-                    }
-                });
-                timer.scheduleTimer(1L);
-            }
-        }
-        dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,tempo);
+        Mago.getSpecialbyLevel(l,player,pos);
     }
     @EventHandler
     public void reversao(EntityDamageByEntityEvent event){
@@ -646,6 +482,28 @@ public class SpecialEvent implements Listener {
                 int forca = arrow.getMetadata(SPECIAL.key.getKey()).getFirst().asInt();
                 World w = arrow.getWorld();
                 w.createExplosion(arrow,forca,false,false);
+            }
+            if (arrow.hasMetadata("flecha_gelo")){
+                int level = arrow.getMetadata("flecha_gelo").getFirst().asInt();
+                if (event.getHitEntity() instanceof LivingEntity target) {
+                    int duration = 60 + (20 * level); // 3s base + 1s por level
+                    int amplifier = Math.min(1 + (level / 3), 4); // Slowness aumenta a cada 3 levels até IV
+                    target.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, duration, amplifier));
+                    target.getWorld().spawnParticle(Particle.SNOWFLAKE, target.getLocation(), 30, 0.5, 1, 0.5);
+                    target.getWorld().playSound(target.getLocation(), Sound.BLOCK_GLASS_BREAK, 1, 1);
+                    target.setFreezeTicks(20*level);
+                }
+                // Acertou bloco
+                if (event.getHitBlock() != null && event.getHitBlockFace()!=null) {
+                    Block block = event.getHitBlock().getRelative(event.getHitBlockFace());
+                    if (block.getType() == Material.WATER) {
+                        block.setType(Material.ICE);
+                    } else {
+                        block.setType(Material.BLUE_ICE);
+                    }
+                }
+
+                arrow.remove();
             }
         }
         if(event.getEntity() instanceof WindCharge bola){

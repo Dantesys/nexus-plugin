@@ -294,9 +294,6 @@ public class ItemsRegistro {
         flash = new Nexus(item,"flash");
     }
     private static void createMago(){
-        List<PotionEffectType> efeitos = new ArrayList<>();
-        efeitos.add(PotionEffectType.GLOWING);
-        efeitos.add(PotionEffectType.RESISTANCE);
         ItemStack item = new ItemStack(Material.WRITTEN_BOOK,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Mago"));
@@ -306,7 +303,7 @@ public class ItemsRegistro {
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"mago");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
         item.setItemMeta(meta);
-        mago = new Nexus(item,efeitos,"mago", Attribute.ATTACK_KNOCKBACK);
+        mago = new Nexus(item,"mago");
     }
     private static void createLadrao(){
         List<PotionEffectType> efeitos = new ArrayList<>();

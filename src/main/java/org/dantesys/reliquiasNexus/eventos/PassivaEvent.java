@@ -123,16 +123,17 @@ public class PassivaEvent implements Listener {
                     if (nome != null && nome.equals("mago")) {
                         ItemMeta meta = stack.getItemMeta();
                         NamespacedKey key = Material.WRITTEN_BOOK.getKey();
+                        int level = player.getPersistentDataContainer().getOrDefault(MAGO.key,PersistentDataType.INTEGER,1);
                         switch (i){
                             case 0 -> key = Material.FIRE_CHARGE.getKey();
-                            case 1 -> key = Material.WIND_CHARGE.getKey();
+                            case 1 -> key = Material.SHIELD.getKey();
                             case 2 -> key = Material.SNOWBALL.getKey();
-                            case 3 -> key = Material.EGG.getKey();
-                            case 4 -> key = Material.SPECTRAL_ARROW.getKey();
-                            case 5 -> key = Material.SCULK_SHRIEKER.getKey();
-                            case 6 -> key = Material.ENDER_EYE.getKey();
-                            case 7 -> key = Material.BREEZE_ROD.getKey();
-                            case 8 -> key = Material.BEACON.getKey();
+                            case 3 -> key = level>5?Material.IRON_BARS.getKey():Material.BARRIER.getKey();
+                            case 4 -> key = level>5?Material.WIND_CHARGE.getKey():Material.BARRIER.getKey();
+                            case 5 -> key = level>10?Material.LIGHTNING_ROD.getKey():Material.BARRIER.getKey();
+                            case 6 -> key = level>10?Material.FEATHER.getKey():Material.BARRIER.getKey();
+                            case 7 -> key = level>15?Material.EGG.getKey():Material.BARRIER.getKey();
+                            case 8 -> key = level>15?Material.NETHER_STAR.getKey():Material.BARRIER.getKey();
                         }
                         meta.setItemModel(key);
                         stack.setItemMeta(meta);
@@ -226,6 +227,10 @@ public class PassivaEvent implements Listener {
                     case "flash" -> {
                         int level = player.getPersistentDataContainer().getOrDefault(FLASH.key,PersistentDataType.INTEGER,1);
                         Flash.getPassivabyLevel(level,player);
+                    }
+                    case "mago" -> {
+                        int level = player.getPersistentDataContainer().getOrDefault(MAGO.key,PersistentDataType.INTEGER,1);
+                        Mago.getPassivabyLevel(level,player);
                     }
                 }
             }
