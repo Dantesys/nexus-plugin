@@ -232,6 +232,10 @@ public class PassivaEvent implements Listener {
                         int level = player.getPersistentDataContainer().getOrDefault(MAGO.key,PersistentDataType.INTEGER,1);
                         Mago.getPassivabyLevel(level,player);
                     }
+                    case "ladrao" -> {
+                        int level = player.getPersistentDataContainer().getOrDefault(LADRAO.key,PersistentDataType.INTEGER,1);
+                        Ladrao.getPassivabyLevel(level,player);
+                    }
                 }
             }
         }

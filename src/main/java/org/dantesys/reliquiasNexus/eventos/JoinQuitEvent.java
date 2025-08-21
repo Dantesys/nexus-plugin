@@ -145,14 +145,7 @@ public class JoinQuitEvent implements Listener {
                         player.getAttribute(Attribute.STEP_HEIGHT).setBaseValue(0.007*level+0.6);
                     }
                     case "mago" -> player.getAttribute(Attribute.MAX_ABSORPTION).setBaseValue(level);
-                    case "ladrao" -> {
-                        dataPlayer.set(MISSAOLADRAO.key, PersistentDataType.INTEGER, 0);
-                        dataPlayer.set(LADRAO.key,PersistentDataType.INTEGER,levelAtual+1);
-                    }
-                    case "domador" -> {
-                        dataPlayer.set(MISSAODOMADOR.key, PersistentDataType.INTEGER, 0);
-                        dataPlayer.set(DOMADOR.key,PersistentDataType.INTEGER,levelAtual+1);
-                    }
+                    case "ladrao","domador" -> player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE).setBaseValue(3+level);
                 }
             }
         }

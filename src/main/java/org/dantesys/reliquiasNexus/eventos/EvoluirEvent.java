@@ -157,10 +157,12 @@ public class EvoluirEvent implements Listener {
             case "ladrao" -> {
                 dataPlayer.set(MISSAOLADRAO.key, PersistentDataType.INTEGER, 0);
                 dataPlayer.set(LADRAO.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE).setBaseValue(3+levelAtual);
             }
             case "domador" -> {
                 dataPlayer.set(MISSAODOMADOR.key, PersistentDataType.INTEGER, 0);
                 dataPlayer.set(DOMADOR.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE).setBaseValue(3+levelAtual);
             }
         }
     }

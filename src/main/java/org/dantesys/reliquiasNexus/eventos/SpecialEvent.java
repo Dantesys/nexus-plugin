@@ -26,7 +26,6 @@ import org.dantesys.reliquiasNexus.SpeciaisPassivas.*;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
 import org.dantesys.reliquiasNexus.util.EntityToEgg;
-import org.dantesys.reliquiasNexus.util.Temporizador;
 
 import java.util.*;
 
@@ -70,10 +69,10 @@ public class SpecialEvent implements Listener {
                             case "protetor" -> protetor(player);
                             case "pescador" -> pescador(player);
                             case "ladrao" -> {
-                                ladrao(player,item);
+                                ladrao(player);
                                 event.setCancelled(true);
                             }
-                            case "domador" -> domador(player,item);
+                            case "domador" -> domador(player);
                             case "mago" -> {
                                 mago(player);
                                 event.setCancelled(true);
@@ -390,26 +389,15 @@ public class SpecialEvent implements Listener {
         int l = dataPlayer.getOrDefault(PESCADOR.key,PersistentDataType.INTEGER,1);
         Pescador.getSpecialbyLevel(l,player);
     }
-    private void ladrao(Player player, Nexus item){
+    private void ladrao(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(LADRAO.key,PersistentDataType.INTEGER,1);
-        item.setLevel(l);
-        Location loc = player.getRespawnLocation();
-        if(loc==null)loc=player.getWorld().getSpawnLocation();
-        player.teleport(loc);
+        Ladrao.getSpecialbyLevel(l,player);
     }
-    private void domador(Player player,Nexus item){
+    private void domador(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(DOMADOR.key,PersistentDataType.INTEGER,1);
-        item.setLevel(l);
-        Location loc = player.getLocation();
-        Wolf wolf = player.getWorld().spawn(loc,Wolf.class);
-        wolf.setOwner(player);
-        wolf.getAttribute(Attribute.ARMOR).setBaseValue(l);
-        wolf.getAttribute(Attribute.ARMOR_TOUGHNESS).setBaseValue(l);
-        wolf.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(l);
-        wolf.getAttribute(Attribute.MAX_HEALTH).setBaseValue(l);
-        wolf.getAttribute(Attribute.SCALE).setBaseValue(1.25);
+        Domador.getSpecialbyLevel(l,player);
     }
     private void mago(Player player){
         PlayerInventory inv = player.getInventory();

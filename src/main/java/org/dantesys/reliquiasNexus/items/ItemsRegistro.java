@@ -11,7 +11,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -306,9 +305,6 @@ public class ItemsRegistro {
         mago = new Nexus(item,"mago");
     }
     private static void createLadrao(){
-        List<PotionEffectType> efeitos = new ArrayList<>();
-        efeitos.add(PotionEffectType.INVISIBILITY);
-        efeitos.add(PotionEffectType.NIGHT_VISION);
         ItemStack item = new ItemStack(Material.BLACK_BUNDLE,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Ladrão"));
@@ -318,14 +314,9 @@ public class ItemsRegistro {
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"ladrao");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
         item.setItemMeta(meta);
-        ladrao = new Nexus(item,efeitos,"ladrao", Attribute.ENTITY_INTERACTION_RANGE);
+        ladrao = new Nexus(item,"ladrao");
     }
     private static void createDomador(){
-        List<PotionEffectType> efeitos = new ArrayList<>();
-        efeitos.add(PotionEffectType.LUCK);
-        efeitos.add(PotionEffectType.DOLPHINS_GRACE);
-        efeitos.add(PotionEffectType.OOZING);
-        efeitos.add(PotionEffectType.INFESTED);
         ItemStack item = new ItemStack(Material.NETHERITE_SHOVEL,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Domador"));
@@ -335,7 +326,7 @@ public class ItemsRegistro {
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"domador");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
         item.setItemMeta(meta);
-        domador = new Nexus(item,efeitos,"domador", Attribute.ENTITY_INTERACTION_RANGE);
+        domador = new Nexus(item,"domador");
     }
     private static void createLivro(){
         ItemStack item = new ItemStack(Material.WRITTEN_BOOK,1);
