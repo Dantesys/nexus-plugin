@@ -298,6 +298,24 @@ public final class ReliquiasNexus extends JavaPlugin {
             }else ctx.getSource().getSender().sendMessage("§c"+lang.getString("comandos.level.erro"));
             return Command.SINGLE_SUCCESS;
         }));
+        root.then(Commands.literal("setlevel").then(Commands.argument("level", IntegerArgumentType.integer()).executes(ctx -> {
+            if(ctx.getSource().getExecutor() instanceof Player player){
+                int level = ctx.getArgument("level", int.class);
+                ItemStack stack = player.getInventory().getItemInMainHand();
+                ItemMeta meta = stack.getItemMeta();
+                PersistentDataContainer data = meta.getPersistentDataContainer();
+                if(data.has(NEXUS.key,PersistentDataType.STRING)){
+                    String nome = data.get(NEXUS.key,PersistentDataType.STRING);
+                    if(nome!=null){
+                        NamespacedKey key = NexusKeys.getKey(nome);
+                        if(key!=null){
+                            player.getPersistentDataContainer().set(key,PersistentDataType.INTEGER,level);
+                        }
+                    }
+                }
+            }else ctx.getSource().getSender().sendMessage("§c"+lang.getString("comandos.level.erro"));
+            return Command.SINGLE_SUCCESS;
+        })));
         root.then(Commands.literal(cmd.get(8)).then(Commands.argument("exp", BoolArgumentType.bool()).requires(sender -> sender.getSender().isOp()).executes(ctx -> {
             boolean exp = ctx.getArgument("exp", boolean.class);
             config.set("expurgo",exp);
