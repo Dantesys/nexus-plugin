@@ -34,6 +34,9 @@ import org.dantesys.reliquiasNexus.util.Troca;
 import org.dantesys.reliquiasNexus.util.UpdaterCheck;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,14 +44,14 @@ import java.util.*;
 
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 
-public final class ReliquiasNexus extends JavaPlugin {
+public final class ReliquiasNexus extends JavaPlugin implements Listener {
     private static final Map<UUID, Troca> trocas = new HashMap<>();
     private static FileConfiguration config;
     private static YamlConfiguration lang;
     final List<String> names = List.of("guerreiro","ceifador","vida","mares","barbaro",
             "fazendeiro","espiao","arqueiro","cacador","tempestade","mineiro","fenix","protetor",
             "hulk","sculk","pescador","flash","mago","ladrao","domador");
-    
+
     @Override
     public void onEnable() {
         ItemsRegistro.init();
@@ -78,485 +81,558 @@ public final class ReliquiasNexus extends JavaPlugin {
             msgs.forEach(m -> ctx.getSource().getSender().sendMessage("§r"+m));
             return Command.SINGLE_SUCCESS;
         });
-        
-        // COMANDO REMOVER
+
+        // Comando para remover relíquia - Sintaxe atualizada: /nexus remover <reliquia> <jogador>
         root.then(Commands.literal("remover")
-            .then(Commands.argument("jogador", ArgumentTypes.player())
-            .then(Commands.argument("reliquia", StringArgumentType.word())
-            .suggests((ctx, builder) -> {
-                names.stream().filter(entry -> entry.toLowerCase().startsWith(builder.getRemainingLowerCase())).forEach(builder::suggest);
-                return builder.buildFuture();
-            })
-            .requires(sender -> sender.getSender().isOp())
-            .executes(ctx -> {
-                final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogador", PlayerSelectorArgumentResolver.class);
-                final Player p = targetResolver.resolve(ctx.getSource()).getFirst();
-                final CommandSender sender = ctx.getSource().getSender();
-                final String reliquia = ctx.getArgument("reliquia", String.class).toLowerCase();
-                
-                Nexus n = ItemsRegistro.getFromNome(reliquia);
-                if (n != null) {
-                    boolean reliquiaRemovida = false;
-                    PlayerInventory inv = p.getInventory();
-                    for (ItemStack item : inv.getContents()) {
-                        if (item != null && item.hasItemMeta()) {
-                            ItemMeta meta = item.getItemMeta();
-                            PersistentDataContainer data = meta.getPersistentDataContainer();
-                            if (data.has(NEXUS.key, PersistentDataType.STRING)) {
-                                String nomeReliquia = data.get(NEXUS.key, PersistentDataType.STRING);
-                                if (reliquia.equalsIgnoreCase(nomeReliquia)) {
-                                    inv.remove(item);
-                                    reliquiaRemovida = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    
-                    if (reliquiaRemovida) {
-                        config.set("nexus." + reliquia, null);
-                        saveConfig();
-                        PersistentDataContainer dataPlayer = p.getPersistentDataContainer();
-                        int qtd = dataPlayer.getOrDefault(QTD.key, PersistentDataType.INTEGER, 0);
-                        if (qtd > 0) {
-                            dataPlayer.set(QTD.key, PersistentDataType.INTEGER, qtd - 1);
-                        }
-                        String msgJogador = lang.getString("comandos.remover.sucesso.jogador");
-                        String msgSender = lang.getString("comandos.remover.sucesso.sender");
-                        if (msgJogador != null) {
-                            p.sendMessage("§c" + msgJogador.replace("<relic>", reliquia));
-                        } else {
-                            p.sendMessage("§cSua relíquia " + reliquia + " foi removida por um administrador!");
-                        }
-                        if (msgSender != null) {
-                            sender.sendMessage("§2" + msgSender.replace("<player>", p.getName()).replace("<relic>", reliquia));
-                        } else {
-                            sender.sendMessage("§2Relíquia " + reliquia + " removida de " + p.getName() + " e liberada para outros jogadores!");
-                        }
-                    } else {
-                        String errorMsg = lang.getString("comandos.remover.erro.nao_encontrada");
-                        if (errorMsg != null) {
-                            sender.sendMessage("§c" + errorMsg.replace("<player>", p.getName()).replace("<relic>", reliquia));
-                        } else {
-                            sender.sendMessage("§cJogador " + p.getName() + " não possui a relíquia " + reliquia + "!");
-                        }
-                    }
-                } else {
-                    String errorMsg = lang.getString("comandos.remover.erro.invalida");
-                    if (errorMsg != null) {
-                        sender.sendMessage("§c" + errorMsg.replace("<relic>", reliquia));
-                    } else {
-                        sender.sendMessage("§cRelíquia " + reliquia + " não existe!");
-                    }
-                }
-                return Command.SINGLE_SUCCESS;
-            }))));
-        
-        // COMANDO MISSOES
-        root.then(Commands.literal("missoes")
-            .executes(ctx -> {
-                final CommandSender sender = ctx.getSource().getSender();
-                if (!(sender instanceof Player player)) {
-                    sender.sendMessage("§c" + lang.getString("comandos.missoes.erro"));
-                    return Command.SINGLE_SUCCESS;
-                }
-                Inventory missoesInv = Bukkit.createInventory(null, 27, Component.text("§5Missões"));
+                .then(Commands.argument("reliquia", StringArgumentType.word())
+                        .suggests((ctx, builder) -> {
+                            names.stream().filter(entry -> entry.toLowerCase().startsWith(builder.getRemainingLowerCase())).forEach(builder::suggest);
+                            return builder.buildFuture();
+                        })
+                        .then(Commands.argument("jogador", ArgumentTypes.player())
+                                .requires(sender -> sender.getSender().isOp())
+                                .executes(ctx -> {
+                                    final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogador", PlayerSelectorArgumentResolver.class);
+                                    final Player p = targetResolver.resolve(ctx.getSource()).getFirst();
+                                    final CommandSender sender = ctx.getSource().getSender();
+                                    final String reliquia = ctx.getArgument("reliquia", String.class).toLowerCase();
 
-                List<String> missoes = lang.getStringList("missoes.lista");
-                if (missoes == null || missoes.isEmpty()) {
-                    player.sendMessage("§c" + lang.getString("comandos.missoes.vazio"));
-                    return Command.SINGLE_SUCCESS;
-                }
-                
-                for (int i = 0; i < missoes.size() && i < 27; i++) {
-                    ItemStack papel = new ItemStack(Material.PAPER);
-                    ItemMeta meta = papel.getItemMeta();
-                    meta.displayName(Component.text("§bTrabalho"));
-                    meta.lore(List.of(Component.text("§f" + missoes.get(i))));
-                    papel.setItemMeta(meta);
-                    missoesInv.setItem(i, papel);
-                }
-
-                player.openInventory(missoesInv);
-                player.sendMessage("§2" + lang.getString("comandos.missoes.sucesso"));
-                return Command.SINGLE_SUCCESS;
-            }));
-            
-        root.then(Commands.literal(cmd.get(3)).then(Commands.argument("jogador", ArgumentTypes.player()).executes(ctx -> {
-            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogador", PlayerSelectorArgumentResolver.class);
-            final Player p = targetResolver.resolve(ctx.getSource()).getFirst();
-            final CommandSender sender = ctx.getSource().getSender();
-            if(ctx.getSource().getExecutor() instanceof Player player){
-                ItemStack stack = player.getInventory().getItemInMainHand();
-                ItemMeta meta = stack.getItemMeta();
-                PersistentDataContainer data = meta.getPersistentDataContainer();
-                if(data.has(NEXUS.key,PersistentDataType.STRING)){
-                    String nome = data.get(NEXUS.key,PersistentDataType.STRING);
-                    if(nome!=null){
-                        Troca t = new Troca(player.getUniqueId(),nome);
-                        trocas.put(p.getUniqueId(),t);
-                        List<String> msgs = lang.getStringList("comandos.troca.envio");
-                        msgs.forEach(m -> {
-                            m=m.replace("<player>",player.getName());
-                            m=m.replace("<relic>",nome);
-                            ctx.getSource().getSender().sendMessage("§r"+m);
-                        });
-                        String m = lang.getString("comandos.troca.recebido");
-                        if(m!=null){
-                            m=m.replace("<player>",p.getName());
-                            sender.sendMessage("§2"+m);
-                        }
-                    }
-                }else{
-                    sender.sendMessage("§c"+lang.getString("comandos.troca.erro1"));
-                }
-            }else{
-                sender.sendMessage("§c"+lang.getString("comandos.troca.erro2"));
-            }
-            return Command.SINGLE_SUCCESS;
-        })));
-        root.then(Commands.literal(cmd.get(0)).executes(ctx -> {
-            final CommandSender sender = ctx.getSource().getSender();
-            if(ctx.getSource().getExecutor() instanceof Player player){
-                player.getInventory().addItem(ItemsRegistro.livro.getItem(1));
-                sender.sendMessage("§2"+lang.getStringList("comandos.livro.sucesso"));
-            }else{
-                sender.sendMessage("§c"+lang.getStringList("comandos.livro.erro"));
-            }
-            return Command.SINGLE_SUCCESS;
-        }));
-        root.then(Commands.literal(cmd.get(1)).executes(ctx -> {
-            final CommandSender sender = ctx.getSource().getSender();
-            if(ctx.getSource().getExecutor() instanceof Player player){
-                ItemStack stack = player.getInventory().getItemInMainHand();
-                ItemMeta meta = stack.getItemMeta();
-                PersistentDataContainer data = meta.getPersistentDataContainer();
-                if(data.has(NEXUS.key,PersistentDataType.STRING)){
-                    EvoluirEvent evo = new EvoluirEvent(this);
-                    String nome = data.get(NEXUS.key,PersistentDataType.STRING);
-                    if(nome!=null){
-                        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-                        int level=switch (nome){
-                            case "barbaro" -> dataPlayer.getOrDefault(BARBARO.key,PersistentDataType.INTEGER,1);
-                            case "ceifador" -> dataPlayer.getOrDefault(CEIFADOR.key,PersistentDataType.INTEGER,1);
-                            case "fazendeiro" -> dataPlayer.getOrDefault(FAZENDEIRO.key,PersistentDataType.INTEGER,1);
-                            case "guerreiro" -> dataPlayer.getOrDefault(GUERREIRO.key,PersistentDataType.INTEGER,1);
-                            case "mares" -> dataPlayer.getOrDefault(MARES.key,PersistentDataType.INTEGER,1);
-                            case "vida" -> dataPlayer.getOrDefault(VIDA.key,PersistentDataType.INTEGER,1);
-                            case "espiao" -> dataPlayer.getOrDefault(ESPIAO.key,PersistentDataType.INTEGER,1);
-                            case "arqueiro" -> dataPlayer.getOrDefault(ARQUEIRO.key,PersistentDataType.INTEGER,1);
-                            case "cacador" -> dataPlayer.getOrDefault(CACADOR.key,PersistentDataType.INTEGER,1);
-                            case "tempestade" -> dataPlayer.getOrDefault(TEMPESTADE.key,PersistentDataType.INTEGER,1);
-                            case "mineiro" -> dataPlayer.getOrDefault(MINEIRO.key,PersistentDataType.INTEGER,1);
-                            case "fenix" -> dataPlayer.getOrDefault(FENIX.key,PersistentDataType.INTEGER,1);
-                            case "protetor" -> dataPlayer.getOrDefault(PROTETOR.key,PersistentDataType.INTEGER,1);
-                            case "hulk" -> dataPlayer.getOrDefault(HULK.key,PersistentDataType.INTEGER,1);
-                            case "sculk" -> dataPlayer.getOrDefault(SCULK.key,PersistentDataType.INTEGER,1);
-                            case "pescador" -> dataPlayer.getOrDefault(PESCADOR.key,PersistentDataType.INTEGER,1);
-                            case "flash" -> dataPlayer.getOrDefault(FLASH.key,PersistentDataType.INTEGER,1);
-                            case "mago" -> dataPlayer.getOrDefault(MAGO.key,PersistentDataType.INTEGER,1);
-                            case "ladrao" -> dataPlayer.getOrDefault(LADRAO.key,PersistentDataType.INTEGER,1);
-                            case "domador" -> dataPlayer.getOrDefault(DOMADOR.key,PersistentDataType.INTEGER,1);
-                            default -> 1;
-                        };
-                        evo.tentarEvoluir(player,stack,level,evo.getSlotOfItem(player,stack));
-                    }else{
-                        sender.sendMessage("§c"+lang.getStringList("comandos.evoluir.erro1"));
-                    }
-                }else{
-                    sender.sendMessage("§c"+lang.getStringList("comandos.evoluir.erro1"));
-                }
-            }else{
-                sender.sendMessage("§c"+lang.getStringList("comandos.evoluir.erro2"));
-            }
-            return Command.SINGLE_SUCCESS;
-        }));
-        root.then(Commands.literal(cmd.get(4)).executes(ctx -> {
-            final CommandSender sender = ctx.getSource().getSender();
-            if(ctx.getSource().getExecutor() instanceof Player player){
-                ItemStack stack = player.getInventory().getItemInMainHand();
-                ItemMeta meta = stack.getItemMeta();
-                if(meta!=null){
-                    PersistentDataContainer data = meta.getPersistentDataContainer();
-                    if(data.has(NEXUS.key,PersistentDataType.STRING)){
-                        String nome = data.get(NEXUS.key,PersistentDataType.STRING);
-                        Troca t = trocas.remove(player.getUniqueId());
-                        Player p = Bukkit.getPlayer(t.uuid());
-                        if(p!=null && nome!=null){
-                            PlayerInventory inv = p.getInventory();
-                            for(ItemStack s:inv.getContents()){
-                                if(s!=null){
-                                    ItemMeta m = s.getItemMeta();
-                                    PersistentDataContainer d = m.getPersistentDataContainer();
-                                    if(d.has(NEXUS.key,PersistentDataType.STRING)){
-                                        String n = d.get(NEXUS.key,PersistentDataType.STRING);
-                                        if(n!=null && n.equals(t.stack())){
-                                            Nexus nex = ItemsRegistro.getFromNome(n);
-                                            if(nex!=null){
-                                                PersistentDataContainer container = player.getPersistentDataContainer();
-                                                NamespacedKey key = NexusKeys.getKey(nex.getNome());
-                                                int level=1;
-                                                if(key!=null && container.has(key,PersistentDataType.INTEGER)){
-                                                    level=container.getOrDefault(key,PersistentDataType.INTEGER,1);
-                                                }else if(key!=null){
-                                                    container.set(key,PersistentDataType.INTEGER,1);
-                                                }
-                                                ItemStack aux = nex.getItem(level);
-                                                player.getInventory().setItemInMainHand(aux);
-                                                config.set("nexus."+n,player.getUniqueId().toString());
-                                                nex = ItemsRegistro.getFromNome(nome);
-                                                if(nex!=null){
-                                                    PersistentDataContainer pc = p.getPersistentDataContainer();
-                                                    key = NexusKeys.getKey(nex.getNome());
-                                                    level=1;
-                                                    if(key!=null && pc.has(key,PersistentDataType.INTEGER)){
-                                                        level=pc.getOrDefault(key,PersistentDataType.INTEGER,1);
-                                                    }else if(key!=null){
-                                                        pc.set(key,PersistentDataType.INTEGER,1);
+                                    Nexus n = ItemsRegistro.getFromNome(reliquia);
+                                    if (n != null) {
+                                        boolean reliquiaRemovida = false;
+                                        PlayerInventory inv = p.getInventory();
+                                        for (ItemStack item : inv.getContents()) {
+                                            if (item != null && item.hasItemMeta()) {
+                                                ItemMeta meta = item.getItemMeta();
+                                                PersistentDataContainer data = meta.getPersistentDataContainer();
+                                                if (data.has(NEXUS.key, PersistentDataType.STRING)) {
+                                                    String nomeReliquia = data.get(NEXUS.key, PersistentDataType.STRING);
+                                                    if (reliquia.equalsIgnoreCase(nomeReliquia)) {
+                                                        inv.remove(item);
+                                                        reliquiaRemovida = true;
+                                                        break;
                                                     }
-                                                    aux = nex.getItem(level);
-                                                    config.set("nexus."+nome,p.getUniqueId().toString());
-                                                    inv.remove(s);
-                                                    inv.addItem(aux);
-                                                    String msg = lang.getString("comandos.troca.aceita.sucesso");
-                                                    p.sendMessage("§2"+msg);
-                                                    sender.sendMessage("§2"+msg);
-                                                    break;
+                                                }
+                                            }
+                                        }
+
+                                        if (reliquiaRemovida) {
+                                            config.set("nexus." + reliquia, null);
+                                            saveConfig();
+                                            PersistentDataContainer dataPlayer = p.getPersistentDataContainer();
+                                            int qtd = dataPlayer.getOrDefault(QTD.key, PersistentDataType.INTEGER, 0);
+                                            if (qtd > 0) {
+                                                dataPlayer.set(QTD.key, PersistentDataType.INTEGER, qtd - 1);
+                                            }
+                                            sender.sendMessage("§2Reliquia removida com sucesso!");
+                                        } else {
+                                            sender.sendMessage("§cJogador " + p.getName() + " não possui a relíquia " + reliquia + "!");
+                                        }
+                                    } else {
+                                        sender.sendMessage("§cRelíquia " + reliquia + " não existe!");
+                                    }
+                                    return Command.SINGLE_SUCCESS;
+                                }))
+                )
+        );
+
+        // Comando para abrir o menu de missões
+        root.then(Commands.literal("missoes")
+                .executes(ctx -> {
+                    final CommandSender sender = ctx.getSource().getSender();
+                    if (!(sender instanceof Player player)) {
+                        sender.sendMessage("§cEste comando só pode ser usado por um jogador.");
+                        return Command.SINGLE_SUCCESS;
+                    }
+                    sender.sendMessage(Component.text("§aMenu de missoes aberto, escolha a sua missao diaria!"));
+                    Inventory missoesInv = Bukkit.createInventory(null, 27, Component.text("§5Missões"));
+                    List<String> missoes = lang.getStringList("missoes.lista");
+                    if (missoes == null || missoes.isEmpty()) {
+                        player.sendMessage("§cNão há missões disponíveis no momento.");
+                        return Command.SINGLE_SUCCESS;
+                    }
+                    for (int i = 0; i < missoes.size() && i < 27; i++) {
+                        ItemStack papel = new ItemStack(Material.PAPER);
+                        ItemMeta meta = papel.getItemMeta();
+                        meta.displayName(Component.text("§bTrabalho"));
+                        meta.lore(List.of(Component.text("§f" + missoes.get(i))));
+                        papel.setItemMeta(meta);
+                        missoesInv.setItem(i, papel);
+                    }
+                    player.openInventory(missoesInv);
+                    return Command.SINGLE_SUCCESS;
+                })
+        );
+
+        // Comando para dar uma relíquia específica (OP)
+        // /nexus dar <jogador> <reliquia>
+        root.then(Commands.literal(cmd.get(7))
+                .then(Commands.argument("jogador", ArgumentTypes.player())
+                        .then(Commands.argument("reliquia", StringArgumentType.word())
+                                .suggests((ctx, builder) -> {
+                                    names.stream().filter(entry -> entry.toLowerCase().startsWith(builder.getRemainingLowerCase())).forEach(builder::suggest);
+                                    return builder.buildFuture();
+                                })
+                                .requires(sender -> sender.getSender().isOp())
+                                .executes(ctx -> {
+                                    final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogador", PlayerSelectorArgumentResolver.class);
+                                    final Player p = targetResolver.resolve(ctx.getSource()).getFirst();
+                                    final CommandSender sender = ctx.getSource().getSender();
+                                    final String reliquia = ctx.getArgument("reliquia",String.class).toLowerCase();
+                                    Nexus n = ItemsRegistro.getFromNome(reliquia);
+                                    if(n!=null){
+                                        int limite = config.getInt("limite");
+                                        PersistentDataContainer dataPlayer = p.getPersistentDataContainer();
+                                        int qtd = dataPlayer.getOrDefault(QTD.key, PersistentDataType.INTEGER,0);
+                                        if(qtd>=limite){
+                                            String m = lang.getString("comandos.receber.limite");
+                                            if(m!=null){
+                                                m=m.replace("<player>",p.getName());
+                                                ctx.getSource().getSender().sendMessage("§2"+m);
+                                            }
+                                        }else{
+                                            qtd++;
+                                            String nome = n.getNome();
+                                            String uuidStr = config.getString("nexus."+nome);
+                                            if(uuidStr==null || uuidStr.isBlank()){
+                                                config.set("nexus."+nome,p.getUniqueId().toString());
+                                                saveConfig();
+                                                dataPlayer.set(QTD.key,PersistentDataType.INTEGER,qtd);
+                                                int level =1;
+                                                NamespacedKey key = NexusKeys.getKey(nome);
+                                                if(key!=null && dataPlayer.has(key,PersistentDataType.INTEGER)){
+                                                    level=dataPlayer.getOrDefault(key,PersistentDataType.INTEGER,1);
+                                                }else if(key!=null){
+                                                    dataPlayer.set(key,PersistentDataType.INTEGER,1);
+                                                }
+                                                ItemStack stack = n.getItem(level);
+                                                ItemMeta meta = stack.getItemMeta();
+                                                meta.getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,p.getUniqueId().toString());
+                                                stack.setItemMeta(meta);
+                                                p.getInventory().addItem(stack);
+                                                p.sendMessage(Component.text("§2"+lang.getString("comandos.receber.sucesso")+" "+nome));
+                                                String m = lang.getString("comandos.receber.slog");
+                                                if(m!=null){
+                                                    m=m.replace("<player>",p.getName());
+                                                    sender.sendMessage("§2"+m+" "+nome);
+                                                }
+                                            }else{
+                                                String m = lang.getString("comandos.receber.erro");
+                                                if(m!=null){
+                                                    m=m.replace("<relic>",reliquia);
+                                                    sender.sendMessage("§c"+m);
                                                 }
                                             }
                                         }
                                     }
+                                    return Command.SINGLE_SUCCESS;
+                                }))
+                )
+        );
+
+        // Comando para receber relíquia aleatória (OP)
+        // /nexus receber <jogadores>
+        root.then(Commands.literal(cmd.get(6))
+                .then(Commands.argument("jogadores", ArgumentTypes.players())
+                        .requires(sender -> sender.getSender().isOp())
+                        .executes(ctx -> {
+                            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogadores", PlayerSelectorArgumentResolver.class);
+                            final List<Player> targets = targetResolver.resolve(ctx.getSource());
+                            final CommandSender sender = ctx.getSource().getSender();
+                            int limite = config.getInt("limite");
+                            for (final Player p : targets) {
+                                PersistentDataContainer dataPlayer = p.getPersistentDataContainer();
+                                int qtd = dataPlayer.getOrDefault(QTD.key, PersistentDataType.INTEGER,0);
+                                if(qtd>=limite){
+                                    String m = lang.getString("comandos.receber.limite");
+                                    if(m!=null){
+                                        m=m.replace("<player>",p.getName());
+                                        ctx.getSource().getSender().sendMessage("§2"+m);
+                                    }
+                                }else{
+                                    qtd++;
+                                    List<Nexus> reliquias = ItemsRegistro.getValidReliquia(config);
+                                    Random rng = new Random();
+                                    int escolhido = rng.nextInt(reliquias.size());
+                                    Nexus n = reliquias.get(escolhido);
+                                    String nome = n.getNome();
+                                    config.set("nexus."+nome,p.getUniqueId().toString());
+                                    saveConfig();
+                                    dataPlayer.set(QTD.key,PersistentDataType.INTEGER,qtd);
+                                    int level =1;
+                                    NamespacedKey key = NexusKeys.getKey(nome);
+                                    if(key!=null && dataPlayer.has(key,PersistentDataType.INTEGER)){
+                                        level=dataPlayer.getOrDefault(key,PersistentDataType.INTEGER,1);
+                                    }else if(key!=null){
+                                        dataPlayer.set(key,PersistentDataType.INTEGER,1);
+                                    }
+                                    ItemStack stack = n.getItem(level);
+                                    ItemMeta meta = stack.getItemMeta();
+                                    meta.getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,p.getUniqueId().toString());
+                                    stack.setItemMeta(meta);
+                                    p.getInventory().addItem(stack);
+                                    p.sendMessage(Component.text("§2"+lang.getString("comandos.receber.sucesso")+" "+nome));
+                                    String m = lang.getString("comandos.receber.slog");
+                                    if(m!=null){
+                                        m=m.replace("<player>",p.getName());
+                                        sender.sendMessage("§2"+m+" "+nome);
+                                    }
                                 }
                             }
-                        }else{
-                            sender.sendMessage("§c"+lang.getString("comandos.troca.aceita.erro1"));
-                        }
+                            return Command.SINGLE_SUCCESS;
+                        }))
+        );
+
+        // Comando de troca
+        // /nexus trocar <jogador>
+        root.then(Commands.literal(cmd.get(3))
+                .then(Commands.argument("jogador", ArgumentTypes.player())
+                        .executes(ctx -> {
+                            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogador", PlayerSelectorArgumentResolver.class);
+                            final Player p = targetResolver.resolve(ctx.getSource()).getFirst();
+                            final CommandSender sender = ctx.getSource().getSender();
+                            if(ctx.getSource().getExecutor() instanceof Player player){
+                                ItemStack stack = player.getInventory().getItemInMainHand();
+                                ItemMeta meta = stack.getItemMeta();
+                                PersistentDataContainer data = meta.getPersistentDataContainer();
+                                if(data.has(NEXUS.key,PersistentDataType.STRING)){
+                                    String nome = data.get(NEXUS.key,PersistentDataType.STRING);
+                                    if(nome!=null){
+                                        Troca t = new Troca(player.getUniqueId(),nome);
+                                        trocas.put(p.getUniqueId(),t);
+                                        List<String> msgs = lang.getStringList("comandos.troca.envio");
+                                        msgs.forEach(m -> {
+                                            m=m.replace("<player>",player.getName());
+                                            m=m.replace("<relic>",nome);
+                                            ctx.getSource().getSender().sendMessage("§r"+m);
+                                        });
+                                        String m = lang.getString("comandos.troca.recebido");
+                                        if(m!=null){
+                                            m=m.replace("<player>",p.getName());
+                                            sender.sendMessage("§2"+m);
+                                        }
+                                    }
+                                }else{
+                                    sender.sendMessage("§c"+lang.getString("comandos.troca.erro1"));
+                                }
+                            }else{
+                                sender.sendMessage("§c"+lang.getString("comandos.troca.erro2"));
+                            }
+                            return Command.SINGLE_SUCCESS;
+                        }))
+        );
+
+        // Comando para obter o livro
+        // /nexus livro
+        root.then(Commands.literal(cmd.get(0))
+                .executes(ctx -> {
+                    final CommandSender sender = ctx.getSource().getSender();
+                    if(ctx.getSource().getExecutor() instanceof Player player){
+                        player.getInventory().addItem(ItemsRegistro.livro.getItem(1));
+                        sender.sendMessage("§2"+lang.getString("comandos.livro.sucesso"));
                     }else{
-                        sender.sendMessage("§c"+lang.getString("comandos.troca.aceita.erro2"));
+                        sender.sendMessage("§c"+lang.getString("comandos.livro.erro"));
                     }
-                }else{
-                    sender.sendMessage("§c"+lang.getString("comandos.troca.aceita.erro2"));
-                }
-            }else{
-                sender.sendMessage("§c"+lang.getString("comandos.troca.aceita.erro3"));
-            }
-            return Command.SINGLE_SUCCESS;
-        }));
-        root.then(Commands.literal(cmd.get(5)).executes(ctx -> {
-            final CommandSender sender = ctx.getSource().getSender();
-            if(ctx.getSource().getExecutor() instanceof Player player){
-                Troca t = trocas.remove(player.getUniqueId());
-                Player p = Bukkit.getPlayer(t.uuid());
-                if(p!=null){
-                    String m = lang.getString("comandos.troca.cancela.envio");
-                    if(m!=null){
-                        m=m.replace("<player>",player.getName());
-                        p.sendMessage("§c"+m);
-                    }
-                }
-                sender.sendMessage("§c"+lang.getString("comandos.troca.cancela.recebido"));
-            }else{
-                sender.sendMessage("§c"+lang.getString("comandos.troca.cancela.erro"));
-            }
-            return Command.SINGLE_SUCCESS;
-        }));
-        root.then(Commands.literal(cmd.get(2)).executes(ctx -> {
-            boolean expurgo = config.getBoolean("expurgo");
-            String msg = "§r§2"+lang.getString("comandos.expurgo.seguro");
-            if(expurgo){
-                msg = "§r§c"+lang.getString("comandos.expurgo.perigo");
-            }
-            ctx.getSource().getSender().sendMessage(msg);
-            return Command.SINGLE_SUCCESS;
-        }));
-        root.then(Commands.literal("list").executes(ctx -> {
-            ConfigurationSection secao = config.getConfigurationSection("nexus");
-            if(secao!=null){
-                for(String nexus: secao.getKeys(false)){
-                    String uuidStr = config.getString("nexus."+nexus);
-                    String dono = "§c"+lang.getString("comandos.list.sem");
-                    if(uuidStr != null && !uuidStr.isBlank()){
-                        try{
-                            UUID uuid = UUID.fromString(uuidStr);
-                            OfflinePlayer player = getServer().getOfflinePlayer(uuid);
-                            dono = "§c"+(player.getName() != null? "§r§2"+player.getName():"§r§c"+lang.getString("comandos.list.desco"));
-                        }catch(IllegalArgumentException ignored){
-                            dono = "§c"+lang.getString("comandos.list.comro");
-                        }
-                    }
-                    ctx.getSource().getSender().sendMessage(nexus+": "+dono);
-                }
-            }else ctx.getSource().getSender().sendMessage("§c"+lang.getString("comandos.list.erro"));
-            return Command.SINGLE_SUCCESS;
-        }));
-        root.then(Commands.literal("level").executes(ctx -> {
-            if(ctx.getSource().getExecutor() instanceof Player player){
-                List<NamespacedKey> keys = NexusKeys.getKeyLevel();
-                PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-                player.sendMessage("§n§l"+lang.getString("comandos.level.msg"));
-                for(NamespacedKey k:keys){
-                    int l = dataPlayer.getOrDefault(k, PersistentDataType.INTEGER,0);
-                    if(l>0){
-                        player.sendMessage("§r§2"+k.getKey()+": "+l);
-                    }else{
-                        player.sendMessage("§r§2"+k.getKey()+": §r§c"+lang.getString("comandos.level.sem"));
-                    }
-                }
-            }else ctx.getSource().getSender().sendMessage("§c"+lang.getString("comandos.level.erro"));
-            return Command.SINGLE_SUCCESS;
-        }));
-        root.then(Commands.literal("setlevel").then(Commands.argument("level", IntegerArgumentType.integer()).requires(sender -> sender.getSender().isOp()).executes(ctx -> {
-            if(ctx.getSource().getExecutor() instanceof Player player){
-                int level = ctx.getArgument("level", int.class);
-                ItemStack stack = player.getInventory().getItemInMainHand();
-                ItemMeta meta = stack.getItemMeta();
-                PersistentDataContainer data = meta.getPersistentDataContainer();
-                if(data.has(NEXUS.key,PersistentDataType.STRING)){
-                    String nome = data.get(NEXUS.key,PersistentDataType.STRING);
-                    if(nome!=null){
-                        NamespacedKey key = NexusKeys.getKey(nome);
-                        if(key!=null){
-                            player.getPersistentDataContainer().set(key,PersistentDataType.INTEGER,level);
-                        }
-                    }
-                }
-            }else ctx.getSource().getSender().sendMessage("§c"+lang.getString("comandos.level.erro"));
-            return Command.SINGLE_SUCCESS;
-        })));
-        root.then(Commands.literal(cmd.get(8)).then(Commands.argument("exp", BoolArgumentType.bool()).requires(sender -> sender.getSender().isOp()).executes(ctx -> {
-            boolean exp = ctx.getArgument("exp", boolean.class);
-            config.set("expurgo",exp);
-            saveConfig();
-            if(exp){
-                Bukkit.getOnlinePlayers().forEach(player -> {
-                    player.sendMessage("§r§c"+lang.getString("comandos.expurgar.msg.aviso"));
-                    player.sendMessage("§r§c"+lang.getString("comandos.expurgar.msg.perigo"));
-                    player.sendMessage("§r§c"+lang.getString("comandos.expurgar.msg.aviso"));
-                });
-            }else{
-                Bukkit.getOnlinePlayers().forEach(player -> {
-                    player.sendMessage("§r§2"+lang.getString("comandos.expurgar.msg.aviso"));
-                    player.sendMessage("§r§2"+lang.getString("comandos.expurgar.msg.seguro"));
-                    player.sendMessage("§r§2"+lang.getString("comandos.expurgar.msg.aviso"));
-                });
-            }
-            ctx.getSource().getSender().sendMessage("§2"+lang.getString("comandos.expurgar.log")+" "+exp);
-            return Command.SINGLE_SUCCESS;
-        })));
-        root.then(Commands.literal(cmd.get(6)).then(Commands.argument("jogadores", ArgumentTypes.players()).requires(sender -> sender.getSender().isOp()).executes(ctx -> {
-            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogadores", PlayerSelectorArgumentResolver.class);
-            final List<Player> targets = targetResolver.resolve(ctx.getSource());
-            final CommandSender sender = ctx.getSource().getSender();
-            int limite = config.getInt("limite");
-            for (final Player p : targets) {
-                PersistentDataContainer dataPlayer = p.getPersistentDataContainer();
-                int qtd = dataPlayer.getOrDefault(QTD.key, PersistentDataType.INTEGER,0);
-                if(qtd>=limite){
-                    String m = lang.getString("comandos.receber.limite");
-                    if(m!=null){
-                        m=m.replace("<player>",p.getName());
-                        ctx.getSource().getSender().sendMessage("§2"+m);
-                    }
-                }else{
-                    qtd++;
-                    List<Nexus> reliquias = ItemsRegistro.getValidReliquia(config);
-                    Random rng = new Random();
-                    int escolhido = rng.nextInt(reliquias.size());
-                    Nexus n = reliquias.get(escolhido);
-                    String nome = n.getNome();
-                    config.set("nexus."+nome,p.getUniqueId().toString());
-                    saveConfig();
-                    dataPlayer.set(QTD.key,PersistentDataType.INTEGER,qtd);
-                    int level =1;
-                    NamespacedKey key = NexusKeys.getKey(nome);
-                    if(key!=null && dataPlayer.has(key,PersistentDataType.INTEGER)){
-                        level=dataPlayer.getOrDefault(key,PersistentDataType.INTEGER,1);
-                    }else if(key!=null){
-                        dataPlayer.set(key,PersistentDataType.INTEGER,1);
-                    }
-                    ItemStack stack = n.getItem(level);
-                    ItemMeta meta = stack.getItemMeta();
-                    meta.getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,p.getUniqueId().toString());
-                    stack.setItemMeta(meta);
-                    p.getInventory().addItem(stack);
-                    p.sendMessage(Component.text("§2"+lang.getString("comandos.receber.sucesso")+" "+nome));
-                    String m = lang.getString("comandos.receber.slog");
-                    if(m!=null){
-                        m=m.replace("<player>",p.getName());
-                        sender.sendMessage("§2"+m+" "+nome);
-                    }
-                }
-            }
-            return Command.SINGLE_SUCCESS;
-        })));
-        root.then(Commands.literal(cmd.get(7)).then(Commands.argument("jogador", ArgumentTypes.player()).then(Commands.argument("reliquia", StringArgumentType.word()).suggests((ctx, builder) -> {
-            names.stream().filter(entry -> entry.toLowerCase().startsWith(builder.getRemainingLowerCase())).forEach(builder::suggest);
-            return builder.buildFuture();
-        }).requires(sender -> sender.getSender().isOp()).executes(ctx -> {
-            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogador", PlayerSelectorArgumentResolver.class);
-            final Player p = targetResolver.resolve(ctx.getSource()).getFirst();
-            final CommandSender sender = ctx.getSource().getSender();
-            final String reliquia = ctx.getArgument("reliquia",String.class).toLowerCase();
-            Nexus n = ItemsRegistro.getFromNome(reliquia);
-            if(n!=null){
-                int limite = config.getInt("limite");
-                PersistentDataContainer dataPlayer = p.getPersistentDataContainer();
-                int qtd = dataPlayer.getOrDefault(QTD.key, PersistentDataType.INTEGER,0);
-                if(qtd>=limite){
-                    String m = lang.getString("comandos.receber.limite");
-                    if(m!=null){
-                        m=m.replace("<player>",p.getName());
-                        ctx.getSource().getSender().sendMessage("§2"+m);
-                    }
-                }else{
-                    qtd++;
-                    String nome = n.getNome();
-                    String uuidStr = config.getString("nexus"+nome);
-                    if(uuidStr==null || uuidStr.isBlank()){
-                        config.set("nexus."+nome,p.getUniqueId().toString());
-                        saveConfig();
-                        dataPlayer.set(QTD.key,PersistentDataType.INTEGER,qtd);
-                        int level =1;
-                        NamespacedKey key = NexusKeys.getKey(nome);
-                        if(key!=null && dataPlayer.has(key,PersistentDataType.INTEGER)){
-                            level=dataPlayer.getOrDefault(key,PersistentDataType.INTEGER,1);
-                        }else if(key!=null){
-                            dataPlayer.set(key,PersistentDataType.INTEGER,1);
-                        }
-                        ItemStack stack = n.getItem(level);
+                    return Command.SINGLE_SUCCESS;
+                })
+        );
+
+        // Comando para evoluir a relíquia
+        // /nexus evoluir
+        root.then(Commands.literal(cmd.get(1))
+                .executes(ctx -> {
+                    final CommandSender sender = ctx.getSource().getSender();
+                    if(ctx.getSource().getExecutor() instanceof Player player){
+                        ItemStack stack = player.getInventory().getItemInMainHand();
                         ItemMeta meta = stack.getItemMeta();
-                        meta.getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,p.getUniqueId().toString());
-                        stack.setItemMeta(meta);
-                        p.getInventory().addItem(stack);
-                        p.sendMessage(Component.text("§2"+lang.getString("comandos.receber.sucesso")+" "+nome));
-                        String m = lang.getString("comandos.receber.slog");
-                        if(m!=null){
-                            m=m.replace("<player>",p.getName());
-                            sender.sendMessage("§2"+m+" "+nome);
+                        if (meta == null) {
+                            sender.sendMessage("§c"+lang.getString("comandos.evoluir.erro1"));
+                            return Command.SINGLE_SUCCESS;
+                        }
+                        PersistentDataContainer data = meta.getPersistentDataContainer();
+                        if(data.has(NEXUS.key,PersistentDataType.STRING)){
+                            EvoluirEvent evo = new EvoluirEvent(this);
+                            String nome = data.get(NEXUS.key,PersistentDataType.STRING);
+                            if(nome!=null){
+                                PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+                                int level=switch (nome){
+                                    case "barbaro" -> dataPlayer.getOrDefault(BARBARO.key,PersistentDataType.INTEGER,1);
+                                    case "ceifador" -> dataPlayer.getOrDefault(CEIFADOR.key,PersistentDataType.INTEGER,1);
+                                    case "fazendeiro" -> dataPlayer.getOrDefault(FAZENDEIRO.key,PersistentDataType.INTEGER,1);
+                                    case "guerreiro" -> dataPlayer.getOrDefault(GUERREIRO.key,PersistentDataType.INTEGER,1);
+                                    case "mares" -> dataPlayer.getOrDefault(MARES.key,PersistentDataType.INTEGER,1);
+                                    case "vida" -> dataPlayer.getOrDefault(VIDA.key,PersistentDataType.INTEGER,1);
+                                    case "espiao" -> dataPlayer.getOrDefault(ESPIAO.key,PersistentDataType.INTEGER,1);
+                                    case "arqueiro" -> dataPlayer.getOrDefault(ARQUEIRO.key,PersistentDataType.INTEGER,1);
+                                    case "cacador" -> dataPlayer.getOrDefault(CACADOR.key,PersistentDataType.INTEGER,1);
+                                    case "tempestade" -> dataPlayer.getOrDefault(TEMPESTADE.key,PersistentDataType.INTEGER,1);
+                                    case "mineiro" -> dataPlayer.getOrDefault(MINEIRO.key,PersistentDataType.INTEGER,1);
+                                    case "fenix" -> dataPlayer.getOrDefault(FENIX.key,PersistentDataType.INTEGER,1);
+                                    case "protetor" -> dataPlayer.getOrDefault(PROTETOR.key,PersistentDataType.INTEGER,1);
+                                    case "hulk" -> dataPlayer.getOrDefault(HULK.key,PersistentDataType.INTEGER,1);
+                                    case "sculk" -> dataPlayer.getOrDefault(SCULK.key,PersistentDataType.INTEGER,1);
+                                    case "pescador" -> dataPlayer.getOrDefault(PESCADOR.key,PersistentDataType.INTEGER,1);
+                                    case "flash" -> dataPlayer.getOrDefault(FLASH.key,PersistentDataType.INTEGER,1);
+                                    case "mago" -> dataPlayer.getOrDefault(MAGO.key,PersistentDataType.INTEGER,1);
+                                    case "ladrao" -> dataPlayer.getOrDefault(LADRAO.key,PersistentDataType.INTEGER,1);
+                                    case "domador" -> dataPlayer.getOrDefault(DOMADOR.key,PersistentDataType.INTEGER,1);
+                                    default -> 1;
+                                };
+                                evo.tentarEvoluir(player,stack,level,evo.getSlotOfItem(player,stack));
+                            }else{
+                                sender.sendMessage("§c"+lang.getString("comandos.evoluir.erro1"));
+                            }
+                        }else{
+                            sender.sendMessage("§c"+lang.getString("comandos.evoluir.erro1"));
                         }
                     }else{
-                        String m = lang.getString("comandos.receber.erro");
-                        if(m!=null){
-                            m=m.replace("<relic>",reliquia);
-                            sender.sendMessage("§c"+m);
-                        }
+                        sender.sendMessage("§c"+lang.getString("comandos.evoluir.erro2"));
                     }
-                }
-            }
-            return Command.SINGLE_SUCCESS;
-        }))));
-        root.then(Commands.literal(cmd.get(9)).then(Commands.argument("valor", IntegerArgumentType.integer()).requires(sender -> sender.getSender().isOp()).executes(ctx -> {
-            final Integer valor = ctx.getArgument("valor", Integer.class);
-            final CommandSender sender = ctx.getSource().getSender();
-            if(valor<1){
-                sender.sendMessage(Component.text("§c"+lang.getString("comandos.limite.erro")));
-                return Command.SINGLE_SUCCESS;
-            }
-            config.set("limite",valor);
-            saveConfig();
-            sender.sendMessage(Component.text("§2"+lang.getString("comandos.limite.sucesso")+" "+valor));
-            return Command.SINGLE_SUCCESS;
-        })));
+                    return Command.SINGLE_SUCCESS;
+                })
+        );
+
+        // Comando para aceitar troca
+        // /nexus aceitar
+        root.then(Commands.literal(cmd.get(4))
+                .executes(ctx -> {
+                    final CommandSender sender = ctx.getSource().getSender();
+                    if(ctx.getSource().getExecutor() instanceof Player player){
+                        ItemStack stack = player.getInventory().getItemInMainHand();
+                        ItemMeta meta = stack.getItemMeta();
+                        if(meta!=null){
+                            PersistentDataContainer data = meta.getPersistentDataContainer();
+                            if(data.has(NEXUS.key,PersistentDataType.STRING)){
+                                String nome = data.get(NEXUS.key, PersistentDataType.STRING);
+                                Troca t = trocas.remove(player.getUniqueId());
+                                Player p = Bukkit.getPlayer(t.uuid());
+                                if(p!=null && nome!=null){
+                                    PlayerInventory inv = p.getInventory();
+                                    for(ItemStack s:inv.getContents()){
+                                        if(s!=null){
+                                            ItemMeta m = s.getItemMeta();
+                                            PersistentDataContainer d = m.getPersistentDataContainer();
+                                            if(d.has(NEXUS.key,PersistentDataType.STRING)){
+                                                String n = d.get(NEXUS.key, PersistentDataType.STRING);
+                                                if(n!=null && n.equals(t.stack())){
+                                                    Nexus nex = ItemsRegistro.getFromNome(n);
+                                                    if(nex!=null){
+                                                        PersistentDataContainer container = player.getPersistentDataContainer();
+                                                        NamespacedKey key = NexusKeys.getKey(nex.getNome());
+                                                        int level=1;
+                                                        if(key!=null && container.has(key,PersistentDataType.INTEGER)){
+                                                            level=container.getOrDefault(key,PersistentDataType.INTEGER,1);
+                                                        }else if(key!=null){
+                                                            container.set(key,PersistentDataType.INTEGER,1);
+                                                        }
+                                                        ItemStack aux = nex.getItem(level);
+                                                        player.getInventory().setItemInMainHand(aux);
+                                                        config.set("nexus."+n,player.getUniqueId().toString());
+                                                        nex = ItemsRegistro.getFromNome(nome);
+                                                        if(nex!=null){
+                                                            PersistentDataContainer pc = p.getPersistentDataContainer();
+                                                            key = NexusKeys.getKey(nex.getNome());
+                                                            level=1;
+                                                            if(key!=null && pc.has(key,PersistentDataType.INTEGER)){
+                                                                level=pc.getOrDefault(key,PersistentDataType.INTEGER,1);
+                                                            }else if(key!=null){
+                                                                pc.set(key,PersistentDataType.INTEGER,1);
+                                                            }
+                                                            aux = nex.getItem(level);
+                                                            config.set("nexus."+nome,p.getUniqueId().toString());
+                                                            inv.remove(s);
+                                                            inv.addItem(aux);
+                                                            String msg = lang.getString("comandos.troca.aceita.sucesso");
+                                                            p.sendMessage("§2"+msg);
+                                                            sender.sendMessage("§2"+msg);
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }else{
+                                    sender.sendMessage("§c"+lang.getString("comandos.troca.aceita.erro1"));
+                                }
+                            }else{
+                                sender.sendMessage("§c"+lang.getString("comandos.troca.aceita.erro2"));
+                            }
+                        }else{
+                            sender.sendMessage("§c"+lang.getString("comandos.troca.aceita.erro2"));
+                        }
+                    }else{
+                        sender.sendMessage("§c"+lang.getString("comandos.troca.aceita.erro3"));
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })
+        );
+
+        // Comando para cancelar troca
+        // /nexus cancelar
+        root.then(Commands.literal(cmd.get(5))
+                .executes(ctx -> {
+                    final CommandSender sender = ctx.getSource().getSender();
+                    if(ctx.getSource().getExecutor() instanceof Player player){
+                        Troca t = trocas.remove(player.getUniqueId());
+                        Player p = Bukkit.getPlayer(t.uuid());
+                        if(p!=null){
+                            String m = lang.getString("comandos.troca.cancela.envio");
+                            if(m!=null){
+                                m=m.replace("<player>",player.getName());
+                                p.sendMessage("§c"+m);
+                            }
+                        }
+                        sender.sendMessage("§c"+lang.getString("comandos.troca.cancela.recebido"));
+                    }else{
+                        sender.sendMessage("§c"+lang.getString("comandos.troca.cancela.erro"));
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })
+        );
+
+        // Comando para checar status do expurgo
+        // /nexus expurgar
+        root.then(Commands.literal(cmd.get(2))
+                .executes(ctx -> {
+                    boolean expurgo = config.getBoolean("expurgo");
+                    String msg = "§r§2"+lang.getString("comandos.expurgo.seguro");
+                    if(expurgo){
+                        msg = "§r§c"+lang.getString("comandos.expurgo.perigo");
+                    }
+                    ctx.getSource().getSender().sendMessage(msg);
+                    return Command.SINGLE_SUCCESS;
+                })
+        );
+
+        // Comando para listar relíquias
+        // /nexus list
+        root.then(Commands.literal("list")
+                .executes(ctx -> {
+                    ConfigurationSection secao = config.getConfigurationSection("nexus");
+                    if(secao!=null){
+                        for(String nexus: secao.getKeys(false)){
+                            String uuidStr = config.getString("nexus."+nexus);
+                            String dono = "§c"+lang.getString("comandos.list.sem");
+                            if(uuidStr != null && !uuidStr.isBlank()){
+                                try{
+                                    UUID uuid = UUID.fromString(uuidStr);
+                                    OfflinePlayer player = getServer().getOfflinePlayer(uuid);
+                                    dono = "§c"+(player.getName() != null? "§r§2"+player.getName():"§r§c"+lang.getString("comandos.list.desco"));
+                                }catch(IllegalArgumentException ignored){
+                                    dono = "§c"+lang.getString("comandos.list.comro");
+                                }
+                            }
+                            ctx.getSource().getSender().sendMessage(nexus+": "+dono);
+                        }
+                    }else ctx.getSource().getSender().sendMessage("§c"+lang.getString("comandos.list.erro"));
+                    return Command.SINGLE_SUCCESS;
+                })
+        );
+
+        // Comando para mostrar nível das relíquias
+        // /nexus level
+        root.then(Commands.literal("level")
+                .executes(ctx -> {
+                    if(ctx.getSource().getExecutor() instanceof Player player){
+                        List<NamespacedKey> keys = NexusKeys.getKeyLevel();
+                        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+                        player.sendMessage("§n§l"+lang.getString("comandos.level.msg"));
+                        for(NamespacedKey k:keys){
+                            int l = dataPlayer.getOrDefault(k, PersistentDataType.INTEGER,0);
+                            if(l>0){
+                                player.sendMessage("§r§2"+k.getKey()+": "+l);
+                            }else{
+                                player.sendMessage("§r§2"+k.getKey()+": §r§c"+lang.getString("comandos.level.sem"));
+                            }
+                        }
+                    }else ctx.getSource().getSender().sendMessage("§c"+lang.getString("comandos.level.erro"));
+                    return Command.SINGLE_SUCCESS;
+                })
+        );
+
+        // Comando para definir nível da relíquia (OP)
+        // /nexus setlevel <level>
+        root.then(Commands.literal("setlevel")
+                .then(Commands.argument("level", IntegerArgumentType.integer())
+                        .requires(sender -> sender.getSender().isOp())
+                        .executes(ctx -> {
+                            final CommandSender sender = ctx.getSource().getSender(); // CORREÇÃO: Adicionado esta linha
+                            if(ctx.getSource().getExecutor() instanceof Player player){
+                                int level = ctx.getArgument("level", int.class);
+                                ItemStack stack = player.getInventory().getItemInMainHand();
+                                ItemMeta meta = stack.getItemMeta();
+                                if (meta == null) {
+                                    sender.sendMessage("§cVocê precisa estar segurando uma relíquia."); // CORREÇÃO: Agora sender está definido
+                                    return Command.SINGLE_SUCCESS;
+                                }
+                                PersistentDataContainer data = meta.getPersistentDataContainer();
+                                if(data.has(NEXUS.key,PersistentDataType.STRING)){
+                                    String nome = data.get(NEXUS.key, PersistentDataType.STRING);
+                                    if(nome!=null){
+                                        NamespacedKey key = NexusKeys.getKey(nome);
+                                        if(key!=null){
+                                            player.getPersistentDataContainer().set(key,PersistentDataType.INTEGER,level);
+                                            sender.sendMessage("§2Nível da relíquia definido para " + level + "!");
+                                        }
+                                    }
+                                } else {
+                                    sender.sendMessage("§cVocê precisa estar segurando uma relíquia válida.");
+                                }
+                            }else {
+                                sender.sendMessage("§c"+lang.getString("comandos.level.erro"));
+                            }
+                            return Command.SINGLE_SUCCESS;
+                        }))
+        );
+
+        // Comando para ligar/desligar expurgo (OP)
+        // /nexus exp <true/false>
+        root.then(Commands.literal(cmd.get(8))
+                .then(Commands.argument("exp", BoolArgumentType.bool())
+                        .requires(sender -> sender.getSender().isOp())
+                        .executes(ctx -> {
+                            boolean exp = ctx.getArgument("exp", boolean.class);
+                            config.set("expurgo",exp);
+                            saveConfig();
+                            if(exp){
+                                Bukkit.getOnlinePlayers().forEach(player -> {
+                                    player.sendMessage("§r§c"+lang.getString("comandos.expurgar.msg.aviso"));
+                                    player.sendMessage("§r§c"+lang.getString("comandos.expurgar.msg.perigo"));
+                                    player.sendMessage("§r§c"+lang.getString("comandos.expurgar.msg.aviso"));
+                                });
+                            }else{
+                                Bukkit.getOnlinePlayers().forEach(player -> {
+                                    player.sendMessage("§r§2"+lang.getString("comandos.expurgar.msg.aviso"));
+                                    player.sendMessage("§r§2"+lang.getString("comandos.expurgar.msg.seguro"));
+                                    player.sendMessage("§r§2"+lang.getString("comandos.expurgar.msg.aviso"));
+                                });
+                            }
+                            ctx.getSource().getSender().sendMessage("§2"+lang.getString("comandos.expurgar.log")+" "+exp);
+                            return Command.SINGLE_SUCCESS;
+                        }))
+        );
+
+        // Comando para definir limite de relíquias (OP)
+        // /nexus limite <valor>
+        root.then(Commands.literal(cmd.get(9))
+                .then(Commands.argument("valor", IntegerArgumentType.integer())
+                        .requires(sender -> sender.getSender().isOp())
+                        .executes(ctx -> {
+                            final Integer valor = ctx.getArgument("valor", Integer.class);
+                            final CommandSender sender = ctx.getSource().getSender();
+                            if(valor<1){
+                                sender.sendMessage("§c"+lang.getString("comandos.limite.erro"));
+                                return Command.SINGLE_SUCCESS;
+                            }
+                            config.set("limite",valor);
+                            saveConfig();
+                            sender.sendMessage("§2"+lang.getString("comandos.limite.sucesso")+" "+valor);
+                            return Command.SINGLE_SUCCESS;
+                        }))
+        );
+
+        // Finaliza o registro dos comandos e eventos
         LiteralCommandNode<CommandSourceStack> buildCommand = root.build();
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> commands.registrar().register(buildCommand));
         getServer().getPluginManager().registerEvents(new JoinQuitEvent(this), this);
@@ -565,6 +641,7 @@ public final class ReliquiasNexus extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PerdeuEvent(), this);
         getServer().getPluginManager().registerEvents(new EvoluirEvent(this), this);
         getServer().getPluginManager().registerEvents(new SpecialEvent(this), this);
+        getServer().getPluginManager().registerEvents(this, this);
         getServer().getConsoleSender().sendMessage("§2[Nexus]: Plugin Ativado!");
     }
 
@@ -573,15 +650,26 @@ public final class ReliquiasNexus extends JavaPlugin {
         saveConfig();
         getServer().getConsoleSender().sendMessage("§4[Nexus]: Plugin Desativado!");
     }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (event.getView().title().equals(Component.text("§5Missões"))) {
+            event.setCancelled(true);
+        }
+    }
+
     public static FileConfiguration getNexusConfig(){
         return config;
     }
+
     public static FileConfiguration getLang(){
         return lang;
     }
+
     public static void setConfigSave(String path,Object value){
         config.set(path,value);
     }
+
     public static void saiu(Player p){
         Troca t = trocas.remove(p.getUniqueId());
         if(t==null)return;
