@@ -32,6 +32,8 @@ import org.dantesys.reliquiasNexus.items.Nexus;
 import org.dantesys.reliquiasNexus.util.NexusKeys;
 import org.dantesys.reliquiasNexus.util.Troca;
 import org.dantesys.reliquiasNexus.util.UpdaterCheck;
+import org.bukkit.Material;
+import org.bukkit.inventory.Inventory;
 
 import java.io.File;
 import java.io.IOException;
@@ -150,6 +152,36 @@ public final class ReliquiasNexus extends JavaPlugin {
                 return Command.SINGLE_SUCCESS;
             }))));
         
+        // COMANDO MISSOES
+        root.then(Commands.literal("missoes")
+            .executes(ctx -> {
+                final CommandSender sender = ctx.getSource().getSender();
+                if (!(sender instanceof Player player)) {
+                    sender.sendMessage("§c" + lang.getString("comandos.missoes.erro"));
+                    return Command.SINGLE_SUCCESS;
+                }
+                Inventory missoesInv = Bukkit.createInventory(null, 27, Component.text("§5Missões"));
+
+                List<String> missoes = lang.getStringList("missoes.lista");
+                if (missoes == null || missoes.isEmpty()) {
+                    player.sendMessage("§c" + lang.getString("comandos.missoes.vazio"));
+                    return Command.SINGLE_SUCCESS;
+                }
+                
+                for (int i = 0; i < missoes.size() && i < 27; i++) {
+                    ItemStack papel = new ItemStack(Material.PAPER);
+                    ItemMeta meta = papel.getItemMeta();
+                    meta.displayName(Component.text("§bTrabalho"));
+                    meta.lore(List.of(Component.text("§f" + missoes.get(i))));
+                    papel.setItemMeta(meta);
+                    missoesInv.setItem(i, papel);
+                }
+
+                player.openInventory(missoesInv);
+                player.sendMessage("§2" + lang.getString("comandos.missoes.sucesso"));
+                return Command.SINGLE_SUCCESS;
+            }));
+            
         root.then(Commands.literal(cmd.get(3)).then(Commands.argument("jogador", ArgumentTypes.player()).executes(ctx -> {
             final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogador", PlayerSelectorArgumentResolver.class);
             final Player p = targetResolver.resolve(ctx.getSource()).getFirst();
