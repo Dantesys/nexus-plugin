@@ -22,17 +22,14 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class Pescador {
     public static void getPassivabyLevel(int level, Player player){
-        if(level>5){
-            player.addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING,600,0));
-            player.setMetadata("arpao", new FixedMetadataValue(ReliquiasNexus.getPlugin(ReliquiasNexus.class), true));
-        }
+        player.addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING,600,0));
+        player.setMetadata("arpao", new FixedMetadataValue(ReliquiasNexus.getPlugin(ReliquiasNexus.class), true));
+
     }
     public static void getSpecialbyLevel(int level, Player player){
-        if(level<6){//1-5
-            buff(level,player);
-        }else if(level<11){//6-10
+        if(level<8){//1-7
             fishrain(level,player);
-        }else if(level<16){//11-15
+        }else if(level<16){//8-15
             roughSea(level,player);
         }else{//16-20
             fishnado(level,player);
@@ -52,10 +49,6 @@ public class Pescador {
                 EntityType.TURTLE
         );
         return m.get(ThreadLocalRandom.current().nextInt(m.size()));
-    }
-    private static void buff(int level, Player player){
-        player.addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING,level*20,0));
-        player.setMetadata("arpao", new FixedMetadataValue(ReliquiasNexus.getPlugin(ReliquiasNexus.class), true));
     }
     private static void fishrain(int level, Player player){
         Location centro = player.getLocation();
@@ -91,9 +84,9 @@ public class Pescador {
 
                             // efeitos especiais
                             if (mob.getType() == EntityType.PUFFERFISH) {
-                                alvo.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 60, 0));
+                                alvo.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 600, 0));
                             } else if (mob.getType() == EntityType.SQUID) {
-                                alvo.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 40, 0));
+                                alvo.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 600, 0));
                             }
                         }
                     }

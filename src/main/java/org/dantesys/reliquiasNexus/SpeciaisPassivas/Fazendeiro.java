@@ -2,6 +2,7 @@ package org.dantesys.reliquiasNexus.SpeciaisPassivas;
 
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -33,34 +34,24 @@ public class Fazendeiro {
             EntityType.WOLF
     );
     public static void getPassivabyLevel(int level, Player player){
-        if(level>5){
-            if(level<10){
-                player.addPotionEffect(new PotionEffect(PotionEffectType.LUCK,600,0));
-            }else if(level<15){
-                player.addPotionEffect(new PotionEffect(PotionEffectType.LUCK,600,1));
-            }else if(level<20){
-                player.addPotionEffect(new PotionEffect(PotionEffectType.LUCK,600,2));
-            }else{
-                player.addPotionEffect(new PotionEffect(PotionEffectType.LUCK,600,3));
-                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION,600,0));
-            }
+        if(level<10){
+            player.addPotionEffect(new PotionEffect(PotionEffectType.LUCK,600,0));
+        }else if(level<15){
+            player.addPotionEffect(new PotionEffect(PotionEffectType.LUCK,600,1));
+        }else if(level<20){
+            player.addPotionEffect(new PotionEffect(PotionEffectType.LUCK,600,2));
+        }else{
+            player.addPotionEffect(new PotionEffect(PotionEffectType.LUCK,600,3));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION,600,0));
         }
     }
     public static void getSpecialbyLevel(int level, Player player){
-        if(level<6){//1-5
-            buff(level,player);
-        }else if(level<11){//6-10
+        if(level<8){//1-7
             greenHand(level,player);
-        }else if(level<16){//11-15
+        }else if(level<16){//8-15
             giftCreation(level,player);
         }else{//16-20
             essenceCreation(level,player);
-        }
-    }
-    private static void buff(int level, Player player){
-        player.addPotionEffect(new PotionEffect(PotionEffectType.LUCK,level*20,level-1));
-        if(level>3){
-            player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION,level*20,level-3));
         }
     }
     private static void greenHand(int level, Player player){
@@ -70,12 +61,9 @@ public class Fazendeiro {
             for (int y = -1; y <= 2; y++) {
                 for (int z = -level; z <= level; z++) {
                     Block block = world.getBlockAt(loc.clone().add(x, y, z));
-                    if (block.getBlockData() instanceof Ageable ageable) {
-                        if (ageable.getAge() < ageable.getMaximumAge()) {
-                            ageable.setAge(ageable.getAge() + 1);
-                            block.setBlockData(ageable);
-                            world.spawnParticle(Particle.HAPPY_VILLAGER, block.getLocation().add(0.5, 0.5, 0.5), 10, 0.3, 0.3, 0.3, 0.1);
-                        }
+                    if (block.getBlockData() instanceof Ageable) {
+                        block.applyBoneMeal(BlockFace.UP);
+                        world.spawnParticle(Particle.HAPPY_VILLAGER, block.getLocation().add(0.5, 0.5, 0.5), 10, 0.3, 0.3, 0.3, 0.1);
                     }
                 }
             }
@@ -91,14 +79,10 @@ public class Fazendeiro {
             EntityType type = FARM_ANIMALS.get(random.nextInt(FARM_ANIMALS.size()));
             Location spawnLoc = baseLoc.clone().add(
                     random.nextInt(7) - 3,
-                    0,
+                    2,
                     random.nextInt(7) - 3
             );
-            spawnLoc.setY(world.getHighestBlockYAt(spawnLoc) + 1);
-            Material blockType = spawnLoc.getBlock().getType();
-            if (blockType.isSolid()) {
-                world.spawnEntity(spawnLoc, type);
-            }
+            world.spawnEntity(spawnLoc, type);
         }
     }
     private static void essenceCreation(int level, Player player){

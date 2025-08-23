@@ -298,7 +298,7 @@ public final class ReliquiasNexus extends JavaPlugin {
             }else ctx.getSource().getSender().sendMessage("§c"+lang.getString("comandos.level.erro"));
             return Command.SINGLE_SUCCESS;
         }));
-        root.then(Commands.literal("setlevel").then(Commands.argument("level", IntegerArgumentType.integer()).executes(ctx -> {
+        root.then(Commands.literal("setlevel").then(Commands.argument("level", IntegerArgumentType.integer()).requires(sender -> sender.getSender().isOp()).executes(ctx -> {
             if(ctx.getSource().getExecutor() instanceof Player player){
                 int level = ctx.getArgument("level", int.class);
                 ItemStack stack = player.getInventory().getItemInMainHand();

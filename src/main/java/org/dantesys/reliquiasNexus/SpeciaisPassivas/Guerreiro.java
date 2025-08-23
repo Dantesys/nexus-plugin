@@ -19,36 +19,26 @@ import java.util.List;
 
 public class Guerreiro {
     public static void getPassivabyLevel(int level, Player player){
-        if(level>5){
-            if(level<10){
-                player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH,600,0));
-            }else if(level<15){
-                player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH,600,1));
-                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE,600,0));
-            }else if(level<20){
-                player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH,600,2));
-                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE,600,1));
-            }else{
-                player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH,600,3));
-                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE,600,2));
-            }
+        if(level<10){
+            player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH,600,0));
+        }else if(level<15){
+            player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH,600,1));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE,600,0));
+        }else if(level<20){
+            player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH,600,2));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE,600,1));
+        }else{
+            player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH,600,3));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE,600,2));
         }
     }
     public static void getSpecialbyLevel(int level, Player player){
-        if(level<6){//1-5
-            buff(level,player);
-        }else if(level<11){//6-10
+        if(level<8){//1-7
             rush(level,player);
-        }else if(level<16){//11-15
+        }else if(level<16){//8-15
             slash360(level,player);
         }else{//16-20
             slash(level,player);
-        }
-    }
-    private static void buff(int level, Player player){
-        player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH,level*20,level-1));
-        if(level>2){
-            player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE,level*20,level-2));
         }
     }
     private static void rush(int level, Player player){
@@ -60,8 +50,7 @@ public class Guerreiro {
         final List<LivingEntity> atingidos = new ArrayList<>();
         Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 1,
                 ()->{
-                },()-> {
-        },(t)->{
+                },()-> player.teleport(location),(t)->{
             tp[0] = tp[0]+3.4;
             double x = direction.getX()*tp[0];
             double y = direction.getY()*tp[0]+1.4;
@@ -86,7 +75,6 @@ public class Guerreiro {
             }
             location.subtract(x,y,z);
             if(t.getSegundosRestantes()>finalRange){
-                player.teleport(location);
                 t.stop();
             }
         });

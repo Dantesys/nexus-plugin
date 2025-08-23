@@ -1,6 +1,5 @@
 package org.dantesys.reliquiasNexus.SpeciaisPassivas;
 
-import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -10,64 +9,51 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Mineiro {
+    private static final Map<Material, Material> MIDAS_EVOLUTIONS = new HashMap<>() {{
+        put(Material.COAL_ORE, Material.IRON_ORE);
+        put(Material.IRON_ORE, Material.GOLD_ORE);
+        put(Material.GOLD_ORE, Material.DIAMOND_ORE);
+        put(Material.DIAMOND_ORE, Material.EMERALD_ORE);
+        // Versões deepslate também
+        put(Material.DEEPSLATE_COAL_ORE, Material.DEEPSLATE_IRON_ORE);
+        put(Material.DEEPSLATE_IRON_ORE, Material.DEEPSLATE_GOLD_ORE);
+        put(Material.DEEPSLATE_GOLD_ORE, Material.DEEPSLATE_DIAMOND_ORE);
+        put(Material.DEEPSLATE_DIAMOND_ORE, Material.DEEPSLATE_EMERALD_ORE);
+    }};
     public static void getPassivabyLevel(int level, Player player){
-        if(level>5){
-            player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION,600,0));
-            if(level<10){
-                player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE,600,0));
-            }else if(level<15){
-                player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE,600,1));
-            }else if(level<20){
-                player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE,600,2));
-            }else{
-                player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE,600,3));
-            }
+        player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION,600,0));
+        if(level<10){
+            player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE,600,0));
+        }else if(level<15){
+            player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE,600,1));
+        }else if(level<20){
+            player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE,600,2));
+        }else{
+            player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE,600,3));
         }
     }
     public static void getSpecialbyLevel(int level, Player player){
-        if(level<6){//1-5
-            buff(level,player);
-        }else if(level<11){//6-10
-            prospectorEye(level,player);
-        }else if(level<16){//11-15
+        if(level<8){//1-7
+            midas(level,player);
+        }else if(level<16){//8-15
             collapse(level,player);
         }else{//16-20
             heartMountain(level,player);
         }
     }
-    private static void buff(int level, Player player){
-        player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION,level*20,level-1));
-        if(level>2){
-            player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE,level*20,level-2));
-        }
-    }
-    private static void prospectorEye(int level, Player player){
-        int raio = 15+level;
-        Location base = player.getLocation();
-        Block target = null;
-        double menorDist = Double.MAX_VALUE;
-        for (int x = -raio; x <= raio; x++) {
-            for (int y = -raio; y <= raio; y++) {
-                for (int z = -raio; z <= raio; z++) {
-                    Block b = base.clone().add(x, y, z).getBlock();
-                    if (isOre(b.getType())) {
-                        double dist = base.distance(b.getLocation());
-                        b.getWorld().spawnParticle(Particle.END_ROD, b.getLocation().add(0.5, 0.5, 0.5), 10, 0.3, 0.3, 0.3, 0);
-                        if (dist < menorDist) {
-                            menorDist = dist;
-                            target = b;
-                        }
-                    }
-                }
+    private static void midas(int level, Player player){
+        Block target = player.getTargetBlockExact(3+level);
+        if (target != null){
+            if (MIDAS_EVOLUTIONS.containsKey(target.getType())) {
+                Material upgraded = MIDAS_EVOLUTIONS.get(target.getType());
+                target.setType(upgraded);
+                player.getWorld().playSound(target.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
+                player.getWorld().spawnParticle(Particle.ENCHANT, target.getLocation().add(0.5, 0.5, 0.5), 20, 0.3, 0.3, 0.3, 0.01);
             }
-        }
-
-        if (target != null) {
-            player.sendActionBar(Component.text("§bOre in " + (int) menorDist + " blocks!"));
-            player.setCompassTarget(target.getLocation());
-        } else {
-            player.sendActionBar(Component.text("§7No Ore Found!"));
         }
     }
     private static void collapse(int level, Player player){

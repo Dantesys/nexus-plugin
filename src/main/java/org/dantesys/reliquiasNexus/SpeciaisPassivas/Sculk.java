@@ -15,31 +15,23 @@ import java.util.Collection;
 
 public class Sculk {
     public static void getPassivabyLevel(int level, Player player){
-        if(level>5){
-            player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION,600,0));
-            player.setMetadata("wardenImunity", new FixedMetadataValue(ReliquiasNexus.getPlugin(ReliquiasNexus.class), true));
-        }
+        player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION,600,level));
+        player.setMetadata("wardenImunity", new FixedMetadataValue(ReliquiasNexus.getPlugin(ReliquiasNexus.class), true));
     }
     public static void getSpecialbyLevel(int level, Player player){
-        if(level<6){//1-5
-            buff(level,player);
-        }else if(level<11){//6-10
+        if(level<8){//1-7
             sonar(level,player);
-        }else if(level<16){//11-15
+        }else if(level<16){//8-15
             sonicboom(level,player);
         }else{//16-20
             ultimatesonicboom(level,player);
         }
     }
-    private static void buff(int level, Player player){
-        player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION,level*20,0));
-        player.setMetadata("wardenImunity", new FixedMetadataValue(ReliquiasNexus.getPlugin(ReliquiasNexus.class), true));
-    }
     private static void sonar(int level, Player player){
         for(Entity e:player.getNearbyEntities(level,level,level)){
             if(e instanceof LivingEntity vivo){
-                vivo.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING,20*level,0));
-                vivo.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS,20*level,level));
+                vivo.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING,600+20*level,0));
+                vivo.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS,600+20*level,level));
                 vivo.damage((double) level /10);
                 vivo.getWorld().playSound(vivo,Sound.ENTITY_WARDEN_EMERGE,1f,0.8f);
             }
@@ -97,9 +89,9 @@ public class Sculk {
         for (Entity e : player.getNearbyEntities(raio, raio, raio)) {
             if (e instanceof LivingEntity vivo && vivo != player) {
                 vivo.damage(dano);
-                vivo.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 20*level, 1));
-                vivo.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 20*level, 0));
-                vivo.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 20*level, 0));
+                vivo.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 600+20*level, 1));
+                vivo.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 600+20*level, 0));
+                vivo.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 600+20*level, 0));
             }
         }
 

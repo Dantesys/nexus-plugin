@@ -7,7 +7,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
@@ -18,30 +17,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.dantesys.reliquiasNexus.util.NexusKeys.DRENO;
-
 public class Ceifador {
     public static void getPassivabyLevel(int level, Player player){
-        if(level>5){
-            player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION,600,0));
-            player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY,600,0));
-        }
+        player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION,600,0));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY,600,0));
     }
     public static void getSpecialbyLevel(int level, Player player){
-        if(level<6){//1-5
-            buff(level,player);
-        }else if(level<11){//6-10
+        if(level<8){//1-7
             deathfear(level,player);
-        }else if(level<16){//11-15
+        }else if(level<16){//8-15
             nigthslash(level,player);
         }else{//16-20
             soulcolector(level,player);
         }
-    }
-    private static void buff(int level, Player player){
-        player.getPersistentDataContainer().set(DRENO.key, PersistentDataType.INTEGER,5+level);
-        player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION,100+(level*20),0));
-        player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY,100+(level*20),0));
     }
     private static void deathfear(int level, Player player){
         final int finalRange = 5+level;
@@ -66,12 +54,12 @@ public class Ceifador {
                     atingidos.add(vivo);
                     if(vivo instanceof Player pl){
                         if(pl != player){
-                            vivo.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS,20*level,2));
-                            vivo.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS,20*level,level));
+                            vivo.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS,600+20*level,2));
+                            vivo.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS,600+20*level,level));
                         }
                     }else{
-                        vivo.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS,20*level,2));
-                        vivo.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS,20*level,level));
+                        vivo.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS,600+20*level,2));
+                        vivo.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS,600+20*level,level));
                     }
                 }
                 pressf.remove(surdo);

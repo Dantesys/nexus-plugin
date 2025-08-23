@@ -19,31 +19,24 @@ import java.util.List;
 
 public class Flash {
     public static void getPassivabyLevel(int level, Player player){
-        if(level>5){
-            if(level<10){
-                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,600,0));
-            }else if(level<15){
-                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,600,1));
-            }else if(level<20){
-                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,600,2));
-            }else{
-                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,600,3));
-            }
+        if(level<10){
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,600,0));
+        }else if(level<15){
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,600,1));
+        }else if(level<20){
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,600,2));
+        }else{
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,600,3));
         }
     }
     public static void getSpecialbyLevel(int level, Player player){
-        if(level<6){//1-5
-            buff(level,player);
-        }else if(level<11){//6-10
+        if(level<8){//1-7
             dash(level,player);
-        }else if(level<16){//11-15
+        }else if(level<16){//8-15
             flashStep(level,player);
         }else{//16-20
             tornado(level,player);
         }
-    }
-    private static void buff(int level, Player player){
-        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,level*20,level-1));
     }
     private static void dash(int level, Player player){
         final int finalRange = 5+level;
@@ -54,8 +47,7 @@ public class Flash {
         final List<LivingEntity> atingidos = new ArrayList<>();
         Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 1,
                 ()->{
-                },()-> {
-        },(t)->{
+                },()-> player.teleport(location),(t)->{
             tp[0] = tp[0]+3.4;
             double x = direction.getX()*tp[0];
             double y = direction.getY()*tp[0]+1.4;
@@ -80,7 +72,6 @@ public class Flash {
             }
             location.subtract(x,y,z);
             if(t.getSegundosRestantes()>finalRange){
-                player.teleport(location);
                 t.stop();
             }
         });
@@ -96,7 +87,7 @@ public class Flash {
             if (e instanceof LivingEntity alvo && alvo != player) {
                 alvo.damage(level); // dano leve
                 alvo.setVelocity(alvo.getLocation().toVector().subtract(origem.toVector()).normalize().multiply(0.5)); // knockback
-                alvo.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 40, 0));
+                alvo.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 400, 0));
             }
         }
         // partículas e som
@@ -151,8 +142,8 @@ public class Flash {
             if (e instanceof LivingEntity alvo && alvo != player) {
                 Vector knockback = alvo.getLocation().toVector().subtract(centro.toVector()).normalize().multiply(1.5);
                 alvo.setVelocity(knockback);
-                alvo.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 60, 1));
-                alvo.addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, 40, 0));
+                alvo.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 600, 1));
+                alvo.addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, 400, 0));
                 alvo.damage(level * 3.0, player);
             }
         }

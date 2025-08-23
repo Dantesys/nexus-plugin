@@ -19,36 +19,26 @@ import java.util.List;
 
 public class Mares {
     public static void getPassivabyLevel(int level, Player player){
-        if(level>5){
-            if(level<10){
-                player.addPotionEffect(new PotionEffect(PotionEffectType.CONDUIT_POWER,600,0));
-            }else if(level<15){
-                player.addPotionEffect(new PotionEffect(PotionEffectType.CONDUIT_POWER,600,1));
-                player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE,600,0));
-            }else if(level<20){
-                player.addPotionEffect(new PotionEffect(PotionEffectType.CONDUIT_POWER,600,2));
-                player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE,600,1));
-            }else{
-                player.addPotionEffect(new PotionEffect(PotionEffectType.CONDUIT_POWER,600,3));
-                player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE,600,2));
-            }
+        if(level<10){
+            player.addPotionEffect(new PotionEffect(PotionEffectType.CONDUIT_POWER,600,0));
+        }else if(level<15){
+            player.addPotionEffect(new PotionEffect(PotionEffectType.CONDUIT_POWER,600,1));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE,600,0));
+        }else if(level<20){
+            player.addPotionEffect(new PotionEffect(PotionEffectType.CONDUIT_POWER,600,2));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE,600,1));
+        }else{
+            player.addPotionEffect(new PotionEffect(PotionEffectType.CONDUIT_POWER,600,3));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE,600,2));
         }
     }
     public static void getSpecialbyLevel(int level, Player player){
-        if(level<6){//1-5
-            buff(level,player);
-        }else if(level<11){//6-10
+        if(level<8){//1-7
             waterStrike(level,player);
-        }else if(level<16){//11-15
+        }else if(level<16){//8-15
             highTide(level,player);
         }else{//16-20
             oceanFury(level,player);
-        }
-    }
-    private static void buff(int level, Player player){
-        player.addPotionEffect(new PotionEffect(PotionEffectType.CONDUIT_POWER,level*20,level-1));
-        if(level>2){
-            player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE,level*20,level-2));
         }
     }
     private static void waterStrike(int level, Player player){

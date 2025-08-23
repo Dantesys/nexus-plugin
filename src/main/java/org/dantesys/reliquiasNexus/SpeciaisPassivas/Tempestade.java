@@ -17,31 +17,24 @@ import java.util.Collection;
 
 public class Tempestade {
     public static void getPassivabyLevel(int level, Player player){
-        if(level>5){
-            if(level<10){
-                player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST,600,0));
-            }else if(level<15){
-                player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST,600,1));
-            }else if(level<20){
-                player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST,600,2));
-            }else{
-                player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST,600,3));
-            }
+        if(level<10){
+            player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST,600,0));
+        }else if(level<15){
+            player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST,600,1));
+        }else if(level<20){
+            player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST,600,2));
+        }else{
+            player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST,600,3));
         }
     }
     public static void getSpecialbyLevel(int level, Player player){
-        if(level<6){//1-5
-            buff(level,player);
-        }else if(level<11){//6-10
+        if(level<8){//1-7
             electricWhip(level,player);
-        }else if(level<16){//11-15
+        }else if(level<16){//8-15
             electricExplosion(level,player);
         }else{//16-20
             tempest(level,player);
         }
-    }
-    private static void buff(int level, Player player){
-        player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST,level*20,level-1));
     }
     private static void electricWhip(int level, Player player){
         final int finalRange = 5+level;
@@ -49,7 +42,7 @@ public class Tempestade {
         final Location location = player.getLocation();
         final Vector direction = location.getDirection().normalize();
         final double[] tp = {0};
-        Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 1,
+        Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 5,
                 ()->{
                 },()-> {
         },(t)->{
@@ -92,7 +85,7 @@ public class Tempestade {
         final Location location = player.getLocation();
         final Vector direction = location.getDirection().normalize();
         final double[] tp = {0};
-        Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 1,
+        Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 5,
                 ()->{
                 },()-> {
         },(t)->{
@@ -109,12 +102,14 @@ public class Tempestade {
                 if(surdo instanceof LivingEntity vivo){
                     if(vivo instanceof Player pl){
                         if(pl != player){
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE   ,200,9));
                             vivo.damage(finalDamage);
                             vivo.getWorld().strikeLightningEffect(vivo.getLocation());
                             vivo.getWorld().createExplosion(vivo, (float) finalDamage,false,false);
                             t.stop();
                         }
                     }else{
+                        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE   ,200,9));
                         vivo.damage(finalDamage);
                         vivo.getWorld().strikeLightningEffect(vivo.getLocation());
                         vivo.getWorld().createExplosion(vivo, (float) finalDamage,false,false);
@@ -125,6 +120,7 @@ public class Tempestade {
             }
             location.subtract(x,y,z);
             if(t.getSegundosRestantes()>finalRange){
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE   ,200,9));
                 location.getWorld().strikeLightningEffect(location);
                 location.getWorld().createExplosion(location, (float) finalDamage,false,false);
                 t.stop();

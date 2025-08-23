@@ -145,7 +145,7 @@ public class EvoluirEvent implements Listener {
                 dataPlayer.set(FLASH.key,PersistentDataType.INTEGER,levelAtual+1);
                 player.getAttribute(Attribute.ATTACK_SPEED).setBaseValue(4+levelAtual);
                 player.getAttribute(Attribute.MOVEMENT_EFFICIENCY).setBaseValue(levelAtual*0.05);
-                player.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.245*levelAtual+0.7);
+                player.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(((0.245*levelAtual)/2)+0.7);
                 player.getAttribute(Attribute.SNEAKING_SPEED).setBaseValue(0.035*levelAtual+0.3);
                 player.getAttribute(Attribute.STEP_HEIGHT).setBaseValue(0.007*levelAtual+0.6);
             }
@@ -562,8 +562,8 @@ public class EvoluirEvent implements Listener {
                                 int l=dataPlayer.getOrDefault(ESPIAO.key,PersistentDataType.INTEGER,1);
                                 int usos=dataPlayer.getOrDefault(MISSAOESPIAO.key,PersistentDataType.INTEGER,0);
                                 usos++;
-                                Espiao.getPassivabyLevel(l,player);
-                                dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,120);
+                                Espiao.getSpecialbyLevel(l,player);
+                                dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,60);
                                 dataPlayer.set(MISSAOESPIAO.key,PersistentDataType.INTEGER,usos);
                                 tentarEvoluir(player,stack,l,getSlotOfItem(player,stack));
                             }
@@ -583,7 +583,7 @@ public class EvoluirEvent implements Listener {
                                 int usos=dataPlayer.getOrDefault(MISSAOFLASH.key,PersistentDataType.INTEGER,0);
                                 usos++;
                                 Flash.getSpecialbyLevel(l,player);
-                                dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,120);
+                                dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,60);
                                 dataPlayer.set(MISSAOFLASH.key,PersistentDataType.INTEGER,usos);
                                 tentarEvoluir(player,stack,l,getSlotOfItem(player,stack));
                             }

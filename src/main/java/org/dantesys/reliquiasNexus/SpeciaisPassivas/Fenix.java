@@ -14,36 +14,26 @@ import static org.dantesys.reliquiasNexus.util.NexusKeys.RENASCER;
 
 public class Fenix {
     public static void getPassivabyLevel(int level, Player player){
-        if(level>5){
-            if(level<10){
-                player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE,600,0));
-            }else if(level<15){
-                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING,600,0));
-                player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE,600,1));
-            }else if(level<20){
-                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING,600,0));
-                player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE,600,2));
-            }else{
-                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING,600,0));
-                player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE,600,3));
-            }
+        if(level<10){
+            player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE,600,0));
+        }else if(level<15){
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING,600,0));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE,600,1));
+        }else if(level<20){
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING,600,0));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE,600,2));
+        }else{
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING,600,0));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE,600,3));
         }
     }
     public static void getSpecialbyLevel(int level, Player player){
-        if(level<6){//1-5
-            buff(level,player);
-        }else if(level<11){//6-10
+        if(level<8){//1-7
             auroraExplosion(level,player);
-        }else if(level<16){//11-15
+        }else if(level<16){//8-15
             risingFlames(level,player);
         }else{//16-20
             supernova(level,player);
-        }
-    }
-    private static void buff(int level, Player player){
-        player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE,level*20,level-1));
-        if(level>2){
-            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING,level*20,level-2));
         }
     }
     private static void auroraExplosion(int level, Player player){

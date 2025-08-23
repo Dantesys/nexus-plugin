@@ -12,35 +12,27 @@ import org.dantesys.reliquiasNexus.util.Temporizador;
 
 public class Espiao {
     public static void getPassivabyLevel(int level, Player player){
-        if(level>5){
-            player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION,600,0));
-            player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY,600,0));
-        }
+        player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION,600,0));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY,600,0));
     }
     public static void getSpecialbyLevel(int level, Player player){
-        if(level<6){//1-5
-            buff(level,player);
-        }else if(level<11){//6-10
+        if(level<8){//1-7
             eyeVigilance(level,player);
-        }else if(level<16){//11-15
+        }else if(level<16){//8-15
             emergencyEscape(level,player);
         }else{//16-20
             soulEscape(level,player);
         }
-    }
-    private static void buff(int level, Player player){
-        player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION,100+(level*20),0));
-        player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY,100+(level*20),0));
     }
     private static void eyeVigilance(int level, Player player){
         for(Entity e: player.getNearbyEntities(level,level,level)){
             if(e instanceof LivingEntity vivo){
                 if(vivo instanceof Player pl){
                     if(pl != player){
-                        vivo.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING,20*level,0));
+                        vivo.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING,600+20*level,0));
                     }
                 }else{
-                    vivo.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING,20*level,0));
+                    vivo.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING,600+20*level,0));
                 }
             }
         }

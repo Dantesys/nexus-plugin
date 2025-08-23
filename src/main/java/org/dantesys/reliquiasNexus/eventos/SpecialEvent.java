@@ -79,7 +79,7 @@ public class SpecialEvent implements Listener {
                             }
                         }
                         if(!item.getNome().equals("mago")){
-                            dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,120);
+                            dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,60);
                         }
                     }
                 }
@@ -91,7 +91,7 @@ public class SpecialEvent implements Listener {
                     Nexus item = ItemsRegistro.getFromNome(nome);
                     if(item!=null){
                         fenix(player);
-                        dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,120);
+                        dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,60);
                     }
                 }
             }
@@ -103,7 +103,7 @@ public class SpecialEvent implements Listener {
                         Nexus item = ItemsRegistro.getFromNome(nome);
                         if(item!=null){
                             protetor(player);
-                            dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,120);
+                            dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,60);
                         }
                     }else if(nome.equals("vida")){
                         vida(player);
@@ -117,7 +117,7 @@ public class SpecialEvent implements Listener {
                     Nexus item = ItemsRegistro.getFromNome(nome);
                     if(item!=null){
                         hulk(player);
-                        dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,120);
+                        dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,60);
                     }
                 }
             }

@@ -31,7 +31,7 @@ public class Mago {
     }
     private static void shield(int level,Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE,20*level,level-1));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE,600+20*level,level-1));
         dataPlayer.set(SPECIAL.key, PersistentDataType.INTEGER,20*level+10);
     }
     private static void iceArrow(int level,Player player){
@@ -311,7 +311,7 @@ public class Mago {
             }
         }.runTaskTimer(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 0, 1);
 
-        dataPlayer.set(SPECIAL.key, PersistentDataType.INTEGER,120);
+        dataPlayer.set(SPECIAL.key, PersistentDataType.INTEGER,60);
     }
     public static void getPassivabyLevel(int level, Player player){
         if(level>5){

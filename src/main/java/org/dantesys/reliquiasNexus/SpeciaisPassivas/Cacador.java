@@ -15,37 +15,24 @@ import static org.dantesys.reliquiasNexus.util.NexusKeys.SPECIAL;
 
 public class Cacador {
     public static void getPassivabyLevel(int level, Player player){
-        if(level>5){
-            if(level<10){
-                player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION,600,0));
-            }else if(level<15) {
-                player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 600, 0));
-                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE,600,0));
-            }else{
-                player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 600, 0));
-                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE,600,0));
-                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,600,0));
-            }
+        if(level<10){
+            player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION,600,0));
+        }else if(level<15) {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 600, 0));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE,600,0));
+        }else{
+            player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 600, 0));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE,600,0));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,600,0));
         }
     }
     public static void getSpecialbyLevel(int level, Player player){
-        if(level<6){//1-5
-            buff(level,player);
-        }else if(level<11){//6-10
+        if(level<8){//1-7
             explosive(level,player);
-        }else if(level<16){//11-15
+        }else if(level<16){//8-15
             freeze(level,player);
         }else{//16-20
             minigun(level,player);
-        }
-    }
-    private static void buff(int level, Player player){
-        player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION,level*20,level-1));
-        if(level>2){
-            player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE,level*20,level-2));
-        }
-        if(level>4){
-            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,level*20,level-4));
         }
     }
     private static void explosive(int level, Player player){
@@ -62,12 +49,12 @@ public class Cacador {
         arrow.setCritical(true);
         arrow.setGlowing(true);
         arrow.setColor(Color.BLACK);
-        arrow.addCustomEffect(new PotionEffect(PotionEffectType.SLOWNESS,20*level,level),true);
+        arrow.addCustomEffect(new PotionEffect(PotionEffectType.SLOWNESS,600+20*level,level),true);
         Vector vec = player.getLocation().getDirection();
         arrow.setVelocity(vec.multiply(level));
     }
     private static void minigun(int level, Player player){
-        Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), level,
+        Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 10+level,
                 ()->{
                     String msg = ReliquiasNexus.getLang().getString("special.cacador.ativado");
                     if(msg==null){
