@@ -46,6 +46,7 @@ public final class ReliquiasNexus extends JavaPlugin {
     final List<String> names = List.of("guerreiro","ceifador","vida","mares","barbaro",
             "fazendeiro","espiao","arqueiro","cacador","tempestade","mineiro","fenix","protetor",
             "hulk","sculk","pescador","flash","mago","ladrao","domador");
+    
     @Override
     public void onEnable() {
         ItemsRegistro.init();
@@ -75,6 +76,80 @@ public final class ReliquiasNexus extends JavaPlugin {
             msgs.forEach(m -> ctx.getSource().getSender().sendMessage("§r"+m));
             return Command.SINGLE_SUCCESS;
         });
+        
+        // COMANDO REMOVER
+        root.then(Commands.literal("remover")
+            .then(Commands.argument("jogador", ArgumentTypes.player())
+            .then(Commands.argument("reliquia", StringArgumentType.word())
+            .suggests((ctx, builder) -> {
+                names.stream().filter(entry -> entry.toLowerCase().startsWith(builder.getRemainingLowerCase())).forEach(builder::suggest);
+                return builder.buildFuture();
+            })
+            .requires(sender -> sender.getSender().isOp())
+            .executes(ctx -> {
+                final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogador", PlayerSelectorArgumentResolver.class);
+                final Player p = targetResolver.resolve(ctx.getSource()).getFirst();
+                final CommandSender sender = ctx.getSource().getSender();
+                final String reliquia = ctx.getArgument("reliquia", String.class).toLowerCase();
+                
+                Nexus n = ItemsRegistro.getFromNome(reliquia);
+                if (n != null) {
+                    boolean reliquiaRemovida = false;
+                    PlayerInventory inv = p.getInventory();
+                    for (ItemStack item : inv.getContents()) {
+                        if (item != null && item.hasItemMeta()) {
+                            ItemMeta meta = item.getItemMeta();
+                            PersistentDataContainer data = meta.getPersistentDataContainer();
+                            if (data.has(NEXUS.key, PersistentDataType.STRING)) {
+                                String nomeReliquia = data.get(NEXUS.key, PersistentDataType.STRING);
+                                if (reliquia.equalsIgnoreCase(nomeReliquia)) {
+                                    inv.remove(item);
+                                    reliquiaRemovida = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (reliquiaRemovida) {
+                        config.set("nexus." + reliquia, null);
+                        saveConfig();
+                        PersistentDataContainer dataPlayer = p.getPersistentDataContainer();
+                        int qtd = dataPlayer.getOrDefault(QTD.key, PersistentDataType.INTEGER, 0);
+                        if (qtd > 0) {
+                            dataPlayer.set(QTD.key, PersistentDataType.INTEGER, qtd - 1);
+                        }
+                        String msgJogador = lang.getString("comandos.remover.sucesso.jogador");
+                        String msgSender = lang.getString("comandos.remover.sucesso.sender");
+                        if (msgJogador != null) {
+                            p.sendMessage("§c" + msgJogador.replace("<relic>", reliquia));
+                        } else {
+                            p.sendMessage("§cSua relíquia " + reliquia + " foi removida por um administrador!");
+                        }
+                        if (msgSender != null) {
+                            sender.sendMessage("§2" + msgSender.replace("<player>", p.getName()).replace("<relic>", reliquia));
+                        } else {
+                            sender.sendMessage("§2Relíquia " + reliquia + " removida de " + p.getName() + " e liberada para outros jogadores!");
+                        }
+                    } else {
+                        String errorMsg = lang.getString("comandos.remover.erro.nao_encontrada");
+                        if (errorMsg != null) {
+                            sender.sendMessage("§c" + errorMsg.replace("<player>", p.getName()).replace("<relic>", reliquia));
+                        } else {
+                            sender.sendMessage("§cJogador " + p.getName() + " não possui a relíquia " + reliquia + "!");
+                        }
+                    }
+                } else {
+                    String errorMsg = lang.getString("comandos.remover.erro.invalida");
+                    if (errorMsg != null) {
+                        sender.sendMessage("§c" + errorMsg.replace("<relic>", reliquia));
+                    } else {
+                        sender.sendMessage("§cRelíquia " + reliquia + " não existe!");
+                    }
+                }
+                return Command.SINGLE_SUCCESS;
+            }))));
+        
         root.then(Commands.literal(cmd.get(3)).then(Commands.argument("jogador", ArgumentTypes.player()).executes(ctx -> {
             final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogador", PlayerSelectorArgumentResolver.class);
             final Player p = targetResolver.resolve(ctx.getSource()).getFirst();
