@@ -13,7 +13,6 @@ import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -34,6 +33,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.dantesys.reliquiasNexus.economy.Banco;
+import org.dantesys.reliquiasNexus.economy.Emprestimo;
 import org.dantesys.reliquiasNexus.eventos.*;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
@@ -57,82 +58,6 @@ public final class ReliquiasNexus extends JavaPlugin implements Listener {
     final List<String> names = List.of("guerreiro","ceifador","vida","mares","barbaro",
             "fazendeiro","espiao","arqueiro","cacador","tempestade","mineiro","fenix","protetor",
             "hulk","sculk","pescador","flash","mago","ladrao","domador");
-
-    // Classes internas para o sistema econômico
-    public static class Emprestimo {
-        private final UUID jogador;
-        private final String banco;
-        private final double valor;
-        private final double valorTotal;
-        private final long dataContracao;
-        private int diasAtraso;
-
-        public Emprestimo(UUID jogador, String banco, double valor, double juros) {
-            this.jogador = jogador;
-            this.banco = banco;
-            this.valor = valor;
-            this.valorTotal = valor * (1 + juros);
-            this.dataContracao = System.currentTimeMillis();
-            this.diasAtraso = 0;
-        }
-
-        // Getters
-        public UUID getJogador() { return jogador; }
-        public String getBanco() { return banco; }
-        public double getValor() { return valor; }
-        public double getValorTotal() { return valorTotal; }
-        public long getDataContracao() { return dataContracao; }
-        public int getDiasAtraso() { return diasAtraso; }
-        public void setDiasAtraso(int dias) { this.diasAtraso = dias; }
-
-        public double getValorDevido() {
-            long diasPassados = TimeUnit.MILLISECONDS.toDays(System.currentTimeMillis() - dataContracao);
-            if (diasPassados > 3) {
-                int diasAtraso = (int) (diasPassados - 3);
-                double multa = valorTotal * (0.05 * diasAtraso);
-                return valorTotal + multa;
-            }
-            return valorTotal;
-        }
-    }
-
-    public static class Banco {
-        private final String nome;
-        private final UUID dono;
-        private double saldo;
-        private double maxEmprestimo;
-        private double taxaJuros;
-        private double taxaSucesso;
-        private String descricao;
-        private boolean aprovado;
-
-        public Banco(String nome, UUID dono, double saldoInicial) {
-            this.nome = nome;
-            this.dono = dono;
-            this.saldo = saldoInicial;
-            this.maxEmprestimo = 1000;
-            this.taxaJuros = 0.2;
-            this.taxaSucesso = 0.7;
-            this.descricao = "Novo banco";
-            this.aprovado = false;
-        }
-
-        // Getters e Setters
-        public String getNome() { return nome; }
-        public UUID getDono() { return dono; }
-        public double getSaldo() { return saldo; }
-        public void setSaldo(double saldo) { this.saldo = saldo; }
-        public double getMaxEmprestimo() { return maxEmprestimo; }
-        public void setMaxEmprestimo(double max) { this.maxEmprestimo = max; }
-        public double getTaxaJuros() { return taxaJuros; }
-        public void setTaxaJuros(double taxa) { this.taxaJuros = taxa; }
-        public double getTaxaSucesso() { return taxaSucesso; }
-        public void setTaxaSucesso(double taxa) { this.taxaSucesso = taxa; }
-        public String getDescricao() { return descricao; }
-        public void setDescricao(String desc) { this.descricao = desc; }
-        public boolean isAprovado() { return aprovado; }
-        public void setAprovado(boolean aprovado) { this.aprovado = aprovado; }
-    }
 
     @Override
     public void onEnable() {
@@ -164,7 +89,7 @@ public final class ReliquiasNexus extends JavaPlugin implements Listener {
 
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("nexus").executes(ctx -> {
             List<String> msgs = lang.getStringList("comandos.nexus");
-            if (msgs == null || msgs.isEmpty()) {
+            if (msgs.isEmpty()) {
                 ctx.getSource().getSender().sendMessage("§a✨ === Comandos Nexus ===");
                 ctx.getSource().getSender().sendMessage("§b📖 /nexus livro - Obter livro de relíquias");
                 ctx.getSource().getSender().sendMessage("§b⚡ /nexus evoluir - Evoluir relíquia");
@@ -251,7 +176,7 @@ public final class ReliquiasNexus extends JavaPlugin implements Listener {
                     sender.sendMessage(Component.text("§a🎯 Menu de missões aberto, escolha a sua missão diária!"));
                     Inventory missoesInv = Bukkit.createInventory(null, 27, Component.text("§5Missões"));
                     List<String> missoes = lang.getStringList("missoes.lista");
-                    if (missoes == null || missoes.isEmpty()) {
+                    if (missoes.isEmpty()) {
                         player.sendMessage("§c❌ Não há missões disponíveis no momento.");
                         return Command.SINGLE_SUCCESS;
                     }
@@ -804,11 +729,11 @@ public final class ReliquiasNexus extends JavaPlugin implements Listener {
                 .then(Commands.literal("pedir")
                         .executes(ctx -> {
                             final Player player = (Player) ctx.getSource().getExecutor();
+                            if(player==null)return Command.SINGLE_SUCCESS;
                             if (emprestimos.containsKey(player.getUniqueId())) {
                                 player.sendMessage("§c❌ Você já tem um empréstimo pendente!");
                                 return Command.SINGLE_SUCCESS;
                             }
-
                             player.sendMessage("§6🏦 Qual banco você quer pedir empréstimo?");
                             player.sendMessage("§a📋 Bancos disponíveis:");
 
