@@ -55,7 +55,9 @@ public enum NexusKeys {
     LADRAO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"ladrao")),
     MISSAOLADRAO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_ladrao")),
     DOMADOR(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"domador")),
-    MISSAODOMADOR(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_domador"));
+    MISSAODOMADOR(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_domador")),
+    COZINHEIRO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"cozinheiro")),
+    MISSAOCOZINHEIRO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_cozinheiro"));
     public final NamespacedKey key;
     NexusKeys(NamespacedKey nexus) {
         key = nexus;
@@ -83,6 +85,7 @@ public enum NexusKeys {
             case "mago" -> MAGO.key;
             case "ladrao" -> LADRAO.key;
             case "domador" -> DOMADOR.key;
+            case "cozinheiro" -> COZINHEIRO.key;
             default -> null;
         };
     }
@@ -108,6 +111,7 @@ public enum NexusKeys {
         keys.add(MAGO.key);
         keys.add(LADRAO.key);
         keys.add(DOMADOR.key);
+        keys.add(COZINHEIRO.key);
         return keys;
     }
 }

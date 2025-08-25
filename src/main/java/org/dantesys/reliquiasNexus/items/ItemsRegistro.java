@@ -39,6 +39,7 @@ public class ItemsRegistro {
     public static Nexus mago;
     public static Nexus ladrao;
     public static Nexus domador;
+    public static Nexus cozinheiro;
     public static Nexus livro;
     private static final List<Nexus> reliquias = new ArrayList<>();
     public static void init(){
@@ -82,6 +83,8 @@ public class ItemsRegistro {
         reliquias.add(ladrao);
         createDomador();
         reliquias.add(domador);
+        createCozinheiro();
+        reliquias.add(cozinheiro);
         createLivro();
     }
     private static void createGuerreiro(){
@@ -328,6 +331,18 @@ public class ItemsRegistro {
         item.setItemMeta(meta);
         domador = new Nexus(item,"domador");
     }
+    private static void createCozinheiro(){
+        ItemStack item = new ItemStack(Material.NETHERITE_SWORD,1);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Nexus do Cozinheiro"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"cozinheiro");
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
+        item.setItemMeta(meta);
+        cozinheiro = new Nexus(item,"cozinheiro");
+    }
     private static void createLivro(){
         ItemStack item = new ItemStack(Material.WRITTEN_BOOK,1);
         BookMeta meta = (BookMeta) item.getItemMeta();
@@ -372,6 +387,7 @@ public class ItemsRegistro {
             case "mago" -> mago;
             case "ladrao" -> ladrao;
             case "domador" -> domador;
+            case "cozinheiro" -> cozinheiro;
             default -> null;
         };
     }

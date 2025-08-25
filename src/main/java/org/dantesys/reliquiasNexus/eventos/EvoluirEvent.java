@@ -19,6 +19,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.BundleMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.components.FoodComponent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
@@ -163,6 +164,11 @@ public class EvoluirEvent implements Listener {
                 dataPlayer.set(MISSAODOMADOR.key, PersistentDataType.INTEGER, 0);
                 dataPlayer.set(DOMADOR.key,PersistentDataType.INTEGER,levelAtual+1);
                 player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE).setBaseValue(3+levelAtual);
+            }
+            case "cozinheiro" -> {
+                dataPlayer.set(MISSAOCOZINHEIRO.key, PersistentDataType.INTEGER, 0);
+                dataPlayer.set(COZINHEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20+(levelAtual/4));
             }
         }
     }
@@ -475,8 +481,55 @@ public class EvoluirEvent implements Listener {
                     condicao=condicao.replace("<cond>",""+(level-kills));
                 }
             }
+            case "cozinheiro" -> {
+                int kills = player.getPersistentDataContainer().getOrDefault(MISSAOCOZINHEIRO.key, PersistentDataType.INTEGER, 0);
+                if(kills < level){
+                    condicao = ReliquiasNexus.getLang().getString("condicao.cozinheiro");
+                    if(condicao==null){
+                        condicao="dome mais <cond> animais/pets";
+                    }
+                    condicao=condicao.replace("<cond>",""+(level-kills));
+                }
+            }
         }
         return condicao;
+    }
+    @EventHandler
+    public void onPlayerEat(PlayerItemConsumeEvent event) {
+        Player player = event.getPlayer();
+        ItemStack comida = event.getItem();
+        PlayerInventory inv = player.getInventory();
+        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+        for (int i = 0; i <= 8; i++) {
+            ItemStack stack = inv.getItem(i);
+            if(stack!=null && stack.getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)){
+                String nome = stack.getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING);
+                if (nome != null && !nome.isBlank()) {
+                    Nexus item = ItemsRegistro.getFromNome(nome);
+                    if(item!=null){
+                        if(item.getNome().equals("cozineiro")){
+                            if (comida.getType().isEdible()
+                                    && comida.getType() != Material.POTION
+                                    && comida.getType() != Material.MILK_BUCKET) {
+
+                                // Recupera os dados da comida
+                                FoodComponent foodData = comida.getItemMeta().getFood();
+                                if (foodData != null) {
+                                    int hunger = foodData.getNutrition(); // quantidade de fome (meio pernil = 1)
+                                    float saturation = foodData.getSaturation(); // saturação base
+                                    player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION,hunger*20,(int) saturation));
+                                    int comidas = dataPlayer.getOrDefault(MISSAOCOZINHEIRO.key, PersistentDataType.INTEGER, 0);
+                                    int level = dataPlayer.getOrDefault(COZINHEIRO.key,PersistentDataType.INTEGER,1);
+                                    comidas++;
+                                    dataPlayer.set(MISSAOCOZINHEIRO.key,PersistentDataType.INTEGER,comidas);
+                                    tentarEvoluir(player,item.getItem(level),level,getSlotOfItem(player,stack));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
     @EventHandler
     public void pescar(FishHookStateChangeEvent event){
