@@ -57,7 +57,13 @@ public enum NexusKeys {
     DOMADOR(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"domador")),
     MISSAODOMADOR(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_domador")),
     COZINHEIRO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"cozinheiro")),
-    MISSAOCOZINHEIRO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_cozinheiro"));
+    MISSAOCOZINHEIRO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_cozinheiro")),
+    CONSTRUTOR(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"construtor")),
+    MISSAOCONSTRUTOR(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_construtor")),
+    ABISSAL(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"abissal")),
+    MISSAOABISSAL(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_abissal")),
+    CRONOSOMBRA(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"cronosombra")),
+    MISSAOCRONOSOMBRA(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_cronosombra"));
     public final NamespacedKey key;
     NexusKeys(NamespacedKey nexus) {
         key = nexus;
@@ -86,6 +92,9 @@ public enum NexusKeys {
             case "ladrao" -> LADRAO.key;
             case "domador" -> DOMADOR.key;
             case "cozinheiro" -> COZINHEIRO.key;
+            case "construtor" -> CONSTRUTOR.key;
+            case "abissal" -> ABISSAL.key;
+            case "cronosombra" -> CRONOSOMBRA.key;
             default -> null;
         };
     }
@@ -112,6 +121,9 @@ public enum NexusKeys {
         keys.add(LADRAO.key);
         keys.add(DOMADOR.key);
         keys.add(COZINHEIRO.key);
+        keys.add(CONSTRUTOR.key);
+        keys.add(ABISSAL.key);
+        keys.add(CRONOSOMBRA.key);
         return keys;
     }
 }

@@ -4,24 +4,37 @@ import com.destroystokyo.paper.event.server.ServerTickEndEvent;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.dantesys.reliquiasNexus.SpeciaisPassivas.*;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
+import org.dantesys.reliquiasNexus.util.BlocoUtils;
+import org.dantesys.reliquiasNexus.util.CoresUtils;
+
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 
@@ -139,6 +152,23 @@ public class PassivaEvent implements Listener {
                         stack.setItemMeta(meta);
                         break;
                     }
+                    if (nome != null && nome.equals("construtor")) {
+                        ItemStack corante = player.getInventory().getItemInOffHand();
+                        DyeColor cor = CoresUtils.getDyeColorFromItem(corante);
+                        ItemMeta meta = stack.getItemMeta();
+                        NamespacedKey key = Material.MACE.getKey();
+                        switch (i){
+                            case 0 -> key = BlocoUtils.getBlocoColorido(Material.WHITE_CONCRETE,cor).getKey();
+                            case 1 -> key = BlocoUtils.getBlocoColorido(Material.GLASS,cor).getKey();
+                            case 2 -> key = BlocoUtils.getBlocoColorido(Material.GLASS_PANE,cor).getKey();
+                            case 3 -> key = BlocoUtils.getBlocoColorido(Material.TERRACOTTA,cor).getKey();
+                            case 4 -> key = BlocoUtils.getBlocoColorido(Material.WHITE_GLAZED_TERRACOTTA,cor).getKey();
+                            case 5 -> key = BlocoUtils.getBlocoColorido(Material.WHITE_WOOL,cor).getKey();
+                        }
+                        meta.setItemModel(key);
+                        stack.setItemMeta(meta);
+                        break;
+                    }
                 }
             }
         });
@@ -147,13 +177,44 @@ public class PassivaEvent implements Listener {
     public void recuperacaoFenix(EntityDamageEvent event){
         Entity e = event.getEntity();
         if(e instanceof Player player){
-            if(player.getInventory().contains(ItemsRegistro.fenix.getItem(1))){
+            if(temReliquia(player,"fenix")){
                 if(event.getCause().equals(EntityDamageEvent.DamageCause.FIRE) || event.getCause().equals(EntityDamageEvent.DamageCause.FIRE_TICK)){
                     player.heal(2d);
                     event.setCancelled(true);
                 }
             }
+            if(temReliquia(player,"cronosombra")){
+                for(Entity ent:player.getNearbyEntities(5,5,5)){
+                    if(ent instanceof LivingEntity vivo && vivo!=player){
+                        vivo.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS,200,1));
+                    }
+                }
+            }
+            if(temReliquia(player,"abissal")){
+                int chance = ThreadLocalRandom.current().nextInt(1,101);
+                if(chance>90){
+                    player.heal(event.getDamage()*2);
+                    event.setDamage(0d);
+                }else if(chance>80){
+                    player.heal(event.getDamage());
+                    event.setDamage(0d);
+                }else if(chance>70){
+                    player.heal(event.getDamage()/2);
+                    event.setDamage(0d);
+                }else if(chance>60){
+                    event.setDamage(0d);
+                }else if(chance>50){
+                    event.setDamage(event.getDamage()/4);
+                }else if(chance>40){
+                    event.setDamage(event.getDamage()/2);
+                }
+            }
         }
+    }
+    private boolean temReliquia(Player player,String nome) {
+        return Arrays.stream(player.getInventory().getContents())
+                .filter(Objects::nonNull)
+                .anyMatch(item -> item.getPersistentDataContainer().getOrDefault(NEXUS.key,PersistentDataType.STRING,"").equals(nome));
     }
     private void aplicaEfeito(PersistentDataContainerView data, Player player){
         if(data.has(NEXUS.key,PersistentDataType.STRING)){
@@ -237,6 +298,59 @@ public class PassivaEvent implements Listener {
                         Ladrao.getPassivabyLevel(level,player);
                     }
                 }
+            }
+        }
+    }
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        ItemStack stack = player.getInventory().getItemInMainHand();
+        // Checa se é a relíquia do Construtor
+        if (stack.getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)){
+            String nome = stack.getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING);
+            if (nome != null && nome.equals("construtor")) {
+                int slot = player.getInventory().getHeldItemSlot();
+                // Define slots que podem colocar blocos (ex: 0 a 6)
+                if (slot < 0 || slot > 6) return;
+                // Bloco base que o jogador quer colocar (pode ser definido por slot ou item)
+                ItemStack corante = player.getInventory().getItemInOffHand();
+                DyeColor cor = CoresUtils.getDyeColorFromItem(corante);
+                Material bloco = switch(slot){
+                    case 1 -> BlocoUtils.getBlocoColorido(Material.GLASS,cor);
+                    case 2 -> BlocoUtils.getBlocoColorido(Material.GLASS_PANE,cor);
+                    case 3 -> BlocoUtils.getBlocoColorido(Material.TERRACOTTA,cor);
+                    case 4 -> BlocoUtils.getBlocoColorido(Material.WHITE_GLAZED_TERRACOTTA,cor);
+                    case 5 -> BlocoUtils.getBlocoColorido(Material.WHITE_WOOL,cor);
+                    default -> BlocoUtils.getBlocoColorido(Material.WHITE_CONCRETE,cor);
+                };
+
+                // Local alvo (ponto que o jogador está olhando)
+                Block alvo = event.getClickedBlock();
+                if(alvo==null){
+                    alvo=player.getTargetBlockExact(1);
+                }
+                if(alvo==null)return;
+                Block lugar = alvo.getRelative(event.getBlockFace());
+                ItemStack blocoItem = new ItemStack(bloco); // bloco é o Material escolhido
+
+                BlockPlaceEvent blockPlaceEvent = new BlockPlaceEvent(
+                        lugar,                  // bloco que será colocado
+                        lugar.getState(),        // estado atual
+                        lugar,                   // bloco colocado “do ponto de vista do jogador”
+                        blocoItem,               // item usado
+                        player,                  // jogador
+                        true,                    // canBuild
+                        player.getActiveItemHand()         // mão usada
+                );
+
+                Bukkit.getPluginManager().callEvent(blockPlaceEvent);
+
+                if (!blockPlaceEvent.isCancelled()) {
+                    lugar.setType(bloco); // só coloca se o evento não foi cancelado
+                }
+
+                // Cancela o evento para não quebrar blocos se for clique direito
+                event.setCancelled(true);
             }
         }
     }

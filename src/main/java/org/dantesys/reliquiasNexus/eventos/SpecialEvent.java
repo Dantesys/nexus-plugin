@@ -2,7 +2,6 @@ package org.dantesys.reliquiasNexus.eventos;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.*;
@@ -12,6 +11,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -77,6 +77,9 @@ public class SpecialEvent implements Listener {
                                 mago(player);
                                 event.setCancelled(true);
                             }
+                            case "cozinheiro" -> cozinheiro(player);
+                            case "construtor" -> construtor(player);
+                            case "abissal" -> abissal(player);
                         }
                         if(!item.getNome().equals("mago")){
                             dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,60);
@@ -314,6 +317,16 @@ public class SpecialEvent implements Listener {
         }
         return desc;
     }
+    private void construtor(Player player){
+        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+        int l = dataPlayer.getOrDefault(CONSTRUTOR.key,PersistentDataType.INTEGER,1);
+        Construtor.getSpecialbyLevel(l,player);
+    }
+    private void abissal(Player player){
+        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+        int l = dataPlayer.getOrDefault(ABISSAL.key,PersistentDataType.INTEGER,1);
+        Abissal.getSpecialbyLevel(l,player);
+    }
     private void barbaro(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(BARBARO.key,PersistentDataType.INTEGER,1);
@@ -398,6 +411,11 @@ public class SpecialEvent implements Listener {
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(DOMADOR.key,PersistentDataType.INTEGER,1);
         Domador.getSpecialbyLevel(l,player);
+    }
+    private void cozinheiro(Player player){
+        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+        int l = dataPlayer.getOrDefault(COZINHEIRO.key,PersistentDataType.INTEGER,1);
+        Cozinheiro.getSpecialbyLevel(l,player);
     }
     private void mago(Player player){
         PlayerInventory inv = player.getInventory();
@@ -564,4 +582,16 @@ public class SpecialEvent implements Listener {
             }
         }
     }
+    @EventHandler
+    public void onPlayerEatBolo(PlayerItemConsumeEvent event) {
+        ItemStack item = event.getItem();
+        Player player = event.getPlayer();
+        if (item.getType() == Material.CAKE && item.getPersistentDataContainer().has(new NamespacedKey("nexus","bolo_do_caos"), PersistentDataType.BOOLEAN)) {
+            player.setFoodLevel(20);
+            player.setSaturation(20f);
+            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_BURP, 2f, 1f);
+            player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, player.getLocation(), 50, 1,1,1,0.2);
+        }
+    }
+
 }

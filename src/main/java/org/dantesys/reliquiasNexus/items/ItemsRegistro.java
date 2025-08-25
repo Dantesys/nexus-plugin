@@ -40,6 +40,9 @@ public class ItemsRegistro {
     public static Nexus ladrao;
     public static Nexus domador;
     public static Nexus cozinheiro;
+    public static Nexus construtor;
+    public static Nexus abissal;
+    public static Nexus cronosombra;
     public static Nexus livro;
     private static final List<Nexus> reliquias = new ArrayList<>();
     public static void init(){
@@ -85,6 +88,12 @@ public class ItemsRegistro {
         reliquias.add(domador);
         createCozinheiro();
         reliquias.add(cozinheiro);
+        createConstrutor();
+        reliquias.add(construtor);
+        createAbissal();
+        reliquias.add(abissal);
+        createCronosombra();
+        reliquias.add(cronosombra);
         createLivro();
     }
     private static void createGuerreiro(){
@@ -343,6 +352,43 @@ public class ItemsRegistro {
         item.setItemMeta(meta);
         cozinheiro = new Nexus(item,"cozinheiro");
     }
+    private static void createConstrutor(){
+        ItemStack item = new ItemStack(Material.MACE,1);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Nexus do Construtor"));
+        meta.setItemModel(Material.NETHERITE_SHOVEL.getKey());
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"construtor");
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
+        item.setItemMeta(meta);
+        construtor = new Nexus(item,"construtor");
+    }
+    private static void createAbissal(){
+        ItemStack item = new ItemStack(Material.NETHER_STAR,1);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Nexus do Abissal"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"abissal");
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
+        item.setItemMeta(meta);
+        abissal = new Nexus(item,"abissal");
+    }
+    private static void createCronosombra(){
+        ItemStack item = new ItemStack(Material.CLOCK,1);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Nexus da Cronosombra"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"cronosombra");
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
+        item.setItemMeta(meta);
+        cronosombra = new Nexus(item,"cronosombra");
+    }
     private static void createLivro(){
         ItemStack item = new ItemStack(Material.WRITTEN_BOOK,1);
         BookMeta meta = (BookMeta) item.getItemMeta();
@@ -388,6 +434,9 @@ public class ItemsRegistro {
             case "ladrao" -> ladrao;
             case "domador" -> domador;
             case "cozinheiro" -> cozinheiro;
+            case "construtor" -> construtor;
+            case "abissal" -> abissal;
+            case "cronosombra" -> cronosombra;
             default -> null;
         };
     }

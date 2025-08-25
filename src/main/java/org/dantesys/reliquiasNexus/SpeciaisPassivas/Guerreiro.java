@@ -46,11 +46,14 @@ public class Guerreiro {
         final double finalDamage = level;
         final Location location = player.getLocation();
         final Vector direction = location.getDirection().normalize();
+        Location destino = player.getLocation().add(direction.multiply(5));
+        destino.setYaw(player.getLocation().getYaw());
+        destino.setPitch(player.getLocation().getPitch());
         final double[] tp = {0};
         final List<LivingEntity> atingidos = new ArrayList<>();
         Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 1,
                 ()->{
-                },()-> player.teleport(location),(t)->{
+                },()-> player.teleport(destino),(t)->{
             tp[0] = tp[0]+3.4;
             double x = direction.getX()*tp[0];
             double y = direction.getY()*tp[0]+1.4;

@@ -12,10 +12,12 @@ import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.BundleMeta;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -26,6 +28,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
+import org.dantesys.reliquiasNexus.SpeciaisPassivas.Cronosombra;
 import org.dantesys.reliquiasNexus.SpeciaisPassivas.Espiao;
 import org.dantesys.reliquiasNexus.SpeciaisPassivas.Flash;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
@@ -169,6 +172,11 @@ public class EvoluirEvent implements Listener {
                 dataPlayer.set(MISSAOCOZINHEIRO.key, PersistentDataType.INTEGER, 0);
                 dataPlayer.set(COZINHEIRO.key,PersistentDataType.INTEGER,levelAtual+1);
                 player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20+(levelAtual/4));
+            }
+            case "construtor" -> {
+                dataPlayer.set(MISSAOCONSTRUTOR.key, PersistentDataType.INTEGER, 0);
+                dataPlayer.set(CONSTRUTOR.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE).setBaseValue(4.5+levelAtual);
             }
         }
     }
@@ -486,13 +494,93 @@ public class EvoluirEvent implements Listener {
                 if(kills < level){
                     condicao = ReliquiasNexus.getLang().getString("condicao.cozinheiro");
                     if(condicao==null){
-                        condicao="dome mais <cond> animais/pets";
+                        condicao="se alimente mais <cond> vezes";
+                    }
+                    condicao=condicao.replace("<cond>",""+(level-kills));
+                }
+            }
+            case "construtor" -> {
+                int kills = player.getPersistentDataContainer().getOrDefault(MISSAOCONSTRUTOR.key, PersistentDataType.INTEGER, 0);
+                if(kills < level){
+                    condicao = ReliquiasNexus.getLang().getString("condicao.construtor");
+                    if(condicao==null){
+                        condicao="coloque mais <cond> blocos";
+                    }
+                    condicao=condicao.replace("<cond>",""+(level-kills));
+                }
+            }
+            case "abissal" -> {
+                int kills = player.getPersistentDataContainer().getOrDefault(MISSAOABISSAL.key, PersistentDataType.INTEGER, 0);
+                if(kills < level){
+                    condicao = ReliquiasNexus.getLang().getString("condicao.abissal");
+                    if(condicao==null){
+                        condicao="se teleporte com enderpearl mais <cond> vezes";
+                    }
+                    condicao=condicao.replace("<cond>",""+(level-kills));
+                }
+            }
+            case "cronosombra" -> {
+                int kills = player.getPersistentDataContainer().getOrDefault(MISSAOCRONOSOMBRA.key, PersistentDataType.INTEGER, 0);
+                if(kills < level){
+                    condicao = ReliquiasNexus.getLang().getString("condicao.abissal");
+                    if(condicao==null){
+                        condicao="use a habilidade mais <cond> vezes";
                     }
                     condicao=condicao.replace("<cond>",""+(level-kills));
                 }
             }
         }
         return condicao;
+    }
+    @EventHandler
+    public void teleporteEnderPearl(PlayerTeleportEvent event){
+        if(event.getCause().equals(PlayerTeleportEvent.TeleportCause.ENDER_PEARL)){
+            Player player = event.getPlayer();
+            PlayerInventory inv = player.getInventory();
+            PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+            for (int i = 0; i <= 8; i++) {
+                ItemStack stack = inv.getItem(i);
+                if(stack!=null && stack.getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)){
+                    String nome = stack.getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING);
+                    if (nome != null && !nome.isBlank()) {
+                        Nexus item = ItemsRegistro.getFromNome(nome);
+                        if(item!=null){
+                            if(item.getNome().equals("abissal")){
+                                int level = dataPlayer.getOrDefault(ABISSAL.key,PersistentDataType.INTEGER,1);
+                                int missao = dataPlayer.getOrDefault(MISSAOABISSAL.key,PersistentDataType.INTEGER,1);
+                                missao++;
+                                dataPlayer.set(MISSAOABISSAL.key,PersistentDataType.INTEGER,missao);
+                                tentarEvoluir(player,item.getItem(level),level,getSlotOfItem(player,stack));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    @EventHandler
+    public void onBlockPlace(BlockPlaceEvent event){
+        Player player = event.getPlayer();
+        PlayerInventory inv = player.getInventory();
+        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+        for (int i = 0; i <= 8; i++) {
+            ItemStack stack = inv.getItem(i);
+            if(stack!=null && stack.getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)){
+                String nome = stack.getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING);
+                if (nome != null && !nome.isBlank()) {
+                    Nexus item = ItemsRegistro.getFromNome(nome);
+                    if(item!=null){
+                        if(item.getNome().equals("construtor")){
+                            int level = dataPlayer.getOrDefault(CONSTRUTOR.key,PersistentDataType.INTEGER,1);
+                            int missao = dataPlayer.getOrDefault(MISSAOCONSTRUTOR.key,PersistentDataType.INTEGER,1);
+                            missao++;
+                            dataPlayer.set(MISSAOCONSTRUTOR.key,PersistentDataType.INTEGER,missao);
+                            tentarEvoluir(player,item.getItem(level),level,getSlotOfItem(player,stack));
+                        }
+                    }
+                }
+            }
+        }
     }
     @EventHandler
     public void onPlayerEat(PlayerItemConsumeEvent event) {
@@ -618,6 +706,15 @@ public class EvoluirEvent implements Listener {
                                 Espiao.getSpecialbyLevel(l,player);
                                 dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,60);
                                 dataPlayer.set(MISSAOESPIAO.key,PersistentDataType.INTEGER,usos);
+                                tentarEvoluir(player,stack,l,getSlotOfItem(player,stack));
+                            }
+                            if(item.getNome().equals("cronosombra")){
+                                int l=dataPlayer.getOrDefault(CRONOSOMBRA.key,PersistentDataType.INTEGER,1);
+                                int usos=dataPlayer.getOrDefault(MISSAOCRONOSOMBRA.key,PersistentDataType.INTEGER,0);
+                                usos++;
+                                Cronosombra.getSpecialbyLevel(l,player);
+                                dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,60);
+                                dataPlayer.set(MISSAOCRONOSOMBRA.key,PersistentDataType.INTEGER,usos);
                                 tentarEvoluir(player,stack,l,getSlotOfItem(player,stack));
                             }
                         }
