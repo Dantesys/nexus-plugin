@@ -1,7 +1,10 @@
 package org.dantesys.reliquiasNexus.eventos;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.*;
@@ -16,19 +19,23 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
 import org.dantesys.reliquiasNexus.SpeciaisPassivas.*;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
 import org.dantesys.reliquiasNexus.util.EntityToEgg;
+import org.dantesys.reliquiasNexus.util.NexusKeys;
 
 import java.util.*;
 
+import static net.kyori.adventure.text.Component.text;
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 
 public class SpecialEvent implements Listener {
@@ -36,6 +43,250 @@ public class SpecialEvent implements Listener {
     public SpecialEvent(ReliquiasNexus plugin){
         this.plugin=plugin;
     }
+
+    public void gerarMissaoEspecial(Player player) {
+        PersistentDataContainer pdc = player.getPersistentDataContainer();
+        if (pdc.has(MISSAO_TIPO.key, PersistentDataType.STRING)) {
+            player.sendMessage(Component.text("❌ §cVocê já tem uma missão ativa!")
+                    .color(NamedTextColor.RED));
+            return;
+        }
+
+        Random random = new Random();
+        int tipoMissao = random.nextInt(5);
+        String missionType;
+        int goal;
+        int durationMinutes;
+
+        Component mensagemMissao;
+
+        switch (tipoMissao) {
+            case 0:
+                missionType = "COLETA";
+                goal = 64;
+                durationMinutes = 10;
+                mensagemMissao = text()
+                        .append(text("\n🎯 §6§lMISSÃO ESPECIAL: COLETA RÁPIDA §6§l🎯\n")
+                                .color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD))
+                        .append(text("§7Colete 64 itens de madeira em 10 minutos!\n")
+                                .color(NamedTextColor.GRAY))
+                        .append(text("§aRecompensa: §e+5000 XP e 1 Relíquia Aleatória\n")
+                                .color(NamedTextColor.GREEN))
+                        .append(text("§cFalta: §610:00")
+                                .color(NamedTextColor.RED))
+                        .build();
+                break;
+            case 1:
+                missionType = "COMBATE";
+                goal = 20;
+                durationMinutes = 15;
+                mensagemMissao = text()
+                        .append(text("\n⚔️ §6§lMISSÃO ESPECIAL: CAÇA AOS MONSTROS §6§l⚔️\n")
+                                .color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD))
+                        .append(text("§7Derrote 20 monstros em 15 minutos!\n")
+                                .color(NamedTextColor.GRAY))
+                        .append(text("§aRecompensa: §e+8000 XP e 2 Diamantes\n")
+                                .color(NamedTextColor.GREEN))
+                        .append(text("§cFalta: §615:00")
+                                .color(NamedTextColor.RED))
+                        .build();
+                break;
+            case 2:
+                missionType = "EXPLORACAO";
+                goal = 3;
+                durationMinutes = 20;
+                mensagemMissao = text()
+                        .append(text("\n🗺️ §6§lMISSÃO ESPECIAL: EXPLORAÇÃO §6§l🗺️\n")
+                                .color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD))
+                        .append(text("§7Visite 3 biomas diferentes em 20 minutos!\n")
+                                .color(NamedTextColor.GRAY))
+                        .append(text("§aRecompensa: §e+6000 XP e 1 Baú de Recompensas\n")
+                                .color(NamedTextColor.GREEN))
+                        .append(text("§cFalta: §620:00")
+                                .color(NamedTextColor.RED))
+                        .build();
+                break;
+            case 3:
+                missionType = "PESCARIA";
+                goal = 15;
+                durationMinutes = 12;
+                mensagemMissao = text()
+                        .append(text("\n🎣 §6§lMISSÃO ESPECIAL: PESCARIA §6§l🎣\n")
+                                .color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD))
+                        .append(text("§7Pesque 15 itens em 12 minutos!\n")
+                                .color(NamedTextColor.GRAY))
+                        .append(text("§aRecompensa: §e+4000 XP e 1 Encantamento Raro\n")
+                                .color(NamedTextColor.GREEN))
+                        .append(text("§cFalta: §612:00")
+                                .color(NamedTextColor.RED))
+                        .build();
+                break;
+            case 4:
+                missionType = "MINERACAO";
+                goal = 32;
+                durationMinutes = 25;
+                mensagemMissao = text()
+                        .append(text("\n⛏️ §6§lMISSÃO ESPECIAL: MINERAÇÃO §6§l⛏️\n")
+                                .color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD))
+                        .append(text("§7Minere 32 minérios de diamante em 25 minutos!\n")
+                                .color(NamedTextColor.GRAY))
+                        .append(text("§aRecompensa: §e+10000 XP e 1 Relíquia Evoluída\n")
+                                .color(NamedTextColor.GREEN))
+                        .append(text("§cFalta: §625:00")
+                                .color(NamedTextColor.RED))
+                        .build();
+                break;
+            default:
+                return;
+        }
+
+        pdc.set(MISSAO_TIPO.key, PersistentDataType.STRING, missionType);
+        pdc.set(MISSAO_META.key, PersistentDataType.INTEGER, goal);
+        pdc.set(MISSAO_PROGRESO.key, PersistentDataType.INTEGER, 0);
+        pdc.set(MISSAO_ENDTIME.key, PersistentDataType.LONG, System.currentTimeMillis() + (long) durationMinutes * 60 * 1000);
+
+        player.sendMessage(mensagemMissao);
+        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+        player.getWorld().spawnParticle(Particle.FIREWORK, player.getLocation(), 50, 0.5, 1, 0.5, 0.1);
+        player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation(), 30, 0.5, 1, 0.5, 0.05);
+
+        // Agendar uma tarefa para atualizar o timer da missão
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                PersistentDataContainer pdc = player.getPersistentDataContainer();
+                if (pdc.has(MISSAO_TIPO.key, PersistentDataType.STRING)) {
+                    long remainingTime = (pdc.get(MISSAO_ENDTIME.key, PersistentDataType.LONG) - System.currentTimeMillis()) / 1000;
+                    if (remainingTime <= 0) {
+                        player.sendMessage(Component.text("❌ §cO tempo da sua missão especial acabou!")
+                                .color(NamedTextColor.RED));
+                        finalizarMissao(player, false); // Finaliza sem recompensa
+                        this.cancel();
+                    }
+                    // Opcional: Enviar mensagem com o tempo restante
+                    // long minutes = remainingTime / 60;
+                    // long seconds = remainingTime % 60;
+                    // player.sendActionBar(Component.text("⏰ Tempo Restante: " + minutes + ":" + (seconds < 10 ? "0" : "") + seconds));
+                } else {
+                    this.cancel();
+                }
+            }
+        }.runTaskTimer(plugin, 0L, 20L); // Executa a cada segundo
+    }
+
+    // Método de operador para finalizar a missão
+    public void finalizarMissao(Player player) {
+        finalizarMissao(player, true);
+    }
+
+    private void finalizarMissao(Player player, boolean giveReward) {
+        PersistentDataContainer pdc = player.getPersistentDataContainer();
+        if (!pdc.has(MISSAO_TIPO.key, PersistentDataType.STRING)) {
+            player.sendMessage(Component.text("❌ §cVocê não tem uma missão ativa para ser finalizada!")
+                    .color(NamedTextColor.RED));
+            return;
+        }
+
+        if (giveReward) {
+            // Recompensa: Relíquia Ceifador
+            Nexus ceifador = ItemsRegistro.getFromNome("ceifador");
+            if (ceifador != null) {
+                ItemStack itemCeifador = ceifador.getItem(1);
+                ItemMeta meta = itemCeifador.getItemMeta();
+                meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING, player.getUniqueId().toString());
+                itemCeifador.setItemMeta(meta);
+
+                player.getInventory().addItem(itemCeifador);
+                ReliquiasNexus.setConfigSave("nexus.ceifador", player.getUniqueId().toString());
+                plugin.saveConfig();
+            }
+
+            player.sendMessage(Component.text("✅ §aMissão concluída! Você recebeu a relíquia Ceifador!")
+                    .color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD));
+        }
+
+        // Limpa os dados da missão
+        pdc.remove(MISSAO_TIPO.key);
+        pdc.remove(MISSAO_META.key);
+        pdc.remove(MISSAO_PROGRESO.key);
+        pdc.remove(MISSAO_ENDTIME.key);
+    }
+
+    // Evento para rastrear o progresso da missão de combate
+    @EventHandler
+    public void onEntityDeath(org.bukkit.event.entity.EntityDeathEvent event) {
+        LivingEntity entity = event.getEntity();
+        Player killer = entity.getKiller();
+
+        if (killer != null) {
+            PersistentDataContainer pdc = killer.getPersistentDataContainer();
+            if (pdc.has(MISSAO_TIPO.key, PersistentDataType.STRING) && pdc.get(MISSAO_TIPO.key, PersistentDataType.STRING).equals("COMBATE")) {
+                int progress = pdc.get(MISSAO_PROGRESO.key, PersistentDataType.INTEGER) + 1;
+                int goal = pdc.get(MISSAO_META.key, PersistentDataType.INTEGER);
+                pdc.set(MISSAO_PROGRESO.key, PersistentDataType.INTEGER, progress);
+
+                killer.sendMessage(Component.text("⚔️ Progresso da Missão: " + progress + "/" + goal)
+                        .color(NamedTextColor.YELLOW));
+                if (progress >= goal) {
+                    finalizarMissao(killer);
+                }
+            }
+        }
+    }
+
+    // Evento para rastrear o progresso da missão de coleta e mineração
+    @EventHandler
+    public void onBlockBreak(org.bukkit.event.block.BlockBreakEvent event) {
+        Player player = event.getPlayer();
+        PersistentDataContainer pdc = player.getPersistentDataContainer();
+
+        if (pdc.has(MISSAO_TIPO.key, PersistentDataType.STRING)) {
+            String missionType = pdc.get(MISSAO_TIPO.key, PersistentDataType.STRING);
+
+            if (missionType.equals("COLETA") && event.getBlock().getType().toString().contains("LOG")) {
+                int progress = pdc.get(MISSAO_PROGRESO.key, PersistentDataType.INTEGER) + 1;
+                int goal = pdc.get(MISSAO_META.key, PersistentDataType.INTEGER);
+                pdc.set(MISSAO_PROGRESO.key, PersistentDataType.INTEGER, progress);
+
+                player.sendMessage(Component.text("🎯 Progresso da Missão: " + progress + "/" + goal)
+                        .color(NamedTextColor.YELLOW));
+                if (progress >= goal) {
+                    finalizarMissao(player);
+                }
+            } else if (missionType.equals("MINERACAO") && event.getBlock().getType() == Material.DIAMOND_ORE) {
+                int progress = pdc.get(MISSAO_PROGRESO.key, PersistentDataType.INTEGER) + 1;
+                int goal = pdc.get(MISSAO_META.key, PersistentDataType.INTEGER);
+                pdc.set(MISSAO_PROGRESO.key, PersistentDataType.INTEGER, progress);
+
+                player.sendMessage(Component.text("⛏️ Progresso da Missão: " + progress + "/" + goal)
+                        .color(NamedTextColor.YELLOW));
+                if (progress >= goal) {
+                    finalizarMissao(player);
+                }
+            }
+        }
+    }
+
+    // Evento para rastrear o progresso da missão de pesca
+    @EventHandler
+    public void onFish(org.bukkit.event.player.PlayerFishEvent event) {
+        Player player = event.getPlayer();
+        PersistentDataContainer pdc = player.getPersistentDataContainer();
+
+        if (event.getState() == org.bukkit.event.player.PlayerFishEvent.State.CAUGHT_FISH && pdc.has(MISSAO_TIPO.key, PersistentDataType.STRING) && pdc.get(MISSAO_TIPO.key, PersistentDataType.STRING).equals("PESCARIA")) {
+            int progress = pdc.get(MISSAO_PROGRESO.key, PersistentDataType.INTEGER) + 1;
+            int goal = pdc.get(MISSAO_META.key, PersistentDataType.INTEGER);
+            pdc.set(MISSAO_PROGRESO.key, PersistentDataType.INTEGER, progress);
+
+            player.sendMessage(Component.text("🎣 Progresso da Missão: " + progress + "/" + goal)
+                    .color(NamedTextColor.YELLOW));
+            if (progress >= goal) {
+                finalizarMissao(player);
+            }
+        }
+    }
+
+    // O restante do seu código original
     @EventHandler
     public void special(PlayerInteractEvent event){
         Player player = event.getPlayer();
@@ -238,31 +489,31 @@ public class SpecialEvent implements Listener {
             }
             case "arqueiro" -> {
                 if(msg==null){
-                    msg="Cria e dispara uma flecha com uma velocidade de uma bala!\nPara evoluir precisa acerta a flecha em monstros ou bosses";
+                    msg="Cria e dispara uma flecha em uma velocidade incrível!\nPara evoluir precisa acertar flechas em monstros ou bosses";
                 }
                 desc="§l§6"+r+" Arqueiro\n§r§0Special (Manual):\n"+msg;
             }
             case "cacador" -> {
                 if(msg==null){
-                    msg="Cria e dispara uma sequencia de flechas!\nPara evoluir precisa acerta a flecha em monstros ou bosses";
+                    msg="Cria e dispara uma sequência de flechas!\nPara evoluir precisa acertar flechas em monstros ou bosses";
                 }
                 desc="§l§6"+r+" Caçador\n§r§0Special (Manual):\n"+msg;
             }
             case "tempestade" -> {
                 if(msg==null){
-                    msg="Cria uma tempestade dee raios a sua volta!\nPara evoluir precisa derrotar Monstros ou Bosses";
+                    msg="Cria uma tempestade de raios ao seu redor!\nPara evoluir precisa derrotar Monstros ou Bosses";
                 }
                 desc="§l§6"+r+" Tempestade\n§r§0Special (Manual):\n"+msg;
             }
             case "mineiro" -> {
                 if(msg==null){
-                    msg="Cria uma onda em area que transforma parte da vida dos enemigos em minerio!\nPara evoluir precisa minerar minerios";
+                    msg="Cria uma onda em área que transforma parte da vida dos inimigos em minério!\nPara evoluir precisa minerar minérios";
                 }
                 desc="§l§6"+r+" Mineiro\n§r§0Special (Manual):\n"+msg;
             }
             case "fenix" -> {
                 if(msg==null){
-                    msg="Cria uma onda de calor que queima os inimigos proximos!\nPara evoluir precisa voar com fogos de artificios";
+                    msg="Cria uma onda de calor que queima os inimigos próximos!\nPara evoluir precisa voar com fogos de artifício";
                 }
                 desc="§l§6"+r+" Fenix\n§r§0Special (Manual):\n"+msg;
             }
@@ -280,13 +531,13 @@ public class SpecialEvent implements Listener {
             }
             case "sculk" -> {
                 if(msg==null){
-                    msg="Cria uma explosão sonica igual a do Warden!\nPara evoluir precisa ser atacado pelo Warden e sobreviver";
+                    msg="Cria uma explosão sônica igual a do Warden!\nPara evoluir precisa ser atacado pelo Warden e sobreviver";
                 }
                 desc="§l§6"+r+" Sculk\n§r§0Special (Manual):\n"+msg;
             }
             case "pescador" -> {
                 if(msg==null){
-                    msg="Cria um peixe a partir da vida no alvo!\nPara evoluir precisa acertar o anzol em animais marinhos";
+                    msg="Cria um peixe a partir da vida do alvo!\nPara evoluir precisa acertar o anzol em animais marinhos";
                 }
                 desc="§l§6"+r+" Pescador\n§r§0Special (Manual):\n"+msg;
             }
@@ -298,22 +549,23 @@ public class SpecialEvent implements Listener {
             }
             case "mago" -> {
                 if(msg==null){
-                    msg="A habilidade pode variar dependendo do slot que ele vai esta!\nPara evoluir precisa beber poções";
+                    msg="A habilidade pode variar dependendo do slot que ele vai estar!\nPara evoluir precisa beber poções";
                 }
                 desc="§l§6"+r+" Mago\n§r§0Special (Manual):\n"+msg;
             }
             case "ladrao" -> {
                 if(msg==null){
-                    msg="Você foge para seu ponto de spawn!\nPara evoluir precisa roubar itens com a reliquia";
+                    msg="Você foge para seu ponto de spawn!\nPara evoluir precisa roubar itens com a relíquia";
                 }
                 desc="§l§6"+r+" Ladrão\n§r§0Special (Manual):\n"+msg;
             }
             case "domador" -> {
                 if(msg==null){
-                    msg="Você cria um lobo companheiro!\nPara evoluir precisa domesticas animais/pets";
+                    msg="Você cria um lobo companheiro!\nPara evoluir precisa domesticar animais/pets";
                 }
                 desc="§l§6"+r+" Domador\n§r§0Special (Manual):\n"+msg;
             }
+            default -> desc="§l§6"+r+" "+nome+"\n§r§0Special: Descrição não disponível";
         }
         return desc;
     }
