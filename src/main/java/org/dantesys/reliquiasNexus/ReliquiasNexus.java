@@ -202,24 +202,14 @@ public final class ReliquiasNexus extends JavaPlugin {
                                         .color(NamedTextColor.GRAY))
                                 .append(Component.text("§7Relíquia: §a" + nome + "\n\n")
                                         .color(NamedTextColor.GRAY))
-                                .append(Component.text("✅ ")
+                                .append(Component.text("✅ ACEITAR ")
                                         .color(NamedTextColor.GREEN)
                                         .clickEvent(ClickEvent.runCommand("/nexus aceitar"))
                                         .hoverEvent(HoverEvent.showText(Component.text("§aClique para aceitar a troca"))))
-                                .append(Component.text("§aACEITAR")
-                                        .color(NamedTextColor.GREEN)
-                                        .clickEvent(ClickEvent.runCommand("/nexus aceitar"))
-                                        .hoverEvent(HoverEvent.showText(Component.text("§aClique para aceitar a troca"))))
-                                .append(Component.text("    "))
-                                .append(Component.text("❌ ")
+                                .append(Component.text("❌ RECUSAR")
                                         .color(NamedTextColor.RED)
                                         .clickEvent(ClickEvent.runCommand("/nexus cancelar"))
                                         .hoverEvent(HoverEvent.showText(Component.text("§cClique para recusar a troca"))))
-                                .append(Component.text("§cRECUSAR")
-                                        .color(NamedTextColor.RED)
-                                        .clickEvent(ClickEvent.runCommand("/nexus cancelar"))
-                                        .hoverEvent(HoverEvent.showText(Component.text("§cClique para recusar a troca"))))
-                                .append(Component.text("\n\n§7Clique nos botões acima para responder"))
                                 .build();
 
                         p.sendMessage(msgRecebido);
@@ -414,6 +404,7 @@ public final class ReliquiasNexus extends JavaPlugin {
                     .append(Component.text("§7➤ §b/nexu dar <jogador> <reliquia> §f- Dar relíquia específica\n"))
                     .append(Component.text("§7➤ §b/nexu remover <jogador> <reliquia> §f- Remover relíquia\n"))
                     .append(Component.text("§7➤ §b/nexu missao <jogador/all> §f- Gerar missão especial\n"))
+                    .append(Component.text("§7➤ §b/nexu finalizarmissao <jogador> §f- Finalizar missão de jogador\n"))
                     .append(Component.text("§7➤ §b/nexu limite <valor> §f- Alterar limite de relíquias\n"))
                     .append(Component.text("§4§l⚡ §c§lNEXU - COMANDOS DE OPERADOR §4§l⚡\n").decorate(TextDecoration.BOLD))
                     .build();
@@ -520,7 +511,12 @@ public final class ReliquiasNexus extends JavaPlugin {
         })));
 
         // Comando dar (operador) - Dar relíquia específica para jogador
-        nexuRoot.then(Commands.literal("dar").then(Commands.argument("jogador", ArgumentTypes.player()).then(Commands.argument("reliquia", StringArgumentType.string()).executes(ctx -> {
+        nexuRoot.then(Commands.literal("dar").then(Commands.argument("jogador", ArgumentTypes.player()).then(Commands.argument("reliquia", StringArgumentType.string()).suggests( (ctx, builder) -> {
+            for (String reliquia : names) {
+                builder.suggest(reliquia);
+            }
+            return builder.buildFuture();
+        }).executes(ctx -> {
             final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogador", PlayerSelectorArgumentResolver.class);
             final Player player = targetResolver.resolve(ctx.getSource()).getFirst();
             final String reliquia = ctx.getArgument("reliquia", String.class);
@@ -558,7 +554,19 @@ public final class ReliquiasNexus extends JavaPlugin {
         }))));
 
         // Comando remover (operador) - Remover relíquia de jogador
-        nexuRoot.then(Commands.literal("remover").then(Commands.argument("jogador", ArgumentTypes.player()).then(Commands.argument("reliquia", StringArgumentType.string()).executes(ctx -> {
+        nexuRoot.then(Commands.literal("remover").then(Commands.argument("jogador", ArgumentTypes.player()).then(Commands.argument("reliquia", StringArgumentType.string()).suggests( (ctx, builder) -> {
+            Player player = ctx.getArgument("jogador", Player.class);
+            if(player != null) {
+                PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+                List<NamespacedKey> keys = NexusKeys.getKeyLevel();
+                for(NamespacedKey k : keys) {
+                    if (dataPlayer.has(k, PersistentDataType.INTEGER)) {
+                        builder.suggest(k.getKey());
+                    }
+                }
+            }
+            return builder.buildFuture();
+        }).executes(ctx -> {
             final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogador", PlayerSelectorArgumentResolver.class);
             final Player player = targetResolver.resolve(ctx.getSource()).getFirst();
             final String reliquia = ctx.getArgument("reliquia", String.class);
@@ -638,6 +646,20 @@ public final class ReliquiasNexus extends JavaPlugin {
                 }
             }
 
+            return Command.SINGLE_SUCCESS;
+        })));
+
+        // Comando para finalizar missão do jogador
+        nexuRoot.then(Commands.literal("finalizarmissao").then(Commands.argument("jogador", ArgumentTypes.player()).executes(ctx -> {
+            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogador", PlayerSelectorArgumentResolver.class);
+            final Player player = targetResolver.resolve(ctx.getSource()).getFirst();
+            final CommandSender sender = ctx.getSource().getSender();
+
+            SpecialEvent specialEvent = new SpecialEvent(this);
+            specialEvent.finalizarMissao(player);
+
+            sender.sendMessage(Component.text("✅ §aMissão de " + player.getName() + " foi finalizada!")
+                    .color(NamedTextColor.GREEN));
             return Command.SINGLE_SUCCESS;
         })));
 
