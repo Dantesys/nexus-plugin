@@ -1,8 +1,9 @@
 package org.dantesys.reliquiasNexus.eventos;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.*;
@@ -20,6 +21,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
 import org.dantesys.reliquiasNexus.SpeciaisPassivas.*;
@@ -29,13 +31,236 @@ import org.dantesys.reliquiasNexus.util.EntityToEgg;
 
 import java.util.*;
 
+import static net.kyori.adventure.text.Component.text;
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 
 public class SpecialEvent implements Listener {
     private final ReliquiasNexus plugin;
+    private static final Map<UUID, Mission> activeMissions = new HashMap<>();
+
     public SpecialEvent(ReliquiasNexus plugin){
-        this.plugin=plugin;
+        this.plugin = plugin;
     }
+
+    // Classe interna para representar uma missão
+    private static class Mission {
+        public String type;
+        public int goal;
+        public int progress;
+        public long endTime;
+
+        public Mission(String type, int goal, int durationMinutes) {
+            this.type = type;
+            this.goal = goal;
+            this.progress = 0;
+            this.endTime = System.currentTimeMillis() + (long) durationMinutes * 60 * 1000;
+        }
+
+        public long getRemainingTime() {
+            return (endTime - System.currentTimeMillis()) / 1000;
+        }
+    }
+
+    public void gerarMissaoEspecial(Player player) {
+        if (activeMissions.containsKey(player.getUniqueId())) {
+            player.sendMessage(Component.text("❌ §cVocê já tem uma missão ativa!")
+                    .color(NamedTextColor.RED));
+            return;
+        }
+
+        Random random = new Random();
+        int tipoMissao = random.nextInt(5);
+        String missionType;
+        int goal;
+        int durationMinutes;
+
+        Component mensagemMissao;
+
+        switch (tipoMissao) {
+            case 0:
+                missionType = "COLETA";
+                goal = 64;
+                durationMinutes = 10;
+                mensagemMissao = text()
+                        .append(text("\n🎯 §6§lMISSÃO ESPECIAL: COLETA RÁPIDA §6§l🎯\n")
+                                .color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD))
+                        .append(text("§7Colete 64 itens de madeira em 10 minutos!\n")
+                                .color(NamedTextColor.GRAY))
+                        .append(text("§aRecompensa: §e+5000 XP e 1 Relíquia Aleatória\n")
+                                .color(NamedTextColor.GREEN))
+                        .append(text("§cFalta: §60:10:00")
+                                .color(NamedTextColor.RED))
+                        .build();
+                break;
+            case 1:
+                missionType = "COMBATE";
+                goal = 20;
+                durationMinutes = 15;
+                mensagemMissao = text()
+                        .append(text("\n⚔️ §6§lMISSÃO ESPECIAL: CAÇA AOS MONSTROS §6§l⚔️\n")
+                                .color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD))
+                        .append(text("§7Derrote 20 monstros em 15 minutos!\n")
+                                .color(NamedTextColor.GRAY))
+                        .append(text("§aRecompensa: §e+8000 XP e 2 Diamantes\n")
+                                .color(NamedTextColor.GREEN))
+                        .append(text("§cFalta: §60:15:00")
+                                .color(NamedTextColor.RED))
+                        .build();
+                break;
+            case 2:
+                missionType = "EXPLORACAO";
+                goal = 3;
+                durationMinutes = 20;
+                mensagemMissao = text()
+                        .append(text("\n🗺️ §6§lMISSÃO ESPECIAL: EXPLORAÇÃO §6§l🗺️\n")
+                                .color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD))
+                        .append(text("§7Visite 3 biomas diferentes em 20 minutos!\n")
+                                .color(NamedTextColor.GRAY))
+                        .append(text("§aRecompensa: §e+6000 XP e 1 Baú de Recompensas\n")
+                                .color(NamedTextColor.GREEN))
+                        .append(text("§cFalta: §60:20:00")
+                                .color(NamedTextColor.RED))
+                        .build();
+                break;
+            case 3:
+                missionType = "PESCARIA";
+                goal = 15;
+                durationMinutes = 12;
+                mensagemMissao = text()
+                        .append(text("\n🎣 §6§lMISSÃO ESPECIAL: PESCARIA §6§l🎣\n")
+                                .color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD))
+                        .append(text("§7Pesque 15 itens em 12 minutos!\n")
+                                .color(NamedTextColor.GRAY))
+                        .append(text("§aRecompensa: §e+4000 XP e 1 Encantamento Raro\n")
+                                .color(NamedTextColor.GREEN))
+                        .append(text("§cFalta: §60:12:00")
+                                .color(NamedTextColor.RED))
+                        .build();
+                break;
+            case 4:
+                missionType = "MINERACAO";
+                goal = 32;
+                durationMinutes = 25;
+                mensagemMissao = text()
+                        .append(text("\n⛏️ §6§lMISSÃO ESPECIAL: MINERAÇÃO §6§l⛏️\n")
+                                .color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD))
+                        .append(text("§7Minere 32 minérios de diamante em 25 minutos!\n")
+                                .color(NamedTextColor.GRAY))
+                        .append(text("§aRecompensa: §e+10000 XP e 1 Relíquia Evoluída\n")
+                                .color(NamedTextColor.GREEN))
+                        .append(text("§cFalta: §60:25:00")
+                                .color(NamedTextColor.RED))
+                        .build();
+                break;
+            default:
+                return;
+        }
+
+        activeMissions.put(player.getUniqueId(), new Mission(missionType, goal, durationMinutes));
+        player.sendMessage(mensagemMissao);
+        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+        player.getWorld().spawnParticle(Particle.FIREWORK, player.getLocation(), 50, 0.5, 1, 0.5, 0.1);
+        player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation(), 30, 0.5, 1, 0.5, 0.05);
+
+        // Agendar uma tarefa para verificar o tempo da missão
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                Mission mission = activeMissions.get(player.getUniqueId());
+                if (mission != null && mission.getRemainingTime() <= 0) {
+                    player.sendMessage(Component.text("❌ §cO tempo da sua missão especial acabou!")
+                            .color(NamedTextColor.RED));
+                    activeMissions.remove(player.getUniqueId());
+                }
+            }
+        }.runTaskLater(plugin, (long) durationMinutes * 60 * 20);
+    }
+
+    // Método para verificar e dar a recompensa da missão
+    private void checkAndRewardMission(Player player, String missionType) {
+        Mission mission = activeMissions.get(player.getUniqueId());
+        if (mission != null && mission.type.equals(missionType) && mission.progress >= mission.goal) {
+
+            // Recompensa: Relíquia Ceifador
+            Nexus ceifador = ItemsRegistro.getFromNome("ceifador");
+            if (ceifador != null) {
+                ItemStack itemCeifador = ceifador.getItem(1);
+                player.getInventory().addItem(itemCeifador);
+
+                // Atualiza o dono no config
+                ReliquiasNexus.setConfigSave("nexus.ceifador", player.getUniqueId().toString());
+                plugin.saveConfig(); // CORRIGIDO: usa a instância do plugin para salvar o config
+            }
+
+            player.sendMessage(Component.text("✅ §aMissão concluída! Você recebeu a relíquia Ceifador!")
+                    .color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD));
+            activeMissions.remove(player.getUniqueId());
+        }
+    }
+
+    // Evento para rastrear o progresso da missão de combate
+    @EventHandler
+    public void onEntityDeath(org.bukkit.event.entity.EntityDeathEvent event) {
+        LivingEntity entity = event.getEntity();
+        Player killer = entity.getKiller();
+
+        if (killer != null && activeMissions.containsKey(killer.getUniqueId())) {
+            Mission mission = activeMissions.get(killer.getUniqueId());
+            if (mission.type.equals("COMBATE")) {
+                mission.progress++;
+                killer.sendMessage(Component.text("⚔️ Progresso da Missão: " + mission.progress + "/" + mission.goal)
+                        .color(NamedTextColor.YELLOW));
+                checkAndRewardMission(killer, "COMBATE");
+            }
+        }
+    }
+
+    // Evento para rastrear o progresso da missão de coleta
+    @EventHandler
+    public void onBlockBreak(org.bukkit.event.block.BlockBreakEvent event) {
+        Player player = event.getPlayer();
+        if (activeMissions.containsKey(player.getUniqueId())) {
+            Mission mission = activeMissions.get(player.getUniqueId());
+            if (mission.type.equals("COLETA") && event.getBlock().getType().toString().contains("LOG")) {
+                mission.progress++;
+                player.sendMessage(Component.text("🎯 Progresso da Missão: " + mission.progress + "/" + mission.goal)
+                        .color(NamedTextColor.YELLOW));
+                checkAndRewardMission(player, "COLETA");
+            }
+        }
+    }
+
+    // Evento para rastrear o progresso da missão de mineração
+    @EventHandler
+    public void onMining(org.bukkit.event.block.BlockBreakEvent event) {
+        Player player = event.getPlayer();
+        if (activeMissions.containsKey(player.getUniqueId())) {
+            Mission mission = activeMissions.get(player.getUniqueId());
+            if (mission.type.equals("MINERACAO") && event.getBlock().getType() == Material.DIAMOND_ORE) {
+                mission.progress++;
+                player.sendMessage(Component.text("⛏️ Progresso da Missão: " + mission.progress + "/" + mission.goal)
+                        .color(NamedTextColor.YELLOW));
+                checkAndRewardMission(player, "MINERACAO");
+            }
+        }
+    }
+
+    // Evento para rastrear o progresso da missão de pesca
+    @EventHandler
+    public void onFish(org.bukkit.event.player.PlayerFishEvent event) {
+        Player player = event.getPlayer();
+        if (event.getState() == org.bukkit.event.player.PlayerFishEvent.State.CAUGHT_FISH && activeMissions.containsKey(player.getUniqueId())) {
+            Mission mission = activeMissions.get(player.getUniqueId());
+            if (mission.type.equals("PESCARIA")) {
+                mission.progress++;
+                player.sendMessage(Component.text("🎣 Progresso da Missão: " + mission.progress + "/" + mission.goal)
+                        .color(NamedTextColor.YELLOW));
+                checkAndRewardMission(player, "PESCARIA");
+            }
+        }
+    }
+
+    // O restante do seu código original
     @EventHandler
     public void special(PlayerInteractEvent event){
         Player player = event.getPlayer();
@@ -180,6 +405,13 @@ public class SpecialEvent implements Listener {
             }
         }
     }
+
+    private void domador(Player player) {
+    }
+
+    private void ladrao(Player player) {
+    }
+
     private String getDesc(String nome){
         String desc="";
         String msg=ReliquiasNexus.getLang().getString("livro."+nome);
@@ -235,31 +467,31 @@ public class SpecialEvent implements Listener {
             }
             case "arqueiro" -> {
                 if(msg==null){
-                    msg="Cria e dispara uma flecha com uma velocidade de uma bala!\nPara evoluir precisa acerta a flecha em monstros ou bosses";
+                    msg="Cria e dispara uma flecha em uma velocidade incrível!\nPara evoluir precisa acertar flechas em monstros ou bosses";
                 }
                 desc="§l§6"+r+" Arqueiro\n§r§0Special (Manual):\n"+msg;
             }
             case "cacador" -> {
                 if(msg==null){
-                    msg="Cria e dispara uma sequencia de flechas!\nPara evoluir precisa acerta a flecha em monstros ou bosses";
+                    msg="Cria e dispara uma sequência de flechas!\nPara evoluir precisa acertar flechas em monstros ou bosses";
                 }
                 desc="§l§6"+r+" Caçador\n§r§0Special (Manual):\n"+msg;
             }
             case "tempestade" -> {
                 if(msg==null){
-                    msg="Cria uma tempestade dee raios a sua volta!\nPara evoluir precisa derrotar Monstros ou Bosses";
+                    msg="Cria uma tempestade de raios ao seu redor!\nPara evoluir precisa derrotar Monstros ou Bosses";
                 }
                 desc="§l§6"+r+" Tempestade\n§r§0Special (Manual):\n"+msg;
             }
             case "mineiro" -> {
                 if(msg==null){
-                    msg="Cria uma onda em area que transforma parte da vida dos enemigos em minerio!\nPara evoluir precisa minerar minerios";
+                    msg="Cria uma onda em área que transforma parte da vida dos inimigos em minério!\nPara evoluir precisa minerar minérios";
                 }
                 desc="§l§6"+r+" Mineiro\n§r§0Special (Manual):\n"+msg;
             }
             case "fenix" -> {
                 if(msg==null){
-                    msg="Cria uma onda de calor que queima os inimigos proximos!\nPara evoluir precisa voar com fogos de artificios";
+                    msg="Cria uma onda de calor que queima os inimigos próximos!\nPara evoluir precisa voar com fogos de artifício";
                 }
                 desc="§l§6"+r+" Fenix\n§r§0Special (Manual):\n"+msg;
             }
@@ -277,13 +509,13 @@ public class SpecialEvent implements Listener {
             }
             case "sculk" -> {
                 if(msg==null){
-                    msg="Cria uma explosão sonica igual a do Warden!\nPara evoluir precisa ser atacado pelo Warden e sobreviver";
+                    msg="Cria uma explosão sônica igual a do Warden!\nPara evoluir precisa ser atacado pelo Warden e sobreviver";
                 }
                 desc="§l§6"+r+" Sculk\n§r§0Special (Manual):\n"+msg;
             }
             case "pescador" -> {
                 if(msg==null){
-                    msg="Cria um peixe a partir da vida no alvo!\nPara evoluir precisa acertar o anzol em animais marinhos";
+                    msg="Cria um peixe a partir da vida do alvo!\nPara evoluir precisa acertar o anzol em animais marinhos";
                 }
                 desc="§l§6"+r+" Pescador\n§r§0Special (Manual):\n"+msg;
             }
@@ -295,110 +527,117 @@ public class SpecialEvent implements Listener {
             }
             case "mago" -> {
                 if(msg==null){
-                    msg="A habilidade pode variar dependendo do slot que ele vai esta!\nPara evoluir precisa beber poções";
+                    msg="A habilidade pode variar dependendo do slot que ele vai estar!\nPara evoluir precisa beber poções";
                 }
                 desc="§l§6"+r+" Mago\n§r§0Special (Manual):\n"+msg;
             }
             case "ladrao" -> {
                 if(msg==null){
-                    msg="Você foge para seu ponto de spawn!\nPara evoluir precisa roubar itens com a reliquia";
+                    msg="Você foge para seu ponto de spawn!\nPara evoluir precisa roubar itens com a relíquia";
                 }
                 desc="§l§6"+r+" Ladrão\n§r§0Special (Manual):\n"+msg;
             }
             case "domador" -> {
                 if(msg==null){
-                    msg="Você cria um lobo companheiro!\nPara evoluir precisa domesticas animais/pets";
+                    msg="Você cria um lobo companheiro!\nPara evoluir precisa domesticar animais/pets";
                 }
                 desc="§l§6"+r+" Domador\n§r§0Special (Manual):\n"+msg;
             }
+            default -> desc="§l§6"+r+" "+nome+"\n§r§0Special: Descrição não disponível";
         }
         return desc;
     }
+
     private void barbaro(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(BARBARO.key,PersistentDataType.INTEGER,1);
         Barbaro.getSpecialbyLevel(l,player);
     }
+
     private void ceifador(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(CEIFADOR.key,PersistentDataType.INTEGER,1);
         Ceifador.getSpecialbyLevel(l,player);
     }
+
     private void vida(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(VIDA.key,PersistentDataType.INTEGER,1);
         Vida.getSpecialbyLevel(l,player);
     }
+
     private void fazendeiro(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(FAZENDEIRO.key,PersistentDataType.INTEGER,1);
         Fazendeiro.getSpecialbyLevel(l,player);
     }
+
     private void guerreiro(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(GUERREIRO.key,PersistentDataType.INTEGER,1);
         Guerreiro.getSpecialbyLevel(l,player);
     }
+
     private void mares(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(MARES.key,PersistentDataType.INTEGER,1);
         Mares.getSpecialbyLevel(l,player);
     }
+
     private void arqueiro(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(ARQUEIRO.key,PersistentDataType.INTEGER,1);
         Arqueiro.getSpecialbyLevel(l,player);
     }
+
     private void cacador(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(CACADOR.key,PersistentDataType.INTEGER,1);
         Cacador.getSpecialbyLevel(l,player);
     }
+
     private void tempestade(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(TEMPESTADE.key,PersistentDataType.INTEGER,1);
         Tempestade.getSpecialbyLevel(l,player);
     }
+
     private void mineiro(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(MINEIRO.key,PersistentDataType.INTEGER,1);
         Mineiro.getSpecialbyLevel(l,player);
     }
+
     private void fenix(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(FENIX.key,PersistentDataType.INTEGER,1);
         Fenix.getSpecialbyLevel(l,player);
     }
+
     private void protetor(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l=dataPlayer.getOrDefault(PROTETOR.key,PersistentDataType.INTEGER,1);
         Protetor.getSpecialbyLevel(l,player);
     }
+
     private void hulk(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(HULK.key,PersistentDataType.INTEGER,1);
         Hulk.getSpecialbyLevel(l,player);
     }
+
     private void sculk(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(SCULK.key,PersistentDataType.INTEGER,1);
         Sculk.getSpecialbyLevel(l,player);
     }
+
     private void pescador(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(PESCADOR.key,PersistentDataType.INTEGER,1);
         Pescador.getSpecialbyLevel(l,player);
     }
-    private void ladrao(Player player){
-        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(LADRAO.key,PersistentDataType.INTEGER,1);
-        Ladrao.getSpecialbyLevel(l,player);
-    }
-    private void domador(Player player){
-        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(DOMADOR.key,PersistentDataType.INTEGER,1);
-        Domador.getSpecialbyLevel(l,player);
-    }
+
     private void mago(Player player){
         PlayerInventory inv = player.getInventory();
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
@@ -416,6 +655,7 @@ public class SpecialEvent implements Listener {
         }
         Mago.getSpecialbyLevel(l,player,pos);
     }
+
     @EventHandler
     public void reversao(EntityDamageByEntityEvent event){
         Entity atacado = event.getEntity();
@@ -450,6 +690,7 @@ public class SpecialEvent implements Listener {
             }
         }
     }
+
     @EventHandler
     public void amigo(EntityTargetEvent event){
         Entity alvo = event.getTarget();
@@ -463,6 +704,7 @@ public class SpecialEvent implements Listener {
             }
         }
     }
+
     @EventHandler
     public void acertou(ProjectileHitEvent event){
         if(event.getEntity() instanceof Arrow arrow){
@@ -474,14 +716,13 @@ public class SpecialEvent implements Listener {
             if (arrow.hasMetadata("flecha_gelo")){
                 int level = arrow.getMetadata("flecha_gelo").getFirst().asInt();
                 if (event.getHitEntity() instanceof LivingEntity target) {
-                    int duration = 60 + (20 * level); // 3s base + 1s por level
-                    int amplifier = Math.min(1 + (level / 3), 4); // Slowness aumenta a cada 3 levels até IV
+                    int duration = 60 + (20 * level);
+                    int amplifier = Math.min(1 + (level / 3), 4);
                     target.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, duration, amplifier));
                     target.getWorld().spawnParticle(Particle.SNOWFLAKE, target.getLocation(), 30, 0.5, 1, 0.5);
                     target.getWorld().playSound(target.getLocation(), Sound.BLOCK_GLASS_BREAK, 1, 1);
                     target.setFreezeTicks(20*level);
                 }
-                // Acertou bloco
                 if (event.getHitBlock() != null && event.getHitBlockFace()!=null) {
                     Block block = event.getHitBlock().getRelative(event.getHitBlockFace());
                     if (block.getType() == Material.WATER) {
@@ -490,7 +731,6 @@ public class SpecialEvent implements Listener {
                         block.setType(Material.BLUE_ICE);
                     }
                 }
-
                 arrow.remove();
             }
         }
@@ -527,6 +767,7 @@ public class SpecialEvent implements Listener {
             }
         }
     }
+
     @EventHandler
     public void onPlayerLand(PlayerMoveEvent event) {
         Player player = event.getPlayer();
