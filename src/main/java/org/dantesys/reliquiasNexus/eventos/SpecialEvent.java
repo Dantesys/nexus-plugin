@@ -17,6 +17,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
@@ -28,6 +29,7 @@ import org.dantesys.reliquiasNexus.SpeciaisPassivas.*;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
 import org.dantesys.reliquiasNexus.util.EntityToEgg;
+import org.dantesys.reliquiasNexus.util.NexusKeys;
 
 import java.util.*;
 
@@ -36,33 +38,14 @@ import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 
 public class SpecialEvent implements Listener {
     private final ReliquiasNexus plugin;
-    private static final Map<UUID, Mission> activeMissions = new HashMap<>();
 
     public SpecialEvent(ReliquiasNexus plugin){
         this.plugin = plugin;
     }
 
-    // Classe interna para representar uma missão
-    private static class Mission {
-        public String type;
-        public int goal;
-        public int progress;
-        public long endTime;
-
-        public Mission(String type, int goal, int durationMinutes) {
-            this.type = type;
-            this.goal = goal;
-            this.progress = 0;
-            this.endTime = System.currentTimeMillis() + (long) durationMinutes * 60 * 1000;
-        }
-
-        public long getRemainingTime() {
-            return (endTime - System.currentTimeMillis()) / 1000;
-        }
-    }
-
     public void gerarMissaoEspecial(Player player) {
-        if (activeMissions.containsKey(player.getUniqueId())) {
+        PersistentDataContainer pdc = player.getPersistentDataContainer();
+        if (pdc.has(MISSAO_TIPO.key, PersistentDataType.STRING)) {
             player.sendMessage(Component.text("❌ §cVocê já tem uma missão ativa!")
                     .color(NamedTextColor.RED));
             return;
@@ -88,7 +71,7 @@ public class SpecialEvent implements Listener {
                                 .color(NamedTextColor.GRAY))
                         .append(text("§aRecompensa: §e+5000 XP e 1 Relíquia Aleatória\n")
                                 .color(NamedTextColor.GREEN))
-                        .append(text("§cFalta: §60:10:00")
+                        .append(text("§cFalta: §610:00")
                                 .color(NamedTextColor.RED))
                         .build();
                 break;
@@ -103,7 +86,7 @@ public class SpecialEvent implements Listener {
                                 .color(NamedTextColor.GRAY))
                         .append(text("§aRecompensa: §e+8000 XP e 2 Diamantes\n")
                                 .color(NamedTextColor.GREEN))
-                        .append(text("§cFalta: §60:15:00")
+                        .append(text("§cFalta: §615:00")
                                 .color(NamedTextColor.RED))
                         .build();
                 break;
@@ -118,7 +101,7 @@ public class SpecialEvent implements Listener {
                                 .color(NamedTextColor.GRAY))
                         .append(text("§aRecompensa: §e+6000 XP e 1 Baú de Recompensas\n")
                                 .color(NamedTextColor.GREEN))
-                        .append(text("§cFalta: §60:20:00")
+                        .append(text("§cFalta: §620:00")
                                 .color(NamedTextColor.RED))
                         .build();
                 break;
@@ -133,7 +116,7 @@ public class SpecialEvent implements Listener {
                                 .color(NamedTextColor.GRAY))
                         .append(text("§aRecompensa: §e+4000 XP e 1 Encantamento Raro\n")
                                 .color(NamedTextColor.GREEN))
-                        .append(text("§cFalta: §60:12:00")
+                        .append(text("§cFalta: §612:00")
                                 .color(NamedTextColor.RED))
                         .build();
                 break;
@@ -148,7 +131,7 @@ public class SpecialEvent implements Listener {
                                 .color(NamedTextColor.GRAY))
                         .append(text("§aRecompensa: §e+10000 XP e 1 Relíquia Evoluída\n")
                                 .color(NamedTextColor.GREEN))
-                        .append(text("§cFalta: §60:25:00")
+                        .append(text("§cFalta: §625:00")
                                 .color(NamedTextColor.RED))
                         .build();
                 break;
@@ -156,46 +139,76 @@ public class SpecialEvent implements Listener {
                 return;
         }
 
-        activeMissions.put(player.getUniqueId(), new Mission(missionType, goal, durationMinutes));
+        pdc.set(MISSAO_TIPO.key, PersistentDataType.STRING, missionType);
+        pdc.set(MISSAO_META.key, PersistentDataType.INTEGER, goal);
+        pdc.set(MISSAO_PROGRESO.key, PersistentDataType.INTEGER, 0);
+        pdc.set(MISSAO_ENDTIME.key, PersistentDataType.LONG, System.currentTimeMillis() + (long) durationMinutes * 60 * 1000);
+
         player.sendMessage(mensagemMissao);
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
         player.getWorld().spawnParticle(Particle.FIREWORK, player.getLocation(), 50, 0.5, 1, 0.5, 0.1);
         player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation(), 30, 0.5, 1, 0.5, 0.05);
 
-        // Agendar uma tarefa para verificar o tempo da missão
+        // Agendar uma tarefa para atualizar o timer da missão
         new BukkitRunnable() {
             @Override
             public void run() {
-                Mission mission = activeMissions.get(player.getUniqueId());
-                if (mission != null && mission.getRemainingTime() <= 0) {
-                    player.sendMessage(Component.text("❌ §cO tempo da sua missão especial acabou!")
-                            .color(NamedTextColor.RED));
-                    activeMissions.remove(player.getUniqueId());
+                PersistentDataContainer pdc = player.getPersistentDataContainer();
+                if (pdc.has(MISSAO_TIPO.key, PersistentDataType.STRING)) {
+                    long remainingTime = (pdc.get(MISSAO_ENDTIME.key, PersistentDataType.LONG) - System.currentTimeMillis()) / 1000;
+                    if (remainingTime <= 0) {
+                        player.sendMessage(Component.text("❌ §cO tempo da sua missão especial acabou!")
+                                .color(NamedTextColor.RED));
+                        finalizarMissao(player, false); // Finaliza sem recompensa
+                        this.cancel();
+                    }
+                    // Opcional: Enviar mensagem com o tempo restante
+                    // long minutes = remainingTime / 60;
+                    // long seconds = remainingTime % 60;
+                    // player.sendActionBar(Component.text("⏰ Tempo Restante: " + minutes + ":" + (seconds < 10 ? "0" : "") + seconds));
+                } else {
+                    this.cancel();
                 }
             }
-        }.runTaskLater(plugin, (long) durationMinutes * 60 * 20);
+        }.runTaskTimer(plugin, 0L, 20L); // Executa a cada segundo
     }
 
-    // Método para verificar e dar a recompensa da missão
-    private void checkAndRewardMission(Player player, String missionType) {
-        Mission mission = activeMissions.get(player.getUniqueId());
-        if (mission != null && mission.type.equals(missionType) && mission.progress >= mission.goal) {
+    // Método de operador para finalizar a missão
+    public void finalizarMissao(Player player) {
+        finalizarMissao(player, true);
+    }
 
+    private void finalizarMissao(Player player, boolean giveReward) {
+        PersistentDataContainer pdc = player.getPersistentDataContainer();
+        if (!pdc.has(MISSAO_TIPO.key, PersistentDataType.STRING)) {
+            player.sendMessage(Component.text("❌ §cVocê não tem uma missão ativa para ser finalizada!")
+                    .color(NamedTextColor.RED));
+            return;
+        }
+
+        if (giveReward) {
             // Recompensa: Relíquia Ceifador
             Nexus ceifador = ItemsRegistro.getFromNome("ceifador");
             if (ceifador != null) {
                 ItemStack itemCeifador = ceifador.getItem(1);
-                player.getInventory().addItem(itemCeifador);
+                ItemMeta meta = itemCeifador.getItemMeta();
+                meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING, player.getUniqueId().toString());
+                itemCeifador.setItemMeta(meta);
 
-                // Atualiza o dono no config
+                player.getInventory().addItem(itemCeifador);
                 ReliquiasNexus.setConfigSave("nexus.ceifador", player.getUniqueId().toString());
-                plugin.saveConfig(); // CORRIGIDO: usa a instância do plugin para salvar o config
+                plugin.saveConfig();
             }
 
             player.sendMessage(Component.text("✅ §aMissão concluída! Você recebeu a relíquia Ceifador!")
                     .color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD));
-            activeMissions.remove(player.getUniqueId());
         }
+
+        // Limpa os dados da missão
+        pdc.remove(MISSAO_TIPO.key);
+        pdc.remove(MISSAO_META.key);
+        pdc.remove(MISSAO_PROGRESO.key);
+        pdc.remove(MISSAO_ENDTIME.key);
     }
 
     // Evento para rastrear o progresso da missão de combate
@@ -204,43 +217,51 @@ public class SpecialEvent implements Listener {
         LivingEntity entity = event.getEntity();
         Player killer = entity.getKiller();
 
-        if (killer != null && activeMissions.containsKey(killer.getUniqueId())) {
-            Mission mission = activeMissions.get(killer.getUniqueId());
-            if (mission.type.equals("COMBATE")) {
-                mission.progress++;
-                killer.sendMessage(Component.text("⚔️ Progresso da Missão: " + mission.progress + "/" + mission.goal)
+        if (killer != null) {
+            PersistentDataContainer pdc = killer.getPersistentDataContainer();
+            if (pdc.has(MISSAO_TIPO.key, PersistentDataType.STRING) && pdc.get(MISSAO_TIPO.key, PersistentDataType.STRING).equals("COMBATE")) {
+                int progress = pdc.get(MISSAO_PROGRESO.key, PersistentDataType.INTEGER) + 1;
+                int goal = pdc.get(MISSAO_META.key, PersistentDataType.INTEGER);
+                pdc.set(MISSAO_PROGRESO.key, PersistentDataType.INTEGER, progress);
+
+                killer.sendMessage(Component.text("⚔️ Progresso da Missão: " + progress + "/" + goal)
                         .color(NamedTextColor.YELLOW));
-                checkAndRewardMission(killer, "COMBATE");
+                if (progress >= goal) {
+                    finalizarMissao(killer);
+                }
             }
         }
     }
 
-    // Evento para rastrear o progresso da missão de coleta
+    // Evento para rastrear o progresso da missão de coleta e mineração
     @EventHandler
     public void onBlockBreak(org.bukkit.event.block.BlockBreakEvent event) {
         Player player = event.getPlayer();
-        if (activeMissions.containsKey(player.getUniqueId())) {
-            Mission mission = activeMissions.get(player.getUniqueId());
-            if (mission.type.equals("COLETA") && event.getBlock().getType().toString().contains("LOG")) {
-                mission.progress++;
-                player.sendMessage(Component.text("🎯 Progresso da Missão: " + mission.progress + "/" + mission.goal)
-                        .color(NamedTextColor.YELLOW));
-                checkAndRewardMission(player, "COLETA");
-            }
-        }
-    }
+        PersistentDataContainer pdc = player.getPersistentDataContainer();
 
-    // Evento para rastrear o progresso da missão de mineração
-    @EventHandler
-    public void onMining(org.bukkit.event.block.BlockBreakEvent event) {
-        Player player = event.getPlayer();
-        if (activeMissions.containsKey(player.getUniqueId())) {
-            Mission mission = activeMissions.get(player.getUniqueId());
-            if (mission.type.equals("MINERACAO") && event.getBlock().getType() == Material.DIAMOND_ORE) {
-                mission.progress++;
-                player.sendMessage(Component.text("⛏️ Progresso da Missão: " + mission.progress + "/" + mission.goal)
+        if (pdc.has(MISSAO_TIPO.key, PersistentDataType.STRING)) {
+            String missionType = pdc.get(MISSAO_TIPO.key, PersistentDataType.STRING);
+
+            if (missionType.equals("COLETA") && event.getBlock().getType().toString().contains("LOG")) {
+                int progress = pdc.get(MISSAO_PROGRESO.key, PersistentDataType.INTEGER) + 1;
+                int goal = pdc.get(MISSAO_META.key, PersistentDataType.INTEGER);
+                pdc.set(MISSAO_PROGRESO.key, PersistentDataType.INTEGER, progress);
+
+                player.sendMessage(Component.text("🎯 Progresso da Missão: " + progress + "/" + goal)
                         .color(NamedTextColor.YELLOW));
-                checkAndRewardMission(player, "MINERACAO");
+                if (progress >= goal) {
+                    finalizarMissao(player);
+                }
+            } else if (missionType.equals("MINERACAO") && event.getBlock().getType() == Material.DIAMOND_ORE) {
+                int progress = pdc.get(MISSAO_PROGRESO.key, PersistentDataType.INTEGER) + 1;
+                int goal = pdc.get(MISSAO_META.key, PersistentDataType.INTEGER);
+                pdc.set(MISSAO_PROGRESO.key, PersistentDataType.INTEGER, progress);
+
+                player.sendMessage(Component.text("⛏️ Progresso da Missão: " + progress + "/" + goal)
+                        .color(NamedTextColor.YELLOW));
+                if (progress >= goal) {
+                    finalizarMissao(player);
+                }
             }
         }
     }
@@ -249,13 +270,17 @@ public class SpecialEvent implements Listener {
     @EventHandler
     public void onFish(org.bukkit.event.player.PlayerFishEvent event) {
         Player player = event.getPlayer();
-        if (event.getState() == org.bukkit.event.player.PlayerFishEvent.State.CAUGHT_FISH && activeMissions.containsKey(player.getUniqueId())) {
-            Mission mission = activeMissions.get(player.getUniqueId());
-            if (mission.type.equals("PESCARIA")) {
-                mission.progress++;
-                player.sendMessage(Component.text("🎣 Progresso da Missão: " + mission.progress + "/" + mission.goal)
-                        .color(NamedTextColor.YELLOW));
-                checkAndRewardMission(player, "PESCARIA");
+        PersistentDataContainer pdc = player.getPersistentDataContainer();
+
+        if (event.getState() == org.bukkit.event.player.PlayerFishEvent.State.CAUGHT_FISH && pdc.has(MISSAO_TIPO.key, PersistentDataType.STRING) && pdc.get(MISSAO_TIPO.key, PersistentDataType.STRING).equals("PESCARIA")) {
+            int progress = pdc.get(MISSAO_PROGRESO.key, PersistentDataType.INTEGER) + 1;
+            int goal = pdc.get(MISSAO_META.key, PersistentDataType.INTEGER);
+            pdc.set(MISSAO_PROGRESO.key, PersistentDataType.INTEGER, progress);
+
+            player.sendMessage(Component.text("🎣 Progresso da Missão: " + progress + "/" + goal)
+                    .color(NamedTextColor.YELLOW));
+            if (progress >= goal) {
+                finalizarMissao(player);
             }
         }
     }
@@ -410,6 +435,7 @@ public class SpecialEvent implements Listener {
     }
 
     private void ladrao(Player player) {
+        
     }
 
     private String getDesc(String nome){
