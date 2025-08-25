@@ -57,10 +57,17 @@ public enum NexusKeys {
     DOMADOR(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"domador")),
     MISSAODOMADOR(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_domador")),
     COZINHEIRO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"cozinheiro")),
-    MISSAOCOZINHEIRO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_cozinheiro"));
+    MISSAOCOZINHEIRO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_cozinheiro")),
+
+    // Novas chaves para o sistema de missões
+    MISSAO_TIPO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class), "missao_tipo")),
+    MISSAO_META(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class), "missao_meta")),
+    MISSAO_PROGRESO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class), "missao_progresso")),
+    MISSAO_ENDTIME(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class), "missao_endtime"));
+
     public final NamespacedKey key;
     NexusKeys(NamespacedKey nexus) {
-        key = nexus;
+        this.key = nexus;
     }
 
     public static NamespacedKey getKey(String nome) {
