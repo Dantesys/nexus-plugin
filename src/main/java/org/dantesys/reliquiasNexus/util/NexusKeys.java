@@ -5,9 +5,11 @@ import org.dantesys.reliquiasNexus.ReliquiasNexus;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public enum NexusKeys {
-    NEXUS(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"nexus")),
+    NEXUS(new NamespacedKey(Objects.requireNonNull(ReliquiasNexus.getPlugin(ReliquiasNexus.class)),"nexus")),
     DRENO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"dreno")),
     TOTEM(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"totem")),
     RENASCER(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"renascer")),
@@ -58,22 +60,18 @@ public enum NexusKeys {
     MISSAODOMADOR(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_domador")),
     COZINHEIRO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"cozinheiro")),
     MISSAOCOZINHEIRO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_cozinheiro")),
-    CONSTRUTOR(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"construtor")),
-    MISSAOCONSTRUTOR(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_construtor")),
-    ABISSAL(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"abissal")),
-    MISSAOABISSAL(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_abissal")),
-    CRONOSOMBRA(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"cronosombra")),
-    MISSAOCRONOSOMBRA(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_cronosombra")),
 
     // Novas chaves para o sistema de missões
     MISSAO_TIPO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class), "missao_tipo")),
     MISSAO_META(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class), "missao_meta")),
     MISSAO_PROGRESO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class), "missao_progresso")),
-    MISSAO_ENDTIME(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class), "missao_endtime"));
+    MISSAO_ENDTIME(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class), "missao_endtime")),
+    MISSAO_SPECIAL(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class), "missao_special")),
+    MISSAO_DIFFICULTY(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class), "missao_difficulty"));
 
     public final NamespacedKey key;
     NexusKeys(NamespacedKey nexus) {
-        key = nexus;
+        this.key = nexus;
     }
 
     public static NamespacedKey getKey(String nome) {
@@ -99,9 +97,6 @@ public enum NexusKeys {
             case "ladrao" -> LADRAO.key;
             case "domador" -> DOMADOR.key;
             case "cozinheiro" -> COZINHEIRO.key;
-            case "construtor" -> CONSTRUTOR.key;
-            case "abissal" -> ABISSAL.key;
-            case "cronosombra" -> CRONOSOMBRA.key;
             default -> null;
         };
     }
@@ -128,9 +123,6 @@ public enum NexusKeys {
         keys.add(LADRAO.key);
         keys.add(DOMADOR.key);
         keys.add(COZINHEIRO.key);
-        keys.add(CONSTRUTOR.key);
-        keys.add(ABISSAL.key);
-        keys.add(CRONOSOMBRA.key);
         return keys;
     }
 }
