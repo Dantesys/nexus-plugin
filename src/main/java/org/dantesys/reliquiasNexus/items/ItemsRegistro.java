@@ -43,6 +43,7 @@ public class ItemsRegistro {
     public static Nexus construtor;
     public static Nexus abissal;
     public static Nexus cronosombra;
+    public static Nexus assassino;
     public static Nexus livro;
     private static final List<Nexus> reliquias = new ArrayList<>();
     public static void init(){
@@ -94,6 +95,8 @@ public class ItemsRegistro {
         reliquias.add(abissal);
         createCronosombra();
         reliquias.add(cronosombra);
+        createAssassino();
+        reliquias.add(assassino);
         createLivro();
     }
     private static void createGuerreiro(){
@@ -389,6 +392,18 @@ public class ItemsRegistro {
         item.setItemMeta(meta);
         cronosombra = new Nexus(item,"cronosombra");
     }
+    private static void createAssassino(){
+        ItemStack item = new ItemStack(Material.NETHERITE_SWORD,1);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Nexus do Assassino"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"assassino");
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
+        item.setItemMeta(meta);
+        assassino = new Nexus(item,"assassino");
+    }
     private static void createLivro(){
         ItemStack item = new ItemStack(Material.WRITTEN_BOOK,1);
         BookMeta meta = (BookMeta) item.getItemMeta();
@@ -437,6 +452,7 @@ public class ItemsRegistro {
             case "construtor" -> construtor;
             case "abissal" -> abissal;
             case "cronosombra" -> cronosombra;
+            case "assassino" -> assassino;
             default -> null;
         };
     }

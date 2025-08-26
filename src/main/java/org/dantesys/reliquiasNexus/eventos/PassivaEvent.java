@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -25,6 +26,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.dantesys.reliquiasNexus.ReliquiasNexus;
 import org.dantesys.reliquiasNexus.SpeciaisPassivas.*;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
@@ -33,12 +35,21 @@ import org.dantesys.reliquiasNexus.util.CoresUtils;
 
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 
 public class PassivaEvent implements Listener {
+    private static boolean inAssassino=false;
+    private static UUID assassino=null;
+    public static void setAssassino(UUID player){
+        assassino=player;
+        inAssassino=true;
+    }
+    public static void removerAssassino(){
+        inAssassino=false;
+    }
     @EventHandler
     public void reviver(EntityResurrectEvent e) {
         LivingEntity deadEntity = e.getEntity();
@@ -128,6 +139,16 @@ public class PassivaEvent implements Listener {
             });
         }
         Bukkit.getServer().getOnlinePlayers().forEach(player -> {
+            Player p = Bukkit.getPlayer(assassino);
+            if(inAssassino){
+                if(p!=null){
+                    player.hidePlayer(ReliquiasNexus.getPlugin(ReliquiasNexus.class),p);
+                }
+            }else{
+                if(p!=null){
+                    player.showPlayer(ReliquiasNexus.getPlugin(ReliquiasNexus.class),p);
+                }
+            }
             PlayerInventory inv = player.getInventory();
             for (int i = 0; i <= 8; i++) {
                 ItemStack stack = inv.getItem(i);
@@ -172,6 +193,24 @@ public class PassivaEvent implements Listener {
                 }
             }
         });
+    }
+    @EventHandler
+    public void ataqueMobs(EntityDamageByEntityEvent event){
+        Entity entity = event.getDamager();
+        if(entity instanceof Player player){
+            if(temReliquia(player,"assassino") && event.isCritical()){
+                player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY,60,0));
+                Entity entidade = event.getEntity();
+                if(entidade instanceof LivingEntity vivo){
+                    PotionEffect efeito = vivo.getPotionEffect(PotionEffectType.POISON);
+                    int amplificador = 0;
+                    if(efeito!=null){
+                        amplificador=efeito.getAmplifier()+1;
+                    }
+                    vivo.addPotionEffect(new PotionEffect(PotionEffectType.POISON,100,amplificador));
+                }
+            }
+        }
     }
     @EventHandler
     public void recuperacaoFenix(EntityDamageEvent event){

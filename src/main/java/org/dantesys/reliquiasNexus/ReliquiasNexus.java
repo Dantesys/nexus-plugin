@@ -47,7 +47,7 @@ public final class ReliquiasNexus extends JavaPlugin {
     private static final Map<UUID, Troca> trocas = new HashMap<>();
     private static FileConfiguration config;
     private static YamlConfiguration lang;
-    final List<String> names = List.of("guerreiro","ceifador","vida","mares","barbaro",
+    public final List<String> names = List.of("guerreiro","ceifador","vida","mares","barbaro",
             "fazendeiro","espiao","arqueiro","cacador","tempestade","mineiro","fenix","protetor",
             "hulk","sculk","pescador","flash","mago","ladrao","domador");
 

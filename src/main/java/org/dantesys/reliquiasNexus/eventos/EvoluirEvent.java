@@ -178,6 +178,19 @@ public class EvoluirEvent implements Listener {
                 dataPlayer.set(CONSTRUTOR.key,PersistentDataType.INTEGER,levelAtual+1);
                 player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE).setBaseValue(4.5+levelAtual);
             }
+            case "abissal" -> {
+                dataPlayer.set(MISSAOABISSAL.key, PersistentDataType.INTEGER, 0);
+                dataPlayer.set(ABISSAL.key,PersistentDataType.INTEGER,levelAtual+1);
+            }
+            case "cronosombra" -> {
+                dataPlayer.set(MISSAOCRONOSOMBRA.key, PersistentDataType.INTEGER, 0);
+                dataPlayer.set(CRONOSOMBRA.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE).setBaseValue(4.5+levelAtual);
+            }
+            case "assassino" -> {
+                dataPlayer.set(MISSAOASSASSINO.key, PersistentDataType.INTEGER, 0);
+                dataPlayer.set(ASSASSINO.key,PersistentDataType.INTEGER,levelAtual+1);
+            }
         }
     }
     public void tentarEvoluir(Player player, ItemStack nexusItem, int levelAtual,int slot) {
@@ -522,9 +535,19 @@ public class EvoluirEvent implements Listener {
             case "cronosombra" -> {
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAOCRONOSOMBRA.key, PersistentDataType.INTEGER, 0);
                 if(kills < level){
-                    condicao = ReliquiasNexus.getLang().getString("condicao.abissal");
+                    condicao = ReliquiasNexus.getLang().getString("condicao.cronosombra");
                     if(condicao==null){
                         condicao="use a habilidade mais <cond> vezes";
+                    }
+                    condicao=condicao.replace("<cond>",""+(level-kills));
+                }
+            }
+            case "assassino" -> {
+                int kills = player.getPersistentDataContainer().getOrDefault(MISSAOASSASSINO.key, PersistentDataType.INTEGER, 0);
+                if(kills < level){
+                    condicao = ReliquiasNexus.getLang().getString("condicao.assassino");
+                    if(condicao==null){
+                        condicao="derrote mobs com dano critico mais <cond> vezes";
                     }
                     condicao=condicao.replace("<cond>",""+(level-kills));
                 }
@@ -827,6 +850,17 @@ public class EvoluirEvent implements Listener {
                 int level = data.getOrDefault(TEMPESTADE.key, PersistentDataType.INTEGER, 1);
                 if(event.getEntity() instanceof Monster || event.getEntity() instanceof Boss){
                     data.set(MISSAOTEMPESTADE.key, PersistentDataType.INTEGER, kills + 1);
+                    tentarEvoluir(killer,stack,level,getSlotOfItem(killer,stack));
+                }
+            }
+            if(nome.equals("assassino")){
+                int kills = data.getOrDefault(MISSAOASSASSINO.key, PersistentDataType.INTEGER, 0);
+                int level = data.getOrDefault(ASSASSINO.key, PersistentDataType.INTEGER, 1);
+                boolean isCrit = !killer.isOnGround() && killer.getFallDistance() > 0.0F &&
+                        !killer.isInsideVehicle() && !killer.hasPotionEffect(PotionEffectType.BLINDNESS) &&
+                        !killer.isSprinting() && killer.getAttackCooldown() > 0.9F;
+                if (isCrit) {
+                    data.set(MISSAOASSASSINO.key, PersistentDataType.INTEGER, kills + 1);
                     tentarEvoluir(killer,stack,level,getSlotOfItem(killer,stack));
                 }
             }

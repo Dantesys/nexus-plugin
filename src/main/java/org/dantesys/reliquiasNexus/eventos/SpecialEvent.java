@@ -435,6 +435,10 @@ public class SpecialEvent implements Listener {
                                 mago(player);
                                 event.setCancelled(true);
                             }
+                            case "cozinheiro" -> cozinheiro(player);
+                            case "construtor" -> cozinheiro(player);
+                            case "abissal" -> abissal(player);
+                            case "assassino" -> assassino(player);
                         }
                         if(!item.getNome().equals("mago")){
                             dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,60);
@@ -668,6 +672,26 @@ public class SpecialEvent implements Listener {
             default -> desc="§l§6"+r+" "+nome+"\n§r§0Special: Descrição não disponível";
         };
         return desc;
+    }
+    private void abissal(Player player){
+        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+        int l = dataPlayer.getOrDefault(ABISSAL.key,PersistentDataType.INTEGER,1);
+        Abissal.getSpecialbyLevel(l,player);
+    }
+    private void cozinheiro(Player player){
+        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+        int l = dataPlayer.getOrDefault(COZINHEIRO.key,PersistentDataType.INTEGER,1);
+        Cozinheiro.getSpecialbyLevel(l,player);
+    }
+    private void construtor(Player player){
+        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+        int l = dataPlayer.getOrDefault(CONSTRUTOR.key,PersistentDataType.INTEGER,1);
+        Construtor.getSpecialbyLevel(l,player);
+    }
+    private void assassino(Player player){
+        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+        int l = dataPlayer.getOrDefault(ASSASSINO.key,PersistentDataType.INTEGER,1);
+        Assassino.getSpecialbyLevel(l,player);
     }
     private void barbaro(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
