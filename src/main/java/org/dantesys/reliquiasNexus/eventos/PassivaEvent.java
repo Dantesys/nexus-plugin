@@ -140,14 +140,14 @@ public class PassivaEvent implements Listener {
         }
         Bukkit.getServer().getOnlinePlayers().forEach(player -> {
             Player p = Bukkit.getPlayer(assassino);
-            if(inAssassino){
+            if(inAssassino && !temReliquia(player,"espiao")){
                 if(p!=null){
                     player.hidePlayer(ReliquiasNexus.getPlugin(ReliquiasNexus.class),p);
                 }
             }else{
                 if(p!=null){
                     player.showPlayer(ReliquiasNexus.getPlugin(ReliquiasNexus.class),p);
-                }
+                } 
             }
             PlayerInventory inv = player.getInventory();
             for (int i = 0; i <= 8; i++) {
@@ -248,6 +248,12 @@ public class PassivaEvent implements Listener {
                     event.setDamage(event.getDamage()/2);
                 }
             }
+            if(temReliquia(player,"frostis")){
+                if(event.getCause().equals(EntityDamageEvent.DamageCause.FREEZE)){
+                    player.heal(1);
+                    event.setCancelled(true);
+                }
+            }
         }
     }
     private boolean temReliquia(Player player,String nome) {
@@ -335,6 +341,12 @@ public class PassivaEvent implements Listener {
                     case "ladrao" -> {
                         int level = player.getPersistentDataContainer().getOrDefault(LADRAO.key,PersistentDataType.INTEGER,1);
                         Ladrao.getPassivabyLevel(level,player);
+                    }
+                    case "frostis" -> {
+                        if(player.hasPotionEffect(PotionEffectType.SLOWNESS)){
+                            player.removePotionEffect(PotionEffectType.SLOWNESS);
+                            player.heal(20);
+                        }
                     }
                 }
             }

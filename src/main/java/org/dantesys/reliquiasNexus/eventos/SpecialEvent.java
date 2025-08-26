@@ -436,9 +436,10 @@ public class SpecialEvent implements Listener {
                                 event.setCancelled(true);
                             }
                             case "cozinheiro" -> cozinheiro(player);
-                            case "construtor" -> cozinheiro(player);
+                            case "construtor" -> construtor(player);
                             case "abissal" -> abissal(player);
                             case "assassino" -> assassino(player);
+                            case "frostis" -> frostis(player);
                         }
                         if(!item.getNome().equals("mago")){
                             dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,60);
@@ -677,6 +678,11 @@ public class SpecialEvent implements Listener {
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int l = dataPlayer.getOrDefault(ABISSAL.key,PersistentDataType.INTEGER,1);
         Abissal.getSpecialbyLevel(l,player);
+    }
+    private void frostis(Player player){
+        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+        int l = dataPlayer.getOrDefault(FROSTIS.key,PersistentDataType.INTEGER,1);
+        Frostis.getSpecialbyLevel(l,player);
     }
     private void cozinheiro(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();

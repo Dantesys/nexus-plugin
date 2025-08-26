@@ -67,6 +67,8 @@ public enum NexusKeys {
     MISSAOCRONOSOMBRA(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_cronosombra")),
     ASSASSINO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"assassino")),
     MISSAOASSASSINO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_assassino")),
+    FROSTIS(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"frostis")),
+    MISSAOFROSTIS(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_frostis")),
 
     // Novas chaves para o sistema de missões
     MISSAO_TIPO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class), "missao_tipo")),
@@ -108,6 +110,7 @@ public enum NexusKeys {
             case "abissal" -> ABISSAL.key;
             case "cronosombra" -> CRONOSOMBRA.key;
             case "assassino" -> ASSASSINO.key;
+            case "frostis" -> FROSTIS.key;
             default -> null;
         };
     }
@@ -138,6 +141,7 @@ public enum NexusKeys {
         keys.add(ABISSAL.key);
         keys.add(CRONOSOMBRA.key);
         keys.add(ASSASSINO.key);
+        keys.add(FROSTIS.key);
         return keys;
     }
 }

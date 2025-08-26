@@ -13,9 +13,11 @@ import org.dantesys.reliquiasNexus.ReliquiasNexus;
 import org.dantesys.reliquiasNexus.eventos.PassivaEvent;
 import org.dantesys.reliquiasNexus.util.Temporizador;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
-public class Assassino {
+public class Frostis {
     public static void getSpecialbyLevel(int level, Player player){
         if(level<8){//1-7
             dashVenenoso(level,player);

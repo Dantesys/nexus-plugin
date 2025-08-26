@@ -35,9 +35,7 @@ import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
 import org.dantesys.reliquiasNexus.util.Temporizador;
 
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 
@@ -190,6 +188,10 @@ public class EvoluirEvent implements Listener {
             case "assassino" -> {
                 dataPlayer.set(MISSAOASSASSINO.key, PersistentDataType.INTEGER, 0);
                 dataPlayer.set(ASSASSINO.key,PersistentDataType.INTEGER,levelAtual+1);
+            }
+            case "frostis" -> {
+                dataPlayer.set(MISSAOFROSTIS.key, PersistentDataType.INTEGER, 0);
+                dataPlayer.set(FROSTIS.key,PersistentDataType.INTEGER,levelAtual+1);
             }
         }
     }
@@ -552,6 +554,16 @@ public class EvoluirEvent implements Listener {
                     condicao=condicao.replace("<cond>",""+(level-kills));
                 }
             }
+            case "frostis" -> {
+                int kills = player.getPersistentDataContainer().getOrDefault(MISSAOFROSTIS.key, PersistentDataType.INTEGER, 0);
+                if(kills < level){
+                    condicao = ReliquiasNexus.getLang().getString("condicao.frostis");
+                    if(condicao==null){
+                        condicao="congele mobs, slowness IV, mais <cond> vezes";
+                    }
+                    condicao=condicao.replace("<cond>",""+(level-kills));
+                }
+            }
         }
         return condicao;
     }
@@ -866,6 +878,20 @@ public class EvoluirEvent implements Listener {
             }
         }
     }
+    private boolean temReliquia(Player player,String nome) {
+        return Arrays.stream(player.getInventory().getContents())
+                .filter(Objects::nonNull)
+                .anyMatch(item -> item.getPersistentDataContainer().getOrDefault(NEXUS.key,PersistentDataType.STRING,"").equals(nome));
+    }
+    private ItemStack getReliquia(Player player, String nome) {
+        return Arrays.stream(player.getInventory().getContents())
+                .filter(Objects::nonNull)
+                .filter(item -> item.getPersistentDataContainer()
+                        .getOrDefault(NEXUS.key, PersistentDataType.STRING, "")
+                        .equals(nome))
+                .findFirst()  // pega o primeiro item que bate com o nome
+                .orElse(null); // retorna null se não tiver
+    }
     @EventHandler
     public void roubaVida(EntityDamageByEntityEvent event){
         Entity atacante = event.getDamager();
@@ -959,6 +985,28 @@ public class EvoluirEvent implements Listener {
                             qtd++;
                             player.getPersistentDataContainer().set(MISSAOLADRAO.key, PersistentDataType.INTEGER, qtd);
                             tentarEvoluir(player,n.getItem(level),level,getSlotOfItem(player,stack));
+                        }
+                    }
+                }
+            }
+            if(temReliquia(player,"frostis")){
+                if(atacado instanceof LivingEntity vivo){
+                    int l = player.getPersistentDataContainer().getOrDefault(FROSTIS.key,PersistentDataType.INTEGER,1);
+                    PotionEffect efeito = vivo.getPotionEffect(PotionEffectType.SLOWNESS);
+                    int amplificador = 0;
+                    int tempofrio = vivo.getFreezeTicks()+(20*l);
+                    if(efeito!=null){
+                        amplificador=efeito.getAmplifier()+1;
+                    }
+                    vivo.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS,100,amplificador));
+                    vivo.setFreezeTicks(tempofrio);
+                    if(amplificador>=3){
+                        int q = player.getPersistentDataContainer().getOrDefault(MISSAOFROSTIS.key,PersistentDataType.INTEGER,0);
+                        q++;
+                        player.getPersistentDataContainer().set(MISSAOFROSTIS.key,PersistentDataType.INTEGER,q);
+                        ItemStack reliquia = getReliquia(player,"frostis");
+                        if(reliquia!=null){
+                            tentarEvoluir(player,stack,l,getSlotOfItem(player,reliquia));
                         }
                     }
                 }
