@@ -3,6 +3,7 @@ package org.dantesys.reliquiasNexus.SpeciaisPassivas;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -10,107 +11,78 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
-import org.dantesys.reliquiasNexus.eventos.PassivaEvent;
 import org.dantesys.reliquiasNexus.util.Temporizador;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 public class Frostis {
     public static void getSpecialbyLevel(int level, Player player){
         if(level<8){//1-7
-            dashVenenoso(level,player);
+            pilarCristalCongelante(level,player);
         }else if(level<16){//8-15
-            execucaoSilenciosa(level,player);
+            coneGeloPrismatico(level,player);
         }else{//16-20
-            trueInvisibility(level,player);
+            tempestadeCristalGelado(level,player);
         }
     }
-    private static void dashVenenoso(int level, Player player){
-        final int finalRange = 5;
-        final double finalDamage = level;
-        final Location location = player.getLocation();
-        final Vector direction = location.getDirection().normalize();
-        Location destino = player.getLocation().add(direction.multiply(5));
-        destino.setYaw(player.getLocation().getYaw());
-        destino.setPitch(player.getLocation().getPitch());
-        final double[] tp = {0};
-        final List<LivingEntity> atingidos = new ArrayList<>();
-        Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 1,
-                ()->{
-                },()-> player.teleport(destino),(t)->{
-            tp[0] = tp[0]+3.4;
-            double x = direction.getX()*tp[0];
-            double y = direction.getY()*tp[0]+1.4;
-            double z = direction.getZ()*tp[0];
-            location.add(x,y,z);
-            location.getWorld().spawnParticle(Particle.SWEEP_ATTACK,location,1,0,0,0,0);
-            location.getWorld().playSound(location, Sound.ENTITY_PLAYER_ATTACK_SWEEP,0.5f,0.7f);
-            Collection<Entity> pressf = location.getWorld().getNearbyEntities(location,2,2,2);
-            while(pressf.iterator().hasNext()){
-                Entity surdo = pressf.iterator().next();
-                if(surdo instanceof LivingEntity vivo && !atingidos.contains(vivo)){
-                    atingidos.add(vivo);
-                    if(vivo instanceof Player pl){
-                        if(pl != player){
-                            vivo.damage(finalDamage);
-                            vivo.addPotionEffect(new PotionEffect(PotionEffectType.POISON,200,level));
+    private static void pilarCristalCongelante(int level,Player player) {
+        World world = player.getWorld();
+        Location centro = player.getTargetBlockExact(5).getLocation();
+        int raio = 2 + level;
+        double dano = 1 + 0.5 * level;
+
+        // Temporizador para duração do pilar
+        new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 10,
+                () -> {}, // antes
+                () -> {}, // depois
+                t -> { // a cada tick
+                    for(Entity e : world.getNearbyEntities(centro, raio, 2, raio)) {
+                        if(e instanceof LivingEntity vivo && vivo != player) {
+                            vivo.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 60, 2));
+                            vivo.setFreezeTicks(vivo.getFreezeTicks() + 20 * level);
+                            vivo.damage(dano, player);
                         }
-                    }else{
-                        vivo.damage(finalDamage);
-                        vivo.addPotionEffect(new PotionEffect(PotionEffectType.POISON,200,level));
                     }
-                }
-                pressf.remove(surdo);
-            }
-            location.subtract(x,y,z);
-            if(t.getSegundosRestantes()>finalRange){
-                t.stop();
-            }
-        });
-        timer.scheduleTimer(1L);
+                    // Partículas do pilar
+                    world.spawnParticle(Particle.SNOWFLAKE, centro.add(0.5,0.5,0.5), 5, 0.3, 0.3, 0.3);
+                }).scheduleTimer(1L);
     }
-    private static void execucaoSilenciosa(int level, Player player) {
-        // raio de busca do alvo
-        double maxDistance = 15;
-        Entity target = player.getTargetEntity((int) maxDistance, false);
+    private static void coneGeloPrismatico(int level,Player player) {
+        Location loc = player.getLocation();
+        Vector dir = loc.getDirection().normalize();
+        World world = loc.getWorld();
+        double dano = 1 + 0.5 * level;
 
-        if (target instanceof LivingEntity vivo) {
-            // Pega a posição atrás do alvo
-            Location behind = vivo.getLocation().clone();
-            Vector dir = vivo.getLocation().getDirection().normalize();
-            behind.subtract(dir.multiply(1.5)); // 1.5 blocos atrás
-            behind.setDirection(player.getLocation().getDirection()); // mantém visão do player
-
-            // Teleporta o player
-            player.teleport(behind);
-
-            // Aplica efeitos no alvo
-            int duration = 20 * level; // 20 ticks * nível
-            vivo.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, duration, 4)); // Slowness V
-            vivo.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, duration, 0)); // Cegueira I
-
-            // Partículas/Sons para impacto
-            vivo.getWorld().playSound(vivo.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
-            vivo.getWorld().spawnParticle(Particle.LARGE_SMOKE, vivo.getLocation().add(0, 1, 0), 20, 0.5, 0.5, 0.5, 0.01);
-
-        } else {
-            player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 20 * level, 4));
+        for(int i=1; i<=5 + level; i++) {
+            Location point = loc.clone().add(dir.clone().multiply(i));
+            world.spawnParticle(Particle.CRIT, point, 2, 0.2, 0.2, 0.2);
+            for(Entity e : world.getNearbyEntities(point, 1, 1, 1)) {
+                if(e instanceof LivingEntity vivo && vivo != player) {
+                    vivo.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 40, 3));
+                    vivo.setFreezeTicks(vivo.getFreezeTicks() + 10 * level);
+                    vivo.damage(dano, player);
+                }
+            }
         }
     }
-    private static void trueInvisibility(int level, Player player) {
-        new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 30,
-                () -> PassivaEvent.setAssassino(player.getUniqueId()),
-                PassivaEvent::removerAssassino,
+    private static void tempestadeCristalGelado(int level,Player player) {
+        World world = player.getWorld();
+        Location centro = player.getLocation();
+        int raio = 5 + level;
+        double dano = 1 + level;
+
+        new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 10,
+                () -> {}, // antes
+                () -> {}, // depois
                 t -> {
-                    for(Entity e : player.getNearbyEntities(level,2,level)){
-                        if(e instanceof LivingEntity vivo && vivo!=player){
-                            vivo.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING,20*level,0));
-                            vivo.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS,20*level,0));
+                    for(Entity e : world.getNearbyEntities(centro, raio, raio, raio)) {
+                        if(e instanceof LivingEntity vivo && vivo != player) {
+                            vivo.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 40, 2));
+                            vivo.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 40, 1));
+                            vivo.setFreezeTicks(vivo.getFreezeTicks() + 20);
+                            vivo.damage(dano, player);
+                            world.spawnParticle(Particle.SNOWFLAKE, vivo.getLocation().add(0,1,0), 5, 0.3, 0.3, 0.3);
                         }
                     }
-                }
-        ).scheduleTimer(1L);
+                }).scheduleTimer(1L);
     }
+
 }
