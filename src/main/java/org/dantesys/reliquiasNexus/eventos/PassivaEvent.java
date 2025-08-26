@@ -9,15 +9,14 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
+import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -348,6 +347,12 @@ public class PassivaEvent implements Listener {
                             player.heal(20);
                         }
                     }
+                    case "necromante" -> {
+                        if(player.hasPotionEffect(PotionEffectType.WITHER)){
+                            player.removePotionEffect(PotionEffectType.WITHER);
+                            player.heal(20);
+                        }
+                    }
                 }
             }
         }
@@ -403,6 +408,53 @@ public class PassivaEvent implements Listener {
                 // Cancela o evento para não quebrar blocos se for clique direito
                 event.setCancelled(true);
             }
+        }
+    }
+    private boolean isNecromanteSlave(LivingEntity mob) {
+        String val = mob.getPersistentDataContainer().getOrDefault(SLAVE.key, PersistentDataType.STRING, "");
+        return val.equals("necromante");
+    }
+    private boolean eOsso(Entity entity){
+        if (entity == null) return false;
+
+        EntityType type = entity.getType();
+
+        return type == EntityType.SKELETON
+                || type == EntityType.STRAY
+                || type == EntityType.WITHER_SKELETON
+                || type == EntityType.SKELETON_HORSE
+                || type == EntityType.BOGGED
+                || type == EntityType.WITHER;
+    }
+    @EventHandler
+    public void onTarget(EntityTargetLivingEntityEvent e) {
+        if(eOsso(e.getEntity())){
+            if (e.getTarget() instanceof Player p) {
+                if (temReliquia(p,"necromante")) {
+                    e.setCancelled(true);
+                    return;
+                }
+            }
+        }
+        if (!(e.getEntity() instanceof LivingEntity mob)) return;
+        if (!isNecromanteSlave(mob)) return;
+
+        // Não atacar o jogador dono
+        if (e.getTarget() instanceof Player p) {
+            if (temReliquia(p,"necromante")) {
+                e.setCancelled(true);
+                return;
+            }
+        }
+
+        // Se não tiver alvo, escolher um inimigo próximo
+        if (e.getTarget() == null) {
+            mob.getLocation().getWorld()
+                    .getNearbyEntities(mob.getLocation(), 10, 10, 10).stream()
+                    .filter(ent -> ent instanceof Monster && !eOsso(ent)) // evita atacar outros esqueletos
+                    .map(ent -> (LivingEntity) ent)
+                    .findAny().ifPresent(e::setTarget);
+
         }
     }
 }

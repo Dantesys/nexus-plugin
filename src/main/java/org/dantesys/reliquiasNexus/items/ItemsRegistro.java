@@ -45,6 +45,7 @@ public class ItemsRegistro {
     public static Nexus cronosombra;
     public static Nexus assassino;
     public static Nexus frostis;
+    public static Nexus necromante;
     public static Nexus livro;
     private static final List<Nexus> reliquias = new ArrayList<>();
     public static void init(){
@@ -100,6 +101,8 @@ public class ItemsRegistro {
         reliquias.add(assassino);
         createFrostis();
         reliquias.add(frostis);
+        createNecromante();
+        reliquias.add(necromante);
         createLivro();
     }
     private static void createGuerreiro(){
@@ -418,6 +421,19 @@ public class ItemsRegistro {
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
         item.setItemMeta(meta);
         frostis = new Nexus(item,"frostis");
+    }
+    private static void createNecromante(){
+        ItemStack item = new ItemStack(Material.WRITTEN_BOOK,1);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Nexus do Necromante"));
+        meta.setItemModel(Material.WITHER_SKELETON_SKULL.getKey());
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"necromante");
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
+        item.setItemMeta(meta);
+        frostis = new Nexus(item,"necromante");
     }
     private static void createLivro(){
         ItemStack item = new ItemStack(Material.WRITTEN_BOOK,1);

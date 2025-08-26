@@ -2,7 +2,6 @@ package org.dantesys.reliquiasNexus.SpeciaisPassivas;
 
 import org.bukkit.Location;
 import org.bukkit.Particle;
-import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -84,5 +83,4 @@ public class Frostis {
                     }
                 }).scheduleTimer(1L);
     }
-
 }

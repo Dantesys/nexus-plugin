@@ -179,6 +179,7 @@ public class EvoluirEvent implements Listener {
             case "abissal" -> {
                 dataPlayer.set(MISSAOABISSAL.key, PersistentDataType.INTEGER, 0);
                 dataPlayer.set(ABISSAL.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE).setBaseValue(4.5+levelAtual);
             }
             case "cronosombra" -> {
                 dataPlayer.set(MISSAOCRONOSOMBRA.key, PersistentDataType.INTEGER, 0);
@@ -188,10 +189,17 @@ public class EvoluirEvent implements Listener {
             case "assassino" -> {
                 dataPlayer.set(MISSAOASSASSINO.key, PersistentDataType.INTEGER, 0);
                 dataPlayer.set(ASSASSINO.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE).setBaseValue(3+levelAtual);
             }
             case "frostis" -> {
                 dataPlayer.set(MISSAOFROSTIS.key, PersistentDataType.INTEGER, 0);
                 dataPlayer.set(FROSTIS.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE).setBaseValue(4.5+levelAtual);
+            }
+            case "necromante" -> {
+                dataPlayer.set(MISSAONECROMANTE.key, PersistentDataType.INTEGER, 0);
+                dataPlayer.set(NECROMANTE.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE).setBaseValue(3+levelAtual);
             }
         }
     }
@@ -564,6 +572,16 @@ public class EvoluirEvent implements Listener {
                     condicao=condicao.replace("<cond>",""+(level-kills));
                 }
             }
+            case "necromante" -> {
+                int kills = player.getPersistentDataContainer().getOrDefault(MISSAONECROMANTE.key, PersistentDataType.INTEGER, 0);
+                if(kills < level*10){
+                    condicao = ReliquiasNexus.getLang().getString("condicao.necromante");
+                    if(condicao==null){
+                        condicao="derrote mobs não esqueléticos mais <cond> vezes";
+                    }
+                    condicao=condicao.replace("<cond>",""+(level-kills));
+                }
+            }
         }
         return condicao;
     }
@@ -827,12 +845,16 @@ public class EvoluirEvent implements Listener {
     }
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
+        if(event.getEntity().getPersistentDataContainer().has(SLAVE.key)){
+            event.setDroppedExp(0);
+            event.getDrops().clear();
+        }
         if (!(event.getEntity().getKiller() instanceof Player killer)) return;
         ItemStack stack = killer.getInventory().getItemInMainHand();
+        PersistentDataContainer data = killer.getPersistentDataContainer();
         if(stack.getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)){
             String nome = stack.getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING);
             if(nome==null) return;
-            PersistentDataContainer data = killer.getPersistentDataContainer();
             if(nome.equals("barbaro")){
                 int kills = data.getOrDefault(MISSAOBARBARO.key, PersistentDataType.INTEGER, 0);
                 int level = data.getOrDefault(BARBARO.key, PersistentDataType.INTEGER, 1);
@@ -877,6 +899,75 @@ public class EvoluirEvent implements Listener {
                 }
             }
         }
+        if(temReliquia(killer,"necromante")){
+            stack=getReliquia(killer,"necromante");
+            Entity entity = event.getEntity();
+            if(!eOsso(entity)){
+                Location loc = entity.getLocation();
+                spawnEsqueletoNecromante(killer,loc);
+                int kills = data.getOrDefault(MISSAONECROMANTE.key, PersistentDataType.INTEGER, 0);
+                int level = data.getOrDefault(NECROMANTE.key, PersistentDataType.INTEGER, 1);
+                data.set(MISSAONECROMANTE.key, PersistentDataType.INTEGER, kills + 1);
+                tentarEvoluir(killer,stack,level, getSlotOfItem(killer,stack));
+            }
+        }
+    }
+    private void spawnEsqueletoNecromante(Player player, Location loc) {
+        EntityType tipo = sortearEsqueleto();
+        LivingEntity mob = (LivingEntity) loc.getWorld().spawnEntity(loc, tipo);
+
+        // Marca como invocado pelo necromante
+        mob.getPersistentDataContainer().set(
+                SLAVE.key,
+                PersistentDataType.STRING,
+                "necromante"
+        );
+
+        // Nome customizado
+        mob.setCustomName("Slave " + player.getName());
+        mob.setCustomNameVisible(true);
+
+        // Exemplo para o Wither "menor e fraco"
+        if (tipo == EntityType.WITHER) {
+            mob.setCustomName("Mini-Wither de " + player.getName());
+            mob.getAttribute(Attribute.MAX_HEALTH).setBaseValue(50);
+            mob.setHealth(50);
+            mob.getAttribute(Attribute.SCALE).setBaseValue(0.5);
+            mob.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(5); // mais fraco
+        }
+
+        // Opcional: para ele atacar inimigos do player
+        if (mob instanceof Monster monstro) {
+            monstro.setTarget(null); // depois dá pra aplicar target dinâmico
+        }
+    }
+    private EntityType sortearEsqueleto() {
+        double r = Math.random() * 100.0; // valor entre 0 e 100
+        if (r < 50) {
+            return EntityType.SKELETON; // 50%
+        } else if (r < 70) {
+            return EntityType.STRAY; // 20%
+        } else if (r < 74) {
+            return EntityType.WITHER_SKELETON; // 4%
+        } else if (r < 79) {
+            return EntityType.SKELETON_HORSE; // 5%
+        } else if (r < 99) {
+            return EntityType.BOGGED; // 20%
+        } else {
+            return EntityType.WITHER; // 1%
+        }
+    }
+    private boolean eOsso(Entity entity){
+        if (entity == null) return false;
+
+        EntityType type = entity.getType();
+
+        return type == EntityType.SKELETON
+                || type == EntityType.STRAY
+                || type == EntityType.WITHER_SKELETON
+                || type == EntityType.SKELETON_HORSE
+                || type == EntityType.BOGGED
+                || type == EntityType.WITHER;
     }
     private boolean temReliquia(Player player,String nome) {
         return Arrays.stream(player.getInventory().getContents())

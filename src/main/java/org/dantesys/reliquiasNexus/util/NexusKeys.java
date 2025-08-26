@@ -9,6 +9,7 @@ import java.util.Objects;
 
 public enum NexusKeys {
     NEXUS(new NamespacedKey(Objects.requireNonNull(ReliquiasNexus.getPlugin(ReliquiasNexus.class)),"nexus")),
+    SLAVE(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"slave")),
     DRENO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"dreno")),
     TOTEM(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"totem")),
     RENASCER(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"renascer")),
@@ -69,6 +70,8 @@ public enum NexusKeys {
     MISSAOASSASSINO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_assassino")),
     FROSTIS(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"frostis")),
     MISSAOFROSTIS(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_frostis")),
+    NECROMANTE(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"necromante")),
+    MISSAONECROMANTE(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_necromante")),
 
     // Novas chaves para o sistema de missões
     MISSAO_TIPO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class), "missao_tipo")),
@@ -111,6 +114,7 @@ public enum NexusKeys {
             case "cronosombra" -> CRONOSOMBRA.key;
             case "assassino" -> ASSASSINO.key;
             case "frostis" -> FROSTIS.key;
+            case "necromante" -> NECROMANTE.key;
             default -> null;
         };
     }
@@ -142,6 +146,7 @@ public enum NexusKeys {
         keys.add(CRONOSOMBRA.key);
         keys.add(ASSASSINO.key);
         keys.add(FROSTIS.key);
+        keys.add(NECROMANTE.key);
         return keys;
     }
 }
