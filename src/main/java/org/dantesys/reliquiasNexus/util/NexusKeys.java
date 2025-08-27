@@ -74,6 +74,8 @@ public enum NexusKeys {
     MISSAONECROMANTE(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_necromante")),
     ALQUIMISTA(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"alquimista")),
     MISSAOALQUIMISTA(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_alquimista")),
+    GOLEM(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"golem")),
+    MISSAOGOLEM(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_golem")),
     // Novas chaves para o sistema de missões
     MISSAO_TIPO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class), "missao_tipo")),
     MISSAO_META(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class), "missao_meta")),
@@ -117,6 +119,7 @@ public enum NexusKeys {
             case "frostis" -> FROSTIS.key;
             case "necromante" -> NECROMANTE.key;
             case "alquimista" -> ALQUIMISTA.key;
+            case "golem" -> GOLEM.key;
             default -> null;
         };
     }
@@ -150,6 +153,7 @@ public enum NexusKeys {
         keys.add(FROSTIS.key);
         keys.add(NECROMANTE.key);
         keys.add(ALQUIMISTA.key);
+        keys.add(GOLEM.key);
         return keys;
     }
 }

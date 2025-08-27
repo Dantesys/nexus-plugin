@@ -8,6 +8,7 @@ import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
+import org.bukkit.damage.DamageType;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -206,6 +207,17 @@ public class EvoluirEvent implements Listener {
                 dataPlayer.set(ALQUIMISTA.key,PersistentDataType.INTEGER,levelAtual+1);
                 player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE).setBaseValue(3+levelAtual);
                 player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE).setBaseValue(4.5+levelAtual);
+            }
+            case "golem" -> {
+                dataPlayer.set(MISSAOGOLEM.key, PersistentDataType.DOUBLE, 0d);
+                dataPlayer.set(GOLEM.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.ARMOR).setBaseValue(levelAtual);
+                player.getAttribute(Attribute.ARMOR_TOUGHNESS).setBaseValue(levelAtual);
+                player.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(2+(levelAtual/3));
+                player.getAttribute(Attribute.ATTACK_KNOCKBACK).setBaseValue((levelAtual/10));
+                player.getAttribute(Attribute.KNOCKBACK_RESISTANCE).setBaseValue((levelAtual/20));
+                player.getAttribute(Attribute.SAFE_FALL_DISTANCE).setBaseValue(3+(levelAtual*2));
+                player.getAttribute(Attribute.SWEEPING_DAMAGE_RATIO).setBaseValue(levelAtual*0.05);
             }
         }
     }
@@ -596,6 +608,20 @@ public class EvoluirEvent implements Listener {
                         condicao="beba mais <cond> poções";
                     }
                     condicao=condicao.replace("<cond>",""+(level-kills));
+                }
+            }
+            case "golem" -> {
+                double colheitasN = 30 * level;
+                double colheitas = player.getPersistentDataContainer().getOrDefault(MISSAOGOLEM.key, PersistentDataType.DOUBLE, 0d);
+                if(colheitas>=colheitasN){
+                    condicao="";
+                }else{
+                    int qtd = (int) (colheitasN-colheitas);
+                    condicao = ReliquiasNexus.getLang().getString("condicao.golem");
+                    if(condicao==null){
+                        condicao="receba mais <cond> de dano por monstros ou bosses";
+                    }
+                    condicao=condicao.replace("<cond>",""+qtd);
                 }
             }
         }
@@ -1136,6 +1162,19 @@ public class EvoluirEvent implements Listener {
                             tentarEvoluir(player,n.getItem(level),level,getSlotOfItem(player,stack));
                         }
                     }
+                }
+            }
+            if(temReliquia(player,"golem")){
+                int level = player.getPersistentDataContainer().getOrDefault(GOLEM.key,PersistentDataType.INTEGER,1);
+                if(atacante instanceof LivingEntity vivo){
+                    vivo.damage(event.getFinalDamage()*(level*0.02));
+                }
+                stack = getReliquia(player,"golem");
+                if(stack!=null && (atacante instanceof Boss || atacante instanceof Monster)){
+                    double protecao = player.getPersistentDataContainer().getOrDefault(MISSAOGOLEM.key, PersistentDataType.DOUBLE, 0d);
+                    protecao+=event.getDamage();
+                    player.getPersistentDataContainer().set(MISSAOGOLEM.key, PersistentDataType.DOUBLE, protecao);
+                    tentarEvoluir(player,stack,level,getSlotOfItem(player,stack));
                 }
             }
             if(player.isBlocking()){

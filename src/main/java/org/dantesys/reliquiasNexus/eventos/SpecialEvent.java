@@ -27,6 +27,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
 import org.dantesys.reliquiasNexus.SpeciaisPassivas.*;
+import org.dantesys.reliquiasNexus.SpeciaisPassivas.Golem;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
 import org.dantesys.reliquiasNexus.util.EntityToEgg;
@@ -459,6 +460,13 @@ public class SpecialEvent implements Listener {
                         dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,60);
                     }
                 }
+                if (nome != null && nome.equals("golem")) {
+                    Nexus item = ItemsRegistro.getFromNome(nome);
+                    if(item!=null){
+                        golem(player);
+                        dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,60);
+                    }
+                }
             }
             stack = player.getInventory().getItemInOffHand();
             if (stack.getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)) {
@@ -675,6 +683,11 @@ public class SpecialEvent implements Listener {
             default -> desc="§l§6"+r+" "+nome+"\n§r§0Special: Descrição não disponível";
         };
         return desc;
+    }
+    private void golem(Player player){
+        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+        int l = dataPlayer.getOrDefault(GOLEM.key,PersistentDataType.INTEGER,1);
+        Golem.getSpecialbyLevel(l,player);
     }
     private void alquimista(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();

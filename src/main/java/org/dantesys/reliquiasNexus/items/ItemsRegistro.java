@@ -47,6 +47,7 @@ public class ItemsRegistro {
     public static Nexus frostis;
     public static Nexus necromante;
     public static Nexus alquimista;
+    public static Nexus golem;
     public static Nexus livro;
     private static final List<Nexus> reliquias = new ArrayList<>();
     public static void init(){
@@ -106,6 +107,8 @@ public class ItemsRegistro {
         reliquias.add(necromante);
         createAlquimista();
         reliquias.add(alquimista);
+        createGolem();
+        reliquias.add(golem);
         createLivro();
     }
     private static void createGuerreiro(){
@@ -450,6 +453,18 @@ public class ItemsRegistro {
         item.setItemMeta(meta);
         alquimista = new Nexus(item,"alquimista");
     }
+    private static void createGolem(){
+        ItemStack item = new ItemStack(Material.NETHERITE_CHESTPLATE,1);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Nexus do Golem"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"golem");
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
+        item.setItemMeta(meta);
+        golem = new Nexus(item,"golem");
+    }
     private static void createLivro(){
         ItemStack item = new ItemStack(Material.WRITTEN_BOOK,1);
         BookMeta meta = (BookMeta) item.getItemMeta();
@@ -502,6 +517,7 @@ public class ItemsRegistro {
             case "frostis" -> frostis;
             case "necromante" -> necromante;
             case "alquimista" -> alquimista;
+            case "golem" -> golem;
             default -> null;
         };
     }
