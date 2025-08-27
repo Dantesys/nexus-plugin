@@ -18,6 +18,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -29,8 +30,10 @@ import org.dantesys.reliquiasNexus.ReliquiasNexus;
 import org.dantesys.reliquiasNexus.SpeciaisPassivas.*;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
+import org.dantesys.reliquiasNexus.util.AlquimistaUtils;
 import org.dantesys.reliquiasNexus.util.BlocoUtils;
 import org.dantesys.reliquiasNexus.util.CoresUtils;
+import org.dantesys.reliquiasNexus.util.EntityToEgg;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -209,6 +212,14 @@ public class PassivaEvent implements Listener {
                     vivo.addPotionEffect(new PotionEffect(PotionEffectType.POISON,100,amplificador));
                 }
             }
+            if(temReliquia(player,"alquimista")){
+                if(event.getEntity() instanceof LivingEntity vivo){
+                    Material mat = EntityToEgg.getEntityEgg(vivo.getType());
+                    if(mat!=null){
+                        vivo.getWorld().dropItemNaturally(vivo.getLocation(),new ItemStack(mat));
+                    }
+                }
+            }
         }
     }
     @EventHandler
@@ -353,9 +364,19 @@ public class PassivaEvent implements Listener {
                             player.heal(20);
                         }
                     }
+                    case "alquimista" -> swapPotion(player);
                 }
             }
         }
+    }
+    private void swapPotion(Player player){
+        player.getActivePotionEffects().forEach(potion -> {
+            int duracao = potion.getDuration();
+            int amplificador = potion.getAmplifier();
+            PotionEffectType type = AlquimistaUtils.getPositiveEffect(potion.getType());
+            player.removePotionEffect(potion.getType());
+            player.addPotionEffect(new PotionEffect(type,duracao,amplificador));
+        });
     }
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
@@ -457,4 +478,17 @@ public class PassivaEvent implements Listener {
 
         }
     }
+    @EventHandler
+    public void onPotionConsume(PlayerItemConsumeEvent event){
+        Player player = event.getPlayer();
+        if(temReliquia(player,"alquimista")){
+            ItemStack item = event.getItem();
+            if(item.getType().equals(Material.POTION)){
+                if(ThreadLocalRandom.current().nextInt(100) < 10){
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20*5, 0));
+                }
+            }
+        }
+    }
+
 }

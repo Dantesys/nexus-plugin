@@ -21,12 +21,8 @@ public class Flash {
     public static void getPassivabyLevel(int level, Player player){
         if(level<10){
             player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,600,0));
-        }else if(level<15){
-            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,600,1));
-        }else if(level<20){
-            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,600,2));
         }else{
-            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,600,3));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,600,1));
         }
     }
     public static void getSpecialbyLevel(int level, Player player){

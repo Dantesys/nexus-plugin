@@ -46,6 +46,7 @@ public class ItemsRegistro {
     public static Nexus assassino;
     public static Nexus frostis;
     public static Nexus necromante;
+    public static Nexus alquimista;
     public static Nexus livro;
     private static final List<Nexus> reliquias = new ArrayList<>();
     public static void init(){
@@ -103,6 +104,8 @@ public class ItemsRegistro {
         reliquias.add(frostis);
         createNecromante();
         reliquias.add(necromante);
+        createAlquimista();
+        reliquias.add(alquimista);
         createLivro();
     }
     private static void createGuerreiro(){
@@ -433,7 +436,19 @@ public class ItemsRegistro {
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"necromante");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
         item.setItemMeta(meta);
-        frostis = new Nexus(item,"necromante");
+        necromante = new Nexus(item,"necromante");
+    }
+    private static void createAlquimista(){
+        ItemStack item = new ItemStack(Material.GLASS_BOTTLE,1);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Nexus do Alquimista"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"alquimista");
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
+        item.setItemMeta(meta);
+        alquimista = new Nexus(item,"alquimista");
     }
     private static void createLivro(){
         ItemStack item = new ItemStack(Material.WRITTEN_BOOK,1);
@@ -485,6 +500,8 @@ public class ItemsRegistro {
             case "cronosombra" -> cronosombra;
             case "assassino" -> assassino;
             case "frostis" -> frostis;
+            case "necromante" -> necromante;
+            case "alquimista" -> alquimista;
             default -> null;
         };
     }

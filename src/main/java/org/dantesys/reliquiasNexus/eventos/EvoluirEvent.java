@@ -201,6 +201,12 @@ public class EvoluirEvent implements Listener {
                 dataPlayer.set(NECROMANTE.key,PersistentDataType.INTEGER,levelAtual+1);
                 player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE).setBaseValue(3+levelAtual);
             }
+            case "alquimista" -> {
+                dataPlayer.set(MISSAOALQUIMISTA.key, PersistentDataType.INTEGER, 0);
+                dataPlayer.set(ALQUIMISTA.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE).setBaseValue(3+levelAtual);
+                player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE).setBaseValue(4.5+levelAtual);
+            }
         }
     }
     public void tentarEvoluir(Player player, ItemStack nexusItem, int levelAtual,int slot) {
@@ -578,6 +584,16 @@ public class EvoluirEvent implements Listener {
                     condicao = ReliquiasNexus.getLang().getString("condicao.necromante");
                     if(condicao==null){
                         condicao="derrote mobs não esqueléticos mais <cond> vezes";
+                    }
+                    condicao=condicao.replace("<cond>",""+(level-kills));
+                }
+            }
+            case "alquimista" -> {
+                int kills = player.getPersistentDataContainer().getOrDefault(MISSAOALQUIMISTA.key, PersistentDataType.INTEGER, 0);
+                if(kills < level){
+                    condicao = ReliquiasNexus.getLang().getString("condicao.alquimista");
+                    if(condicao==null){
+                        condicao="beba mais <cond> poções";
                     }
                     condicao=condicao.replace("<cond>",""+(level-kills));
                 }
@@ -1389,6 +1405,13 @@ public class EvoluirEvent implements Listener {
                             if(item.getNome().equals("mago")){
                                 int l=dataPlayer.getOrDefault(MAGO.key,PersistentDataType.INTEGER,1);
                                 int usos=dataPlayer.getOrDefault(MISSAOMAGO.key,PersistentDataType.INTEGER,0);
+                                usos++;
+                                dataPlayer.set(MISSAOMAGO.key,PersistentDataType.INTEGER,usos);
+                                tentarEvoluir(player,stack,l,getSlotOfItem(player,stack));
+                            }
+                            if(item.getNome().equals("alquimista")){
+                                int l=dataPlayer.getOrDefault(ALQUIMISTA.key,PersistentDataType.INTEGER,1);
+                                int usos=dataPlayer.getOrDefault(MISSAOALQUIMISTA.key,PersistentDataType.INTEGER,0);
                                 usos++;
                                 dataPlayer.set(MISSAOMAGO.key,PersistentDataType.INTEGER,usos);
                                 tentarEvoluir(player,stack,l,getSlotOfItem(player,stack));
