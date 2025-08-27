@@ -31,7 +31,6 @@ import org.dantesys.reliquiasNexus.SpeciaisPassivas.Golem;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
 import org.dantesys.reliquiasNexus.util.EntityToEgg;
-import org.dantesys.reliquiasNexus.util.NexusKeys;
 
 import java.util.*;
 import java.util.stream.Collectors;
