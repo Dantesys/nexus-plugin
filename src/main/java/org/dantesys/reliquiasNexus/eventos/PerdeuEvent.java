@@ -6,6 +6,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -178,6 +179,13 @@ public class PerdeuEvent implements Listener {
                 }
                 event.getWhoClicked().sendMessage("§c"+msg);
             }
+        }
+    }
+    @EventHandler
+    public void colocaBloco(BlockPlaceEvent event){
+        ItemStack stack = event.getItemInHand();
+        if(stack.getPersistentDataContainer().has(NEXUS.key)){
+            event.setCancelled(true);
         }
     }
 }
