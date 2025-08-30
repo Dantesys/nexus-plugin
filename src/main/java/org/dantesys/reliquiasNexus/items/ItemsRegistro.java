@@ -48,6 +48,7 @@ public class ItemsRegistro {
     public static Nexus necromante;
     public static Nexus alquimista;
     public static Nexus golem;
+    public static Nexus dragao;
     public static Nexus livro;
     private static final List<Nexus> reliquias = new ArrayList<>();
     public static void init(){
@@ -109,6 +110,8 @@ public class ItemsRegistro {
         reliquias.add(alquimista);
         createGolem();
         reliquias.add(golem);
+        createDragao();
+        reliquias.add(dragao);
         createLivro();
     }
     private static void createGuerreiro(){
@@ -442,7 +445,7 @@ public class ItemsRegistro {
         necromante = new Nexus(item,"necromante");
     }
     private static void createAlquimista(){
-        ItemStack item = new ItemStack(Material.GLASS_BOTTLE,1);
+        ItemStack item = new ItemStack(Material.HEART_OF_THE_SEA,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Alquimista"));
         meta.setUnbreakable(true);
@@ -464,6 +467,18 @@ public class ItemsRegistro {
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
         item.setItemMeta(meta);
         golem = new Nexus(item,"golem");
+    }
+    private static void createDragao(){
+        ItemStack item = new ItemStack(Material.DRAGON_HEAD,1);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Nexus do Dragão"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"dragao");
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
+        item.setItemMeta(meta);
+        dragao = new Nexus(item,"dragao");
     }
     private static void createLivro(){
         ItemStack item = new ItemStack(Material.WRITTEN_BOOK,1);
@@ -518,6 +533,7 @@ public class ItemsRegistro {
             case "necromante" -> necromante;
             case "alquimista" -> alquimista;
             case "golem" -> golem;
+            case "dragao" -> dragao;
             default -> null;
         };
     }

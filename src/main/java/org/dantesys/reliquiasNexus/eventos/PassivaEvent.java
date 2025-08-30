@@ -3,10 +3,7 @@ package org.dantesys.reliquiasNexus.eventos;
 import com.destroystokyo.paper.event.server.ServerTickEndEvent;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
-import org.bukkit.DyeColor;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
@@ -15,6 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -26,6 +24,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.Vector;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
 import org.dantesys.reliquiasNexus.SpeciaisPassivas.*;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
@@ -36,6 +35,7 @@ import org.dantesys.reliquiasNexus.util.CoresUtils;
 import org.dantesys.reliquiasNexus.util.EntityToEgg;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -103,6 +103,12 @@ public class PassivaEvent implements Listener {
                     }
                 }else{
                     conteiner.set(SPECIAL.key, PersistentDataType.INTEGER,0);
+                }
+                if(player.getPersistentDataContainer().has(RUGIDO.key,PersistentDataType.INTEGER)){
+                    int rg = player.getPersistentDataContainer().getOrDefault(RUGIDO.key,PersistentDataType.INTEGER,0);
+                    if(rg>0){
+                        player.getPersistentDataContainer().set(RUGIDO.key,PersistentDataType.INTEGER,rg-1);
+                    }
                 }
                 if(conteiner.has(DRENO.key,PersistentDataType.INTEGER)){
                     int tempo = conteiner.getOrDefault(DRENO.key,PersistentDataType.INTEGER,0);
@@ -199,6 +205,7 @@ public class PassivaEvent implements Listener {
     @EventHandler
     public void ataqueMobs(EntityDamageByEntityEvent event){
         Entity entity = event.getDamager();
+        Entity atacado = event.getEntity();
         if(entity instanceof Player player){
             if(temReliquia(player,"assassino") && event.isCritical()){
                 player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY,60,0));
@@ -218,6 +225,14 @@ public class PassivaEvent implements Listener {
                     if(mat!=null){
                         vivo.getWorld().dropItemNaturally(vivo.getLocation(),new ItemStack(mat));
                     }
+                }
+            }
+        }
+        if(atacado instanceof Player player){
+            if(temReliquia(player,"dragao")){
+                if(entity instanceof LivingEntity vivo && vivo.getType()==EntityType.ENDER_DRAGON){
+                    player.heal(20);
+                    event.setCancelled(true);
                 }
             }
         }
@@ -261,6 +276,15 @@ public class PassivaEvent implements Listener {
             if(temReliquia(player,"frostis")){
                 if(event.getCause().equals(EntityDamageEvent.DamageCause.FREEZE)){
                     player.heal(1);
+                    event.setCancelled(true);
+                }
+            }
+            if(temReliquia(player,"dragao")){
+                DamageCause cause = event.getCause();
+                List<DamageCause> causes = List.of(DamageCause.CAMPFIRE,DamageCause.FIRE,DamageCause.FIRE_TICK,DamageCause.HOT_FLOOR,
+                        DamageCause.LAVA);
+                if(causes.contains(cause)){
+                    player.heal(20);
                     event.setCancelled(true);
                 }
             }
@@ -365,6 +389,31 @@ public class PassivaEvent implements Listener {
                         }
                     }
                     case "alquimista" -> swapPotion(player);
+                    case "dragao" -> {
+                        int level = player.getPersistentDataContainer().getOrDefault(DRAGAO.key,PersistentDataType.INTEGER,1);
+                        if(level>5){
+                            player.setAllowFlight(true);
+                            player.setFlying(true);
+                        }
+                        if(player.getHealth()<=player.getAttribute(Attribute.MAX_HEALTH).getBaseValue()*0.25){
+                            if(player.getPersistentDataContainer().has(RUGIDO.key,PersistentDataType.INTEGER)){
+                                int rg = player.getPersistentDataContainer().getOrDefault(RUGIDO.key,PersistentDataType.INTEGER,0);
+                                if(rg<=0){
+                                    player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 2.0f, 1.0f);
+                                    player.getWorld().spawnParticle(Particle.DRAGON_BREATH, player.getLocation(), 200, 3, 1, 3, 0.1);
+                                    for (Entity e : player.getNearbyEntities(6, 6, 6)) {
+                                        if (e instanceof LivingEntity && e != player) {
+                                            Vector knockback = e.getLocation().toVector().subtract(player.getLocation().toVector()).normalize().multiply(1.5);
+                                            e.setVelocity(knockback);
+                                            ((LivingEntity) e).addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 100, 1)); // 5s Slowness II
+                                            ((LivingEntity) e).addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 100, 0)); // 5s Weakness I
+                                        }
+                                    }
+                                    player.getPersistentDataContainer().set(RUGIDO.key,PersistentDataType.INTEGER,120);
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -476,6 +525,11 @@ public class PassivaEvent implements Listener {
                     .map(ent -> (LivingEntity) ent)
                     .findAny().ifPresent(e::setTarget);
 
+        }
+        if(e.getEntity().getType() == EntityType.ENDER_DRAGON){
+            if(e.getTarget() instanceof Player player && temReliquia(player,"dragao")){
+                e.setCancelled(true);
+            }
         }
     }
     @EventHandler

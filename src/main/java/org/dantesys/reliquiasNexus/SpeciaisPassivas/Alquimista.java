@@ -81,7 +81,7 @@ public class Alquimista {
         Random random = new Random();
         // Listar entidades próximas
         for (Entity entity : world.getNearbyEntities(centro, raio, raio, raio)) {
-            if (entity instanceof LivingEntity living) {
+            if (entity instanceof LivingEntity living && living!=player) {
                 int qtdEfeitos = 1+random.nextInt(3);
                 for (int i = 0; i < qtdEfeitos; i++) {
                     PotionEffectType efeito = EFEITOS_NEGATIVOS.get(random.nextInt(EFEITOS_NEGATIVOS.size()));

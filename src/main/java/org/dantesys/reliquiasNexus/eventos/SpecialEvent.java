@@ -493,6 +493,17 @@ public class SpecialEvent implements Listener {
                     }
                 }
             }
+            stack = player.getInventory().getHelmet();
+            if (stack!=null && stack.getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)) {
+                String nome = stack.getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING);
+                if (nome != null && nome.equals("dragao")) {
+                    Nexus item = ItemsRegistro.getFromNome(nome);
+                    if(item!=null){
+                        dragao(player);
+                        dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,60);
+                    }
+                }
+            }
         }
         ItemStack stack = player.getInventory().getItemInMainHand();
         if(stack.getPersistentDataContainer().has(DONO.key, PersistentDataType.STRING) && stack.getType()==Material.WRITTEN_BOOK){
@@ -682,6 +693,11 @@ public class SpecialEvent implements Listener {
             default -> desc="§l§6"+r+" "+nome+"\n§r§0Special: Descrição não disponível";
         };
         return desc;
+    }
+    private void dragao(Player player){
+        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+        int l = dataPlayer.getOrDefault(DRAGAO.key,PersistentDataType.INTEGER,1);
+        Dragao.getSpecialbyLevel(l,player);
     }
     private void golem(Player player){
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();

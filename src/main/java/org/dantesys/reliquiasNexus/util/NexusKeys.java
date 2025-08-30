@@ -11,6 +11,7 @@ public enum NexusKeys {
     NEXUS(new NamespacedKey(Objects.requireNonNull(ReliquiasNexus.getPlugin(ReliquiasNexus.class)),"nexus")),
     SLAVE(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"slave")),
     DRENO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"dreno")),
+    RUGIDO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"rugido")),
     TOTEM(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"totem")),
     RENASCER(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"renascer")),
     CHARGE(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"CHARGE")),
@@ -76,6 +77,8 @@ public enum NexusKeys {
     MISSAOALQUIMISTA(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_alquimista")),
     GOLEM(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"golem")),
     MISSAOGOLEM(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_golem")),
+    DRAGAO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"dragao")),
+    MISSAODRAGAO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class),"missao_dragao")),
     // Novas chaves para o sistema de missões
     MISSAO_TIPO(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class), "missao_tipo")),
     MISSAO_META(new NamespacedKey(ReliquiasNexus.getPlugin(ReliquiasNexus.class), "missao_meta")),
@@ -120,6 +123,7 @@ public enum NexusKeys {
             case "necromante" -> NECROMANTE.key;
             case "alquimista" -> ALQUIMISTA.key;
             case "golem" -> GOLEM.key;
+            case "dragao" -> DRAGAO.key;
             default -> null;
         };
     }
@@ -154,6 +158,7 @@ public enum NexusKeys {
         keys.add(NECROMANTE.key);
         keys.add(ALQUIMISTA.key);
         keys.add(GOLEM.key);
+        keys.add(DRAGAO.key);
         return keys;
     }
 }

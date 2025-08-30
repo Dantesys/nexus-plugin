@@ -219,6 +219,17 @@ public class EvoluirEvent implements Listener {
                 player.getAttribute(Attribute.SAFE_FALL_DISTANCE).setBaseValue(3+(levelAtual*2));
                 player.getAttribute(Attribute.SWEEPING_DAMAGE_RATIO).setBaseValue(levelAtual*0.05);
             }
+            case "dragao" -> {
+                dataPlayer.set(MISSAODRAGAO.key, PersistentDataType.DOUBLE, 0d);
+                dataPlayer.set(DRAGAO.key,PersistentDataType.INTEGER,levelAtual+1);
+                player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20+levelAtual);
+                player.getAttribute(Attribute.ARMOR).setBaseValue(levelAtual/5);
+                player.getAttribute(Attribute.ARMOR_TOUGHNESS).setBaseValue(levelAtual/5);
+                player.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(2+(levelAtual/5));
+                player.getAttribute(Attribute.JUMP_STRENGTH).setBaseValue(0.42+(levelAtual/20));
+                player.getAttribute(Attribute.SAFE_FALL_DISTANCE).setBaseValue(3+(levelAtual*2));
+                player.getAttribute(Attribute.SWEEPING_DAMAGE_RATIO).setBaseValue(levelAtual*0.05);
+            }
         }
     }
     public void tentarEvoluir(Player player, ItemStack nexusItem, int levelAtual,int slot) {
@@ -624,6 +635,19 @@ public class EvoluirEvent implements Listener {
                     condicao=condicao.replace("<cond>",""+qtd);
                 }
             }
+            case "dragao" -> {
+                double colheitas = player.getPersistentDataContainer().getOrDefault(MISSAODRAGAO.key, PersistentDataType.DOUBLE, 0d);
+                if(colheitas>=level){
+                    condicao="";
+                }else{
+                    int qtd = (int) (level-colheitas);
+                    condicao = ReliquiasNexus.getLang().getString("condicao.dragao");
+                    if(condicao==null){
+                        condicao="derrote mais <cond> bosses";
+                    }
+                    condicao=condicao.replace("<cond>",""+qtd);
+                }
+            }
         }
         return condicao;
     }
@@ -950,6 +974,16 @@ public class EvoluirEvent implements Listener {
                 int kills = data.getOrDefault(MISSAONECROMANTE.key, PersistentDataType.INTEGER, 0);
                 int level = data.getOrDefault(NECROMANTE.key, PersistentDataType.INTEGER, 1);
                 data.set(MISSAONECROMANTE.key, PersistentDataType.INTEGER, kills + 1);
+                tentarEvoluir(killer,stack,level, getSlotOfItem(killer,stack));
+            }
+        }
+        if(temReliquia(killer,"dragao")){
+            stack=getReliquia(killer,"dragao");
+            Entity entity = event.getEntity();
+            if(entity instanceof Boss || entity.getType() == EntityType.WARDEN || entity.getType() == EntityType.ELDER_GUARDIAN){
+                int kills = data.getOrDefault(MISSAODRAGAO.key, PersistentDataType.INTEGER, 0);
+                int level = data.getOrDefault(DRAGAO.key, PersistentDataType.INTEGER, 1);
+                data.set(MISSAODRAGAO.key, PersistentDataType.INTEGER, kills + 1);
                 tentarEvoluir(killer,stack,level, getSlotOfItem(killer,stack));
             }
         }
