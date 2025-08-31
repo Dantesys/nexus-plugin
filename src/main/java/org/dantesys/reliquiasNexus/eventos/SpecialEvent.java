@@ -30,7 +30,9 @@ import org.dantesys.reliquiasNexus.SpeciaisPassivas.*;
 import org.dantesys.reliquiasNexus.SpeciaisPassivas.Golem;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
+import org.dantesys.reliquiasNexus.util.Economia;
 import org.dantesys.reliquiasNexus.util.EntityToEgg;
+import org.dantesys.reliquiasNexus.util.NexusKeys;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -46,36 +48,39 @@ public class SpecialEvent implements Listener {
         this.plugin = plugin;
     }
 
+    public List<String> getMissionTypes() {
+        return missionTypes;
+    }
+
     public void gerarMissaoAleatoria(Player player) {
         Random random = new Random();
         String missionType = missionTypes.get(random.nextInt(missionTypes.size()));
 
-        int playerLevel = player.getLevel();
+        int highestRelicLevel = 0;
+        PersistentDataContainer pdcPlayer = player.getPersistentDataContainer();
+        for(NamespacedKey key : NexusKeys.getKeyLevel()){
+            int level = pdcPlayer.getOrDefault(key, PersistentDataType.INTEGER, 0);
+            if(level > highestRelicLevel){
+                highestRelicLevel = level;
+            }
+        }
+
         String difficulty;
-        if (playerLevel < 10) {
+        if (highestRelicLevel < 5) {
             difficulty = "facil";
-        } else if (playerLevel < 30) {
+        } else if (highestRelicLevel < 10) {
             difficulty = "medio";
-        } else {
+        } else if (highestRelicLevel < 20) {
             difficulty = "dificil";
+        } else {
+            difficulty = "extreme";
         }
 
         gerarMissao(player, missionType, difficulty, false);
     }
 
-    public void gerarMissaoEspecifica(Player player, String missionType, String difficulty) {
-        gerarMissao(player, missionType, difficulty, true);
-    }
-
     // Método combinado que gera missões diárias e especiais
-    public void gerarMissaoEspecial(Player player) {
-        Random random = new Random();
-        String missionType = missionTypes.get(random.nextInt(missionTypes.size()));
-        String difficulty = "extreme"; // Dificuldade padrão para missões especiais
-        gerarMissao(player, missionType, difficulty, true);
-    }
-
-    private void gerarMissao(Player player, String missionType, String difficulty, boolean isSpecial) {
+    public void gerarMissao(Player player, String missionType, String difficulty, boolean isSpecial) {
         PersistentDataContainer pdc = player.getPersistentDataContainer();
         if (pdc.has(MISSAO_TIPO.key, PersistentDataType.STRING)) {
             player.sendMessage(Component.text("❌ §cVocê já tem uma missão ativa!")
@@ -92,12 +97,14 @@ public class SpecialEvent implements Listener {
             case "facil" -> "§aFácil";
             case "medio" -> "§eMédio";
             case "dificil" -> "§cDifícil";
-            case "extreme" -> "§4Extreme";
+            case "extreme", "ender" -> "§4Extreme";
             default -> "§7Desconhecida";
         };
 
         int xpReward = 0;
+        double molyReward = 0;
         int levelReward = 0;
+        String rewardText;
 
         switch (missionType) {
             case "coleta":
@@ -120,7 +127,7 @@ public class SpecialEvent implements Listener {
                 baseGoal = 32;
                 durationMinutes = 25;
                 break;
-            case "especial_enderdragon":
+            case "ender":
                 baseGoal = 1;
                 durationMinutes = 60;
                 break;
@@ -134,23 +141,24 @@ public class SpecialEvent implements Listener {
             case "facil" -> 1.0;
             case "medio" -> 2.0;
             case "dificil" -> 3.0;
-            case "extreme" -> 5.0;
+            case "extreme", "ender" -> 5.0;
             default -> 1.0;
         };
 
         goal = (int) (baseGoal * difficultyMultiplier);
+        molyReward = (500.0 * difficultyMultiplier);
 
-        String rewardText;
         if (isSpecial) {
-            if (missionType.equals("especial_enderdragon")) {
+            if (missionType.equals("ender")) {
                 levelReward = 10;
+                rewardText = "§e+" + levelReward + " Levels, " + molyReward + " moly e Relíquia Cronossombra";
             } else {
                 levelReward = (int) (1 * difficultyMultiplier);
+                rewardText = "§e+" + levelReward + " Levels, " + molyReward + " moly e Relíquia Aleatória";
             }
-            rewardText = "§e+" + levelReward + " Levels e Relíquia Aleatória";
         } else {
             xpReward = (int) (2500 * difficultyMultiplier);
-            rewardText = "§e+" + xpReward + " XP";
+            rewardText = "§e+" + xpReward + " XP e " + molyReward + " moly";
         }
 
         mensagemMissao = text()
@@ -206,7 +214,7 @@ public class SpecialEvent implements Listener {
             case "exploracao" -> "Visite " + goal + " biomas diferentes em " + duration + " minutos!";
             case "pescaria" -> "Pesque " + goal + " itens em " + duration + " minutos!";
             case "mineracao" -> "Minere " + goal + " minérios de diamante em " + duration + " minutos!";
-            case "especial_enderdragon" -> "Derrote o Ender Dragon!";
+            case "ender" -> "Derrote o Ender Dragon!";
             default -> "Missão inválida.";
         };
     }
@@ -230,66 +238,81 @@ public class SpecialEvent implements Listener {
 
         if (giveReward) {
             int xpReward = 0;
+            double molyReward = 0;
             int levelReward = 0;
 
+            double difficultyMultiplier = switch (difficulty) {
+                case "facil" -> 1.0;
+                case "medio" -> 2.0;
+                case "dificil" -> 3.0;
+                case "extreme", "ender" -> 5.0;
+                default -> 1.0;
+            };
+
+            molyReward = (500.0 * difficultyMultiplier);
+
             if (isSpecial) {
-                if (missionType.equals("especial_enderdragon")) {
+                if (missionType.equals("ender")) {
                     levelReward = 10;
-                } else {
-                    double difficultyMultiplier = switch (difficulty) {
-                        case "facil" -> 1.0;
-                        case "medio" -> 2.0;
-                        case "dificil" -> 3.0;
-                        case "extreme" -> 5.0;
-                        default -> 1.0;
-                    };
-                    levelReward = (int) (1 * difficultyMultiplier);
-                }
-                player.giveExpLevels(levelReward);
-                player.sendMessage(Component.text("✅ §aMissão '" + missionName + "' concluída! Você recebeu " + levelReward + " níveis!")
-                        .color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD));
 
-                Random random = new Random();
-                List<String> names = plugin.names;
-
-                List<String> availableRelics = names.stream()
-                        .filter(name -> plugin.getNexusConfig().getString("nexus." + name) == null)
-                        .collect(Collectors.toList());
-
-                if (!availableRelics.isEmpty()) {
-                    String reliquiaAleatoria = availableRelics.get(random.nextInt(availableRelics.size()));
-
-                    Nexus nexus = ItemsRegistro.getFromNome(reliquiaAleatoria);
-                    if (nexus != null) {
-                        ItemStack itemReliquia = nexus.getItem(1);
+                    Nexus cronosombraNexus = ItemsRegistro.getFromNome("cronosombra");
+                    if (cronosombraNexus != null) {
+                        ItemStack itemReliquia = cronosombraNexus.getItem(1);
                         ItemMeta meta = itemReliquia.getItemMeta();
                         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING, player.getUniqueId().toString());
                         itemReliquia.setItemMeta(meta);
 
                         player.getInventory().addItem(itemReliquia);
-                        ReliquiasNexus.setConfigSave("nexus." + reliquiaAleatoria, player.getUniqueId().toString());
+                        ReliquiasNexus.setConfigSave("nexus." + "cronosombra", player.getUniqueId().toString());
                         plugin.saveConfig();
 
-                        player.sendMessage(Component.text("✅ §aVocê recebeu a relíquia " + reliquiaAleatoria + "!")
+                        player.sendMessage(Component.text("✅ §aVocê recebeu a relíquia Cronossombra!")
                                 .color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD));
+                    } else {
+                        player.sendMessage(Component.text("❌ §cOcorreu um erro ao obter a relíquia Cronossombra.")
+                                .color(NamedTextColor.RED));
                     }
                 } else {
-                    player.sendMessage(Component.text("❌ §cNão há relíquias disponíveis para serem distribuídas no momento!")
-                            .color(NamedTextColor.RED));
-                }
+                    levelReward = (int) (1 * difficultyMultiplier);
+                    player.giveExpLevels(levelReward);
+                    player.sendMessage(Component.text("✅ §aMissão '" + missionName + "' concluída! Você recebeu " + levelReward + " níveis!")
+                            .color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD));
 
+                    Random random = new Random();
+                    List<String> names = plugin.names;
+
+                    List<String> availableRelics = names.stream()
+                            .filter(name -> plugin.getNexusConfig().getString("nexus." + name) == null)
+                            .collect(Collectors.toList());
+
+                    if (!availableRelics.isEmpty()) {
+                        String reliquiaAleatoria = availableRelics.get(random.nextInt(availableRelics.size()));
+                        Nexus nexus = ItemsRegistro.getFromNome(reliquiaAleatoria);
+                        if (nexus != null) {
+                            ItemStack itemReliquia = nexus.getItem(1);
+                            ItemMeta meta = itemReliquia.getItemMeta();
+                            meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING, player.getUniqueId().toString());
+                            itemReliquia.setItemMeta(meta);
+                            player.getInventory().addItem(itemReliquia);
+                            ReliquiasNexus.setConfigSave("nexus." + reliquiaAleatoria, player.getUniqueId().toString());
+                            plugin.saveConfig();
+                            player.sendMessage(Component.text("✅ §aVocê recebeu a relíquia " + reliquiaAleatoria + "!")
+                                    .color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD));
+                        }
+                    } else {
+                        player.sendMessage(Component.text("❌ §cNão há relíquias disponíveis para serem distribuídas no momento!")
+                                .color(NamedTextColor.RED));
+                    }
+                }
             } else {
-                double difficultyMultiplier = switch (difficulty) {
-                    case "facil" -> 1.0;
-                    case "medio" -> 2.0;
-                    case "dificil" -> 3.0;
-                    default -> 1.0;
-                };
                 xpReward = (int) (2500 * difficultyMultiplier);
                 player.giveExp(xpReward);
                 player.sendMessage(Component.text("✅ §aMissão '" + missionName + "' concluída! Você recebeu " + xpReward + " de XP!")
                         .color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD));
             }
+            // Adiciona a recompensa de moly para todas as missões concluídas com sucesso
+            Economia.adicionarSaldo(player, molyReward, "Missão Concluída");
+            player.sendMessage(Component.text("🎁 Você também recebeu " + molyReward + " moly(s)!").color(NamedTextColor.YELLOW));
         } else {
             player.sendMessage(Component.text("❌ §cMissão '" + missionName + "' finalizada sem recompensa.")
                     .color(NamedTextColor.RED));
@@ -310,7 +333,7 @@ public class SpecialEvent implements Listener {
             case "exploracao" -> "Exploração";
             case "pescaria" -> "Pescaria";
             case "mineracao" -> "Mineração";
-            case "especial_enderdragon" -> "A Caça ao Dragão";
+            case "ender" -> "A Caça ao Dragão";
             default -> missionType;
         };
     }
@@ -335,7 +358,7 @@ public class SpecialEvent implements Listener {
                     if (progress >= goal) {
                         finalizarMissao(killer);
                     }
-                } else if (missionType.equals("especial_enderdragon") && entity.getType() == EntityType.ENDER_DRAGON) {
+                } else if (missionType.equals("ender") && entity.getType() == EntityType.ENDER_DRAGON) {
                     finalizarMissao(killer);
                 }
             }
@@ -359,6 +382,7 @@ public class SpecialEvent implements Listener {
                         .color(NamedTextColor.YELLOW));
                 if (progress >= goal) {
                     finalizarMissao(player);
+                    player.sendMessage(Component.text("🎁 Você também recebeu " + 500 * (player.getLevel()/10) + " moly(s)!").color(NamedTextColor.YELLOW));
                 }
             } else if (missionType.equals("mineracao") && event.getBlock().getType() == Material.DIAMOND_ORE) {
                 int progress = pdc.get(MISSAO_PROGRESO.key, PersistentDataType.INTEGER) + 1;
@@ -405,25 +429,25 @@ public class SpecialEvent implements Listener {
                     Nexus item = ItemsRegistro.getFromNome(nome);
                     if(item!=null){
                         switch (item.getNome()) {
-                            case "barbaro" -> barbaro(player);
-                            case "ceifador" -> ceifador(player);
-                            case "fazendeiro" -> fazendeiro(player);
-                            case "guerreiro" -> guerreiro(player);
-                            case "vida" -> vida(player);
-                            case "mares" -> mares(player);
+                            case "barbaro" -> Barbaro.getSpecialbyLevel(dataPlayer.getOrDefault(BARBARO.key, PersistentDataType.INTEGER, 1), player);
+                            case "ceifador" -> Ceifador.getSpecialbyLevel(dataPlayer.getOrDefault(CEIFADOR.key, PersistentDataType.INTEGER, 1), player);
+                            case "fazendeiro" -> Fazendeiro.getSpecialbyLevel(dataPlayer.getOrDefault(FAZENDEIRO.key, PersistentDataType.INTEGER, 1), player);
+                            case "guerreiro" -> Guerreiro.getSpecialbyLevel(dataPlayer.getOrDefault(GUERREIRO.key, PersistentDataType.INTEGER, 1), player);
+                            case "vida" -> Vida.getSpecialbyLevel(dataPlayer.getOrDefault(VIDA.key, PersistentDataType.INTEGER, 1), player);
+                            case "mares" -> Mares.getSpecialbyLevel(dataPlayer.getOrDefault(MARES.key, PersistentDataType.INTEGER, 1), player);
                             case "arqueiro" -> {
-                                arqueiro(player);
+                                Arqueiro.getSpecialbyLevel(dataPlayer.getOrDefault(ARQUEIRO.key, PersistentDataType.INTEGER, 1), player);
                                 event.setCancelled(true);
                             }
                             case "cacador" -> {
-                                cacador(player);
+                                Cacador.getSpecialbyLevel(dataPlayer.getOrDefault(CACADOR.key, PersistentDataType.INTEGER, 1), player);
                                 event.setCancelled(true);
                             }
-                            case "tempestade" -> tempestade(player);
-                            case "mineiro" -> mineiro(player);
-                            case "sculk" -> sculk(player);
-                            case "protetor" -> protetor(player);
-                            case "pescador" -> pescador(player);
+                            case "tempestade" -> Tempestade.getSpecialbyLevel(dataPlayer.getOrDefault(TEMPESTADE.key, PersistentDataType.INTEGER, 1), player);
+                            case "mineiro" -> Mineiro.getSpecialbyLevel(dataPlayer.getOrDefault(MINEIRO.key, PersistentDataType.INTEGER, 1), player);
+                            case "sculk" -> Sculk.getSpecialbyLevel(dataPlayer.getOrDefault(SCULK.key, PersistentDataType.INTEGER, 1), player);
+                            case "protetor" -> Protetor.getSpecialbyLevel(dataPlayer.getOrDefault(PROTETOR.key, PersistentDataType.INTEGER, 1), player);
+                            case "pescador" -> Pescador.getSpecialbyLevel(dataPlayer.getOrDefault(PESCADOR.key, PersistentDataType.INTEGER, 1), player);
                             case "ladrao" -> {
                                 Ladrao.getSpecialbyLevel(dataPlayer.getOrDefault(LADRAO.key, PersistentDataType.INTEGER, 1), player);
                                 event.setCancelled(true);
@@ -432,16 +456,18 @@ public class SpecialEvent implements Listener {
                                 Domador.getSpecialbyLevel(dataPlayer.getOrDefault(DOMADOR.key, PersistentDataType.INTEGER, 1), player);
                             }
                             case "mago" -> {
-                                mago(player);
+                                Mago.getSpecialbyLevel(dataPlayer.getOrDefault(MAGO.key, PersistentDataType.INTEGER, 1), player);
                                 event.setCancelled(true);
                             }
-                            case "cozinheiro" -> cozinheiro(player);
-                            case "construtor" -> construtor(player);
-                            case "abissal" -> abissal(player);
-                            case "assassino" -> assassino(player);
-                            case "frostis" -> frostis(player);
-                            case "necromante" -> necromante(player);
-                            case "alquimista" -> alquimista(player);
+                            case "cozinheiro" -> Cozinheiro.getSpecialbyLevel(dataPlayer.getOrDefault(COZINHEIRO.key, PersistentDataType.INTEGER, 1), player);
+                            case "construtor" -> Construtor.getSpecialbyLevel(dataPlayer.getOrDefault(CONSTRUTOR.key, PersistentDataType.INTEGER, 1), player);
+                            case "abissal" -> Abissal.getSpecialbyLevel(dataPlayer.getOrDefault(ABISSAL.key, PersistentDataType.INTEGER, 1), player);
+                            case "assassino" -> Assassino.getSpecialbyLevel(dataPlayer.getOrDefault(ASSASSINO.key, PersistentDataType.INTEGER, 1), player);
+                            case "frostis" -> Frostis.getSpecialbyLevel(dataPlayer.getOrDefault(FROSTIS.key, PersistentDataType.INTEGER, 1), player);
+                            case "necromante" -> Necromante.getSpecialbyLevel(dataPlayer.getOrDefault(NECROMANTE.key, PersistentDataType.INTEGER, 1), player);
+                            case "alquimista" -> Alquimista.getSpecialbyLevel(dataPlayer.getOrDefault(ALQUIMISTA.key, PersistentDataType.INTEGER, 1), player);
+                            case "golem" -> Golem.getSpecialbyLevel(dataPlayer.getOrDefault(GOLEM.key, PersistentDataType.INTEGER, 1), player);
+                            case "dragao" -> Dragao.getSpecialbyLevel(dataPlayer.getOrDefault(DRAGAO.key, PersistentDataType.INTEGER, 1), player);
                         }
                         if(!item.getNome().equals("mago")){
                             dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,60);
@@ -455,14 +481,14 @@ public class SpecialEvent implements Listener {
                 if (nome != null && nome.equals("fenix")) {
                     Nexus item = ItemsRegistro.getFromNome(nome);
                     if(item!=null){
-                        fenix(player);
+                        Fenix.getSpecialbyLevel(dataPlayer.getOrDefault(FENIX.key, PersistentDataType.INTEGER, 1), player);
                         dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,60);
                     }
                 }
                 if (nome != null && nome.equals("golem")) {
                     Nexus item = ItemsRegistro.getFromNome(nome);
                     if(item!=null){
-                        golem(player);
+                        Golem.getSpecialbyLevel(dataPlayer.getOrDefault(GOLEM.key, PersistentDataType.INTEGER, 1), player);
                         dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,60);
                     }
                 }
@@ -474,11 +500,11 @@ public class SpecialEvent implements Listener {
                     if (nome.equals("protetor")) {
                         Nexus item = ItemsRegistro.getFromNome(nome);
                         if(item!=null){
-                            protetor(player);
+                            Protetor.getSpecialbyLevel(dataPlayer.getOrDefault(PROTETOR.key, PersistentDataType.INTEGER, 1), player);
                             dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,60);
                         }
                     }else if(nome.equals("vida")){
-                        vida(player);
+                        Vida.getSpecialbyLevel(dataPlayer.getOrDefault(VIDA.key, PersistentDataType.INTEGER, 1), player);
                     }
                 }
             }
@@ -488,7 +514,7 @@ public class SpecialEvent implements Listener {
                 if (nome != null && nome.equals("hulk")) {
                     Nexus item = ItemsRegistro.getFromNome(nome);
                     if(item!=null){
-                        hulk(player);
+                        Hulk.getSpecialbyLevel(dataPlayer.getOrDefault(HULK.key, PersistentDataType.INTEGER, 1), player);
                         dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,60);
                     }
                 }
@@ -499,7 +525,7 @@ public class SpecialEvent implements Listener {
                 if (nome != null && nome.equals("dragao")) {
                     Nexus item = ItemsRegistro.getFromNome(nome);
                     if(item!=null){
-                        dragao(player);
+                        Dragao.getSpecialbyLevel(dataPlayer.getOrDefault(DRAGAO.key, PersistentDataType.INTEGER, 1), player);
                         dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,60);
                     }
                 }
@@ -514,7 +540,7 @@ public class SpecialEvent implements Listener {
                 meta.pages(Collections.emptyList());
                 String msg = ReliquiasNexus.getLang().getString("livro.base");
                 if(msg==null){
-                    msg="Todas as Reliquias precisam de Xp para evoluir.<break>As que possuem Special Manual para ativar tem que está agachado";
+                    msg="Todas as Reliquias precisam de Xp para evoluir.\nAs que possuem Special Manual para ativar tem que está agachado";
                 }
                 msg=msg.replace("<break>","\n");
                 meta.addPages(Component.text(msg));
@@ -666,12 +692,6 @@ public class SpecialEvent implements Listener {
                 }
                 desc="§l§6"+r+" Pescador\n§r§0Special (Manual):\n"+msg;
             }
-            case "flash" -> {
-                if(msg==null){
-                    msg="Um teleporte para alguns blocos a frente!\nPara evoluir precisa usar a habilidade";
-                }
-                desc="§l§6"+r+" Flash\n§r§0Special (Manual):\n"+msg;
-            }
             case "mago" -> {
                 if(msg==null){
                     msg="A habilidade pode variar dependendo do slot que ele vai estar!\nPara evoluir precisa beber poções";
@@ -693,143 +713,6 @@ public class SpecialEvent implements Listener {
             default -> desc="§l§6"+r+" "+nome+"\n§r§0Special: Descrição não disponível";
         };
         return desc;
-    }
-    private void dragao(Player player){
-        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(DRAGAO.key,PersistentDataType.INTEGER,1);
-        Dragao.getSpecialbyLevel(l,player);
-    }
-    private void golem(Player player){
-        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(GOLEM.key,PersistentDataType.INTEGER,1);
-        Golem.getSpecialbyLevel(l,player);
-    }
-    private void alquimista(Player player){
-        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(ALQUIMISTA.key,PersistentDataType.INTEGER,1);
-        Alquimista.getSpecialbyLevel(l,player);
-    }
-    private void necromante(Player player){
-        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(NECROMANTE.key,PersistentDataType.INTEGER,1);
-        Necromante.getSpecialbyLevel(l,player);
-    }
-    private void abissal(Player player){
-        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(ABISSAL.key,PersistentDataType.INTEGER,1);
-        Abissal.getSpecialbyLevel(l,player);
-    }
-    private void frostis(Player player){
-        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(FROSTIS.key,PersistentDataType.INTEGER,1);
-        Frostis.getSpecialbyLevel(l,player);
-    }
-    private void cozinheiro(Player player){
-        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(COZINHEIRO.key,PersistentDataType.INTEGER,1);
-        Cozinheiro.getSpecialbyLevel(l,player);
-    }
-    private void construtor(Player player){
-        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(CONSTRUTOR.key,PersistentDataType.INTEGER,1);
-        Construtor.getSpecialbyLevel(l,player);
-    }
-    private void assassino(Player player){
-        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(ASSASSINO.key,PersistentDataType.INTEGER,1);
-        Assassino.getSpecialbyLevel(l,player);
-    }
-    private void barbaro(Player player){
-        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(BARBARO.key,PersistentDataType.INTEGER,1);
-        Barbaro.getSpecialbyLevel(l,player);
-    }
-    private void ceifador(Player player){
-        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(CEIFADOR.key,PersistentDataType.INTEGER,1);
-        Ceifador.getSpecialbyLevel(l,player);
-    }
-    private void vida(Player player){
-        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(VIDA.key,PersistentDataType.INTEGER,1);
-        Vida.getSpecialbyLevel(l,player);
-    }
-    private void fazendeiro(Player player){
-        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(FAZENDEIRO.key,PersistentDataType.INTEGER,1);
-        Fazendeiro.getSpecialbyLevel(l,player);
-    }
-    private void guerreiro(Player player){
-        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(GUERREIRO.key,PersistentDataType.INTEGER,1);
-        Guerreiro.getSpecialbyLevel(l,player);
-    }
-    private void mares(Player player){
-        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(MARES.key,PersistentDataType.INTEGER,1);
-        Mares.getSpecialbyLevel(l,player);
-    }
-    private void arqueiro(Player player){
-        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(ARQUEIRO.key,PersistentDataType.INTEGER,1);
-        Arqueiro.getSpecialbyLevel(l,player);
-    }
-    private void cacador(Player player){
-        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(CACADOR.key,PersistentDataType.INTEGER,1);
-        Cacador.getSpecialbyLevel(l,player);
-    }
-    private void tempestade(Player player){
-        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(TEMPESTADE.key,PersistentDataType.INTEGER,1);
-        Tempestade.getSpecialbyLevel(l,player);
-    }
-    private void mineiro(Player player){
-        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(MINEIRO.key,PersistentDataType.INTEGER,1);
-        Mineiro.getSpecialbyLevel(l,player);
-    }
-    private void fenix(Player player){
-        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(FENIX.key,PersistentDataType.INTEGER,1);
-        Fenix.getSpecialbyLevel(l,player);
-    }
-    private void protetor(Player player){
-        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l=dataPlayer.getOrDefault(PROTETOR.key,PersistentDataType.INTEGER,1);
-        Protetor.getSpecialbyLevel(l,player);
-    }
-    private void hulk(Player player){
-        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(HULK.key,PersistentDataType.INTEGER,1);
-        Hulk.getSpecialbyLevel(l,player);
-    }
-    private void sculk(Player player){
-        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(SCULK.key,PersistentDataType.INTEGER,1);
-        Sculk.getSpecialbyLevel(l,player);
-    }
-    private void pescador(Player player){
-        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(PESCADOR.key,PersistentDataType.INTEGER,1);
-        Pescador.getSpecialbyLevel(l,player);
-    }
-    private void mago(Player player){
-        PlayerInventory inv = player.getInventory();
-        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        int l = dataPlayer.getOrDefault(MAGO.key,PersistentDataType.INTEGER,1);
-        int pos=0;
-        for (int i = 0; i <= 8; i++) {
-            ItemStack stack = inv.getItem(i);
-            if(stack!=null && stack.getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)){
-                String nome = stack.getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING);
-                if (nome != null && nome.equals("mago")) {
-                    pos=i;
-                    break;
-                }
-            }
-        }
-        Mago.getSpecialbyLevel(l,player,pos);
     }
     @EventHandler
     public void reversao(EntityDamageByEntityEvent event){

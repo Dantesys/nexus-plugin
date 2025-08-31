@@ -2,6 +2,7 @@ package org.dantesys.reliquiasNexus;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -25,26 +26,30 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.dantesys.reliquiasNexus.eventos.*;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
+import org.dantesys.reliquiasNexus.util.Economia;
 import org.dantesys.reliquiasNexus.util.NexusKeys;
 import org.dantesys.reliquiasNexus.util.Troca;
 import org.dantesys.reliquiasNexus.util.UpdaterCheck;
+import org.dantesys.reliquiasNexus.team.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 
 public final class ReliquiasNexus extends JavaPlugin {
-    private static final Map<UUID, Troca> trocas = new HashMap<>();
+    private static final Map<UUID, Troca> trocas = new ConcurrentHashMap<>();
     private static FileConfiguration config;
     private static YamlConfiguration lang;
     public final List<String> names = List.of("guerreiro","ceifador","vida","mares","barbaro",
@@ -52,8 +57,12 @@ public final class ReliquiasNexus extends JavaPlugin {
             "hulk","sculk","pescador","flash","mago","ladrao","domador","cozinheiro","construtor",
             "abissal","cronosombra","assassino","frostis","necromante","alquimista","golem","dragao");
 
+    public static void saiu(Player player) {
+    }
+
     @Override
     public void onEnable() {
+        NexusKeys.init(this);
         ItemsRegistro.init();
         saveResource("lang/pt-br.yml",true);
         saveResource("lang/en-us.yml",true);
@@ -83,11 +92,13 @@ public final class ReliquiasNexus extends JavaPlugin {
                     .append(Component.text("§7➤ §b/nexus livro §f- Receber livro das relíquias\n"))
                     .append(Component.text("§7➤ §b/nexus evoluir §f- Evoluir relíquia na mão\n"))
                     .append(Component.text("§7➤ §b/nexus expurgo §f- Ver status do expurgo\n"))
+                    .append(Component.text("§7➤ §b/nexus missao §f- Gerar uma missão aleatória\n"))
+                    .append(Component.text("§7➤ §b/nexus Loja §f- Abrir menu da loja\n"))
                     .append(Component.text("§7➤ §b/nexus trocar <jogador> §f- Oferecer troca\n"))
+                    .append(Component.text("§7➤ §b/nexus banco §f- Abrir menu do banco\n"))
+                    .append(Component.text("§7➤ §b/nexus team §f- Comandos de equipe\n"))
                     .append(Component.text("§7➤ §b/nexus list §f- Listar relíquias do servidor\n"))
                     .append(Component.text("§7➤ §b/nexus level §f- Seus níveis de relíquias\n"))
-                    .append(Component.text("§7➤ §b/nexus aceitar §f- Aceitar oferta de troca\n"))
-                    .append(Component.text("§7➤ §b/nexus cancelar §f- Recusar oferta de troca\n"))
                     .append(Component.text("§6§l⭐ §e§lNEXUS COMMANDS §6§l⭐\n").decorate(TextDecoration.BOLD))
                     .build();
 
@@ -205,11 +216,11 @@ public final class ReliquiasNexus extends JavaPlugin {
                                         .color(NamedTextColor.GRAY))
                                 .append(Component.text("✅ ACEITAR ")
                                         .color(NamedTextColor.GREEN)
-                                        .clickEvent(ClickEvent.runCommand("/nexus aceitar"))
+                                        .clickEvent(ClickEvent.runCommand("/nexus aceitar " + player.getUniqueId().toString()))
                                         .hoverEvent(HoverEvent.showText(Component.text("§aClique para aceitar a troca"))))
                                 .append(Component.text("❌ RECUSAR")
                                         .color(NamedTextColor.RED)
-                                        .clickEvent(ClickEvent.runCommand("/nexus cancelar"))
+                                        .clickEvent(ClickEvent.runCommand("/nexus cancelar " + player.getUniqueId().toString()))
                                         .hoverEvent(HoverEvent.showText(Component.text("§cClique para recusar a troca"))))
                                 .build();
 
@@ -226,89 +237,97 @@ public final class ReliquiasNexus extends JavaPlugin {
             return Command.SINGLE_SUCCESS;
         })));
 
-        // Comando aceitar
-        nexusRoot.then(Commands.literal("aceitar").executes(ctx -> {
+        // Comando aceitar (oculto)
+        nexusRoot.then(Commands.literal("aceitar").then(Commands.argument("offerer", StringArgumentType.string()).executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
-            if(ctx.getSource().getExecutor() instanceof Player player){
+            if (ctx.getSource().getExecutor() instanceof Player player) {
+                String offererId = ctx.getArgument("offerer", String.class);
+                UUID offererUuid = UUID.fromString(offererId);
+                Player offerer = Bukkit.getPlayer(offererUuid);
                 Troca t = trocas.get(player.getUniqueId());
 
-                if(t == null){
-                    sender.sendMessage(Component.text("❌ §cVocê não tem ofertas de troca pendentes!")
+                if (t == null || !t.offererUuid().equals(offererUuid)) {
+                    sender.sendMessage(Component.text("❌ §cEsta oferta não é mais válida!")
                             .color(NamedTextColor.RED));
                     return Command.SINGLE_SUCCESS;
                 }
 
-                Player p = Bukkit.getPlayer(t.uuid());
-                if(p == null || !p.isOnline()){
+                if (offerer == null || !offerer.isOnline()) {
                     trocas.remove(player.getUniqueId());
-                    sender.sendMessage(Component.text("❌ §cO jogador não está mais online!")
+                    sender.sendMessage(Component.text("❌ §cO jogador que ofereceu a troca saiu do servidor!")
                             .color(NamedTextColor.RED));
                     return Command.SINGLE_SUCCESS;
                 }
 
-                // Lógica de aceitação da troca
                 ItemStack stack = player.getInventory().getItemInMainHand();
-                if(stack == null || !stack.hasItemMeta()){
-                    sender.sendMessage(Component.text("❌ §cVocê precisa segurar uma relíquia na mão para aceitar a troca!")
+                if(stack == null || !stack.hasItemMeta() || !stack.getItemMeta().getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)){
+                    sender.sendMessage(Component.text("❌ §cVocê precisa segurar uma relíquia Nexus na mão para aceitar a troca!")
                             .color(NamedTextColor.RED));
                     return Command.SINGLE_SUCCESS;
                 }
+                String relicToGive = stack.getItemMeta().getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING);
+                t.setPlayer2Relic(relicToGive);
 
-                ItemMeta meta = stack.getItemMeta();
-                PersistentDataContainer data = meta.getPersistentDataContainer();
+                sender.sendMessage(Component.text("✅ §aVocê aceitou a troca! A contagem regressiva irá começar.")
+                        .color(NamedTextColor.GREEN));
+                offerer.sendMessage(Component.text("✅ §a" + player.getName() + " aceitou sua oferta! A troca será concluída em instantes.")
+                        .color(NamedTextColor.GREEN));
 
-                if(data.has(NEXUS.key,PersistentDataType.STRING)){
-                    String nome = data.get(NEXUS.key,PersistentDataType.STRING);
-                    if(nome != null){
-                        // Processar troca
-                        if(processarTroca(player, p, nome, t.stack())){
-                            trocas.remove(player.getUniqueId());
-                            sender.sendMessage(Component.text("✅ §aTroca realizada com sucesso!")
-                                    .color(NamedTextColor.GREEN));
-                            p.sendMessage(Component.text("✅ §aTroca realizada com sucesso!")
-                                    .color(NamedTextColor.GREEN));
+                new BukkitRunnable() {
+                    private int count = 5;
+                    @Override
+                    public void run() {
+                        if (count > 0) {
+                            NamedTextColor color = NamedTextColor.GREEN;
+                            if (count <= 3) color = NamedTextColor.YELLOW;
+                            if (count <= 2) color = NamedTextColor.GOLD;
+                            if (count <= 1) color = NamedTextColor.RED;
+
+                            Component countdownMessage = Component.text("⚡ Troca em andamento: " + count + "...", color);
+                            player.sendMessage(countdownMessage);
+                            offerer.sendMessage(countdownMessage);
+                            count--;
                         } else {
-                            sender.sendMessage(Component.text("❌ §cFalha ao processar a troca. Certifique-se de que o outro jogador ainda tem a relíquia!")
-                                    .color(NamedTextColor.RED));
+                            if (processarTroca(offerer, player, t.offeredRelicName(), t.player2Relic())) {
+                                player.sendMessage(Component.text("✅ Troca finalizada com sucesso!").color(NamedTextColor.GREEN));
+                                offerer.sendMessage(Component.text("✅ Troca finalizada com sucesso!").color(NamedTextColor.GREEN));
+                                trocas.remove(player.getUniqueId());
+                            } else {
+                                player.sendMessage(Component.text("❌ Falha na troca. Relíquias não encontradas.").color(NamedTextColor.RED));
+                                offerer.sendMessage(Component.text("❌ Falha na troca. Relíquias não encontradas.").color(NamedTextColor.RED));
+                                trocas.remove(player.getUniqueId());
+                            }
+                            this.cancel();
                         }
                     }
-                } else {
-                    sender.sendMessage(Component.text("❌ §cVocê precisa segurar uma relíquia Nexus na mão!")
-                            .color(NamedTextColor.RED));
-                }
-            }else{
-                sender.sendMessage(Component.text("❌ §cApenas jogadores podem usar este comando!")
-                        .color(NamedTextColor.RED));
+                }.runTaskTimer(this, 0L, 20L);
             }
             return Command.SINGLE_SUCCESS;
-        }));
+        })));
 
-        // Comando cancelar
-        nexusRoot.then(Commands.literal("cancelar").executes(ctx -> {
+        // Comando cancelar (oculto)
+        nexusRoot.then(Commands.literal("cancelar").then(Commands.argument("offerer", StringArgumentType.string()).executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
-            if(ctx.getSource().getExecutor() instanceof Player player){
+            if (ctx.getSource().getExecutor() instanceof Player player) {
+                String offererId = ctx.getArgument("offerer", String.class);
+                UUID offererUuid = UUID.fromString(offererId);
+                Player offerer = Bukkit.getPlayer(offererUuid);
                 Troca t = trocas.remove(player.getUniqueId());
 
-                if(t == null){
-                    sender.sendMessage(Component.text("❌ §cVocê não tem ofertas de troca pendentes!")
+                if (t != null && t.offererUuid().equals(offererUuid)) {
+                    if (offerer != null && offerer.isOnline()) {
+                        offerer.sendMessage(Component.text("❌ §c" + player.getName() + " recusou sua oferta de troca!")
+                                .color(NamedTextColor.RED));
+                    }
+                    sender.sendMessage(Component.text("❌ §cVocê recusou a oferta de troca.")
                             .color(NamedTextColor.RED));
-                    return Command.SINGLE_SUCCESS;
-                }
-
-                Player p = Bukkit.getPlayer(t.uuid());
-                if(p != null && p.isOnline()){
-                    p.sendMessage(Component.text("❌ §c" + player.getName() + " recusou sua oferta de troca!")
+                } else {
+                    sender.sendMessage(Component.text("❌ §cEsta oferta não é mais válida.")
                             .color(NamedTextColor.RED));
                 }
-
-                sender.sendMessage(Component.text("❌ §cVocê recusou a oferta de troca.")
-                        .color(NamedTextColor.RED));
-            }else{
-                sender.sendMessage(Component.text("❌ §cApenas jogadores podem usar este comando!")
-                        .color(NamedTextColor.RED));
             }
             return Command.SINGLE_SUCCESS;
-        }));
+        })));
 
         // Comando list
         nexusRoot.then(Commands.literal("list").executes(ctx -> {
@@ -395,6 +414,49 @@ public final class ReliquiasNexus extends JavaPlugin {
             return Command.SINGLE_SUCCESS;
         }));
 
+        // Comando missao (player) - Gerar missão aleatória
+        nexusRoot.then(Commands.literal("missao").executes(ctx -> {
+            if (ctx.getSource().getExecutor() instanceof Player player) {
+                new SpecialEvent(this).gerarMissaoAleatoria(player);
+                return Command.SINGLE_SUCCESS;
+            }
+            ctx.getSource().getSender().sendMessage(Component.text("❌ §cApenas jogadores podem usar este comando!")
+                    .color(NamedTextColor.RED));
+            return Command.SINGLE_SUCCESS;
+        }));
+
+        // Comando Loja (player) - Abrir menu da loja
+        nexusRoot.then(Commands.literal("Loja").executes(ctx -> {
+            if (ctx.getSource().getExecutor() instanceof Player player) {
+                new LojaEvent(this).abrirMenuPrincipal(player);
+                return Command.SINGLE_SUCCESS;
+            }
+            ctx.getSource().getSender().sendMessage(Component.text("❌ §cApenas jogadores podem usar este comando!")
+                    .color(NamedTextColor.RED));
+            return Command.SINGLE_SUCCESS;
+        }));
+
+        // Comando /nexus banco (player) - Abrir menu do banco
+        nexusRoot.then(Commands.literal("banco").executes(ctx -> {
+            if (ctx.getSource().getExecutor() instanceof Player player) {
+                new BancoEvent(this).abrirMenuPrincipal(player);
+                return Command.SINGLE_SUCCESS;
+            }
+            ctx.getSource().getSender().sendMessage(Component.text("❌ §cApenas jogadores podem usar este comando!")
+                    .color(NamedTextColor.RED));
+            return Command.SINGLE_SUCCESS;
+        }));
+
+        // Comando /nexus team
+        nexusRoot.then(Commands.literal("team").executes(ctx -> {
+            if (ctx.getSource().getExecutor() instanceof Player player) {
+                Team.abrirMenuTeam(player);
+            } else {
+                ctx.getSource().getSender().sendMessage(Component.text("❌ §cApenas jogadores podem usar este comando!").color(NamedTextColor.RED));
+            }
+            return Command.SINGLE_SUCCESS;
+        }));
+
         // Comando /nexu para operadores
         LiteralArgumentBuilder<CommandSourceStack> nexuRoot = Commands.literal("nexu").requires(sender -> sender.getSender().isOp()).executes(ctx -> {
             Component mensagem = Component.text()
@@ -403,9 +465,9 @@ public final class ReliquiasNexus extends JavaPlugin {
                     .append(Component.text("§7➤ §b/nexu expurgar <true/false> §f- Ativar/desativar expurgo\n"))
                     .append(Component.text("§7➤ §b/nexu receber <jogadores> §f- Dar relíquia aleatória\n"))
                     .append(Component.text("§7➤ §b/nexu dar <jogador> <reliquia> §f- Dar relíquia específica\n"))
-                    .append(Component.text("§7➤ §b/nexu remover <jogador> <reliquia> §f- Remover relíquia\n"))
-                    .append(Component.text("§7➤ §b/nexu missao <jogador/all> §f- Gerar missão especial\n"))
+                    .append(Component.text("§7➤ §b/nexu missao <jogador/all> <tipo> <dificuldade> §f- Gerar missão especial\n"))
                     .append(Component.text("§7➤ §b/nexu finalizarmissao <jogador> §f- Finalizar missão de jogador\n"))
+                    .append(Component.text("§7➤ §b/nexu dar moly <jogador> <quantia> §f- Dar moly a um jogador\n"))
                     .append(Component.text("§7➤ §b/nexu limite <valor> §f- Alterar limite de relíquias\n"))
                     .append(Component.text("§4§l⚡ §c§lNEXU - COMANDOS DE OPERADOR §4§l⚡\n").decorate(TextDecoration.BOLD))
                     .build();
@@ -413,6 +475,20 @@ public final class ReliquiasNexus extends JavaPlugin {
             ctx.getSource().getSender().sendMessage(mensagem);
             return Command.SINGLE_SUCCESS;
         });
+
+        // Comando dar moly (operador)
+        nexuRoot.then(Commands.literal("dar").then(Commands.literal("moly").then(Commands.argument("jogador", ArgumentTypes.player()).then(Commands.argument("quantia", DoubleArgumentType.doubleArg()).executes(ctx -> {
+            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogador", PlayerSelectorArgumentResolver.class);
+            final Player player = targetResolver.resolve(ctx.getSource()).getFirst();
+            final double quantia = ctx.getArgument("quantia", Double.class);
+            final CommandSender sender = ctx.getSource().getSender();
+
+            Economia.adicionarSaldo(player, quantia, "Comando de Operador");
+            sender.sendMessage(Component.text("✅ §a" + quantia + " moly(s) foram adicionados ao saldo de §b" + player.getName()).color(NamedTextColor.GREEN));
+            player.sendMessage(Component.text("🎁 §aVocê recebeu " + quantia + " moly(s) de um operador!").color(NamedTextColor.GREEN));
+
+            return Command.SINGLE_SUCCESS;
+        })))));
 
         // Comando setlevel (operador)
         nexuRoot.then(Commands.literal("setlevel").then(Commands.argument("level", IntegerArgumentType.integer()).executes(ctx -> {
@@ -554,91 +630,51 @@ public final class ReliquiasNexus extends JavaPlugin {
             return Command.SINGLE_SUCCESS;
         }))));
 
-        // Comando remover (operador) - Remover relíquia de jogador
-        nexuRoot.then(Commands.literal("remover").then(Commands.argument("jogador", ArgumentTypes.player()).then(Commands.argument("reliquia", StringArgumentType.string()).suggests( (ctx, builder) -> {
-            Player player = ctx.getArgument("jogador", Player.class);
-            if(player != null) {
-                PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-                List<NamespacedKey> keys = NexusKeys.getKeyLevel();
-                for(NamespacedKey k : keys) {
-                    if (dataPlayer.has(k, PersistentDataType.INTEGER)) {
-                        builder.suggest(k.getKey());
-                    }
-                }
+        // Comando missao (operador) - Gerar missão especial
+        nexuRoot.then(Commands.literal("missao").then(Commands.argument("alvo", StringArgumentType.string()).suggests((context, builder) -> {
+            builder.suggest("all");
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                builder.suggest(player.getName());
             }
             return builder.buildFuture();
+        }).then(Commands.argument("tipoMissao", StringArgumentType.string()).suggests((context, builder) -> {
+            SpecialEvent specialEvent = new SpecialEvent(this);
+            for (String type : specialEvent.getMissionTypes()) {
+                builder.suggest(type);
+            }
+            builder.suggest("ender");
+            return builder.buildFuture();
+        }).then(Commands.argument("dificuldade", StringArgumentType.string()).suggests((context, builder) -> {
+            builder.suggest("facil");
+            builder.suggest("medio");
+            builder.suggest("dificil");
+            builder.suggest("extreme");
+            builder.suggest("ender");
+            return builder.buildFuture();
         }).executes(ctx -> {
-            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogador", PlayerSelectorArgumentResolver.class);
-            final Player player = targetResolver.resolve(ctx.getSource()).getFirst();
-            final String reliquia = ctx.getArgument("reliquia", String.class);
-            final CommandSender sender = ctx.getSource().getSender();
-
-            if (!names.contains(reliquia.toLowerCase())) {
-                sender.sendMessage(Component.text("❌ §cRelíquia inválida! Use uma das seguintes: " + String.join(", ", names))
-                        .color(NamedTextColor.RED));
-                return Command.SINGLE_SUCCESS;
-            }
-
-            // Verificar se o jogador tem a relíquia
-            NamespacedKey key = NexusKeys.getKey(reliquia.toLowerCase());
-            PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-            int level = dataPlayer.getOrDefault(key, PersistentDataType.INTEGER, 0);
-
-            if (level <= 0) {
-                sender.sendMessage(Component.text("❌ §cO jogador §b" + player.getName() + " §cnão possui a relíquia §6" + reliquia)
-                        .color(NamedTextColor.RED));
-                return Command.SINGLE_SUCCESS;
-            }
-
-            // Remover do jogador
-            dataPlayer.remove(key);
-
-            // Remover do inventário
-            for (ItemStack item : player.getInventory().getContents()) {
-                if (item != null && item.hasItemMeta()) {
-                    ItemMeta meta = item.getItemMeta();
-                    PersistentDataContainer data = meta.getPersistentDataContainer();
-                    if (data.has(NEXUS.key, PersistentDataType.STRING)) {
-                        String nomeRelic = data.get(NEXUS.key, PersistentDataType.STRING);
-                        if (reliquia.equalsIgnoreCase(nomeRelic)) {
-                            player.getInventory().remove(item);
-                            break;
-                        }
-                    }
-                }
-            }
-
-            // Remover do config
-            config.set("nexus." + reliquia.toLowerCase(), null);
-            saveConfig();
-
-            player.sendMessage(Component.text("🗑️ §cA relíquia §6" + reliquia + " §cfoi removida de você!")
-                    .color(NamedTextColor.RED));
-            sender.sendMessage(Component.text("✅ §aRelíquia §6" + reliquia + " §aremovida de §b" + player.getName())
-                    .color(NamedTextColor.GREEN));
-
-            return Command.SINGLE_SUCCESS;
-        }))));
-
-        // Comando missao (operador) - Gerar missão especial
-        nexuRoot.then(Commands.literal("missao").then(Commands.argument("alvo", StringArgumentType.string()).executes(ctx -> {
             final String alvo = ctx.getArgument("alvo", String.class);
+            final String tipoMissao = ctx.getArgument("tipoMissao", String.class);
+            final String dificuldade = ctx.getArgument("dificuldade", String.class);
             final CommandSender sender = ctx.getSource().getSender();
 
             SpecialEvent specialEvent = new SpecialEvent(this);
 
-            if (alvo.equalsIgnoreCase("all")) {
-                // Gerar missão para todos os jogadores online
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    specialEvent.gerarMissaoEspecial(player);
+            if (alvo.equalsIgnoreCase("all") || alvo.equalsIgnoreCase("@a")) {
+                Collection<? extends Player> players = Bukkit.getOnlinePlayers();
+                if (players.isEmpty()) {
+                    sender.sendMessage(Component.text("❌ §cNenhum jogador online para receber a missão!")
+                            .color(NamedTextColor.RED));
+                    return Command.SINGLE_SUCCESS;
+                }
+                for (Player player : players) {
+                    specialEvent.gerarMissao(player, tipoMissao, dificuldade, true);
                 }
                 sender.sendMessage(Component.text("✅ §aMissão especial gerada para todos os jogadores online!")
                         .color(NamedTextColor.GREEN));
             } else {
-                // Gerar missão para jogador específico
                 Player player = Bukkit.getPlayer(alvo);
                 if (player != null && player.isOnline()) {
-                    specialEvent.gerarMissaoEspecial(player);
+                    specialEvent.gerarMissao(player, tipoMissao, dificuldade, true);
                     sender.sendMessage(Component.text("✅ §aMissão especial gerada para §b" + player.getName())
                             .color(NamedTextColor.GREEN));
                 } else {
@@ -648,7 +684,7 @@ public final class ReliquiasNexus extends JavaPlugin {
             }
 
             return Command.SINGLE_SUCCESS;
-        })));
+        })))));
 
         // Comando para finalizar missão do jogador
         nexuRoot.then(Commands.literal("finalizarmissao").then(Commands.argument("jogador", ArgumentTypes.player()).executes(ctx -> {
@@ -679,9 +715,70 @@ public final class ReliquiasNexus extends JavaPlugin {
         LiteralCommandNode<CommandSourceStack> nexusCommand = nexusRoot.build();
         LiteralCommandNode<CommandSourceStack> nexuCommand = nexuRoot.build();
 
+        LiteralCommandNode<CommandSourceStack> partyRoot = Commands.literal("party")
+                .then(Commands.argument("jogador", ArgumentTypes.player()).executes(ctx -> {
+                    if (ctx.getSource().getExecutor() instanceof Player player) {
+                        final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogador", PlayerSelectorArgumentResolver.class);
+                        final Player targetPlayer = targetResolver.resolve(ctx.getSource()).getFirst();
+                        Party.convidarParaParty(player, targetPlayer);
+                        return Command.SINGLE_SUCCESS;
+                    }
+                    ctx.getSource().getSender().sendMessage(Component.text("❌ §cApenas jogadores podem usar este comando!").color(NamedTextColor.RED));
+                    return Command.SINGLE_SUCCESS;
+                }))
+                .build();
+
+        LiteralCommandNode<CommandSourceStack> nexusTeamRoot = Commands.literal("team")
+                .executes(ctx -> {
+                    if (ctx.getSource().getExecutor() instanceof Player player) {
+                        Team.abrirMenuTeam(player);
+                    } else {
+                        ctx.getSource().getSender().sendMessage(Component.text("❌ §cApenas jogadores podem usar este comando!").color(NamedTextColor.RED));
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })
+                .then(Commands.literal("criar").then(Commands.argument("nome", StringArgumentType.string()).executes(ctx -> {
+                    if (ctx.getSource().getExecutor() instanceof Player player) {
+                        String teamName = ctx.getArgument("nome", String.class);
+                        Team.criarTeam(player, teamName);
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })))
+                .then(Commands.literal("convidar").then(Commands.argument("player", ArgumentTypes.player()).executes(ctx -> {
+                    if (ctx.getSource().getExecutor() instanceof Player player) {
+                        final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
+                        final Player targetPlayer = targetResolver.resolve(ctx.getSource()).getFirst();
+                        Team.convidarPlayer(player, targetPlayer);
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })))
+                .then(Commands.literal("aceitar").then(Commands.argument("team", StringArgumentType.string()).executes(ctx -> {
+                    if (ctx.getSource().getExecutor() instanceof Player player) {
+                        String teamName = ctx.getArgument("team", String.class);
+                        Team.aceitarConvite(player, teamName);
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })))
+                .then(Commands.literal("sair").executes(ctx -> {
+                    if (ctx.getSource().getExecutor() instanceof Player player) {
+                        Team.sairTeam(player);
+                    }
+                    return Command.SINGLE_SUCCESS;
+                }))
+                .then(Commands.literal("depositar").then(Commands.argument("valor", DoubleArgumentType.doubleArg(0)).executes(ctx -> {
+                    if (ctx.getSource().getExecutor() instanceof Player player) {
+                        double valor = ctx.getArgument("valor", Double.class);
+                        Team.depositar(player, valor);
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })))
+                .build();
+
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
             commands.registrar().register(nexusCommand);
             commands.registrar().register(nexuCommand);
+            commands.registrar().register(partyRoot);
+            commands.registrar().register(nexusTeamRoot);
         });
 
         // Registrar eventos
@@ -691,6 +788,10 @@ public final class ReliquiasNexus extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PerdeuEvent(), this);
         getServer().getPluginManager().registerEvents(new EvoluirEvent(this), this);
         getServer().getPluginManager().registerEvents(new SpecialEvent(this), this);
+        getServer().getPluginManager().registerEvents(new LojaEvent(this), this);
+        getServer().getPluginManager().registerEvents(new BancoEvent(this), this);
+        getServer().getPluginManager().registerEvents(new Party(this), this);
+        getServer().getPluginManager().registerEvents(new Team(this), this);
 
         getServer().getConsoleSender().sendMessage("§2✅ §a[Nexus]: Plugin Ativado com Sucesso!");
     }
@@ -787,15 +888,5 @@ public final class ReliquiasNexus extends JavaPlugin {
 
     public static void setConfigSave(String path,Object value){
         config.set(path,value);
-    }
-
-    public static void saiu(Player p){
-        Troca t = trocas.remove(p.getUniqueId());
-        if(t == null) return;
-        Player player = Bukkit.getPlayer(t.uuid());
-        if(player != null){
-            player.sendMessage(Component.text("❌ §c" + p.getName() + " saiu do servidor. Troca cancelada.")
-                    .color(NamedTextColor.RED));
-        }
     }
 }

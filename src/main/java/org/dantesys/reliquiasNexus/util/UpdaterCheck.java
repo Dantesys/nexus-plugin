@@ -1,79 +1,73 @@
 package org.dantesys.reliquiasNexus.util;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.dantesys.reliquiasNexus.ReliquiasNexus;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.URI;
 import java.net.URL;
 
 public class UpdaterCheck {
     private final JavaPlugin plugin;
-    private final String repo;
+    private final String repoOwner;
+    private final String repoName;
+
     public UpdaterCheck(JavaPlugin plugin, String repo) {
         this.plugin = plugin;
-        this.repo = repo;
+        String[] splitRepo = repo.split("/");
+        this.repoOwner = splitRepo[0];
+        this.repoName = splitRepo[1];
     }
-    public void checkForUpdates() {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            try {
-                URL url = URI.create("https://api.github.com/repos/" + repo + "/releases/latest").toURL();
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestProperty("User-Agent", "Mozilla/5.0");
-                connection.setConnectTimeout(5000);
-                connection.setReadTimeout(5000);
 
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-                    StringBuilder response = new StringBuilder();
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        response.append(line);
-                    }
-                    String latestVersion = parseTagName(response.toString());
-                    String currentVersion = plugin.getPluginMeta().getVersion();
-                    if (!currentVersion.equalsIgnoreCase(latestVersion)) {
-                        String msg = ReliquiasNexus.getLang().getString("updater.new");
-                        if(msg==null){
-                            msg = "Nova versão disponível no GitHub: <new> (você está usando <used>)";
-                        }
-                        msg=msg.replace("<new>",latestVersion);
-                        msg=msg.replace("<used>",currentVersion);
-                        plugin.getLogger().warning(msg);
-                        String dw = ReliquiasNexus.getLang().getString("updater.dowload");
-                        if(dw==null){
-                            dw = "Baixe em: <link>";
-                        }
-                        dw=msg.replace("<link>","https://github.com/" + repo + "/releases/latest");
-                        plugin.getLogger().warning(dw);
+    public void checkForUpdates() {
+        Bukkit.getScheduler().runTaskAsynchronously(this.plugin, () -> {
+            try {
+                URL url = new URL("https://api.github.com/repos/" + repoOwner + "/" + repoName + "/releases/latest");
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("GET");
+                connection.setRequestProperty("User-Agent", "Mozilla/5.0");
+
+                int responseCode = connection.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    JsonObject jsonObject = JsonParser.parseReader(new InputStreamReader(connection.getInputStream())).getAsJsonObject();
+                    String latestVersion = jsonObject.get("tag_name").getAsString();
+
+                    if (isUpdateAvailable(plugin.getDescription().getVersion(), latestVersion)) {
+                        plugin.getLogger().info("-------------------------------------------");
+                        plugin.getLogger().warning("New version " + latestVersion + " is available!");
+                        plugin.getLogger().warning("You are currently using version " + plugin.getDescription().getVersion() + ".");
+                        plugin.getLogger().warning("Download the new version from: " + jsonObject.get("html_url").getAsString());
+                        plugin.getLogger().info("-------------------------------------------");
                     } else {
-                        String msg = ReliquiasNexus.getLang().getString("updater.current");
-                        if(msg==null){
-                            msg = "Você está usando a versão mais recente!";
-                        }
-                        plugin.getLogger().info(msg);
+                        plugin.getLogger().info("You are using the latest version of the plugin!");
                     }
+                } else {
+                    plugin.getLogger().warning("Failed to check for updates. HTTP response code: " + responseCode);
                 }
-            } catch (IOException e) {
-                String msg = ReliquiasNexus.getLang().getString("updater.erro");
-                if(msg==null){
-                    msg = "Não foi possível verificar atualizações:";
-                }
-                plugin.getLogger().warning(msg+" " + e.getMessage());
+            } catch (Exception e) {
+                plugin.getLogger().warning("Failed to check for updates: " + e.getMessage());
             }
         });
     }
 
-    private String parseTagName(String json) {
-        int index = json.indexOf("\"tag_name\"");
-        if (index != -1) {
-            int start = json.indexOf(":", index) + 2;
-            int end = json.indexOf("\"", start);
-            return json.substring(start, end);
+    private boolean isUpdateAvailable(String currentVersion, String latestVersion) {
+        String[] current = currentVersion.replace("v", "").split("\\.");
+        String[] latest = latestVersion.replace("v", "").split("\\.");
+
+        for (int i = 0; i < Math.min(current.length, latest.length); i++) {
+            int currentPart = Integer.parseInt(current[i]);
+            int latestPart = Integer.parseInt(latest[i]);
+
+            if (latestPart > currentPart) {
+                return true;
+            }
+            if (latestPart < currentPart) {
+                return false;
+            }
         }
-        return "unknown";
+
+        return latest.length > current.length;
     }
 }

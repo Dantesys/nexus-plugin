@@ -2,4 +2,22 @@ package org.dantesys.reliquiasNexus.util;
 
 import java.util.UUID;
 
-public record Troca(UUID uuid, String stack){}
+public record Troca(UUID offererUuid, String offeredRelicName) {
+    private static String player2RelicName;
+
+    public void setPlayer2Relic(String player2RelicName) {
+        this.player2RelicName = player2RelicName;
+    }
+
+    public UUID uuid() {
+        return offererUuid;
+    }
+
+    public String stack() {
+        return offeredRelicName;
+    }
+
+    public String player2Relic() {
+        return player2RelicName;
+    }
+}

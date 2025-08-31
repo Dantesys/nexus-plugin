@@ -381,4 +381,8 @@ public class Mago {
             }
         }
     }
+
+    public static <C> void getSpecialbyLevel(C orDefault, Player player) {
+
+    }
 }

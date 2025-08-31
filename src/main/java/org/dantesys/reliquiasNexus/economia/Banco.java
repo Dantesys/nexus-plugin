@@ -1,4 +1,4 @@
-package org.dantesys.reliquiasNexus.economy;
+package org.dantesys.reliquiasNexus.economia;
 
 import java.util.UUID;
 
