@@ -474,7 +474,7 @@ public class EvoluirEvent implements Listener {
                     condicao="";
                 }else{
                     int qtd = (int) (colheitasN-colheitas);
-                    condicao = ReliquiasNexus.getLang().getString("condicao.hulk");
+                    condicao = ReliquiasNexus.getLang().getString("condicao.dano");
                     if(condicao==null){
                         condicao="receba mais <cond> de dano por monstros ou bosses";
                     }
@@ -514,7 +514,7 @@ public class EvoluirEvent implements Listener {
             case "mago" -> {
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAOMAGO.key, PersistentDataType.INTEGER, 0);
                 if(kills < level){
-                    condicao = ReliquiasNexus.getLang().getString("condicao.mago");
+                    condicao = ReliquiasNexus.getLang().getString("condicao.pocao");
                     if(condicao==null){
                         condicao="beba mais <cond> poções";
                     }
@@ -574,9 +574,9 @@ public class EvoluirEvent implements Listener {
             case "cronosombra" -> {
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAOCRONOSOMBRA.key, PersistentDataType.INTEGER, 0);
                 if(kills < level){
-                    condicao = ReliquiasNexus.getLang().getString("condicao.cronosombra");
+                    condicao = ReliquiasNexus.getLang().getString("condicao.special");
                     if(condicao==null){
-                        condicao="use a habilidade mais <cond> vezes";
+                        condicao="use o Special mais <cond> vezes";
                     }
                     condicao=condicao.replace("<cond>",""+(level-kills));
                 }
@@ -614,7 +614,7 @@ public class EvoluirEvent implements Listener {
             case "alquimista" -> {
                 int kills = player.getPersistentDataContainer().getOrDefault(MISSAOALQUIMISTA.key, PersistentDataType.INTEGER, 0);
                 if(kills < level){
-                    condicao = ReliquiasNexus.getLang().getString("condicao.alquimista");
+                    condicao = ReliquiasNexus.getLang().getString("condicao.pocao");
                     if(condicao==null){
                         condicao="beba mais <cond> poções";
                     }
@@ -628,7 +628,7 @@ public class EvoluirEvent implements Listener {
                     condicao="";
                 }else{
                     int qtd = (int) (colheitasN-colheitas);
-                    condicao = ReliquiasNexus.getLang().getString("condicao.golem");
+                    condicao = ReliquiasNexus.getLang().getString("condicao.dano");
                     if(condicao==null){
                         condicao="receba mais <cond> de dano por monstros ou bosses";
                     }
