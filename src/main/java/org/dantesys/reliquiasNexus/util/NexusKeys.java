@@ -78,6 +78,8 @@ public enum NexusKeys {
     MISSAOGOLEM,
     DRAGAO,
     MISSAODRAGAO,
+    MORTE,
+    MISSAOMORTE,
     MISSAO_TIPO,
     MISSAO_META,
     MISSAO_PROGRESO,
@@ -93,7 +95,8 @@ public enum NexusKeys {
     TEAM_NAME,
     TEAM_RANK,
     TEAM_BALANCE,
-    ENDER_CHEST_OWNED;
+    ENDER_CHEST_OWNED,
+    NEXUS_BANK_SALDO;
 
     public NamespacedKey key;
 
@@ -143,6 +146,7 @@ public enum NexusKeys {
         keys.add(ALQUIMISTA.key);
         keys.add(GOLEM.key);
         keys.add(DRAGAO.key);
+        keys.add(MORTE.key);
         return keys;
     }
 }

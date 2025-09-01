@@ -17,9 +17,11 @@ import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
@@ -27,6 +29,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
 import org.dantesys.reliquiasNexus.SpeciaisPassivas.*;
+import org.dantesys.reliquiasNexus.SpeciaisPassivas.Golem;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
 import org.dantesys.reliquiasNexus.util.AlquimistaUtils;
@@ -40,6 +43,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
+import static org.dantesys.reliquiasNexus.items.ItemsRegistro.morte;
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 
 public class PassivaEvent implements Listener {
@@ -155,7 +159,7 @@ public class PassivaEvent implements Listener {
             }else{
                 if(p!=null){
                     player.showPlayer(ReliquiasNexus.getPlugin(ReliquiasNexus.class),p);
-                } 
+                }
             }
             PlayerInventory inv = player.getInventory();
             for (int i = 0; i <= 8; i++) {
@@ -236,6 +240,10 @@ public class PassivaEvent implements Listener {
                 }
             }
         }
+        // Ativar a perseguição da Morte quando o jogador acerta um alvo
+        if (entity instanceof Player player && player.hasMetadata("punhoDaMorteAtivo") && atacado instanceof LivingEntity) {
+            Morte.onHitPunhoDaMorte(player, (LivingEntity) atacado);
+        }
     }
     @EventHandler
     public void recuperacaoFenix(EntityDamageEvent event){
@@ -286,6 +294,14 @@ public class PassivaEvent implements Listener {
                 if(causes.contains(cause)){
                     player.heal(20);
                     event.setCancelled(true);
+                }
+            }
+            if(temReliquia(player, "morte")){
+                if (event.getFinalDamage() >= player.getHealth()) {
+                    event.setCancelled(true);
+                    player.setHealth(1);
+                    player.sendMessage("§4A Morte não pode ser ceifada!");
+                    player.getWorld().playSound(player.getLocation(), Sound.BLOCK_GLASS_BREAK, 1.0f, 1.0f);
                 }
             }
         }
@@ -405,14 +421,17 @@ public class PassivaEvent implements Listener {
                                         if (e instanceof LivingEntity && e != player) {
                                             Vector knockback = e.getLocation().toVector().subtract(player.getLocation().toVector()).normalize().multiply(1.5);
                                             e.setVelocity(knockback);
-                                            ((LivingEntity) e).addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 100, 1)); // 5s Slowness II
-                                            ((LivingEntity) e).addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 100, 0)); // 5s Weakness I
+                                            ((LivingEntity) e).addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 100, 1));
+                                            ((LivingEntity) e).addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 100, 0));
                                         }
                                     }
                                     player.getPersistentDataContainer().set(RUGIDO.key,PersistentDataType.INTEGER,120);
                                 }
                             }
                         }
+                    }
+                    case "morte" -> {
+                        Morte.aplicaEfeitoPassivo(player);
                     }
                 }
             }
@@ -544,5 +563,4 @@ public class PassivaEvent implements Listener {
             }
         }
     }
-
 }

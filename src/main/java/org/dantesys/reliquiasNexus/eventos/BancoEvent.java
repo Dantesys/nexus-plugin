@@ -18,6 +18,7 @@ import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
+import org.dantesys.reliquiasNexus.economia.Banco;
 import org.dantesys.reliquiasNexus.util.Economia;
 import org.dantesys.reliquiasNexus.util.NexusKeys;
 import org.dantesys.reliquiasNexus.team.Team;
@@ -38,6 +39,7 @@ public class BancoEvent implements Listener {
     private final String SALDO_MENU_TITLE = "§lSeu Saldo";
     private final String EMPRESTIMO_MENU_TITLE = "§lEmpréstimos";
     private final String HISTORICO_MENU_TITLE = "§lHistórico de Moly";
+    private final String CENTRAL_BANK_TITLE = "§lNexus Central Bank";
 
     public BancoEvent(ReliquiasNexus plugin) {
         this.plugin = plugin;
@@ -46,13 +48,36 @@ public class BancoEvent implements Listener {
     public void abrirMenuPrincipal(Player player) {
         Inventory inv = Bukkit.createInventory(null, 27, Component.text(MAIN_MENU_TITLE));
 
-        ItemStack saldo = criarItemComID(Material.GOLD_INGOT, "§eSaldo", "saldo");
-        ItemStack emprestimo = criarItemComID(Material.PAPER, "§bEmpréstimo", "emprestimo");
+        ItemStack bancoCentral = criarItemComID(Material.DIAMOND, CENTRAL_BANK_TITLE, "central_bank");
+        ItemStack saldo = criarItemComID(Material.GOLD_INGOT, "§eSaldo Pessoal", "saldo");
+        ItemStack emprestimo = criarItemComID(Material.PAPER, "§bEmpréstimos", "emprestimo");
         ItemStack historico = criarItemComID(Material.BOOK, "§aHistórico", "historico");
 
         inv.setItem(11, saldo);
         inv.setItem(13, emprestimo);
         inv.setItem(15, historico);
+        inv.setItem(4, bancoCentral);
+
+        player.openInventory(inv);
+    }
+
+    private void abrirMenuCentralBank(Player player) {
+        Inventory inv = Bukkit.createInventory(null, 27, Component.text(CENTRAL_BANK_TITLE));
+
+        Banco centralBank = Banco.getNexusCentralBank();
+        double saldoBank = centralBank.getSaldo();
+
+        ItemStack saldoItem = criarItem(Material.GOLD_BLOCK, "§eSaldo do Banco Central",
+                Collections.singletonList(Component.text("§7Total de moly: §6" + String.format("%.2f", saldoBank) + " moly§7.")));
+
+        inv.setItem(13, saldoItem);
+
+        ItemStack backArrow = criarCabecaComID(
+                "MHF_ArrowLeft",
+                "§cVoltar",
+                Collections.singletonList(Component.text("§7Clique para voltar ao menu principal.")),
+                "back_button");
+        inv.setItem(22, backArrow);
 
         player.openInventory(inv);
     }
@@ -89,13 +114,11 @@ public class BancoEvent implements Listener {
 
         if (Economia.temEmprestimo(player)) {
             double divida = Economia.getEmprestimo(player);
-            long vencimento = Economia.getVencimentoEmprestimo(player);
-            long tempoRestante = (vencimento - Instant.now().getEpochSecond()) / 3600;
 
             ItemStack dividaItem = criarItem(Material.RED_WOOL, "§cSua Dívida",
                     Arrays.asList(
-                            Component.text("§7Total: §c" + divida + " moly"),
-                            Component.text("§7Tempo restante: §e" + tempoRestante + " horas")
+                            Component.text("§7Total: §c" + String.format("%.2f", divida) + " moly"),
+                            Component.text("§7Juros de 1% por minuto")
                     ));
             ItemStack pagarItem = criarItemComID(Material.GREEN_WOOL, "§aPagar Dívida", "pagar_emprestimo");
 
@@ -178,6 +201,9 @@ public class BancoEvent implements Listener {
             if (data.has(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING)) {
                 String itemId = data.get(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING);
                 switch (itemId) {
+                    case "central_bank":
+                        abrirMenuCentralBank(player);
+                        break;
                     case "saldo":
                         abrirMenuSaldo(player);
                         break;
@@ -202,9 +228,15 @@ public class BancoEvent implements Listener {
                 switch (itemId) {
                     case "pedir_emprestimo":
                         if (!Economia.temEmprestimo(player)) {
-                            Economia.concederEmprestimo(player, 1000, 24); // Exemplo: 1000 moly, 24h
-                            player.sendMessage(Component.text("✅ Você pegou um empréstimo de 1000 moly. Pague de volta em 24h!").color(NamedTextColor.GREEN));
-                            abrirMenuEmprestimo(player);
+                            double valorEmprestimo = 1000;
+                            if (Banco.getNexusCentralBank().getSaldo() >= valorEmprestimo) {
+                                Economia.concederEmprestimo(player, valorEmprestimo); // Exemplo: 1000 moly
+                                Banco.getNexusCentralBank().setSaldo(Banco.getNexusCentralBank().getSaldo() - valorEmprestimo);
+                                player.sendMessage(Component.text("✅ Você pegou um empréstimo de 1000 moly.").color(NamedTextColor.GREEN));
+                                abrirMenuEmprestimo(player);
+                            } else {
+                                player.sendMessage(Component.text("❌ O banco central não tem saldo suficiente para te dar um empréstimo.").color(NamedTextColor.RED));
+                            }
                         } else {
                             player.sendMessage(Component.text("❌ Você já tem um empréstimo ativo.").color(NamedTextColor.RED));
                         }
@@ -212,7 +244,8 @@ public class BancoEvent implements Listener {
                     case "pagar_emprestimo":
                         double divida = Economia.getEmprestimo(player);
                         if (Economia.getSaldo(player) >= divida) {
-                            Economia.removerSaldo(player, divida);
+                            Economia.removerSaldo(player, divida, "Pagamento de Empréstimo");
+                            Economia.adicionarSaldo(Banco.getNexusCentralBank(), divida, "Pagamento de Empréstimo");
                             Economia.finalizarEmprestimo(player);
                             player.sendMessage(Component.text("✅ Você pagou sua dívida! Seu empréstimo foi finalizado.").color(NamedTextColor.GREEN));
                             abrirMenuEmprestimo(player);
@@ -231,6 +264,14 @@ public class BancoEvent implements Listener {
                         player.getInventory().addItem(livro);
                         player.sendMessage(Component.text("✅ Você recebeu seu histórico de transações.").color(NamedTextColor.GREEN));
                         break;
+                }
+            }
+        } else if (inventoryTitle.contains(CENTRAL_BANK_TITLE)) {
+            event.setCancelled(true);
+            if (data.has(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING)) {
+                String itemId = data.get(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING);
+                if ("back_button".equals(itemId)) {
+                    abrirMenuPrincipal(player);
                 }
             }
         }
