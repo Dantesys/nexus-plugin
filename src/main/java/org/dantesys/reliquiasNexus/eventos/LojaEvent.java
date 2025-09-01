@@ -19,28 +19,23 @@ import org.bukkit.persistence.PersistentDataType;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
 import org.dantesys.reliquiasNexus.util.Economia;
 import org.dantesys.reliquiasNexus.util.NexusKeys;
-import org.dantesys.reliquiasNexus.team.Team;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.ArrayList;
-
-import static org.dantesys.reliquiasNexus.util.NexusKeys.LOJA_ITEM_KEY;
 
 public class LojaEvent implements Listener {
 
     private final ReliquiasNexus plugin;
+    private final String MAIN_MENU_TITLE = "§lNexus Shop";
+    private final String OP_ITEMS_MENU_TITLE = "§lItens OP";
+    private final String NORMAL_ITEMS_MENU_TITLE = "§lItens Normais";
 
     public LojaEvent(ReliquiasNexus plugin) {
         this.plugin = plugin;
     }
-
-    private final String MAIN_MENU_TITLE = "§lNexus Shop";
-    private final String OP_ITEMS_MENU_TITLE = "§lItens OP";
-    private final String NORMAL_ITEMS_MENU_TITLE = "§lItens Normais";
-    private final String PAYMENT_MENU_TITLE = "§lForma de Pagamento";
 
     public void abrirMenuPrincipal(Player player) {
         Inventory inv = Bukkit.createInventory(null, 27, Component.text(MAIN_MENU_TITLE));
@@ -57,12 +52,31 @@ public class LojaEvent implements Listener {
     private void abrirMenuOpItems(Player player) {
         Inventory inv = Bukkit.createInventory(null, 54, Component.text(OP_ITEMS_MENU_TITLE));
 
-        // Itens OP (20+ itens de exemplo)
-        adicionarItemComPreco(inv, 0, Material.NETHERITE_SWORD, "§cEspada do Deus", 50000.0, 1);
-        adicionarItemComPreco(inv, 1, Material.NETHERITE_PICKAXE, "§cPicareta do Deus", 45000.0, 1);
-        adicionarItemComPreco(inv, 2, Material.TOTEM_OF_UNDYING, "§eTotem Abissal", 15000.0, 1);
-        adicionarItemComPreco(inv, 3, Material.ENCHANTED_GOLDEN_APPLE, "§6Maçã Dourada Encantada", 10000.0, 1);
-        adicionarItemComPreco(inv, 4, Material.BEACON, "§bFaro", 20000.0, 1);
+        // Item do Baú do Fim (Ender Chest)
+        ItemStack enderChestItem = new ItemStack(Material.ENDER_CHEST);
+        ItemMeta enderChestMeta = enderChestItem.getItemMeta();
+        enderChestMeta.displayName(Component.text("§bBaú do Fim"));
+        List<Component> lore = new ArrayList<>();
+        lore.add(Component.text("§7Permite o uso do comando §e/ec§7."));
+        lore.add(Component.text("§7Abre seu inventário do fim de qualquer lugar."));
+        lore.add(Component.text(""));
+        lore.add(Component.text("§aPreço: §65.000 Moly"));
+        lore.add(Component.text("§aCompra única por jogador."));
+        enderChestMeta.lore(lore);
+        enderChestItem.setItemMeta(enderChestMeta);
+
+        PersistentDataContainer metaPDC = enderChestItem.getItemMeta().getPersistentDataContainer();
+        metaPDC.set(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING, "ender_chest");
+        enderChestItem.setItemMeta(enderChestMeta);
+
+        inv.setItem(22, enderChestItem);
+
+        // Outros itens OP (20+ itens de exemplo)
+        adicionarItemComPreco(inv, 0, Material.NETHERITE_SWORD, "§cEspada de Netherite", 50000.0, 1);
+        adicionarItemComPreco(inv, 1, Material.NETHERITE_PICKAXE, "§cPicareta de Netherite", 45000.0, 1);
+        adicionarItemComPreco(inv, 2, Material.TOTEM_OF_UNDYING, "§eTotem ", 15000.0, 1);
+        adicionarItemComPreco(inv, 3, Material.ENCHANTED_GOLDEN_APPLE, "§6Maçã Dourada Encantada", 100000.0, 1);
+        adicionarItemComPreco(inv, 4, Material.BEACON, "§bFarol", 20000.0, 1);
         adicionarItemComPreco(inv, 5, Material.SHULKER_BOX, "§aCaixa de Shulker", 7500.0, 1);
         adicionarItemComPreco(inv, 6, Material.TRIDENT, "§bTridente da Tempestade", 30000.0, 1);
         adicionarItemComPreco(inv, 7, Material.NETHER_STAR, "§5Estrela do Nether", 18000.0, 1);
@@ -80,6 +94,7 @@ public class LojaEvent implements Listener {
         adicionarItemComPreco(inv, 19, Material.NETHERITE_CHESTPLATE, "§cPeitoral de Netherita", 15000.0, 1);
         adicionarItemComPreco(inv, 20, Material.NETHERITE_LEGGINGS, "§cCaleças de Netherita", 14000.0, 1);
         adicionarItemComPreco(inv, 21, Material.NETHERITE_BOOTS, "§cBota de Netherita", 11000.0, 1);
+
 
         // Botão de voltar
         ItemStack backArrow = criarCabecaComID(
@@ -163,7 +178,7 @@ public class LojaEvent implements Listener {
                 Component.text("§7Preço: §6" + preco + " moly"),
                 Component.text("§aClique para comprar!")
         ));
-        meta.getPersistentDataContainer().set(LOJA_ITEM_KEY.key, PersistentDataType.STRING, nome.replaceAll("§.",""));
+        meta.getPersistentDataContainer().set(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING, nome.replaceAll("§.",""));
         meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "preco"), PersistentDataType.DOUBLE, preco);
         item.setItemMeta(meta);
         inv.setItem(slot, item);
@@ -173,7 +188,7 @@ public class LojaEvent implements Listener {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text(nome));
-        meta.getPersistentDataContainer().set(LOJA_ITEM_KEY.key, PersistentDataType.STRING, id);
+        meta.getPersistentDataContainer().set(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING, id);
         item.setItemMeta(meta);
         return item;
     }
@@ -184,7 +199,7 @@ public class LojaEvent implements Listener {
         meta.setOwner(owner);
         meta.displayName(Component.text(nome));
         meta.lore(lore);
-        meta.getPersistentDataContainer().set(LOJA_ITEM_KEY.key, PersistentDataType.STRING, id);
+        meta.getPersistentDataContainer().set(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING, id);
         head.setItemMeta(meta);
         return head;
     }
@@ -196,14 +211,14 @@ public class LojaEvent implements Listener {
 
         if (clickedItem == null || !clickedItem.hasItemMeta()) return;
 
-        String inventoryTitle = event.getView().title().toString();
+        String inventoryTitle = PlainComponentSerializer.plain().serialize(event.getView().title());
         ItemMeta meta = clickedItem.getItemMeta();
         PersistentDataContainer data = meta.getPersistentDataContainer();
 
-        if (inventoryTitle.contains(MAIN_MENU_TITLE)) {
+        if (inventoryTitle.contains(MAIN_MENU_TITLE.replaceAll("§.", ""))) {
             event.setCancelled(true);
-            if (data.has(LOJA_ITEM_KEY.key, PersistentDataType.STRING)) {
-                String itemId = data.get(LOJA_ITEM_KEY.key, PersistentDataType.STRING);
+            if (data.has(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING)) {
+                String itemId = data.get(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING);
                 switch (itemId) {
                     case "op_items":
                         abrirMenuOpItems(player);
@@ -213,16 +228,34 @@ public class LojaEvent implements Listener {
                         break;
                 }
             }
-        } else if (inventoryTitle.contains(OP_ITEMS_MENU_TITLE) || inventoryTitle.contains(NORMAL_ITEMS_MENU_TITLE)) {
+        } else if (inventoryTitle.contains(OP_ITEMS_MENU_TITLE.replaceAll("§.", "")) || inventoryTitle.contains(NORMAL_ITEMS_MENU_TITLE.replaceAll("§.", ""))) {
             event.setCancelled(true);
-            if (data.has(LOJA_ITEM_KEY.key, PersistentDataType.STRING)) {
-                String itemId = data.get(LOJA_ITEM_KEY.key, PersistentDataType.STRING);
+            if (data.has(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING)) {
+                String itemId = data.get(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING);
                 if ("back_button".equals(itemId)) {
                     abrirMenuPrincipal(player);
                     return;
                 }
 
-                // Lógica de compra
+                // Lógica para comprar Baú do Fim
+                if (itemId.equals("ender_chest")) {
+                    if (Economia.getSaldo(player) >= 5000) {
+                        PersistentDataContainer playerData = player.getPersistentDataContainer();
+                        if (playerData.has(NexusKeys.ENDER_CHEST_OWNED.key, PersistentDataType.BOOLEAN)) {
+                            player.sendMessage(Component.text("❌ Você já comprou o Baú do Fim. Esta é uma compra única.").color(NamedTextColor.RED));
+                            return;
+                        }
+
+                        Economia.removerSaldo(player, 5000, "Compra de Baú do Fim");
+                        playerData.set(NexusKeys.ENDER_CHEST_OWNED.key, PersistentDataType.BOOLEAN, true);
+                        player.sendMessage(Component.text("✅ Você comprou o Baú do Fim por 5.000 moly. Use o comando /ec para abri-lo.").color(NamedTextColor.GREEN));
+                    } else {
+                        player.sendMessage(Component.text("❌ Saldo insuficiente para comprar este item.").color(NamedTextColor.RED));
+                    }
+                    return;
+                }
+
+                // Lógica de compra para outros itens
                 if (data.has(new NamespacedKey(plugin, "preco"), PersistentDataType.DOUBLE)) {
                     double preco = data.get(new NamespacedKey(plugin, "preco"), PersistentDataType.DOUBLE);
                     double saldo = Economia.getSaldo(player);
@@ -232,7 +265,6 @@ public class LojaEvent implements Listener {
                             Economia.removerSaldo(player, preco);
                             player.getInventory().addItem(new ItemStack(clickedItem.getType(), clickedItem.getAmount()));
 
-                            // Mensagem de sucesso corrigida
                             String nomeItem = PlainComponentSerializer.plain().serialize(Objects.requireNonNull(meta.displayName()));
                             player.sendMessage(Component.text("✅ Você comprou " + nomeItem + " por " + preco + " moly.").color(NamedTextColor.GREEN));
                         } else {

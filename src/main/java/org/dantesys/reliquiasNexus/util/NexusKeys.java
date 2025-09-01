@@ -92,7 +92,8 @@ public enum NexusKeys {
     EMPRESTIMO_JUROS,
     TEAM_NAME,
     TEAM_RANK,
-    TEAM_BALANCE;
+    TEAM_BALANCE,
+    ENDER_CHEST_OWNED;
 
     public NamespacedKey key;
 

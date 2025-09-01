@@ -10,6 +10,9 @@ comandos:
     - "reliquia"
     - "expurgar"
     - "limite"
+    - "team"
+    - "vender"
+    - "renascer"
   nexus:
     - "Usando Nexus"
     - "/nexus livro"
@@ -21,22 +24,28 @@ comandos:
     - "/nexus level"
     - "-Mostrar seus niveis de reliquias."
     - "/nexus expurgo"
-    - "-Mostrar seu o servidor está em expurgo."
+    - "-Mostrar se o servidor está em expurgo."
     - "/nexus trocar <jogador>"
     - "-Envia um pedido de troca para o jogador escolhido."
     - "/nexus troca-aceitar"
     - "-Aceita um pedido de troca."
     - "/nexus troca-cancelar"
     - "-Cancela um pedido de troca."
+    - "/nexus team"
+    - "-Comandos para gerenciar seu time."
+    - "/nexus vender <quantidade>"
+    - "-Vende o minério que está em sua mão."
     - "--Apenas OPs--"
-    - "/nexus receber <jogador/jogadores>"
-    - "-Envia reliquias não utilizadas aleatoriamente para jogadores que não tenha atingido o limite de reliquias."
-    - "/nexus reliquia <jogador> <reliquia>"
-    - "-Envia reliquias não utilizadas da sua escolhar para um jogador que não tenha atingido o limite de reliquias."
-    - "/nexus expurgar <true/false>"
+    - "/nexu receber <jogador/jogadores>"
+    - "-Envia reliquias não utilizadas aleatoriamente para jogadores que não tenham atingido o limite de reliquias."
+    - "/nexu reliquia <jogador> <reliquia>"
+    - "-Envia reliquias não utilizadas da sua escolha para um jogador que não tenha atingido o limite de reliquias."
+    - "/nexu expurgar <true/false>"
     - "-Define se está em expurgo ou não."
-    - "/nexus limite <int>"
+    - "/nexu limite <int>"
     - "-Define o limite de reliquias que os jogadores podem ter."
+    - "/nexu op <player>"
+    - "-Dá permissões de OP limitadas para o jogador."
   troca:
     envio:
       - "Você recebeu 1 pedido de troca!"
@@ -53,7 +62,7 @@ comandos:
       erro2: "Você precisa estar segurando a reliquia para aceitar a troca!"
       erro3: "Apenas jogadores podem fazer aceitar trocas!"
     cancela:
-      envio: "Seu pedido de troca para <player> foi cancelaro!"
+      envio: "Seu pedido de troca para <player> foi cancelado!"
       recebido: "Você cancelou o pedido de troca!"
       erro: "Apenas jogadores podem fazer cancelar trocas!"
   livro:
@@ -78,7 +87,7 @@ comandos:
     msg:
       aviso: "=============|AVISO|============="
       perigo: "O Servidor agora está em expurgo."
-      seguro: "O Servidor agora esta seguro agora."
+      seguro: "O Servidor agora está seguro."
     log: "O expurgo foi definido como:"
   receber:
     limite: "O jogador <player> não pode receber a reliquia!"
@@ -88,6 +97,18 @@ comandos:
   limite:
     erro: "O valor não pode ser menor que 1"
     sucesso: "Limite atualizado para"
+  vender:
+    erro_item: "Este item não pode ser vendido."
+    erro_quantia: "Você não tem a quantidade necessária para vender."
+    sucesso: "Você vendeu %quantidade% de %item% por %valor% moly."
+    itens:
+      netherite_ingot: "Barra de Netherite"
+      diamond: "Diamante"
+      emerald: "Esmeralda"
+      gold_ingot: "Barra de Ouro"
+      iron_ingot: "Barra de Ferro"
+      coal: "Carvão"
+      redstone: "Redstone"
 special:
   vida: "Habilidade do Nexus da Vida Ativado!"
   hulk:
@@ -97,7 +118,7 @@ special:
     ativado: "Habilidade do Nexus do Protetor Ativado!"
     tempo: "Modo Reversão acaba em <tempo> segundos!"
   cacador:
-    ativado: "Modo Minigum Ativado!"
+    ativado: "Modo Minigun Ativado!"
     tempo: "Modo Minigun acaba em <tempo> segundos!"
 livro:
   reliquia: "Nexus do"
