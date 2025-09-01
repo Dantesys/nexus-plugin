@@ -127,11 +127,9 @@ public class Dragao {
         new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), duracaoSegundos * 20,
                 () -> {
                     world.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 2f, 1f);
-                    player.sendMessage("§6Você entrou em Forma Dracônica Suprema!");
                 },
                 () -> {
                     player.setWalkSpeed((float) velocidadeOriginal);
-                    player.sendMessage("§cSua Forma Dracônica Suprema terminou!");
                 },
                 t -> {
                     // Empurra e danifica mobs próximos ao se mover
