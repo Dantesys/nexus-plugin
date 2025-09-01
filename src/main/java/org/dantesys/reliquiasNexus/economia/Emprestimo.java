@@ -16,7 +16,7 @@ public class Emprestimo {
         this.jogador = jogador;
         this.banco = banco;
         this.valor = valor;
-        this.valorTotal = valor * (1 + juros);
+        this.valorTotal = valor * (2500 + juros);
         this.dataContracao = System.currentTimeMillis();
         this.diasAtraso = 0;
     }

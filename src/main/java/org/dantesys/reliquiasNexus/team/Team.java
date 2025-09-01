@@ -72,8 +72,8 @@ public class Team implements Listener {
         }
 
         String inviterRank = getPlayerRank(inviter);
-        if (!inviterRank.equals("lider") && !inviterRank.equals("sub-lider")) {
-            inviter.sendMessage(Component.text("❌ Apenas o líder ou sub-líder podem convidar jogadores.").color(NamedTextColor.RED));
+        if (!inviterRank.equals("lider") && !inviterRank.equals("sub-lider") && !inviterRank.equals("confiavel")) {
+            inviter.sendMessage(Component.text("❌ Apenas o líder, sub-líder ou confiável podem convidar jogadores.").color(NamedTextColor.RED));
             return;
         }
 
@@ -85,15 +85,22 @@ public class Team implements Listener {
         teamInvites.put(target.getUniqueId(), teamName);
 
         inviter.sendMessage(Component.text("✅ Convite enviado para " + target.getName() + ".").color(NamedTextColor.GREEN));
+
+        // Mensagem de convite com botões clicáveis
         target.sendMessage(Component.text("§6Você foi convidado para o time " + teamName + " por " + inviter.getName() + "!").color(NamedTextColor.GOLD));
-        target.sendMessage(Component.text("§aClique para aceitar").color(NamedTextColor.GREEN).clickEvent(ClickEvent.runCommand("/nexus team aceitar " + teamName)));
+        Component inviteMessage = Component.text("§a[ACEITAR] ").clickEvent(ClickEvent.runCommand("/nexus team aceitar " + inviter.getName()));
+        inviteMessage = inviteMessage.append(Component.text("§c[RECUSAR]").clickEvent(ClickEvent.runCommand("/nexus team recusar " + inviter.getName())));
+        target.sendMessage(inviteMessage);
     }
 
-    public static void aceitarConvite(Player player, String teamName) {
-        if (!teamInvites.containsKey(player.getUniqueId()) || !Objects.equals(teamInvites.get(player.getUniqueId()), teamName)) {
-            player.sendMessage(Component.text("❌ Você não tem um convite para este time.").color(NamedTextColor.RED));
+    public static void aceitarConvite(Player player, String inviterName) {
+        Player inviter = Bukkit.getPlayer(inviterName);
+        if (inviter == null || !teamInvites.containsKey(player.getUniqueId()) || !Objects.equals(teamInvites.get(player.getUniqueId()), getTeamName(inviter))) {
+            player.sendMessage(Component.text("❌ Este convite não é mais válido.").color(NamedTextColor.RED));
             return;
         }
+
+        String teamName = getTeamName(inviter);
 
         FileConfiguration config = ReliquiasNexus.getNexusConfig();
         if (!config.contains("teams." + teamName)) {
@@ -108,6 +115,23 @@ public class Team implements Listener {
 
         teamInvites.remove(player.getUniqueId());
         player.sendMessage(Component.text("✅ Você se juntou ao time " + teamName + "!").color(NamedTextColor.GREEN));
+        if (inviter.isOnline()) {
+            inviter.sendMessage(Component.text("✅ " + player.getName() + " aceitou seu convite e se juntou ao time.").color(NamedTextColor.GREEN));
+        }
+    }
+
+    public static void recusarConvite(Player player, String inviterName) {
+        Player inviter = Bukkit.getPlayer(inviterName);
+        if (inviter == null || !teamInvites.containsKey(player.getUniqueId()) || !Objects.equals(teamInvites.get(player.getUniqueId()), getTeamName(inviter))) {
+            player.sendMessage(Component.text("❌ Este convite não é mais válido.").color(NamedTextColor.RED));
+            return;
+        }
+
+        teamInvites.remove(player.getUniqueId());
+        player.sendMessage(Component.text("❌ Você recusou o convite do time de " + inviter.getName() + ".").color(NamedTextColor.RED));
+        if (inviter.isOnline()) {
+            inviter.sendMessage(Component.text("❌ " + player.getName() + " recusou seu convite para o time.").color(NamedTextColor.RED));
+        }
     }
 
     public static void sairTeam(Player player) {
@@ -130,6 +154,77 @@ public class Team implements Listener {
         setTeamData(player, null, null);
         player.sendMessage(Component.text("✅ Você saiu do time " + teamName + ".").color(NamedTextColor.GREEN));
     }
+
+    public static void excluirTeam(Player player) {
+        String teamName = getTeamName(player);
+        if (teamName == null) {
+            player.sendMessage(Component.text("❌ Você não está em um time.").color(NamedTextColor.RED));
+            return;
+        }
+
+        String playerRank = getPlayerRank(player);
+        if (!playerRank.equals("lider")) {
+            player.sendMessage(Component.text("❌ Apenas o líder pode excluir o time.").color(NamedTextColor.RED));
+            return;
+        }
+
+        FileConfiguration config = ReliquiasNexus.getNexusConfig();
+
+        // Remove all members from the team data
+        if (config.contains("teams." + teamName + ".members")) {
+            for (String memberUUID : Objects.requireNonNull(config.getConfigurationSection("teams." + teamName + ".members")).getKeys(false)) {
+                Player memberPlayer = Bukkit.getPlayer(UUID.fromString(memberUUID));
+                if (memberPlayer != null && memberPlayer.isOnline()) {
+                    setTeamData(memberPlayer, null, null);
+                    memberPlayer.sendMessage(Component.text("❌ O seu time foi excluído por " + player.getName() + ".").color(NamedTextColor.RED));
+                }
+            }
+        }
+
+        config.set("teams." + teamName, null);
+        ReliquiasNexus.getPlugin(ReliquiasNexus.class).saveConfig();
+
+        player.sendMessage(Component.text("✅ O time " + teamName + " foi excluído com sucesso!").color(NamedTextColor.GREEN));
+    }
+
+    public static void setRank(Player sender, Player target, String rank) {
+        String teamName = getTeamName(sender);
+        if (teamName == null) {
+            sender.sendMessage(Component.text("❌ Você precisa estar em um time para definir o cargo.").color(NamedTextColor.RED));
+            return;
+        }
+
+        if (!getTeamName(target).equals(teamName)) {
+            sender.sendMessage(Component.text("❌ " + target.getName() + " não está no seu time.").color(NamedTextColor.RED));
+            return;
+        }
+
+        String senderRank = getPlayerRank(sender);
+
+        if (senderRank.equals("membro") || senderRank.equals("confiavel")) {
+            sender.sendMessage(Component.text("❌ Você não tem permissão para alterar cargos.").color(NamedTextColor.RED));
+            return;
+        }
+
+        if (rank.equals("lider") && !senderRank.equals("lider")) {
+            sender.sendMessage(Component.text("❌ Apenas o líder pode promover para líder.").color(NamedTextColor.RED));
+            return;
+        }
+
+        if (!rank.equals("lider") && !rank.equals("sub-lider") && !rank.equals("confiavel") && !rank.equals("membro")) {
+            sender.sendMessage(Component.text("❌ Cargo inválido. Use: lider, sub-lider, confiavel ou membro.").color(NamedTextColor.RED));
+            return;
+        }
+
+        FileConfiguration config = ReliquiasNexus.getNexusConfig();
+        config.set("teams." + teamName + ".members." + target.getUniqueId().toString(), rank);
+        ReliquiasNexus.getPlugin(ReliquiasNexus.class).saveConfig();
+
+        setTeamData(target, teamName, rank);
+        sender.sendMessage(Component.text("✅ O cargo de " + target.getName() + " foi definido para " + rank + ".").color(NamedTextColor.GREEN));
+        target.sendMessage(Component.text("✅ O seu cargo no time " + teamName + " foi alterado para " + rank + ".").color(NamedTextColor.GREEN));
+    }
+
 
     public static void depositar(Player player, double amount) {
         String teamName = getTeamName(player);

@@ -16,7 +16,7 @@ public class Banco {
         this.nome = nome;
         this.dono = dono;
         this.saldo = saldoInicial;
-        this.maxEmprestimo = 1000;
+        this.maxEmprestimo = 5000;
         this.taxaJuros = 0.2;
         this.taxaSucesso = 0.7;
         this.descricao = "Novo banco";
