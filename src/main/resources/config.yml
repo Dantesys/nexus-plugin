@@ -1,20 +1,26 @@
-#Linguagens suportadas (en-us,pt-br)
-#Supported languages (en-us,pt-br)
+# Linguagens suportadas (en-us,pt-br)
+# Supported languages (en-us,pt-br)
 lang: en-us
-#Se o servidor está em expurgo, permite roubo de reliquia se verdadeiro
-#If the server is in purge, allow relic stealing if true
+# Se o servidor está em expurgo, permite roubo de reliquia se verdadeiro
+# If the server is in purge, allow relic stealing if true
 expurgo: false
-#Limite de reliquias que um jogador pode ter, se o jogador passar disso ele é derrotado e fica com apenas 1 reliquia
-#Limit of relics that a player can have, if the player exceeds this he is defeated and is left with only 1 relic
+# Lista de comandos para desativar durante o expurgo
+# List of commands to disable during purge
+expurgo_comandos_desativados:
+  - "trocar"
+  - "loja"
+  - "missoes"
+# Limite de reliquias que um jogador pode ter, se o jogador passar disso ele é derrotado e é deixado com apenas 1 reliquia
+# Limit of relics that a player can have, if the player exceeds this he is defeated and is left with only 1 relic
 limite: 3
-#Level maximo que as reliquias podem evoluir, se definido como 1 ou menor desabilida o level maximo
-#Maximum level that relics can evolve, if set to 1 or lower, it disables the maximum level
+# Level maximo que as reliquias podem evoluir, se definido como 1 ou menor desabilida o level maximo
+# Maximum level that relics can evolve, if set to 1 or lower, it disables the maximum level
 levelMax: 20
-#Quantidade de xp que precisa para evoluir, o calculo é xp*level
-#Amount of xp you need to evolve, the calculation is xp*level
+# Quantidade de xp que precisa para evoluir, o calculo é xp*level
+# Amount of xp you need to evolve, the calculation is xp*level
 xptolevel: 7
-#Registro das reliquias, quando algum jogador possui fica registrado o UUID dele
-#Registration of relics, when a player has one, his UUID is registered
+# Registro das reliquias, quando algum jogador possui fica registrado o UUID dele
+# Registration of relics, when a player has one, his UUID is registered
 nexus:
   guerreiro: ""
   ceifador: ""

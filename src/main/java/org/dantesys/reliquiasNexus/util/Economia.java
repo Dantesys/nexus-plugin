@@ -110,4 +110,8 @@ public class Economia {
     public static long getVencimentoEmprestimo(Player player) {
         return 0;
     }
+
+    public static void removerSaldo(Player player, int i, String renascimentoInstantâneo) {
+
+    }
 }
