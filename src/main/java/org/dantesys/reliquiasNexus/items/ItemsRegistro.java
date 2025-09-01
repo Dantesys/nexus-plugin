@@ -118,6 +118,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.NETHERITE_SWORD,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Guerreiro"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","guerreiro"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -130,7 +131,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.NETHERITE_SWORD,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Ceifador"));
-        meta.setItemModel(Material.NETHERITE_HOE.getKey());
+        meta.setItemModel(new NamespacedKey("nexus_texture","ceifador"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -143,6 +144,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.TOTEM_OF_UNDYING,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus da vida"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","vida"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -155,6 +157,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.TRIDENT,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus dos Mares"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","mares"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -167,6 +170,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.NETHERITE_AXE,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Barbaro"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","barbaro"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -179,6 +183,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.NETHERITE_HOE,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Fazendeiro"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","fazendeiro"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -191,6 +196,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.NETHERITE_HELMET,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Espiao"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","espiao"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -203,6 +209,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.BOW,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Arqueiro"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","arqueiro"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -215,6 +222,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.CROSSBOW,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Caçador"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","cacador"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -227,6 +235,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.MACE,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus da Tempestade"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","tempestade"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -239,6 +248,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.NETHERITE_PICKAXE,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Mineiro"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","mineiro"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -252,6 +262,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.ELYTRA,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus da Fenix"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","fenix"));
         meta.setUnbreakable(true);
         meta.setGlider(true);
         meta.setEnchantmentGlintOverride(true);
@@ -265,6 +276,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.SHIELD,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Protetor"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","protetor"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -277,6 +289,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.NETHERITE_LEGGINGS,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Hulk"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","hulk"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -290,6 +303,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.ECHO_SHARD,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Sculk"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","sculk"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -302,6 +316,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.FISHING_ROD,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Pescador"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","pescador"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -314,6 +329,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.NETHERITE_BOOTS,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Flash"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","flash"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -326,6 +342,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.WRITTEN_BOOK,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Mago"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","mago_base"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -338,6 +355,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.BLACK_BUNDLE,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Ladrão"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","ladrao"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -350,6 +368,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.NETHERITE_SHOVEL,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Domador"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","domador"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -362,6 +381,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.NETHERITE_SWORD,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Cozinheiro"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","cozinheiro"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -374,7 +394,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.MACE,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Construtor"));
-        meta.setItemModel(Material.NETHERITE_SHOVEL.getKey());
+        meta.setItemModel(new NamespacedKey("nexus_texture","construtor"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -387,6 +407,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.NETHER_STAR,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Abissal"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","abissal"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -399,6 +420,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.CLOCK,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus da Cronosombra"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","cronosombra"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -411,6 +433,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.NETHERITE_SWORD,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Assassino"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","assassino"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -423,6 +446,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.AMETHYST_SHARD,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Frostis"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","frostis"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -435,7 +459,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.WRITTEN_BOOK,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Necromante"));
-        meta.setItemModel(Material.WITHER_SKELETON_SKULL.getKey());
+        meta.setItemModel(new NamespacedKey("nexus_texture","necromante"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -448,6 +472,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.HEART_OF_THE_SEA,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Alquimista"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","alquimista"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -460,6 +485,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.NETHERITE_CHESTPLATE,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Golem"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","golem"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
@@ -472,6 +498,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.DRAGON_HEAD,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§6Nexus do Dragão"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","dragao"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);

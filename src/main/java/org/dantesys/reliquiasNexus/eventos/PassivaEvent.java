@@ -167,15 +167,15 @@ public class PassivaEvent implements Listener {
                         NamespacedKey key = Material.WRITTEN_BOOK.getKey();
                         int level = player.getPersistentDataContainer().getOrDefault(MAGO.key,PersistentDataType.INTEGER,1);
                         switch (i){
-                            case 0 -> key = Material.FIRE_CHARGE.getKey();
-                            case 1 -> key = Material.SHIELD.getKey();
-                            case 2 -> key = Material.SNOWBALL.getKey();
-                            case 3 -> key = level>5?Material.IRON_BARS.getKey():Material.BARRIER.getKey();
-                            case 4 -> key = level>5?Material.WIND_CHARGE.getKey():Material.BARRIER.getKey();
-                            case 5 -> key = level>10?Material.LIGHTNING_ROD.getKey():Material.BARRIER.getKey();
-                            case 6 -> key = level>10?Material.FEATHER.getKey():Material.BARRIER.getKey();
-                            case 7 -> key = level>15?Material.EGG.getKey():Material.BARRIER.getKey();
-                            case 8 -> key = level>15?Material.NETHER_STAR.getKey():Material.BARRIER.getKey();
+                            case 0 -> key = new NamespacedKey("nexus_texture","mago_vm1");
+                            case 1 -> key = new NamespacedKey("nexus_texture","mago_vm2");
+                            case 2 -> key = new NamespacedKey("nexus_texture","mago_vm3");
+                            case 3 -> key = level>5?new NamespacedKey("nexus_texture","mago_vm4"):new NamespacedKey("nexus_texture","mago_vm10");
+                            case 4 -> key = level>5?new NamespacedKey("nexus_texture","mago_vm5"):new NamespacedKey("nexus_texture","mago_vm10");
+                            case 5 -> key = level>10?new NamespacedKey("nexus_texture","mago_vm6"):new NamespacedKey("nexus_texture","mago_vm10");
+                            case 6 -> key = level>10?new NamespacedKey("nexus_texture","mago_vm7"):new NamespacedKey("nexus_texture","mago_vm10");
+                            case 7 -> key = level>15?new NamespacedKey("nexus_texture","mago_vm8"):new NamespacedKey("nexus_texture","mago_vm10");
+                            case 8 -> key = level>15?new NamespacedKey("nexus_texture","mago_vm9"):new NamespacedKey("nexus_texture","mago_vm10");
                         }
                         meta.setItemModel(key);
                         stack.setItemMeta(meta);
@@ -185,7 +185,7 @@ public class PassivaEvent implements Listener {
                         ItemStack corante = player.getInventory().getItemInOffHand();
                         DyeColor cor = CoresUtils.getDyeColorFromItem(corante);
                         ItemMeta meta = stack.getItemMeta();
-                        NamespacedKey key = Material.MACE.getKey();
+                        NamespacedKey key = new NamespacedKey("nexus_texture","construtor");
                         switch (i){
                             case 0 -> key = BlocoUtils.getBlocoColorido(Material.WHITE_CONCRETE,cor).getKey();
                             case 1 -> key = BlocoUtils.getBlocoColorido(Material.GLASS,cor).getKey();
