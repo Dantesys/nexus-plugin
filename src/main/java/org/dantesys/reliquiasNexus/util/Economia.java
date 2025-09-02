@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
+import org.dantesys.reliquiasNexus.economia.Banco;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -112,6 +113,17 @@ public class Economia {
     }
 
     public static void removerSaldo(Player player, int i, String renascimentoInstantâneo) {
+
+    }
+
+    public static void concederEmprestimo(Player player, double valorEmprestimo) {
+
+    }
+
+    public static void removerSaldo(Player player, double divida, String pagamentoDeEmpréstimo) {
+    }
+
+    public static void adicionarSaldo(Banco nexusCentralBank, double divida, String pagamentoDeEmpréstimo) {
 
     }
 }

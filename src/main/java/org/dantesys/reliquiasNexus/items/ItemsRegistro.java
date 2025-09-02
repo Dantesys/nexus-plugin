@@ -6,10 +6,12 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemRarity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
@@ -49,7 +51,9 @@ public class ItemsRegistro {
     public static Nexus alquimista;
     public static Nexus golem;
     public static Nexus dragao;
+    public static Nexus morte;
     public static Nexus livro;
+    public static Nexus carrasco;
     private static final List<Nexus> reliquias = new ArrayList<>();
     public static void init(){
         createGuerreiro();
@@ -112,6 +116,10 @@ public class ItemsRegistro {
         reliquias.add(golem);
         createDragao();
         reliquias.add(dragao);
+        createMorte();
+        reliquias.add(morte);
+        createCarrasco();
+        reliquias.add(carrasco);
         createLivro();
     }
     private static void createGuerreiro(){
@@ -507,6 +515,29 @@ public class ItemsRegistro {
         item.setItemMeta(meta);
         dragao = new Nexus(item,"dragao");
     }
+    private static void createMorte(){
+        ItemStack item = new ItemStack(Material.GHAST_TEAR,1);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§4Nexus da Morte"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.EPIC);
+        meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"morte");
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"");
+        item.setItemMeta(meta);
+        morte = new Nexus(item,"morte");
+    }
+    private static void createCarrasco(){
+        ItemStack item = new ItemStack(Material.GOLDEN_SWORD,1);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§eEspada do Carrasco"));
+        meta.setUnbreakable(true);
+        meta.addEnchant(Enchantment.SHARPNESS, 1, true);
+        meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING, "carrasco");
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING, "server");
+        item.setItemMeta(meta);
+        carrasco = new Nexus(item, "carrasco");
+    }
     private static void createLivro(){
         ItemStack item = new ItemStack(Material.WRITTEN_BOOK,1);
         BookMeta meta = (BookMeta) item.getItemMeta();
@@ -561,6 +592,8 @@ public class ItemsRegistro {
             case "alquimista" -> alquimista;
             case "golem" -> golem;
             case "dragao" -> dragao;
+            case "morte" -> morte;
+            case "carrasco" -> carrasco;
             default -> null;
         };
     }

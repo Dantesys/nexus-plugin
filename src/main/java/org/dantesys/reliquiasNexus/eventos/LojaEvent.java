@@ -17,6 +17,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
+import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.util.Economia;
 import org.dantesys.reliquiasNexus.util.NexusKeys;
 
@@ -70,6 +71,20 @@ public class LojaEvent implements Listener {
         enderChestItem.setItemMeta(enderChestMeta);
 
         inv.setItem(22, enderChestItem);
+
+        // Adicionando Espada do Carrasco
+        ItemStack carrascoItem = ItemsRegistro.getFromNome("carrasco").getItem(1);
+        ItemMeta carrascoMeta = carrascoItem.getItemMeta();
+        List<Component> carrascoLore = new ArrayList<>();
+        carrascoLore.add(Component.text("§7Dano fixo de 0.5 corações."));
+        carrascoLore.add(Component.text("§7Ignora todos os efeitos de resistência e armadura."));
+        carrascoLore.add(Component.text("§7A única arma capaz de matar o portador da relíquia da Morte."));
+        carrascoLore.add(Component.text("§7Se quebra após um único uso."));
+        carrascoLore.add(Component.text(""));
+        carrascoLore.add(Component.text("§aPreço: §6666.000.000 Moly"));
+        carrascoMeta.lore(carrascoLore);
+        carrascoItem.setItemMeta(carrascoMeta);
+        inv.setItem(13, carrascoItem); // Adicionado em uma posição específica
 
         // Outros itens OP (20+ itens de exemplo)
         adicionarItemComPreco(inv, 0, Material.NETHERITE_SWORD, "§cEspada de Netherite", 50000.0, 1);
@@ -249,6 +264,25 @@ public class LojaEvent implements Listener {
                         Economia.removerSaldo(player, 5000, "Compra de Baú do Fim");
                         playerData.set(NexusKeys.ENDER_CHEST_OWNED.key, PersistentDataType.BOOLEAN, true);
                         player.sendMessage(Component.text("✅ Você comprou o Baú do Fim por 5.000 moly. Use o comando /ec para abri-lo.").color(NamedTextColor.GREEN));
+                    } else {
+                        player.sendMessage(Component.text("❌ Saldo insuficiente para comprar este item.").color(NamedTextColor.RED));
+                    }
+                    return;
+                }
+
+                // Lógica para a Espada do Carrasco
+                if ("Espada do Carrasco".equals(PlainComponentSerializer.plain().serialize(Objects.requireNonNull(meta.displayName())))) {
+                    double preco = 666000000.0;
+                    if (Economia.getSaldo(player) >= preco) {
+                        // Verifica se o jogador já possui a espada
+                        if (player.getInventory().contains(ItemsRegistro.carrasco.getItem(1))) {
+                            player.sendMessage(Component.text("❌ Você já possui a Espada do Carrasco.").color(NamedTextColor.RED));
+                            return;
+                        }
+
+                        Economia.removerSaldo(player, preco, "Compra de Espada do Carrasco");
+                        player.getInventory().addItem(ItemsRegistro.carrasco.getItem(1));
+                        player.sendMessage(Component.text("✅ Você comprou a Espada do Carrasco!").color(NamedTextColor.GREEN));
                     } else {
                         player.sendMessage(Component.text("❌ Saldo insuficiente para comprar este item.").color(NamedTextColor.RED));
                     }

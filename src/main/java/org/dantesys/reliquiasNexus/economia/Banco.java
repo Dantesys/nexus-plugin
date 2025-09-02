@@ -1,6 +1,7 @@
 package org.dantesys.reliquiasNexus.economia;
 
 import java.util.UUID;
+import org.dantesys.reliquiasNexus.ReliquiasNexus;
 
 public class Banco {
     private final String nome;
@@ -21,6 +22,10 @@ public class Banco {
         this.taxaSucesso = 0.7;
         this.descricao = "Novo banco";
         this.aprovado = false;
+    }
+
+    public static Banco getNexusCentralBank() {
+        return ReliquiasNexus.getNexusCentralBank();
     }
 
     // Getters e Setters

@@ -421,8 +421,10 @@ public class SpecialEvent implements Listener {
         Player player = event.getPlayer();
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
         int cd = dataPlayer.getOrDefault(SPECIAL.key, PersistentDataType.INTEGER,0);
+
         if(player.isSneaking() && cd<=0){
             ItemStack stack = player.getInventory().getItemInMainHand();
+
             if (stack.getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)) {
                 String nome = stack.getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING);
                 if (nome != null && !nome.isBlank()) {
@@ -468,6 +470,19 @@ public class SpecialEvent implements Listener {
                             case "alquimista" -> Alquimista.getSpecialbyLevel(dataPlayer.getOrDefault(ALQUIMISTA.key, PersistentDataType.INTEGER, 1), player);
                             case "golem" -> Golem.getSpecialbyLevel(dataPlayer.getOrDefault(GOLEM.key, PersistentDataType.INTEGER, 1), player);
                             case "dragao" -> Dragao.getSpecialbyLevel(dataPlayer.getOrDefault(DRAGAO.key, PersistentDataType.INTEGER, 1), player);
+                            case "morte" -> {
+                                int almasColetadas = dataPlayer.getOrDefault(MISSAOMORTE.key, PersistentDataType.INTEGER, 0);
+                                if (almasColetadas < 25) {
+                                    Morte.startPunhoDaMorte(player);
+                                    dataPlayer.set(SPECIAL.key, PersistentDataType.INTEGER, 30);
+                                } else if (almasColetadas < 100) {
+                                    Morte.getMorteSubita(player);
+                                    dataPlayer.set(SPECIAL.key, PersistentDataType.INTEGER, 45);
+                                } else {
+                                    Morte.getDevoradorDeAlmas(player);
+                                    dataPlayer.set(SPECIAL.key, PersistentDataType.INTEGER, 60);
+                                }
+                            }
                         }
                         if(!item.getNome().equals("mago")){
                             dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,60);
