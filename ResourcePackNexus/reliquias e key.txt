@@ -1,5 +1,5 @@
-guerreiro: new NamespacedKey("nexus_texture","guerreiro")
-ceifador: new NamespacedKey("nexus_texture","ceifador")
+guerreiro: FEITO
+ceifador: FEITO
 vida: new NamespacedKey("nexus_texture","vida")
 mares: new NamespacedKey("nexus_texture","mares")
 barbaro: new NamespacedKey("nexus_texture","barbaro")
