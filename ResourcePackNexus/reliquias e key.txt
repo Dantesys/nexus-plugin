@@ -1,7 +1,7 @@
 guerreiro: FEITO
 ceifador: FEITO
-vida: new NamespacedKey("nexus_texture","vida")
-mares: new NamespacedKey("nexus_texture","mares")
+vida: FEITO
+mares: FEITO
 barbaro: new NamespacedKey("nexus_texture","barbaro")
 fazendeiro: new NamespacedKey("nexus_texture","fazendeiro")
 espiao: new NamespacedKey("nexus_texture","espiao")
