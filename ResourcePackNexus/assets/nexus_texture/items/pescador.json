@@ -1,0 +1,14 @@
+{
+  "model": {
+    "type": "minecraft:condition",
+    "on_false": {
+      "type": "minecraft:model",
+      "model": "nexus_texture:item/pescador"
+    },
+    "on_true": {
+      "type": "minecraft:model",
+      "model": "nexus_texture:item/pescador_cast"
+    },
+    "property": "minecraft:fishing_rod/cast"
+  }
+}
