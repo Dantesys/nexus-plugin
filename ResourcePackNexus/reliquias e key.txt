@@ -5,11 +5,11 @@ mares: FEITO
 barbaro: FEITO
 fazendeiro: FEITO
 espiao: FEITO
-arqueiro: new NamespacedKey("nexus_texture","arqueiro")
-cacador: new NamespacedKey("nexus_texture","cacador")
-tempestade: new NamespacedKey("nexus_texture","tempestade")
-mineiro: new NamespacedKey("nexus_texture","mineiro")
-fenix: new NamespacedKey("nexus_texture","fenix")
+arqueiro: FEITO
+cacador: FEITO
+tempestade: FEITO
+mineiro: FEITO
+fenix: FEITO
 protetor: new NamespacedKey("nexus_texture","protetor")
 hulk: new NamespacedKey("nexus_texture","hulk")
 sculk: new NamespacedKey("nexus_texture","sculk")
