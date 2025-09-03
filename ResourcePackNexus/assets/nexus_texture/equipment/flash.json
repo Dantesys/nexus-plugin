@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "nexus_texture:flash"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "minecraft:netherite"
+      }
+    ]
+  }
+}

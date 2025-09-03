@@ -1,0 +1,10 @@
+{
+  "layers": {
+    "wings": [
+      {
+        "texture": "nexus_texture:fenix",
+        "use_player_texture": true
+      }
+    ]
+  }
+}

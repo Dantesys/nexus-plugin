@@ -14,7 +14,7 @@ protetor: FEITO
 hulk: FEITO
 sculk: FEITO
 pescador: FEITO
-flash: new NamespacedKey("nexus_texture","flash")
+flash: FEITO
 mago: new NamespacedKey("nexus_texture","mago_base") (Vai ter mais 10 variações, para cada variação vou mudar o base para vm1, vm2 ..., com base na magia e caso a magia esteja bloqueada)
 ladrao: new NamespacedKey("nexus_texture","ladrao")
 domador: new NamespacedKey("nexus_texture","domador")
