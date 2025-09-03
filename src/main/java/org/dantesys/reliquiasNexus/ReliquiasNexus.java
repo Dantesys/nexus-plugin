@@ -6,6 +6,7 @@ import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -26,6 +27,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
@@ -51,6 +53,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import org.bukkit.Material;
+import org.dantesys.reliquiasNexus.SpeciaisPassivas.Morte;
 
 
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
@@ -453,6 +456,17 @@ public final class ReliquiasNexus extends JavaPlugin {
             sender.sendMessage(Component.text("❌ Apenas jogadores podem usar este comando!").color(NamedTextColor.RED));
             return Command.SINGLE_SUCCESS;
         }));
+
+        // Comando /nexus missao morte
+        nexusRoot.then(Commands.literal("missao").then(Commands.literal("morte").executes(ctx -> {
+            final CommandSender sender = ctx.getSource().getSender();
+            if (sender instanceof Player player) {
+                Morte.startMissaoMorte(player);
+            } else {
+                sender.sendMessage(Component.text("❌ Apenas jogadores podem usar este comando!").color(NamedTextColor.RED));
+            }
+            return Command.SINGLE_SUCCESS;
+        })));
 
         // Comando /nexus procurados
         nexusRoot.then(Commands.literal("procurados").executes(ctx -> {
@@ -999,6 +1013,17 @@ public final class ReliquiasNexus extends JavaPlugin {
                 )
         );
 
+        // Novo comando para iniciar missão da Morte
+        nexuRoot.then(Commands.literal("missao_morte").executes(ctx -> {
+            CommandSender sender = ctx.getSource().getSender();
+            if (sender instanceof Player player) {
+                Morte.startMissaoMorte(player);
+                return Command.SINGLE_SUCCESS;
+            }
+            sender.sendMessage(Component.text("❌ Apenas jogadores podem usar este comando!").color(NamedTextColor.RED));
+            return Command.SINGLE_SUCCESS;
+        }));
+
         // Registrar comandos
         LiteralCommandNode<CommandSourceStack> nexusCommand = nexusRoot.build();
         LiteralCommandNode<CommandSourceStack> nexuCommand = nexuRoot.build();
@@ -1061,7 +1086,7 @@ public final class ReliquiasNexus extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new JoinQuitEvent(this), this);
         getServer().getPluginManager().registerEvents(new LimitadorEvent(this), this);
         getServer().getPluginManager().registerEvents(new PassivaEvent(), this);
-        getServer().getPluginManager().registerEvents(new PerdeuEvent(), this);
+        getServer().getPluginManager().registerEvents(new PerdeuEvent(this), this);
         getServer().getPluginManager().registerEvents(new EvoluirEvent(this), this);
         getServer().getPluginManager().registerEvents(new SpecialEvent(this), this);
         getServer().getPluginManager().registerEvents(new LojaEvent(this), this);

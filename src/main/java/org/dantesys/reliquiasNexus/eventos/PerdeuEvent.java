@@ -24,6 +24,9 @@ import java.util.List;
 import static org.dantesys.reliquiasNexus.util.NexusKeys.NEXUS;
 
 public class PerdeuEvent implements Listener {
+    public PerdeuEvent(ReliquiasNexus reliquiasNexus) {
+    }
+
     @EventHandler
     public void itemFrame(PlayerInteractEntityEvent event){
         Player player = event.getPlayer();
