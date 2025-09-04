@@ -82,8 +82,8 @@ public class PlayerList {
         if (team == null) {
             team = scoreboard.registerNewTeam(teamName);
             team.prefix(prefix);
-            team.setAllowFriendlyFire(false); // Adicionado para evitar dano entre membros do mesmo time, se for o caso
-            team.setCanSeeFriendlyInvisibles(true); // Membros do time podem ver uns aos outros
+            team.setAllowFriendlyFire(false);
+            team.setCanSeeFriendlyInvisibles(true);
         }
 
         // Remove o jogador de todos os outros times

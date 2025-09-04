@@ -490,7 +490,7 @@ public final class ReliquiasNexus extends JavaPlugin {
 
             for (String uuidStr : wantedSection.getKeys(false)) {
                 UUID uuid = UUID.fromString(uuidStr);
-                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+                OfflinePlayer offlinePlayer = getServer().getOfflinePlayer(uuid);
                 String nomeJogador = offlinePlayer.getName() != null ? offlinePlayer.getName() : "Desconhecido";
 
                 double recompensa = wantedSection.getDouble(uuidStr + ".recompensa", 0);
@@ -769,9 +769,10 @@ public final class ReliquiasNexus extends JavaPlugin {
                 });
             }else{
                 Bukkit.getOnlinePlayers().forEach(player -> {
-                    player.sendMessage(Component.text("🛡️ §a§lMODO EXPURGO DESATIVADO\n§2✔ §aSuas relíquias estão seguras!")
-                            .color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD));
+                    playerListManager.updateAllPlayerLists();
                 });
+                ctx.getSource().getSender().sendMessage(Component.text("🛡️ §a§lMODO EXPURGO DESATIVADO\n§2✔ §aSuas relíquias estão seguras!")
+                        .color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD));
             }
             ctx.getSource().getSender().sendMessage(Component.text("✅ §aExpurgo definido para: " + exp)
                     .color(NamedTextColor.GREEN));
@@ -1050,9 +1051,9 @@ public final class ReliquiasNexus extends JavaPlugin {
             CommandSender sender = ctx.getSource().getSender();
             if (sender instanceof Player player) {
                 Morte.startMissaoMorte(player);
-                return Command.SINGLE_SUCCESS;
+            } else {
+                sender.sendMessage(Component.text("❌ Apenas jogadores podem usar este comando!").color(NamedTextColor.RED));
             }
-            sender.sendMessage(Component.text("❌ Apenas jogadores podem usar este comando!").color(NamedTextColor.RED));
             return Command.SINGLE_SUCCESS;
         }));
 
@@ -1126,6 +1127,7 @@ public final class ReliquiasNexus extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new BancoEvent(this), this);
         getServer().getPluginManager().registerEvents(new MorteEvent(this), this);
         getServer().getPluginManager().registerEvents(playerListManager, this);
+        getServer().getPluginManager().registerEvents(new ChatListener(this), this);
 
 
         getServer().getConsoleSender().sendMessage("§2✅ §a[Nexus]: Plugin Ativado com Sucesso!");

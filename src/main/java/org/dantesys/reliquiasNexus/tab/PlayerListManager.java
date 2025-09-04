@@ -30,6 +30,8 @@ public class PlayerListManager implements Listener {
         Player player = event.getPlayer();
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             playerList.updatePlayerList(player);
+            // Corrige o erro, chamando o método correto para atualizar todos os jogadores
+            playerList.updateForAllPlayers();
         }, 20L); // Delay de 1 segundo
     }
 
