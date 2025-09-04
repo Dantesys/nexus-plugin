@@ -519,6 +519,7 @@ public class ItemsRegistro {
         ItemStack item = new ItemStack(Material.GHAST_TEAR,1);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text("§4Nexus da Morte"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","morte"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.EPIC);
@@ -528,11 +529,11 @@ public class ItemsRegistro {
         morte = new Nexus(item,"morte");
     }
     private static void createCarrasco(){
-        ItemStack item = new ItemStack(Material.GOLDEN_SWORD,1);
+        ItemStack item = new ItemStack(Material.NETHERITE_SWORD,1);
         ItemMeta meta = item.getItemMeta();
-        meta.displayName(Component.text("§eEspada do Carrasco"));
+        meta.displayName(Component.text("§eNexus do Carrasco"));
+        meta.setItemModel(new NamespacedKey("nexus_texture","carrasco"));
         meta.setUnbreakable(true);
-        meta.addEnchant(Enchantment.SHARPNESS, 1, true);
         meta.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING, "carrasco");
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING, "server");
         item.setItemMeta(meta);

@@ -15,12 +15,12 @@ hulk: FEITO
 sculk: FEITO
 pescador: FEITO
 flash: FEITO
-mago: new NamespacedKey("nexus_texture","mago_base") (Vai ter mais 10 variações, para cada variação vou mudar o base para vm1, vm2 ..., com base na magia e caso a magia esteja bloqueada)
-ladrao: new NamespacedKey("nexus_texture","ladrao")
-domador: new NamespacedKey("nexus_texture","domador")
-cozinheiro: new NamespacedKey("nexus_texture","cozinheiro")
-construtor: new NamespacedKey("nexus_texture","construtor")
-abissal: new NamespacedKey("nexus_texture","abissal")
+mago: FEITO
+ladrao: FEITO
+domador: FEITO
+cozinheiro: FEITO
+construtor: FEITO
+abissal: FEITO
 cronosombra: new NamespacedKey("nexus_texture","cronosombra")
 assassino: new NamespacedKey("nexus_texture","assassino")
 frostis: new NamespacedKey("nexus_texture","frostis")
@@ -28,3 +28,5 @@ necromante: new NamespacedKey("nexus_texture","necromante")
 alquimista: new NamespacedKey("nexus_texture","alquimista")
 golem: new NamespacedKey("nexus_texture","golem")
 dragao: new NamespacedKey("nexus_texture","dragao")
+morte: new NamespacedKey("nexus_texture","morte")
+carrasco: new NamespacedKey("nexus_texture","carrasco")
