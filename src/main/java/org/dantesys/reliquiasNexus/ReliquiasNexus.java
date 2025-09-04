@@ -41,6 +41,8 @@ import org.dantesys.reliquiasNexus.economia.Banco;
 import org.dantesys.reliquiasNexus.eventos.*;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
+import org.dantesys.reliquiasNexus.SpeciaisPassivas.Morte;
+import org.dantesys.reliquiasNexus.tab.PlayerListManager;
 import org.dantesys.reliquiasNexus.team.Team;
 import org.dantesys.reliquiasNexus.util.Economia;
 import org.dantesys.reliquiasNexus.util.NexusKeys;
@@ -53,7 +55,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import org.bukkit.Material;
-import org.dantesys.reliquiasNexus.SpeciaisPassivas.Morte;
 
 
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
@@ -64,6 +65,7 @@ public final class ReliquiasNexus extends JavaPlugin {
     private static YamlConfiguration lang;
     private static final Map<UUID, PermissionAttachment> opAttachments = new HashMap<>();
     private static Banco nexusCentralBank;
+    private PlayerListManager playerListManager;
     public final List<String> names = List.of("guerreiro","ceifador","vida","mares","barbaro",
             "fazendeiro","espiao","arqueiro","cacador","tempestade","mineiro","fenix","protetor",
             "hulk","sculk","pescador","flash","mago","ladrao","domador","cozinheiro","construtor",
@@ -103,6 +105,9 @@ public final class ReliquiasNexus extends JavaPlugin {
         nexusCentralBank = new Banco("Nexus Central Bank", null, saldoInicial);
         // Salva o saldo inicial no config
         config.set("nexus_central_bank.saldo", nexusCentralBank.getSaldo());
+
+        // Inicializar o gerenciador da player list
+        playerListManager = new PlayerListManager(this);
 
         new UpdaterCheck(this, "dantesys/nexus-plugin").checkForUpdates();
 
@@ -186,6 +191,9 @@ public final class ReliquiasNexus extends JavaPlugin {
                 ctx.getSource().getSender().sendMessage(Component.text("⚡ §c§lMODO EXPURGO ATIVADO!\n§4⚠ §cTodas as relíquias dropam ao morrer!")
                         .color(NamedTextColor.RED).decorate(TextDecoration.BOLD));
             }else{
+                Bukkit.getOnlinePlayers().forEach(player -> {
+                    playerListManager.updateAllPlayerLists();
+                });
                 ctx.getSource().getSender().sendMessage(Component.text("🛡️ §a§lMODO EXPURGO DESATIVADO\n§2✔ §aSuas relíquias estão seguras!")
                         .color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD));
             }
@@ -604,12 +612,36 @@ public final class ReliquiasNexus extends JavaPlugin {
                     .append(Component.text("§7➤ §b/nexu op <player> §f- Dar permissões de OP limitadas ao jogador\n"))
                     .append(Component.text("§7➤ §b/nexu alma dar <player> <quantidade> §f- Dar almas para um jogador\n"))
                     .append(Component.text("§7➤ §b/nexu procurado <player> <valor> §f- Marcar jogador como procurado\n"))
+                    .append(Component.text("§7➤ §b/nexu playerlist all §f- Forçar atualização da player list\n"))
+                    .append(Component.text("§7➤ §b/nexu addlist <player> <cargo> §f- Adicionar cargo na player list\n"))
                     .append(Component.text("§4§l⚡ §c§lNEXU - COMANDOS DE OPERADOR §4§l⚡\n").decorate(TextDecoration.BOLD))
                     .build();
 
             ctx.getSource().getSender().sendMessage(mensagem);
             return Command.SINGLE_SUCCESS;
         });
+
+        // Novo comando /nexu playerlist all
+        nexuRoot.then(Commands.literal("playerlist").then(Commands.literal("all").executes(ctx -> {
+            playerListManager.updateAllPlayerLists();
+            ctx.getSource().getSender().sendMessage(Component.text("✅ Player list atualizada para todos os jogadores!")
+                    .color(NamedTextColor.GREEN));
+            return Command.SINGLE_SUCCESS;
+        })));
+
+        // Novo comando /nexu addlist
+        nexuRoot.then(Commands.literal("addlist").then(Commands.argument("player", ArgumentTypes.player()).then(Commands.argument("cargo", StringArgumentType.string()).executes(ctx -> {
+                    final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
+                    final Player player = targetResolver.resolve(ctx.getSource()).getFirst();
+                    final String cargo = ctx.getArgument("cargo", String.class).toLowerCase();
+                    final CommandSender sender = ctx.getSource().getSender();
+
+                    playerListManager.setPlayerRank(player.getUniqueId(), cargo);
+                    sender.sendMessage(Component.text("✅ Cargo de " + player.getName() + " definido para " + cargo + ".").color(NamedTextColor.GREEN));
+
+                    return Command.SINGLE_SUCCESS;
+                })))
+        );
 
         // Comando dar moly (operador)
         nexuRoot.then(Commands.literal("dar").then(Commands.literal("moly").then(Commands.argument("jogador", ArgumentTypes.player()).then(Commands.argument("quantia", DoubleArgumentType.doubleArg()).executes(ctx -> {
@@ -1054,12 +1086,13 @@ public final class ReliquiasNexus extends JavaPlugin {
                     return Command.SINGLE_SUCCESS;
                 })))
                 .then(Commands.literal("aceitar").then(Commands.argument("team", StringArgumentType.string()).executes(ctx -> {
-                    if (ctx.getSource().getExecutor() instanceof Player player) {
-                        String teamName = ctx.getArgument("team", String.class);
-                        Team.aceitarConvite(player, teamName);
-                    }
-                    return Command.SINGLE_SUCCESS;
-                })))
+                            if (ctx.getSource().getExecutor() instanceof Player player) {
+                                String teamName = ctx.getArgument("team", String.class);
+                                Team.aceitarConvite(player, teamName);
+                            }
+                            return Command.SINGLE_SUCCESS;
+                        }))
+                )
                 .then(Commands.literal("sair").executes(ctx -> {
                     if (ctx.getSource().getExecutor() instanceof Player player) {
                         Team.sairTeam(player);
@@ -1092,6 +1125,8 @@ public final class ReliquiasNexus extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new LojaEvent(this), this);
         getServer().getPluginManager().registerEvents(new BancoEvent(this), this);
         getServer().getPluginManager().registerEvents(new MorteEvent(this), this);
+        getServer().getPluginManager().registerEvents(playerListManager, this);
+
 
         getServer().getConsoleSender().sendMessage("§2✅ §a[Nexus]: Plugin Ativado com Sucesso!");
     }

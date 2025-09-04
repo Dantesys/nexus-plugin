@@ -1,0 +1,19 @@
+# Configurações da Player List
+header:
+  title: "ResourcePackNexus"
+  title-color: "GOLD"
+  subtitle: "TPS: %tps% | Pins: %players%"
+  subtitle-color: "GRAY"
+
+footer:
+  line1: "----------------"
+  line1-color: "DARK_GRAY"
+  line2: "Pathox.ml"
+  line2-color: "YELLOW"
+
+player-format:
+  admin-prefix: "[Admin] "
+  admin-prefix-color: "RED"
+  player-color: "WHITE"
+  op-color: "BLUE"
+  vip-color: "GREEN"

@@ -3,3 +3,34 @@ version: 'v1.0.8'
 main: org.dantesys.reliquiasNexus.ReliquiasNexus
 api-version: '1.21'
 authors: [ Dantesys ]
+
+commands:
+  nexus:
+    description: Comando principal do Nexus
+    usage: /nexus [subcomando]
+  nexu:
+    description: Comandos de operador do Nexus
+    usage: /nexu [subcomando]
+  team:
+    description: Comandos de equipe
+    usage: /team [subcomando]
+  ec:
+    description: Abrir ender chest
+    usage: /ec
+
+permissions:
+  reliquiasnexus.admin:
+    description: Acesso aos comandos administrativos do Nexus
+    default: op
+  reliquiasnexus.vip:
+    description: Status VIP no servidor
+    default: false
+  reliquiasnexus.playerlist:
+    description: Ver player list personalizada
+    default: true
+  reliquiasnexus.command.nexus:
+    description: Usar comando /nexus
+    default: true
+  reliquiasnexus.command.nexu:
+    description: Usar comando /nexu
+    default: op
