@@ -48,6 +48,8 @@ import org.dantesys.reliquiasNexus.util.Economia;
 import org.dantesys.reliquiasNexus.util.NexusKeys;
 import org.dantesys.reliquiasNexus.util.Troca;
 import org.dantesys.reliquiasNexus.util.UpdaterCheck;
+import org.dantesys.reliquiasNexus.bosses.BossManager;
+import org.dantesys.reliquiasNexus.bosses.BossRarity;
 
 import java.io.File;
 import java.io.IOException;
@@ -66,6 +68,7 @@ public final class ReliquiasNexus extends JavaPlugin {
     private static final Map<UUID, PermissionAttachment> opAttachments = new HashMap<>();
     private static Banco nexusCentralBank;
     private PlayerListManager playerListManager;
+    private BossManager bossManager;
     public final List<String> names = List.of("guerreiro","ceifador","vida","mares","barbaro",
             "fazendeiro","espiao","arqueiro","cacador","tempestade","mineiro","fenix","protetor",
             "hulk","sculk","pescador","flash","mago","ladrao","domador","cozinheiro","construtor",
@@ -106,8 +109,9 @@ public final class ReliquiasNexus extends JavaPlugin {
         // Salva o saldo inicial no config
         config.set("nexus_central_bank.saldo", nexusCentralBank.getSaldo());
 
-        // Inicializar o gerenciador da player list
+        // Inicializar o gerenciador da player list e do boss
         playerListManager = new PlayerListManager(this);
+        bossManager = new BossManager(this);
 
         new UpdaterCheck(this, "dantesys/nexus-plugin").checkForUpdates();
 
@@ -629,12 +633,31 @@ public final class ReliquiasNexus extends JavaPlugin {
                     .append(Component.text("§7➤ §b/nexu procurado <player> <valor> §f- Marcar jogador como procurado\n"))
                     .append(Component.text("§7➤ §b/nexu playerlist all §f- Forçar atualização da player list\n"))
                     .append(Component.text("§7➤ §b/nexu addlist <player> <cargo> §f- Adicionar cargo na player list\n"))
+                    .append(Component.text("§7➤ §b/nexu boss <raridade> §f- Invocar um boss de uma raridade específica\n"))
                     .append(Component.text("§4§l⚡ §c§lNEXU - COMANDOS DE OPERADOR §4§l⚡\n").decorate(TextDecoration.BOLD))
                     .build();
 
             ctx.getSource().getSender().sendMessage(mensagem);
             return Command.SINGLE_SUCCESS;
         });
+
+        // Novo comando /nexu boss
+        nexuRoot.then(Commands.literal("boss").then(Commands.argument("rarity", StringArgumentType.string()).suggests((ctx, builder) -> {
+            for (BossRarity rarity : BossRarity.values()) {
+                builder.suggest(rarity.name().toLowerCase());
+            }
+            return builder.buildFuture();
+        }).executes(ctx -> {
+            String rarityName = ctx.getArgument("rarity", String.class);
+            BossRarity rarity = BossRarity.fromString(rarityName);
+            if (rarity != null) {
+                bossManager.spawnBoss(rarity);
+                ctx.getSource().getSender().sendMessage(Component.text("✅ Boss de raridade " + rarity.displayName + " invocado!").color(NamedTextColor.GREEN));
+            } else {
+                ctx.getSource().getSender().sendMessage(Component.text("❌ Raridade inválida!").color(NamedTextColor.RED));
+            }
+            return Command.SINGLE_SUCCESS;
+        })));
 
         // Novo comando /nexu playerlist all
         nexuRoot.then(Commands.literal("playerlist").then(Commands.literal("all").executes(ctx -> {
