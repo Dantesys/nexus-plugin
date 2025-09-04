@@ -118,6 +118,7 @@ public final class ReliquiasNexus extends JavaPlugin {
             Component mensagem = Component.text()
                     .append(Component.text("\n§6§l⭐ §e§lNEXUS COMMANDS §6§l⭐\n").decorate(TextDecoration.BOLD))
                     .append(Component.text("§7➤ §b/nexus livro §f- Receber livro das relíquias\n"))
+                    .append(Component.text("§7➤ §b/nexus historia §f- Conheça a história do servidor\n"))
                     .append(Component.text("§7➤ §b/nexus evoluir §f- Evoluir relíquia na mão\n"))
                     .append(Component.text("§7➤ §b/nexus expurgo §f- Ver status do expurgo\n"))
                     .append(Component.text("§7➤ §b/nexus missao §f- Gerar uma missão aleatória\n"))
@@ -134,6 +135,20 @@ public final class ReliquiasNexus extends JavaPlugin {
             sender.sendMessage(mensagem);
             return Command.SINGLE_SUCCESS;
         });
+
+        // Novo comando /nexus historia
+        nexusRoot.then(Commands.literal("historia").executes(ctx -> {
+            CommandSender sender = ctx.getSource().getSender();
+            if (ctx.getSource().getExecutor() instanceof Player player) {
+                player.getInventory().addItem(ItemsRegistro.nexusStoryBook.getItem(1));
+                sender.sendMessage(Component.text("📖 §aVocê recebeu o livro Nexus Story!")
+                        .color(NamedTextColor.GREEN));
+            } else {
+                sender.sendMessage(Component.text("❌ §cApenas jogadores podem usar este comando!")
+                        .color(NamedTextColor.RED));
+            }
+            return Command.SINGLE_SUCCESS;
+        }));
 
         // Comando livro
         nexusRoot.then(Commands.literal("livro").executes(ctx -> {
@@ -676,7 +691,6 @@ public final class ReliquiasNexus extends JavaPlugin {
 
             sender.sendMessage(Component.text("✅ §a" + quantidade + " almas foram adicionadas para " + player.getName() + ".").color(NamedTextColor.GREEN));
             player.sendMessage(Component.text("✨ Você recebeu " + quantidade + " almas de um operador!").color(NamedTextColor.YELLOW));
-            player.sendMessage(Component.text("§eAlmas totais: " + novasAlmas));
             return Command.SINGLE_SUCCESS;
         })))));
 

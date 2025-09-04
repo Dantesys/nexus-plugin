@@ -13,6 +13,7 @@ import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.dantesys.reliquiasNexus.books.NexusStoryBook;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +56,8 @@ public class ItemsRegistro {
     public static Nexus livro;
     public static Nexus carrasco;
     private static final List<Nexus> reliquias = new ArrayList<>();
+    public static Nexus nexusStoryBook;
+
     public static void init(){
         createGuerreiro();
         reliquias.add(guerreiro);
@@ -121,6 +124,7 @@ public class ItemsRegistro {
         createCarrasco();
         reliquias.add(carrasco);
         createLivro();
+        createNexusStoryBook();
     }
     private static void createGuerreiro(){
         ItemStack item = new ItemStack(Material.NETHERITE_SWORD,1);
@@ -550,6 +554,11 @@ public class ItemsRegistro {
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"nexus");
         item.setItemMeta(meta);
         livro = new Nexus(item,"livro");
+    }
+
+    private static void createNexusStoryBook() {
+        ItemStack book = NexusStoryBook.createBook();
+        nexusStoryBook = new Nexus(book, "nexus_story");
     }
     public static List<Nexus> getValidReliquia(FileConfiguration config){
         List<Nexus> validos = new ArrayList<>();

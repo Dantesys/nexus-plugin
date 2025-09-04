@@ -55,7 +55,10 @@ public class JoinQuitEvent implements Listener {
             meta.getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,player.getUniqueId().toString());
             stack.setItemMeta(meta);
             player.getInventory().addItem(stack);
-            player.getInventory().addItem(ItemsRegistro.livro.getItem(1));
+
+            // Adiciona o livro de história ao inventário do jogador
+            player.getInventory().addItem(ItemsRegistro.nexusStoryBook.getItem(1));
+
             String msg=ReliquiasNexus.getLang().getString("joinquit.joinnew");
             if(msg==null){
                 msg="Bem-vindo ao jogo, Jogador <player>";
