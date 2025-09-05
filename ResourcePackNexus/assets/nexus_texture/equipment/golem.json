@@ -1,0 +1,10 @@
+{
+  "layers": {
+    "wings": [
+      {
+        "texture": "nexus_texture:golem",
+        "use_player_texture": true
+      }
+    ]
+  }
+}

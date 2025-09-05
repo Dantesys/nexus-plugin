@@ -21,12 +21,12 @@ domador: FEITO
 cozinheiro: FEITO
 construtor: FEITO
 abissal: FEITO
-cronosombra: new NamespacedKey("nexus_texture","cronosombra")
+cronosombra: FEITO
 assassino: FEITO
 frostis: FEITO
-necromante: new NamespacedKey("nexus_texture","necromante")
-alquimista: new NamespacedKey("nexus_texture","alquimista")
-golem: new NamespacedKey("nexus_texture","golem")
+necromante: FEITO
+alquimista: FEITO
+golem: FEITO
 dragao: new NamespacedKey("nexus_texture","dragao")
 morte: new NamespacedKey("nexus_texture","morte")
 carrasco: new NamespacedKey("nexus_texture","carrasco")
