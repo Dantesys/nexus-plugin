@@ -128,7 +128,7 @@ public class BossItem {
                 break;
             case LEGENDARY:
                 material = Material.NETHERITE_CHESTPLATE;
-                protectionLevel = 5;
+                protectionLevel = 8;
                 unbreakingLevel = 4;
                 break;
             default:
@@ -221,7 +221,7 @@ public class BossItem {
                 break;
             case LEGENDARY:
                 material = Material.NETHERITE_BOOTS;
-                protectionLevel = 5;
+                protectionLevel = 7;
                 unbreakingLevel = 4;
                 featherFallingLevel = 3;
                 break;
@@ -241,5 +241,9 @@ public class BossItem {
             boots.addUnsafeEnchantment(Enchantment.FEATHER_FALLING, featherFallingLevel);
         }
         return boots;
+    }
+
+    public static ItemStack getBow(BossRarity rarity) {
+        return null;
     }
 }

@@ -8,28 +8,42 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.ArrayList;
 
 public class BossDrop {
 
     private static final Random random = new Random();
 
-    public static ItemStack getRandomDrop(BossRarity rarity) {
-        switch (rarity) {
-            case COMMUN:
-                return getCommonDrop();
-            case INCOMMON:
-                return getUncommonDrop();
-            case RARE:
-                return getRareDrop();
-            case EPIC:
-                return getEpicDrop();
-            case LEGENDARY:
-                return getLegendaryDrop();
-            default:
-                return getCommonDrop();
+    public static List<ItemStack> getRandomDrops(BossRarity rarity) {
+        int dropCount = random.nextInt(3) + 2; // Drops 2 to 4 items
+        List<ItemStack> drops = new ArrayList<>();
+
+        for (int i = 0; i < dropCount; i++) {
+            switch (rarity) {
+                case COMMUN:
+                    drops.add(getCommonDrop());
+                    break;
+                case INCOMMON:
+                    drops.add(getUncommonDrop());
+                    break;
+                case RARE:
+                    drops.add(getRareDrop());
+                    break;
+                case EPIC:
+                    drops.add(getEpicDrop());
+                    break;
+                case LEGENDARY:
+                    drops.add(getLegendaryDrop());
+                    break;
+                default:
+                    drops.add(getCommonDrop());
+                    break;
+            }
         }
+        return drops;
     }
 
+    // Métodos de drop de cada raridade...
     private static ItemStack getCommonDrop() {
         List<ItemStack> commonDrops = Arrays.asList(
                 createEnchantedItem(Material.LEATHER_HELMET, "Capacete de Couro Encantado", Enchantment.PROTECTION, 1),
@@ -90,14 +104,21 @@ public class BossDrop {
 
     private static ItemStack getLegendaryDrop() {
         List<ItemStack> legendaryDrops = Arrays.asList(
-                createEnchantedItem(Material.NETHERITE_HELMET, "Capacete de Netherite Encantado", Enchantment.PROTECTION, 5),
-                createEnchantedItem(Material.NETHERITE_CHESTPLATE, "Peitoral de Netherite Encantado", Enchantment.PROTECTION, 5),
-                createEnchantedItem(Material.NETHERITE_LEGGINGS, "Calças de Netherite Encantado", Enchantment.PROTECTION, 5),
-                createEnchantedItem(Material.NETHERITE_BOOTS, "Botas de Netherite Encantado", Enchantment.PROTECTION, 5),
-                createEnchantedItem(Material.NETHERITE_SWORD, "Espada de Netherite Encantada", Enchantment.SHARPNESS, 5),
-                createEnchantedItem(Material.NETHERITE_SWORD, "Espada Lendária",
+                createEnchantedItem(Material.NETHERITE_HELMET, "Capacete de Netherite Lendário",
+                        new Enchantment[]{Enchantment.PROTECTION, Enchantment.AQUA_AFFINITY, Enchantment.RESPIRATION},
+                        new int[]{5, 1, 3}),
+                createEnchantedItem(Material.NETHERITE_CHESTPLATE, "Peitoral de Netherite Lendário",
+                        new Enchantment[]{Enchantment.PROTECTION, Enchantment.THORNS, Enchantment.UNBREAKING},
+                        new int[]{5, 3, 5}),
+                createEnchantedItem(Material.NETHERITE_LEGGINGS, "Calças de Netherite Lendárias",
+                        new Enchantment[]{Enchantment.PROTECTION, Enchantment.MENDING, Enchantment.UNBREAKING},
+                        new int[]{5, 1, 5}),
+                createEnchantedItem(Material.NETHERITE_BOOTS, "Botas de Netherite Lendárias",
+                        new Enchantment[]{Enchantment.PROTECTION, Enchantment.FEATHER_FALLING, Enchantment.SOUL_SPEED},
+                        new int[]{5, 4, 3}),
+                createEnchantedItem(Material.NETHERITE_SWORD, "Espada de Netherite Lendária",
                         new Enchantment[]{Enchantment.SHARPNESS, Enchantment.FIRE_ASPECT, Enchantment.KNOCKBACK},
-                        new int[]{5, 2, 2}),
+                        new int[]{15, 5, 3}),
                 createItem(Material.NETHERITE_INGOT, 1, "Barra de Netherite"),
                 createItem(Material.DIAMOND, 5, "Diamantes"),
                 createItem(Material.EMERALD_BLOCK, 2, "Blocos de Esmeralda"),

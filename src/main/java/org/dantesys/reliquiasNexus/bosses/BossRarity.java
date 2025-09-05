@@ -4,11 +4,11 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Color;
 
 public enum BossRarity {
-    COMMUN(NamedTextColor.GRAY, "Comum", 50, 1.0, 1.0, Color.GRAY, 1.0),
-    INCOMMON(NamedTextColor.GREEN, "Incomum", 30, 1.5, 1.2, Color.LIME, 1.2),
-    RARE(NamedTextColor.AQUA, "Raro", 15, 2.0, 1.5, Color.AQUA, 1.4),
-    EPIC(NamedTextColor.LIGHT_PURPLE, "Épico", 4, 3.0, 1.8, Color.PURPLE, 1.6),
-    LEGENDARY(NamedTextColor.GOLD, "Lendário", 1, 5.0, 2.0, Color.YELLOW, 1.8);
+    COMMUN(NamedTextColor.GRAY, "Comum", 50, 0.5, 0.5, Color.GRAY),
+    INCOMMON(NamedTextColor.GREEN, "Incomum", 30, 0.75, 0.6, Color.LIME),
+    RARE(NamedTextColor.AQUA, "Raro", 15, 1.0, 0.75, Color.AQUA),
+    EPIC(NamedTextColor.LIGHT_PURPLE, "Épico", 4, 1.5, 0.9, Color.PURPLE),
+    LEGENDARY(NamedTextColor.GOLD, "Lendário", 1, 1.5, 1.0, Color.YELLOW);
 
     public final NamedTextColor color;
     public final String displayName;
@@ -16,16 +16,14 @@ public enum BossRarity {
     public final double healthMultiplier;
     public final double damageMultiplier;
     public final Color armorColor;
-    public final double speedMultiplier;
 
-    BossRarity(NamedTextColor color, String displayName, int weight, double healthMultiplier, double damageMultiplier, Color armorColor, double speedMultiplier) {
+    BossRarity(NamedTextColor color, String displayName, int weight, double healthMultiplier, double damageMultiplier, Color armorColor) {
         this.color = color;
         this.displayName = displayName;
         this.weight = weight;
         this.healthMultiplier = healthMultiplier;
         this.damageMultiplier = damageMultiplier;
         this.armorColor = armorColor;
-        this.speedMultiplier = speedMultiplier;
     }
 
     public static BossRarity fromString(String name) {

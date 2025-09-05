@@ -1,9 +1,13 @@
 package org.dantesys.reliquiasNexus.bosses;
 
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,6 +18,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
+import org.bukkit.Particle;
+import org.bukkit.Color;
+import org.bukkit.Effect;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,10 +33,15 @@ public class BossManager {
     private BukkitRunnable spawnTask;
     private LivingEntity currentBoss;
     private Boss currentBossData;
+    private BossBar bossBar;
+    private long spawnTime;
     private boolean isSpawning = false;
+    private BukkitRunnable despawnTask;
+    private BukkitRunnable beaconTask;
 
     public BossManager(ReliquiasNexus plugin) {
         this.plugin = plugin;
+        this.bossBar = BossBar.bossBar(Component.empty(), 1.0f, BossBar.Color.PURPLE, BossBar.Overlay.PROGRESS);
         startBossSpawnTask();
     }
 
@@ -39,16 +51,15 @@ public class BossManager {
         }
 
         spawnTask = new BukkitRunnable() {
-            int timeUntilSpawn = 120; // 2 minutos em segundos
+            int timeUntilSpawn = 1800; // 30 minutos
 
             @Override
             public void run() {
                 if (Bukkit.getOnlinePlayers().isEmpty()) {
-                    timeUntilSpawn = 120;
+                    timeUntilSpawn = 1800;
                     return;
                 }
 
-                // Verifica se já existe um boss vivo
                 if (currentBoss != null && !currentBoss.isDead()) {
                     return;
                 }
@@ -57,7 +68,7 @@ public class BossManager {
                     if (!isSpawning) {
                         isSpawning = true;
                         spawnRandomBoss();
-                        timeUntilSpawn = 120;
+                        timeUntilSpawn = 1800;
                         isSpawning = false;
                     }
                 } else if (timeUntilSpawn == 60) {
@@ -69,12 +80,11 @@ public class BossManager {
         spawnTask.runTaskTimer(plugin, 0L, 20L);
     }
 
-    public void spawnBoss(BossRarity rarity) {
+    public void spawnBoss(BossRarity rarity, boolean isSuperBoss) {
         if (Bukkit.getOnlinePlayers().isEmpty()) {
             return;
         }
 
-        // Verifica se já existe um boss vivo
         if (currentBoss != null && !currentBoss.isDead()) {
             return;
         }
@@ -84,16 +94,15 @@ public class BossManager {
 
         Location spawnLocation = findSafeLocation(targetPlayer.getLocation(), 100);
         if (spawnLocation == null) {
-            // Tenta spawnar novamente se não encontrar local seguro
-            spawnBoss(rarity);
+            spawnBoss(rarity, isSuperBoss);
             return;
         }
 
-        Boss boss = new Boss(rarity, spawnLocation, plugin);
+        Boss boss = new Boss(rarity, spawnLocation, plugin, isSuperBoss);
         currentBoss = boss.spawn();
         currentBossData = boss;
+        spawnTime = System.currentTimeMillis();
 
-        // Mensagem de spawn no estilo da imagem
         String rarityColor = getColorCode(rarity.color);
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (p.getWorld().equals(spawnLocation.getWorld()) && p.getLocation().distance(spawnLocation) < 200) {
@@ -101,32 +110,46 @@ public class BossManager {
             }
         }
 
-        // Adiciona listener de morte para dropar o item
+        // Show boss bar
+        bossBar.name(Component.text(rarityColor + boss.getBossName()));
+        bossBar.color(getBossBarColor(rarity.color));
+        bossBar.progress(1.0f);
+        Bukkit.getOnlinePlayers().forEach(p -> p.showBossBar(bossBar));
+
+        // Start the boss beacon with rarity color
+        startBossBeacon(spawnLocation, rarity);
+
+        // Add death listener
         Listener deathListener = new Listener() {
             @EventHandler
             public void onEntityDeath(EntityDeathEvent event) {
                 if (event.getEntity().equals(currentBoss)) {
-                    // Dropa o item do boss
-                    ItemStack drop = boss.getDropItem();
-                    if (drop != null) {
-                        currentBoss.getWorld().dropItemNaturally(currentBoss.getLocation(), drop);
-                        Bukkit.broadcast(Component.text("§a✧ " + boss.getBossName() + " dropou um item raro! ✧"));
+                    List<ItemStack> drops = BossDrop.getRandomDrops(rarity);
+                    if (drops != null) {
+                        for (ItemStack drop : drops) {
+                            currentBoss.getWorld().dropItemNaturally(currentBoss.getLocation(), drop);
+                        }
+                        Bukkit.broadcast(Component.text("§a✧ " + boss.getBossName() + " dropou " + drops.size() + " itens raros! ✧"));
                     }
-
-                    // Mensagem de morte
                     Bukkit.broadcast(Component.text("§a✔ " + boss.getBossName() + " foi derrotado!"));
 
-                    // Remove o listener
+                    // Hide and unregister boss bar
+                    Bukkit.getOnlinePlayers().forEach(p -> p.hideBossBar(bossBar));
                     HandlerList.unregisterAll(this);
                     currentBoss = null;
                     currentBossData = null;
+                    if (despawnTask != null) {
+                        despawnTask.cancel();
+                    }
+                    if (beaconTask != null) {
+                        beaconTask.cancel();
+                    }
                 }
             }
         };
-
         Bukkit.getPluginManager().registerEvents(deathListener, plugin);
 
-        // Task para mostrar action bar aos jogadores próximos
+        // Update boss bar
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -134,28 +157,63 @@ public class BossManager {
                     this.cancel();
                     return;
                 }
+                double health = currentBoss.getHealth();
+                double maxHealth = currentBoss.getAttribute(Attribute.MAX_HEALTH).getBaseValue();
+                bossBar.progress((float) (health / maxHealth));
+
+                // Action bar for nearby players
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     if (p.getWorld().equals(currentBoss.getWorld()) && p.getLocation().distance(currentBoss.getLocation()) < 50) {
-                        String rarityColor = getColorCode(rarity.color);
                         p.sendActionBar(Component.text(rarityColor + "⚠ " + boss.getBossName() + " está por perto! ⚠"));
                     }
                 }
             }
         }.runTaskTimer(plugin, 0L, 20L);
+
+        // Despawn task
+        despawnTask = new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (currentBoss != null && !currentBoss.isDead()) {
+                    currentBoss.remove();
+                    Bukkit.broadcast(Component.text("§7O " + boss.getBossName() + " desapareceu por falta de desafio!"));
+                }
+                Bukkit.getOnlinePlayers().forEach(p -> p.hideBossBar(bossBar));
+                currentBoss = null;
+                currentBossData = null;
+                if (beaconTask != null) {
+                    beaconTask.cancel();
+                }
+            }
+        };
+        despawnTask.runTaskLater(plugin, 20L * 60 * 20); // 20 minutos
     }
 
-    private String getColorCode(net.kyori.adventure.text.format.TextColor color) {
-        if (color.equals(net.kyori.adventure.text.format.NamedTextColor.GRAY)) return "§7";
-        if (color.equals(net.kyori.adventure.text.format.NamedTextColor.GREEN)) return "§a";
-        if (color.equals(net.kyori.adventure.text.format.NamedTextColor.AQUA)) return "§b";
-        if (color.equals(net.kyori.adventure.text.format.NamedTextColor.LIGHT_PURPLE)) return "§d";
-        if (color.equals(net.kyori.adventure.text.format.NamedTextColor.GOLD)) return "§6";
+    private String getColorCode(TextColor color) {
+        if (color.equals(NamedTextColor.GRAY)) return "§7";
+        if (color.equals(NamedTextColor.GREEN)) return "§a";
+        if (color.equals(NamedTextColor.AQUA)) return "§b";
+        if (color.equals(NamedTextColor.LIGHT_PURPLE)) return "§d";
+        if (color.equals(NamedTextColor.GOLD)) return "§6";
         return "§f";
+    }
+
+    private BossBar.Color getBossBarColor(TextColor color) {
+        if (color.equals(NamedTextColor.GRAY)) return BossBar.Color.WHITE;
+        if (color.equals(NamedTextColor.GREEN)) return BossBar.Color.GREEN;
+        if (color.equals(NamedTextColor.AQUA)) return BossBar.Color.BLUE;
+        if (color.equals(NamedTextColor.LIGHT_PURPLE)) return BossBar.Color.PURPLE;
+        if (color.equals(NamedTextColor.GOLD)) return BossBar.Color.YELLOW;
+        return BossBar.Color.WHITE;
     }
 
     public void spawnRandomBoss() {
         BossRarity rarity = chooseRandomRarity();
-        spawnBoss(rarity);
+        spawnBoss(rarity, false);
+    }
+
+    public void spawnSuperBoss() {
+        spawnBoss(BossRarity.LEGENDARY, true);
     }
 
     private BossRarity chooseRandomRarity() {
@@ -176,9 +234,66 @@ public class BossManager {
     }
 
     private Location findSafeLocation(Location center, int radius) {
-        // Implementação básica - retorna o centro
-        // Você pode adicionar lógica para encontrar um local seguro aqui
-        return center;
+        World world = center.getWorld();
+        int centerX = center.getBlockX();
+        int centerZ = center.getBlockZ();
+        int spawnY = world.getHighestBlockYAt(centerX, centerZ) + 1;
+        return new Location(world, centerX, spawnY, centerZ);
+    }
+
+    private void startBossBeacon(Location location, BossRarity rarity) {
+        if (beaconTask != null) {
+            beaconTask.cancel();
+        }
+
+        beaconTask = new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (currentBoss == null || currentBoss.isDead()) {
+                    this.cancel();
+                    return;
+                }
+
+                // Use different particle effects based on rarity
+                Particle particleType;
+                switch (rarity) {
+                    case COMMUN:
+                        particleType = Particle.SMOKE;
+                        break;
+                    case INCOMMON:
+                        particleType = Particle.HAPPY_VILLAGER;
+                        break;
+                    case RARE:
+                        particleType = Particle.ANGRY_VILLAGER;
+                        break;
+                    case EPIC:
+                        particleType = Particle.WITCH;
+                        break;
+                    case LEGENDARY:
+                        particleType = Particle.FLAME;
+                        break;
+                    default:
+                        particleType = Particle.CLOUD;
+                        break;
+                }
+
+                // Spawn particle beam above boss location
+                for (int i = 0; i < 20; i++) {
+                    Location particleLoc = location.clone().add(0, i, 0);
+                    location.getWorld().spawnParticle(
+                            particleType,
+                            particleLoc,
+                            2,
+                            0.1, 0.1, 0.1,
+                            0.05
+                    );
+                }
+
+                // Also play ender signal effect
+                location.getWorld().playEffect(location.clone().add(0, 1, 0), Effect.ENDER_SIGNAL, 0);
+            }
+        };
+        beaconTask.runTaskTimer(plugin, 0L, 5L);
     }
 
     public void setCurrentBoss(LivingEntity boss) {
@@ -192,6 +307,12 @@ public class BossManager {
     public void stop() {
         if (spawnTask != null) {
             spawnTask.cancel();
+        }
+        if (despawnTask != null) {
+            despawnTask.cancel();
+        }
+        if (beaconTask != null) {
+            beaconTask.cancel();
         }
     }
 }

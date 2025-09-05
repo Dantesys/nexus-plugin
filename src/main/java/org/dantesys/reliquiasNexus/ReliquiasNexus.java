@@ -651,7 +651,7 @@ public final class ReliquiasNexus extends JavaPlugin {
             String rarityName = ctx.getArgument("rarity", String.class);
             BossRarity rarity = BossRarity.fromString(rarityName);
             if (rarity != null) {
-                bossManager.spawnBoss(rarity);
+                bossManager.spawnBoss(rarity, false); // Alterado aqui
                 ctx.getSource().getSender().sendMessage(Component.text("✅ Boss de raridade " + rarity.displayName + " invocado!").color(NamedTextColor.GREEN));
             } else {
                 ctx.getSource().getSender().sendMessage(Component.text("❌ Raridade inválida!").color(NamedTextColor.RED));
