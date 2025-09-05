@@ -22,8 +22,8 @@ cozinheiro: FEITO
 construtor: FEITO
 abissal: FEITO
 cronosombra: new NamespacedKey("nexus_texture","cronosombra")
-assassino: new NamespacedKey("nexus_texture","assassino")
-frostis: new NamespacedKey("nexus_texture","frostis")
+assassino: FEITO
+frostis: FEITO
 necromante: new NamespacedKey("nexus_texture","necromante")
 alquimista: new NamespacedKey("nexus_texture","alquimista")
 golem: new NamespacedKey("nexus_texture","golem")
