@@ -138,10 +138,6 @@ public class Abissal {
                 (t) -> {
                     world.spawnParticle(Particle.PORTAL, centro, 50, raio.get()/2.0, 1, raio.get()/2.0, 0);
                     for (Entity entity : world.getNearbyEntities(centro, raio.get(), raio.get(), raio.get())) {
-                        if(!jafoi.contains(entity)){
-                            raio.getAndUpdate(r -> Math.min(r + 1, 50));
-                            jafoi.add(entity);
-                        }
                         world.spawnParticle(Particle.PORTAL, entity.getLocation().add(0,1,0), 5, 0.3, 0.3, 0.3, 0);
                         if (entity instanceof LivingEntity living && entity != player) {
                             living.damage(dano, player);
