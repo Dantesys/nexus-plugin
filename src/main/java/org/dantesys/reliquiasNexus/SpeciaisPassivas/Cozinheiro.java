@@ -148,7 +148,7 @@ public class Cozinheiro {
                 if (ticks >= 5 * 20) { // 5 segundos
                     // Explosão final
                     for (Entity e : targets) {
-                        if (e instanceof LivingEntity le) {
+                        if (e instanceof LivingEntity le && !(le instanceof Player)) {
                             world.createExplosion(le.getLocation(), 0F, false, false, dono);
                             le.remove();
                         }
