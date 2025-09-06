@@ -27,6 +27,6 @@ frostis: FEITO
 necromante: FEITO
 alquimista: FEITO
 golem: FEITO
-dragao: new NamespacedKey("nexus_texture","dragao")
+dragao: FEITO
 morte: new NamespacedKey("nexus_texture","morte")
 carrasco: new NamespacedKey("nexus_texture","carrasco")
