@@ -458,7 +458,7 @@ public class PassivaEvent implements Listener {
             if (nome != null && nome.equals("construtor")) {
                 int slot = player.getInventory().getHeldItemSlot();
                 // Define slots que podem colocar blocos (ex: 0 a 6)
-                if (slot < 0 || slot > 6) return;
+                if (slot < 0 || slot >= 6) return;
                 // Bloco base que o jogador quer colocar (pode ser definido por slot ou item)
                 ItemStack corante = player.getInventory().getItemInOffHand();
                 DyeColor cor = CoresUtils.getDyeColorFromItem(corante);
