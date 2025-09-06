@@ -2,6 +2,7 @@ package org.dantesys.reliquiasNexus.eventos;
 
 import org.bukkit.Sound;
 import org.bukkit.Particle;
+import org.bukkit.Color;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -24,20 +25,41 @@ import org.dantesys.reliquiasNexus.util.Economia;
 import org.dantesys.reliquiasNexus.util.NexusKeys;
 import org.dantesys.reliquiasNexus.team.Team;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Arrays;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class BancoEvent implements Listener {
 
     private final ReliquiasNexus plugin;
-    private final String MAIN_MENU_TITLE = "§lBanco Nexus";
-    private final String SALDO_MENU_TITLE = "§lSeu Saldo";
-    private final String EMPRESTIMO_MENU_TITLE = "§lEmpréstimos";
-    private final String HISTORICO_MENU_TITLE = "§lHistórico de Moly";
-    private final String CENTRAL_BANK_TITLE = "§lNexus Central Bank";
+    private final String MAIN_MENU_TITLE = "§l§dN§5e§9x§bu§as §6B§ca§cn§6c§eo";
+    private final String SALDO_MENU_TITLE = "§l§eSeu Saldo";
+    private final String EMPRESTIMO_MENU_TITLE = "§l§bEmpréstimos";
+    private final String HISTORICO_MENU_TITLE = "§l§aHistórico de Moly";
+
+    private final Map<UUID, Integer> animationTasks = new HashMap<>();
+    private final Map<UUID, Integer> particleTasks = new HashMap<>();
+    private final Map<UUID, Integer> musicTasks = new HashMap<>();
+    private final Map<UUID, List<ItemStack>> animatedItems = new HashMap<>();
+
+    // Materiais para animação de ouro
+    private final Material[] goldMaterials = {
+            Material.GOLD_NUGGET,
+            Material.GOLD_INGOT,
+            Material.GOLD_BLOCK,
+            Material.GOLD_INGOT,
+            Material.GOLD_NUGGET
+    };
+
+    // Cores para partículas giratórias
+    private final Color[] particleColors = {
+            Color.fromRGB(255, 0, 0),    // Vermelho
+            Color.fromRGB(255, 165, 0),  // Laranja
+            Color.fromRGB(255, 255, 0),  // Amarelo
+            Color.fromRGB(0, 255, 0),    // Verde
+            Color.fromRGB(0, 0, 255),    // Azul
+            Color.fromRGB(75, 0, 130),   // Índigo
+            Color.fromRGB(238, 130, 238) // Violeta
+    };
 
     public BancoEvent(ReliquiasNexus plugin) {
         this.plugin = plugin;
@@ -47,65 +69,66 @@ public class BancoEvent implements Listener {
         Inventory inv = Bukkit.createInventory(null, 27, Component.text(MAIN_MENU_TITLE));
         playBankAnimation(player, true);
 
-        ItemStack bancoCentral = criarItemComID(Material.DIAMOND, CENTRAL_BANK_TITLE, "central_bank");
-        ItemStack saldo = criarItemComID(Material.GOLD_INGOT, "§eSaldo Pessoal", "saldo");
-        ItemStack emprestimo = criarItemComID(Material.PAPER, "§bEmpréstimos", "emprestimo");
-        ItemStack historico = criarItemComID(Material.BOOK, "§aHistórico", "historico");
+        // Itens principais
+        ItemStack saldo = criarItemComID(Material.GOLD_INGOT, "§e§lSaldo Pessoal", "saldo");
+        ItemStack emprestimo = criarItemComID(Material.PAPER, "§b§lEmpréstimos", "emprestimo");
+        ItemStack historico = criarItemComID(Material.BOOK, "§a§lHistórico", "historico");
+
+        // Item central com efeito especial
+        ItemStack bankItem = criarItemAnimado(Material.GOLD_NUGGET, "§6§lBanco Nexus", "info", goldMaterials);
 
         inv.setItem(11, saldo);
-        inv.setItem(13, emprestimo);
-        inv.setItem(15, historico);
-        inv.setItem(4, bancoCentral);
+        inv.setItem(13, bankItem);
+        inv.setItem(15, emprestimo);
+        inv.setItem(22, historico);
 
-        player.openInventory(inv);
-    }
-
-    private void abrirMenuCentralBank(Player player) {
-        Inventory inv = Bukkit.createInventory(null, 27, Component.text(CENTRAL_BANK_TITLE));
-
-        Banco centralBank = Banco.getNexusCentralBank();
-        double saldoBank = centralBank.getSaldo();
-
-        ItemStack saldoItem = criarItem(Material.GOLD_BLOCK, "§eSaldo do Banco Central",
-                Collections.singletonList(Component.text("§7Total de moly: §6" + String.format("%,.2f", saldoBank) + " moly§7.")));
-
-        inv.setItem(13, saldoItem);
-
+        // Flecha de voltar no canto inferior esquerdo
         ItemStack backArrow = criarCabecaComID(
                 "MHF_ArrowLeft",
-                "§cVoltar",
-                Collections.singletonList(Component.text("§7Clique para voltar ao menu principal.")),
+                "§c§lVoltar",
+                Arrays.asList(Component.text("§7Clique para voltar")),
                 "back_button");
-        inv.setItem(22, backArrow);
+        inv.setItem(18, backArrow);
 
         player.openInventory(inv);
+        startInventoryAnimation(player, inv);
+        startParticleAnimation(player);
+        startMusic(player);
     }
 
     private void abrirMenuSaldo(Player player) {
         Inventory inv = Bukkit.createInventory(null, 27, Component.text(SALDO_MENU_TITLE));
 
         double saldoPessoal = Economia.getSaldo(player);
-        ItemStack saldoPessoalItem = criarItem(Material.GOLD_BLOCK, "§eSeu Saldo Pessoal",
-                Collections.singletonList(Component.text("§7Você tem §6" + String.format("%,.2f", saldoPessoal) + " moly§7.")));
+        ItemStack saldoPessoalItem = criarItem(Material.GOLD_BLOCK, "§e§lSeu Saldo Pessoal",
+                Arrays.asList(
+                        Component.text("§7Você tem: §6" + String.format("%,.2f", saldoPessoal) + " moly§7."),
+                        Component.text("§7Gerencie suas finanças")
+                ));
 
         inv.setItem(12, saldoPessoalItem);
 
         String teamName = Team.getTeamName(player);
         if (teamName != null) {
             double saldoTeam = Economia.getSaldoTime(teamName);
-            ItemStack saldoTeamItem = criarItem(Material.IRON_BLOCK, "§eSaldo do Time (" + teamName + ")",
-                    Collections.singletonList(Component.text("§7O time tem §6" + String.format("%,.2f", saldoTeam) + " moly§7.")));
+            ItemStack saldoTeamItem = criarItem(Material.IRON_BLOCK, "§e§lSaldo do Time",
+                    Arrays.asList(
+                            Component.text("§7Time: §a" + teamName),
+                            Component.text("§7Saldo: §6" + String.format("%,.2f", saldoTeam) + " moly§7.")
+                    ));
             inv.setItem(14, saldoTeamItem);
         }
 
+        // Flecha de voltar no canto inferior esquerdo
         ItemStack backArrow = criarCabecaComID(
                 "MHF_ArrowLeft",
-                "§cVoltar",
-                Collections.singletonList(Component.text("§7Clique para voltar ao menu principal.")),
+                "§c§lVoltar",
+                Arrays.asList(Component.text("§7Clique para voltar ao menu principal")),
                 "back_button");
-        inv.setItem(22, backArrow);
+        inv.setItem(18, backArrow);
 
         player.openInventory(inv);
+        playMenuSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f);
     }
 
     private void abrirMenuEmprestimo(Player player) {
@@ -116,63 +139,70 @@ public class BancoEvent implements Listener {
         if (Economia.temEmprestimo(playerId)) {
             double divida = Economia.getEmprestimo(playerId);
 
-            ItemStack dividaItem = criarItem(Material.RED_WOOL, "§cSua Dívida",
+            ItemStack dividaItem = criarItem(Material.RED_WOOL, "§c§lSua Dívida",
                     Arrays.asList(
                             Component.text("§7Total: §c" + String.format("%,.2f", divida) + " moly"),
-                            Component.text("§7Juros de 50% sobre o valor emprestado"),
+                            Component.text("§7Juros: §c50%"),
                             Component.text(""),
                             Component.text("§eClique em Pagar para quitar sua dívida")
                     ));
+
             ItemStack pagarItem = criarItemComID(Material.GREEN_WOOL, "§a§lPAGAR DÍVIDA", "pagar_emprestimo");
 
             inv.setItem(11, dividaItem);
-            inv.setItem(13, criarItemComID(Material.BARRIER, "§cNão é possível pedir novo empréstimo", "bloqueado"));
+            inv.setItem(13, criarItemComID(Material.BARRIER, "§c§lNOVO EMPRÉSTIMO", "bloqueado"));
             inv.setItem(15, pagarItem);
         } else {
             ItemStack emprestimoItem = criarItemComID(Material.LIME_WOOL, "§a§lPEDIR EMPRÉSTIMO", "pedir_emprestimo");
-            ItemStack infoItem = criarItem(Material.PAPER, "§eInformações do Empréstimo",
+            ItemStack infoItem = criarItem(Material.PAPER, "§e§lInformações",
                     Arrays.asList(
-                            Component.text("§7Valor: §a1000 moly"),
-                            Component.text("§7Juros: §c50%"),
-                            Component.text("§7Total a pagar: §61500 moly"),
-                            Component.text(""),
-                            Component.text("§eClique em Pedir Empréstimo para receber 1000 moly")
+                            Component.text("§7Empréstimo rápido e fácil"),
+                            Component.text("§7Taxa de juros: §c50%"),
+                            Component.text("§7Pagamento único"),
+                            Component.text("§7Sem complicações")
                     ));
 
             inv.setItem(11, infoItem);
             inv.setItem(13, emprestimoItem);
-            inv.setItem(15, criarItemComID(Material.BARRIER, "§cNenhuma dívida para pagar", "nenhuma_divida"));
+            inv.setItem(15, criarItemComID(Material.BARRIER, "§c§lSEM DÍVIDA", "nenhuma_divida"));
         }
 
-        // Adicionar animação
-        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_HARP, 0.7f, 1.0f);
-        player.spawnParticle(Particle.CLOUD, player.getLocation(), 20, 0.5, 0.5, 0.5, 0.05);
-
+        // Flecha de voltar no canto inferior esquerdo
         ItemStack backArrow = criarCabecaComID(
                 "MHF_ArrowLeft",
-                "§cVoltar",
-                Collections.singletonList(Component.text("§7Clique para voltar ao menu principal.")),
+                "§c§lVoltar",
+                Arrays.asList(Component.text("§7Clique para voltar ao menu principal")),
                 "back_button");
-        inv.setItem(22, backArrow);
+        inv.setItem(18, backArrow);
 
         player.openInventory(inv);
+        playMenuSound(player, Sound.BLOCK_NOTE_BLOCK_HARP, 0.8f);
     }
 
     private void abrirMenuHistorico(Player player) {
         Inventory inv = Bukkit.createInventory(null, 27, Component.text(HISTORICO_MENU_TITLE));
 
-        ItemStack pegarHistorico = criarItemComID(Material.PAPER, "§ePegar Histórico", "pegar_historico");
+        ItemStack pegarHistorico = criarItemComID(Material.WRITTEN_BOOK, "§e§lPegar Histórico", "pegar_historico");
+        ItemStack infoItem = criarItem(Material.PAPER, "§6§lInformações",
+                Arrays.asList(
+                        Component.text("§7Seu histórico contém"),
+                        Component.text("§7as últimas 20 transações"),
+                        Component.text("§7realizadas no banco")
+                ));
 
-        inv.setItem(13, pegarHistorico);
+        inv.setItem(12, infoItem);
+        inv.setItem(14, pegarHistorico);
 
+        // Flecha de voltar no canto inferior esquerdo
         ItemStack backArrow = criarCabecaComID(
                 "MHF_ArrowLeft",
-                "§cVoltar",
-                Collections.singletonList(Component.text("§7Clique para voltar ao menu principal.")),
+                "§c§lVoltar",
+                Arrays.asList(Component.text("§7Clique para voltar ao menu principal")),
                 "back_button");
-        inv.setItem(22, backArrow);
+        inv.setItem(18, backArrow);
 
         player.openInventory(inv);
+        playMenuSound(player, Sound.BLOCK_NOTE_BLOCK_BELL, 0.9f);
     }
 
     private ItemStack criarItem(Material material, String nome, List<Component> lore) {
@@ -193,6 +223,15 @@ public class BancoEvent implements Listener {
         return item;
     }
 
+    private ItemStack criarItemAnimado(Material material, String nome, String id, Material[] materials) {
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text(nome));
+        meta.getPersistentDataContainer().set(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING, id);
+        item.setItemMeta(meta);
+        return item;
+    }
+
     private ItemStack criarCabecaComID(String owner, String nome, List<Component> lore, String id) {
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta meta = (SkullMeta) head.getItemMeta();
@@ -204,19 +243,169 @@ public class BancoEvent implements Listener {
         return head;
     }
 
-    private void playClickAnimation(Player player, ItemStack clickedItem) {
-        player.playSound(player.getLocation(), Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 0.5f, 1.5f);
-        player.spawnParticle(Particle.FIREWORK, player.getLocation(), 10, 0.5, 0.5, 0.5, 0.05);
+    private void startInventoryAnimation(Player player, Inventory inv) {
+        UUID playerId = player.getUniqueId();
+
+        // Cancelar animação anterior se existir
+        if (animationTasks.containsKey(playerId)) {
+            Bukkit.getScheduler().cancelTask(animationTasks.get(playerId));
+        }
+
+        // Itens para animar (slots principais)
+        int[] animatedSlots = {11, 13, 15, 22};
+        List<ItemStack> itemsToAnimate = new ArrayList<>();
+
+        for (int slot : animatedSlots) {
+            ItemStack item = inv.getItem(slot);
+            if (item != null) {
+                itemsToAnimate.add(item);
+            }
+        }
+
+        animatedItems.put(playerId, itemsToAnimate);
+
+        int taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
+            if (!player.isOnline() || !player.getOpenInventory().getTopInventory().equals(inv)) {
+                stopInventoryAnimation(player);
+                return;
+            }
+
+            for (int i = 0; i < animatedSlots.length; i++) {
+                if (i < itemsToAnimate.size()) {
+                    ItemStack originalItem = itemsToAnimate.get(i);
+                    Material[] materialsToUse = (originalItem.getType() == Material.GOLD_NUGGET ||
+                            originalItem.getType() == Material.GOLD_INGOT ||
+                            originalItem.getType() == Material.GOLD_BLOCK) ?
+                            goldMaterials : new Material[]{originalItem.getType()};
+
+                    Material nextMaterial = materialsToUse[(int) (System.currentTimeMillis() / 500 % materialsToUse.length)];
+
+                    ItemStack animatedItem = originalItem.clone();
+                    animatedItem.setType(nextMaterial);
+                    inv.setItem(animatedSlots[i], animatedItem);
+                }
+            }
+        }, 0L, 5L); // Animação a cada 5 ticks (0.25 segundos)
+
+        animationTasks.put(playerId, taskId);
+    }
+
+    private void startParticleAnimation(Player player) {
+        UUID playerId = player.getUniqueId();
+
+        // Cancelar animação anterior se existir
+        if (particleTasks.containsKey(playerId)) {
+            Bukkit.getScheduler().cancelTask(particleTasks.get(playerId));
+        }
+
+        int taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
+            if (!player.isOnline()) {
+                stopParticleAnimation(player);
+                return;
+            }
+
+            // Partículas giratórias ao redor do jogador
+            double time = System.currentTimeMillis() / 1000.0;
+            int particlesPerCircle = 12;
+
+            for (int i = 0; i < particlesPerCircle; i++) {
+                double angle = 2 * Math.PI * i / particlesPerCircle + time;
+                double x = Math.cos(angle) * 1.5;
+                double z = Math.sin(angle) * 1.5;
+
+                Color color = particleColors[(i + (int)(time * 2)) % particleColors.length];
+
+                player.getWorld().spawnParticle(
+                        Particle.DUST,
+                        player.getLocation().add(x, 2.0, z),
+                        1,
+                        new Particle.DustOptions(color, 1.5f)
+                );
+            }
+        }, 0L, 2L); // Animação a cada 2 ticks (0.1 segundos)
+
+        particleTasks.put(playerId, taskId);
+    }
+
+    private void startMusic(Player player) {
+        UUID playerId = player.getUniqueId();
+
+        // Cancelar música anterior se existir
+        if (musicTasks.containsKey(playerId)) {
+            Bukkit.getScheduler().cancelTask(musicTasks.get(playerId));
+        }
+
+        // Tocar música PIGSTEP
+        player.stopSound(Sound.MUSIC_DISC_PIGSTEP);
+        player.playSound(player.getLocation(), Sound.MUSIC_DISC_PIGSTEP, 0.8f, 1.0f);
+
+        // Task para manter a música tocando
+        int taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
+            if (!player.isOnline() || !player.getOpenInventory().getTitle().contains("Banco")) {
+                stopMusic(player);
+                return;
+            }
+            // Manter a música tocando
+            player.playSound(player.getLocation(), Sound.MUSIC_DISC_PIGSTEP, 0.8f, 1.0f);
+        }, 0L, 200L); // Verificar a cada 10 segundos
+
+        musicTasks.put(playerId, taskId);
+    }
+
+    private void stopInventoryAnimation(Player player) {
+        UUID playerId = player.getUniqueId();
+        if (animationTasks.containsKey(playerId)) {
+            Bukkit.getScheduler().cancelTask(animationTasks.get(playerId));
+            animationTasks.remove(playerId);
+            animatedItems.remove(playerId);
+        }
+    }
+
+    private void stopParticleAnimation(Player player) {
+        UUID playerId = player.getUniqueId();
+        if (particleTasks.containsKey(playerId)) {
+            Bukkit.getScheduler().cancelTask(particleTasks.get(playerId));
+            particleTasks.remove(playerId);
+        }
+    }
+
+    private void stopMusic(Player player) {
+        UUID playerId = player.getUniqueId();
+        if (musicTasks.containsKey(playerId)) {
+            Bukkit.getScheduler().cancelTask(musicTasks.get(playerId));
+            musicTasks.remove(playerId);
+        }
+        player.stopSound(Sound.MUSIC_DISC_PIGSTEP);
+    }
+
+    private void playClickAnimation(Player player) {
+        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.7f, 1.8f);
+        player.spawnParticle(Particle.FIREWORK, player.getLocation(), 15, 0.3, 0.3, 0.3, 0.1);
     }
 
     private void playBankAnimation(Player player, boolean opening) {
         if (opening) {
-            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
-            player.playSound(player.getLocation(), Sound.BLOCK_ENDER_CHEST_OPEN, 0.7f, 1.2f);
-            player.spawnParticle(Particle.HAPPY_VILLAGER, player.getLocation().add(0, 1, 0), 30, 0.5, 0.5, 0.5, 0.1);
+            player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 0.6f, 1.2f);
         } else {
-            player.playSound(player.getLocation(), Sound.BLOCK_ENDER_CHEST_CLOSE, 0.7f, 1.0f);
+            player.playSound(player.getLocation(), Sound.BLOCK_CHEST_CLOSE, 0.5f, 1.0f);
         }
+    }
+
+    private void playMenuSound(Player player, Sound sound, float pitch) {
+        player.playSound(player.getLocation(), sound, 0.6f, pitch);
+        player.spawnParticle(Particle.HEART, player.getLocation(), 5, 0.2, 0.2, 0.2, 0.05);
+    }
+
+    private void playSuccessAnimation(Player player) {
+        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.5f);
+        player.playSound(player.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 0.7f, 1.2f);
+        player.spawnParticle(Particle.FIREWORK, player.getLocation(), 30, 0.5, 0.5, 0.5, 0.2);
+    }
+
+    private void playErrorAnimation(Player player) {
+        player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 0.7f, 0.5f);
+        player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.7f, 0.8f);
+        player.spawnParticle(Particle.SMOKE, player.getLocation(), 15, 0.3, 0.3, 0.3, 0.1);
     }
 
     @EventHandler
@@ -232,66 +421,48 @@ public class BancoEvent implements Listener {
         ItemMeta meta = clickedItem.getItemMeta();
         PersistentDataContainer data = meta.getPersistentDataContainer();
 
-        if (inventoryTitle.contains(MAIN_MENU_TITLE)) {
+        if (inventoryTitle.contains(MAIN_MENU_TITLE) ||
+                inventoryTitle.contains(SALDO_MENU_TITLE) ||
+                inventoryTitle.contains(EMPRESTIMO_MENU_TITLE) ||
+                inventoryTitle.contains(HISTORICO_MENU_TITLE)) {
+
             event.setCancelled(true);
+
             if (data.has(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING)) {
                 String itemId = data.get(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING);
-                switch (itemId) {
-                    case "central_bank":
-                        playClickAnimation(player, clickedItem);
-                        abrirMenuCentralBank(player);
-                        break;
-                    case "saldo":
-                        playClickAnimation(player, clickedItem);
-                        abrirMenuSaldo(player);
-                        break;
-                    case "emprestimo":
-                        playClickAnimation(player, clickedItem);
-                        abrirMenuEmprestimo(player);
-                        break;
-                    case "historico":
-                        playClickAnimation(player, clickedItem);
-                        abrirMenuHistorico(player);
-                        break;
-                }
-            }
-        } else if (inventoryTitle.contains(SALDO_MENU_TITLE) || inventoryTitle.contains(EMPRESTIMO_MENU_TITLE) || inventoryTitle.contains(HISTORICO_MENU_TITLE)) {
-            event.setCancelled(true);
-            if (data.has(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING)) {
-                String itemId = data.get(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING);
+
                 if ("back_button".equals(itemId)) {
-                    playClickAnimation(player, clickedItem);
+                    playClickAnimation(player);
                     abrirMenuPrincipal(player);
                     return;
                 }
 
-                // Lógica de empréstimo
-                switch (itemId) {
-                    case "pedir_emprestimo":
-                        // Adicionar animação
-                        player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
-                        player.spawnParticle(Particle.FIREWORK, player.getLocation(), 15, 0.5, 0.5, 0.5, 0.1);
+                playClickAnimation(player);
 
-                        // Processar empréstimo
-                        Economia.processarEmprestimo(player, 1000);
+                switch (itemId) {
+                    case "saldo":
+                        abrirMenuSaldo(player);
+                        break;
+                    case "emprestimo":
                         abrirMenuEmprestimo(player);
                         break;
-
+                    case "historico":
+                        abrirMenuHistorico(player);
+                        break;
+                    case "pedir_emprestimo":
+                        Economia.processarEmprestimo(player, 1000);
+                        playSuccessAnimation(player);
+                        abrirMenuEmprestimo(player);
+                        break;
                     case "pagar_emprestimo":
-                        // Usar o novo método para pagar empréstimo
                         boolean sucesso = Economia.pagarEmprestimo(player);
                         if (sucesso) {
-                            // Adicionar animação de sucesso
-                            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
-                            player.spawnParticle(Particle.HAPPY_VILLAGER, player.getLocation(), 20, 0.5, 0.5, 0.5, 0.1);
+                            playSuccessAnimation(player);
                         } else {
-                            // Adicionar animação de falha
-                            player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 0.7f, 0.5f);
-                            player.spawnParticle(Particle.SMOKE, player.getLocation(), 10, 0.5, 0.5, 0.5, 0.05);
+                            playErrorAnimation(player);
                         }
                         abrirMenuEmprestimo(player);
                         break;
-
                     case "pegar_historico":
                         List<String> historico = Economia.getHistorico(player);
                         ItemStack livro = new ItemStack(Material.WRITTEN_BOOK);
@@ -299,12 +470,10 @@ public class BancoEvent implements Listener {
                         bookMeta.setTitle("Histórico de Moly");
                         bookMeta.setAuthor(player.getName());
 
-                        // Converter lista de strings para componentes
                         List<Component> pages = historico.stream()
                                 .map(Component::text)
                                 .collect(Collectors.toList());
 
-                        // Se não houver histórico, adicionar uma página padrão
                         if (pages.isEmpty()) {
                             pages.add(Component.text("Sem histórico de transações disponível."));
                         }
@@ -312,22 +481,14 @@ public class BancoEvent implements Listener {
                         bookMeta.pages(pages);
                         livro.setItemMeta(bookMeta);
 
-                        // Adicionar o livro ao inventário do jogador
                         if (player.getInventory().addItem(livro).isEmpty()) {
                             player.sendMessage(Component.text("✅ Você recebeu seu histórico de transações.").color(NamedTextColor.GREEN));
+                            playSuccessAnimation(player);
                         } else {
-                            player.sendMessage(Component.text("❌ Seu inventário está cheio! Libere espaço para receber o histórico.").color(NamedTextColor.RED));
+                            player.sendMessage(Component.text("❌ Seu inventário está cheio!").color(NamedTextColor.RED));
+                            playErrorAnimation(player);
                         }
                         break;
-                }
-            }
-        } else if (inventoryTitle.contains(CENTRAL_BANK_TITLE)) {
-            event.setCancelled(true);
-            if (data.has(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING)) {
-                String itemId = data.get(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING);
-                if ("back_button".equals(itemId)) {
-                    playClickAnimation(player, clickedItem);
-                    abrirMenuPrincipal(player);
                 }
             }
         }
@@ -335,8 +496,13 @@ public class BancoEvent implements Listener {
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
-        if (event.getView().getTitle().contains("Banco")) {
-            playBankAnimation((Player) event.getPlayer(), false);
+        String title = event.getView().getTitle();
+        if (title.contains("Banco") || title.contains("Saldo") || title.contains("Empréstimo") || title.contains("Histórico")) {
+            Player player = (Player) event.getPlayer();
+            stopInventoryAnimation(player);
+            stopParticleAnimation(player);
+            stopMusic(player);
+            playBankAnimation(player, false);
         }
     }
 }
