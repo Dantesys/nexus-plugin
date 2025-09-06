@@ -458,7 +458,7 @@ public class SpecialEvent implements Listener {
                                 Domador.getSpecialbyLevel(dataPlayer.getOrDefault(DOMADOR.key, PersistentDataType.INTEGER, 1), player);
                             }
                             case "mago" -> {
-                                Mago.getSpecialbyLevel(dataPlayer.getOrDefault(MAGO.key, PersistentDataType.INTEGER, 1), player);
+                                mago(player);
                                 event.setCancelled(true);
                             }
                             case "cozinheiro" -> Cozinheiro.getSpecialbyLevel(dataPlayer.getOrDefault(COZINHEIRO.key, PersistentDataType.INTEGER, 1), player);
@@ -599,6 +599,25 @@ public class SpecialEvent implements Listener {
                 }
             }
         }
+    }
+    private void mago(Player player){
+
+        PlayerInventory inv = player.getInventory();
+        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+        int l = dataPlayer.getOrDefault(MAGO.key,PersistentDataType.INTEGER,1);
+
+        int pos=0;
+        for (int i = 0; i <= 8; i++) {
+            ItemStack stack = inv.getItem(i);
+            if(stack!=null && stack.getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)){
+                String nome = stack.getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING);
+                if (nome != null && nome.equals("mago")) {
+                    pos=i;
+                    break;
+                }
+            }
+        }
+        Mago.getSpecialbyLevel(l,player,pos);
     }
     private String getDesc(String nome){
         String desc="";
