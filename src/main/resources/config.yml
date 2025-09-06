@@ -71,8 +71,6 @@ nexus:
   alquimista: ""
   golem: ""
   dragao: ""
-  morte: ""
-  carrasco: ""
 
 # Configurações do Banco Central do Nexus
 nexus_central_bank:

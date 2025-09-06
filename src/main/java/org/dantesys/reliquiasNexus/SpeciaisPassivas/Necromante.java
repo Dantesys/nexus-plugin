@@ -168,9 +168,6 @@ public class Necromante {
                         esqueleto.getAttribute(Attribute.SCALE).setBaseValue(0.5);
                         esqueleto.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(5); // mais fraco
                     }
-                    if(!(esqueleto instanceof Wither)) {
-                        equiparArmadura(esqueleto, level); // função que você pode criar para equipar armadura de acordo com level
-                    }
 
                     // partículas saindo do chão
                     world.spawnParticle(Particle.LARGE_SMOKE, spawnLoc, 10, 0.5, 1, 0.5, 0.02);
@@ -182,39 +179,5 @@ public class Necromante {
                     spawned.add(esqueleto);
                 }
         ).scheduleTimer(2L); // executa a cada 2 ticks
-    }
-
-    private static void equiparArmadura(LivingEntity esqueleto, int level){
-        if(esqueleto instanceof Player) return; // só mobs
-
-        // ignora o Wither Boss
-        if(esqueleto instanceof Wither) return;
-
-        // apenas esqueletos "normais" ou variantes que podem receber armadura
-        if(esqueleto instanceof Skeleton || esqueleto instanceof Stray || esqueleto instanceof Bogged || esqueleto instanceof WitherSkeleton){
-            // cria itens base
-            ItemStack capacete = new ItemStack(Material.IRON_HELMET);
-            ItemStack peitoral = new ItemStack(Material.IRON_CHESTPLATE);
-            ItemStack calca = new ItemStack(Material.IRON_LEGGINGS);
-            ItemStack botas = new ItemStack(Material.IRON_BOOTS);
-
-            int protLevel = Math.min(1 + level / 3, 5);
-            capacete.addEnchantment(Enchantment.PROTECTION, protLevel);
-            peitoral.addEnchantment(Enchantment.PROTECTION, protLevel);
-            calca.addEnchantment(Enchantment.PROTECTION, protLevel);
-            botas.addEnchantment(Enchantment.PROTECTION, protLevel);
-
-            int projLevel = Math.min(1 + level / 4, 5);
-            peitoral.addEnchantment(Enchantment.PROJECTILE_PROTECTION, projLevel);
-            botas.addEnchantment(Enchantment.PROJECTILE_PROTECTION, projLevel);
-
-            // só esqueletos que têm equipamento podem receber os itens
-            if(esqueleto instanceof Skeleton s){
-                s.getEquipment().setHelmet(capacete);
-                s.getEquipment().setChestplate(peitoral);
-                s.getEquipment().setLeggings(calca);
-                s.getEquipment().setBoots(botas);
-            }
-        }
     }
 }

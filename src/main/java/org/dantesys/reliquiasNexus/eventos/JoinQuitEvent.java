@@ -33,6 +33,7 @@ public class JoinQuitEvent implements Listener {
         int qtd = container.getOrDefault(QTD.key, PersistentDataType.INTEGER,0);
         boolean novato = container.getOrDefault(new NamespacedKey("nexus_novato","novato"),PersistentDataType.BOOLEAN,true);
         container.set(SPECIAL.key,PersistentDataType.INTEGER,qtd);
+        container.set(SPECIAL.key, PersistentDataType.INTEGER,0);
         if(qtd==0 && novato){
             container.set(new NamespacedKey("nexus_novato","novato"),PersistentDataType.BOOLEAN,false);
             List<Nexus> reliquias = ItemsRegistro.getValidReliquia(ReliquiasNexus.getNexusConfig());

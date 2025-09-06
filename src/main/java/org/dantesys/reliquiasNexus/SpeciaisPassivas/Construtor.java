@@ -36,7 +36,7 @@ public class Construtor {
         for (int x = -raio; x <= raio; x++) {
             for (int z = -raio; z <= raio; z++) {
                 Location local = centro.clone().add(x, 0, z);
-                world.spawnParticle(Particle.CRIT, local.add(0.5, 0.5, 0.5), 5, 0.3, 0.3, 0.3, Material.ORANGE_CONCRETE.createBlockData());
+                world.spawnParticle(Particle.CRIT, local.add(0.5, 0.5, 0.5), 5, 0.3, 0.3, 0.3);
             }
         }
 
@@ -64,7 +64,7 @@ public class Construtor {
         // Cria o pilar de andaimes
         for (int y = 0; y <= altura; y++) {
             Location local = centro.clone().add(0, y, 0);
-            world.spawnParticle(Particle.CRIT, local.add(0.5, 0.5, 0.5), 5, 0.3, 0.3, 0.3, bloco.createBlockData());
+            world.spawnParticle(Particle.CRIT, local.add(0.5, 0.5, 0.5), 5, 0.3, 0.3, 0.3);
             local.getBlock().setType(bloco);
         }
 

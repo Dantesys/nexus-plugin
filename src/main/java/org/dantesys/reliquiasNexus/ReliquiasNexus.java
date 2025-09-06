@@ -72,7 +72,7 @@ public final class ReliquiasNexus extends JavaPlugin {
     public final List<String> names = List.of("guerreiro","ceifador","vida","mares","barbaro",
             "fazendeiro","espiao","arqueiro","cacador","tempestade","mineiro","fenix","protetor",
             "hulk","sculk","pescador","flash","mago","ladrao","domador","cozinheiro","construtor",
-            "abissal","cronosombra","assassino","frostis","necromante","alquimista","golem","dragao", "morte", "carrasco");
+            "abissal","cronosombra","assassino","frostis","necromante","alquimista","golem","dragao");
 
     public static void saiu(Player player) {
     }

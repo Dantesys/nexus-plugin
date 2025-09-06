@@ -169,7 +169,7 @@ public class PassivaEvent implements Listener {
                         String nome = stack.getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING);
                         if (nome != null && nome.equals("mago")) {
                             ItemMeta meta = stack.getItemMeta();
-                            NamespacedKey key = Material.WRITTEN_BOOK.getKey();
+                            NamespacedKey key = new NamespacedKey("nexus_texture","mago_base");
                             int level = player.getPersistentDataContainer().getOrDefault(MAGO.key,PersistentDataType.INTEGER,1);
                             switch (i){
                                 case 0 -> key = new NamespacedKey("nexus_texture","mago_vm1");

@@ -21,7 +21,7 @@
       "type": "minecraft:condition",
       "on_false": {
         "type": "minecraft:model",
-        "model": "nexus_texture:item/crossbow"
+        "model": "nexus_texture:item/cacador"
       },
       "on_true": {
         "type": "minecraft:range_dispatch",
