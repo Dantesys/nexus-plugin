@@ -1,18 +1,16 @@
 package org.dantesys.reliquiasNexus.eventos;
 
-
 import org.bukkit.Sound;
 import org.bukkit.Particle;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -26,14 +24,11 @@ import org.dantesys.reliquiasNexus.util.Economia;
 import org.dantesys.reliquiasNexus.util.NexusKeys;
 import org.dantesys.reliquiasNexus.team.Team;
 
-import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Arrays;
-import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 
 public class BancoEvent implements Listener {
 
@@ -50,7 +45,7 @@ public class BancoEvent implements Listener {
 
     public void abrirMenuPrincipal(Player player) {
         Inventory inv = Bukkit.createInventory(null, 27, Component.text(MAIN_MENU_TITLE));
-        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
+        playBankAnimation(player, true);
 
         ItemStack bancoCentral = criarItemComID(Material.DIAMOND, CENTRAL_BANK_TITLE, "central_bank");
         ItemStack saldo = criarItemComID(Material.GOLD_INGOT, "§eSaldo Pessoal", "saldo");
@@ -72,7 +67,7 @@ public class BancoEvent implements Listener {
         double saldoBank = centralBank.getSaldo();
 
         ItemStack saldoItem = criarItem(Material.GOLD_BLOCK, "§eSaldo do Banco Central",
-                Collections.singletonList(Component.text("§7Total de moly: §6" + String.format("%.2f", saldoBank) + " moly§7.")));
+                Collections.singletonList(Component.text("§7Total de moly: §6" + String.format("%,.2f", saldoBank) + " moly§7.")));
 
         inv.setItem(13, saldoItem);
 
@@ -91,7 +86,7 @@ public class BancoEvent implements Listener {
 
         double saldoPessoal = Economia.getSaldo(player);
         ItemStack saldoPessoalItem = criarItem(Material.GOLD_BLOCK, "§eSeu Saldo Pessoal",
-                Collections.singletonList(Component.text("§7Você tem §6" + saldoPessoal + " moly§7.")));
+                Collections.singletonList(Component.text("§7Você tem §6" + String.format("%,.2f", saldoPessoal) + " moly§7.")));
 
         inv.setItem(12, saldoPessoalItem);
 
@@ -99,7 +94,7 @@ public class BancoEvent implements Listener {
         if (teamName != null) {
             double saldoTeam = Economia.getSaldoTime(teamName);
             ItemStack saldoTeamItem = criarItem(Material.IRON_BLOCK, "§eSaldo do Time (" + teamName + ")",
-                    Collections.singletonList(Component.text("§7O time tem §6" + saldoTeam + " moly§7.")));
+                    Collections.singletonList(Component.text("§7O time tem §6" + String.format("%,.2f", saldoTeam) + " moly§7.")));
             inv.setItem(14, saldoTeamItem);
         }
 
@@ -116,22 +111,42 @@ public class BancoEvent implements Listener {
     private void abrirMenuEmprestimo(Player player) {
         Inventory inv = Bukkit.createInventory(null, 27, Component.text(EMPRESTIMO_MENU_TITLE));
 
-        if (Economia.temEmprestimo(player)) {
-            double divida = Economia.getEmprestimo(player);
+        UUID playerId = player.getUniqueId();
+
+        if (Economia.temEmprestimo(playerId)) {
+            double divida = Economia.getEmprestimo(playerId);
 
             ItemStack dividaItem = criarItem(Material.RED_WOOL, "§cSua Dívida",
                     Arrays.asList(
-                            Component.text("§7Total: §c" + String.format("%.2f", divida) + " moly"),
-                            Component.text("§7Juros de 5% a cada 5 horas")
+                            Component.text("§7Total: §c" + String.format("%,.2f", divida) + " moly"),
+                            Component.text("§7Juros de 50% sobre o valor emprestado"),
+                            Component.text(""),
+                            Component.text("§eClique em Pagar para quitar sua dívida")
                     ));
-            ItemStack pagarItem = criarItemComID(Material.GREEN_WOOL, "§aPagar Dívida", "pagar_emprestimo");
+            ItemStack pagarItem = criarItemComID(Material.GREEN_WOOL, "§a§lPAGAR DÍVIDA", "pagar_emprestimo");
 
-            inv.setItem(12, dividaItem);
-            inv.setItem(14, pagarItem);
+            inv.setItem(11, dividaItem);
+            inv.setItem(13, criarItemComID(Material.BARRIER, "§cNão é possível pedir novo empréstimo", "bloqueado"));
+            inv.setItem(15, pagarItem);
         } else {
-            ItemStack emprestimoItem = criarItemComID(Material.LIME_WOOL, "§aPedir Empréstimo (1000 moly)", "pedir_emprestimo");
+            ItemStack emprestimoItem = criarItemComID(Material.LIME_WOOL, "§a§lPEDIR EMPRÉSTIMO", "pedir_emprestimo");
+            ItemStack infoItem = criarItem(Material.PAPER, "§eInformações do Empréstimo",
+                    Arrays.asList(
+                            Component.text("§7Valor: §a1000 moly"),
+                            Component.text("§7Juros: §c50%"),
+                            Component.text("§7Total a pagar: §61500 moly"),
+                            Component.text(""),
+                            Component.text("§eClique em Pedir Empréstimo para receber 1000 moly")
+                    ));
+
+            inv.setItem(11, infoItem);
             inv.setItem(13, emprestimoItem);
+            inv.setItem(15, criarItemComID(Material.BARRIER, "§cNenhuma dívida para pagar", "nenhuma_divida"));
         }
+
+        // Adicionar animação
+        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_HARP, 0.7f, 1.0f);
+        player.spawnParticle(Particle.CLOUD, player.getLocation(), 20, 0.5, 0.5, 0.5, 0.05);
 
         ItemStack backArrow = criarCabecaComID(
                 "MHF_ArrowLeft",
@@ -191,17 +206,29 @@ public class BancoEvent implements Listener {
 
     private void playClickAnimation(Player player, ItemStack clickedItem) {
         player.playSound(player.getLocation(), Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 0.5f, 1.5f);
-        player.spawnParticle(Particle.FIREWORK, clickedItem.getItemMeta().getDisplayName().toString().toLowerCase().contains("voltar") ? player.getLocation().add(0, 1.5, 0) : player.getLocation(), 10, 0.5, 0.5, 0.5, 0.05);
+        player.spawnParticle(Particle.FIREWORK, player.getLocation(), 10, 0.5, 0.5, 0.5, 0.05);
+    }
+
+    private void playBankAnimation(Player player, boolean opening) {
+        if (opening) {
+            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
+            player.playSound(player.getLocation(), Sound.BLOCK_ENDER_CHEST_OPEN, 0.7f, 1.2f);
+            player.spawnParticle(Particle.HAPPY_VILLAGER, player.getLocation().add(0, 1, 0), 30, 0.5, 0.5, 0.5, 0.1);
+        } else {
+            player.playSound(player.getLocation(), Sound.BLOCK_ENDER_CHEST_CLOSE, 0.7f, 1.0f);
+        }
     }
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
+        if (!(event.getWhoClicked() instanceof Player)) return;
+
         Player player = (Player) event.getWhoClicked();
         ItemStack clickedItem = event.getCurrentItem();
 
         if (clickedItem == null || !clickedItem.hasItemMeta()) return;
 
-        String inventoryTitle = event.getView().title().toString();
+        String inventoryTitle = event.getView().getTitle();
         ItemMeta meta = clickedItem.getItemMeta();
         PersistentDataContainer data = meta.getPersistentDataContainer();
 
@@ -241,30 +268,56 @@ public class BancoEvent implements Listener {
                 // Lógica de empréstimo
                 switch (itemId) {
                     case "pedir_emprestimo":
-                        player.sendMessage(Component.text("❌ Você tentou pegar um emprestimo mas não foi aprovado. Entre em contato com um dos administradores para eles reavaliarem sobre o valor e juros.").color(NamedTextColor.RED));
+                        // Adicionar animação
+                        player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
+                        player.spawnParticle(Particle.FIREWORK, player.getLocation(), 15, 0.5, 0.5, 0.5, 0.1);
+
+                        // Processar empréstimo
+                        Economia.processarEmprestimo(player, 1000);
+                        abrirMenuEmprestimo(player);
                         break;
+
                     case "pagar_emprestimo":
-                        double divida = Economia.getEmprestimo(player);
-                        if (Economia.getSaldo(player) >= divida) {
-                            Economia.removerSaldo(player, divida, "Pagamento de Empréstimo");
-                            Economia.adicionarSaldo(Banco.getNexusCentralBank(), divida, "Pagamento de Empréstimo");
-                            Economia.finalizarEmprestimo(player);
-                            player.sendMessage(Component.text("✅ Você pagou sua dívida! Seu empréstimo foi finalizado.").color(NamedTextColor.GREEN));
-                            abrirMenuEmprestimo(player);
+                        // Usar o novo método para pagar empréstimo
+                        boolean sucesso = Economia.pagarEmprestimo(player);
+                        if (sucesso) {
+                            // Adicionar animação de sucesso
+                            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+                            player.spawnParticle(Particle.HAPPY_VILLAGER, player.getLocation(), 20, 0.5, 0.5, 0.5, 0.1);
                         } else {
-                            player.sendMessage(Component.text("❌ Saldo insuficiente para pagar a dívida.").color(NamedTextColor.RED));
+                            // Adicionar animação de falha
+                            player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 0.7f, 0.5f);
+                            player.spawnParticle(Particle.SMOKE, player.getLocation(), 10, 0.5, 0.5, 0.5, 0.05);
                         }
+                        abrirMenuEmprestimo(player);
                         break;
+
                     case "pegar_historico":
                         List<String> historico = Economia.getHistorico(player);
                         ItemStack livro = new ItemStack(Material.WRITTEN_BOOK);
                         BookMeta bookMeta = (BookMeta) livro.getItemMeta();
                         bookMeta.setTitle("Histórico de Moly");
                         bookMeta.setAuthor(player.getName());
-                        bookMeta.pages(historico.stream().map(Component::text).collect(Collectors.toList()));
+
+                        // Converter lista de strings para componentes
+                        List<Component> pages = historico.stream()
+                                .map(Component::text)
+                                .collect(Collectors.toList());
+
+                        // Se não houver histórico, adicionar uma página padrão
+                        if (pages.isEmpty()) {
+                            pages.add(Component.text("Sem histórico de transações disponível."));
+                        }
+
+                        bookMeta.pages(pages);
                         livro.setItemMeta(bookMeta);
-                        player.getInventory().addItem(livro);
-                        player.sendMessage(Component.text("✅ Você recebeu seu histórico de transações.").color(NamedTextColor.GREEN));
+
+                        // Adicionar o livro ao inventário do jogador
+                        if (player.getInventory().addItem(livro).isEmpty()) {
+                            player.sendMessage(Component.text("✅ Você recebeu seu histórico de transações.").color(NamedTextColor.GREEN));
+                        } else {
+                            player.sendMessage(Component.text("❌ Seu inventário está cheio! Libere espaço para receber o histórico.").color(NamedTextColor.RED));
+                        }
                         break;
                 }
             }
@@ -277,6 +330,13 @@ public class BancoEvent implements Listener {
                     abrirMenuPrincipal(player);
                 }
             }
+        }
+    }
+
+    @EventHandler
+    public void onInventoryClose(InventoryCloseEvent event) {
+        if (event.getView().getTitle().contains("Banco")) {
+            playBankAnimation((Player) event.getPlayer(), false);
         }
     }
 }

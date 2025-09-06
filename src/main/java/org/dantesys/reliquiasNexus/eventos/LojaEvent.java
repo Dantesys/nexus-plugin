@@ -2,7 +2,7 @@ package org.dantesys.reliquiasNexus.eventos;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -110,7 +110,6 @@ public class LojaEvent implements Listener {
         adicionarItemComPreco(inv, 20, Material.NETHERITE_LEGGINGS, "§cCaleças de Netherita", 14000.0, 1);
         adicionarItemComPreco(inv, 21, Material.NETHERITE_BOOTS, "§cBota de Netherita", 11000.0, 1);
 
-
         // Botão de voltar
         ItemStack backArrow = criarCabecaComID(
                 "MHF_ArrowLeft",
@@ -193,7 +192,7 @@ public class LojaEvent implements Listener {
                 Component.text("§7Preço: §6" + preco + " moly"),
                 Component.text("§aClique para comprar!")
         ));
-        meta.getPersistentDataContainer().set(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING, nome.replaceAll("§.",""));
+        meta.getPersistentDataContainer().set(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING, nome.replaceAll("§.", ""));
         meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "preco"), PersistentDataType.DOUBLE, preco);
         item.setItemMeta(meta);
         inv.setItem(slot, item);
@@ -219,6 +218,11 @@ public class LojaEvent implements Listener {
         return head;
     }
 
+    // Método auxiliar para converter Component para String
+    private String componentToString(Component component) {
+        return PlainTextComponentSerializer.plainText().serialize(component);
+    }
+
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
@@ -226,7 +230,7 @@ public class LojaEvent implements Listener {
 
         if (clickedItem == null || !clickedItem.hasItemMeta()) return;
 
-        String inventoryTitle = PlainComponentSerializer.plain().serialize(event.getView().title());
+        String inventoryTitle = componentToString(event.getView().title());
         ItemMeta meta = clickedItem.getItemMeta();
         PersistentDataContainer data = meta.getPersistentDataContainer();
 
@@ -271,7 +275,7 @@ public class LojaEvent implements Listener {
                 }
 
                 // Lógica para a Espada do Carrasco
-                if ("Espada do Carrasco".equals(PlainComponentSerializer.plain().serialize(Objects.requireNonNull(meta.displayName())))) {
+                if (meta.hasDisplayName() && "Espada do Carrasco".equals(componentToString(meta.displayName()))) {
                     double preco = 666000000.0;
                     if (Economia.getSaldo(player) >= preco) {
                         // Verifica se o jogador já possui a espada
@@ -296,10 +300,10 @@ public class LojaEvent implements Listener {
 
                     if (saldo >= preco) {
                         if (player.getInventory().firstEmpty() != -1) {
-                            Economia.removerSaldo(player, preco);
+                            Economia.removerSaldo(player, preco, "Compra de item na loja");
                             player.getInventory().addItem(new ItemStack(clickedItem.getType(), clickedItem.getAmount()));
 
-                            String nomeItem = PlainComponentSerializer.plain().serialize(Objects.requireNonNull(meta.displayName()));
+                            String nomeItem = meta.hasDisplayName() ? componentToString(meta.displayName()) : clickedItem.getType().toString();
                             player.sendMessage(Component.text("✅ Você comprou " + nomeItem + " por " + preco + " moly.").color(NamedTextColor.GREEN));
                         } else {
                             player.sendMessage(Component.text("❌ Seu inventário está cheio!").color(NamedTextColor.RED));

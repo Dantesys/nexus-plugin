@@ -25,7 +25,12 @@ public class Banco {
     }
 
     public static Banco getNexusCentralBank() {
-        return ReliquiasNexus.getNexusCentralBank();
+        // Alterado para 250 milhões
+        Banco centralBank = ReliquiasNexus.getNexusCentralBank();
+        if (centralBank.getSaldo() < 250000000) {
+            centralBank.setSaldo(250000000);
+        }
+        return centralBank;
     }
 
     // Getters e Setters
