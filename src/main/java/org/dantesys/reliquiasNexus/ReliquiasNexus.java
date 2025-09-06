@@ -103,8 +103,8 @@ public final class ReliquiasNexus extends JavaPlugin {
             throw new RuntimeException(e);
         }
 
-        // Inicializa o Nexus Central Bank
-        double saldoInicial = config.getDouble("nexus_central_bank.saldo", 25000.0);
+        // Inicializa o Nexus Central Bank com 25 milhões.
+        double saldoInicial = config.getDouble("nexus_central_bank.saldo", 25000000.0);
         nexusCentralBank = new Banco("Nexus Central Bank", null, saldoInicial);
         // Salva o saldo inicial no config
         config.set("nexus_central_bank.saldo", nexusCentralBank.getSaldo());
@@ -731,7 +731,8 @@ public final class ReliquiasNexus extends JavaPlugin {
             final CommandSender sender = ctx.getSource().getSender();
 
             if (!names.contains(reliquiaNome)) {
-                sender.sendMessage(Component.text("❌ §cRelíquia inválida!").color(NamedTextColor.RED));
+                sender.sendMessage(Component.text("❌ §cRelíquia inválida! Use uma das seguintes: " + String.join(", ", names))
+                        .color(NamedTextColor.RED));
                 return Command.SINGLE_SUCCESS;
             }
 

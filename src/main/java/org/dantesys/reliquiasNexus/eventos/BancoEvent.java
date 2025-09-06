@@ -1,5 +1,8 @@
 package org.dantesys.reliquiasNexus.eventos;
 
+
+import org.bukkit.Sound;
+import org.bukkit.Particle;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
@@ -47,6 +50,7 @@ public class BancoEvent implements Listener {
 
     public void abrirMenuPrincipal(Player player) {
         Inventory inv = Bukkit.createInventory(null, 27, Component.text(MAIN_MENU_TITLE));
+        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
 
         ItemStack bancoCentral = criarItemComID(Material.DIAMOND, CENTRAL_BANK_TITLE, "central_bank");
         ItemStack saldo = criarItemComID(Material.GOLD_INGOT, "§eSaldo Pessoal", "saldo");
@@ -118,7 +122,7 @@ public class BancoEvent implements Listener {
             ItemStack dividaItem = criarItem(Material.RED_WOOL, "§cSua Dívida",
                     Arrays.asList(
                             Component.text("§7Total: §c" + String.format("%.2f", divida) + " moly"),
-                            Component.text("§7Juros de 1% por minuto")
+                            Component.text("§7Juros de 5% a cada 5 horas")
                     ));
             ItemStack pagarItem = criarItemComID(Material.GREEN_WOOL, "§aPagar Dívida", "pagar_emprestimo");
 
@@ -185,6 +189,11 @@ public class BancoEvent implements Listener {
         return head;
     }
 
+    private void playClickAnimation(Player player, ItemStack clickedItem) {
+        player.playSound(player.getLocation(), Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 0.5f, 1.5f);
+        player.spawnParticle(Particle.FIREWORK, clickedItem.getItemMeta().getDisplayName().toString().toLowerCase().contains("voltar") ? player.getLocation().add(0, 1.5, 0) : player.getLocation(), 10, 0.5, 0.5, 0.5, 0.05);
+    }
+
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
@@ -202,15 +211,19 @@ public class BancoEvent implements Listener {
                 String itemId = data.get(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING);
                 switch (itemId) {
                     case "central_bank":
+                        playClickAnimation(player, clickedItem);
                         abrirMenuCentralBank(player);
                         break;
                     case "saldo":
+                        playClickAnimation(player, clickedItem);
                         abrirMenuSaldo(player);
                         break;
                     case "emprestimo":
+                        playClickAnimation(player, clickedItem);
                         abrirMenuEmprestimo(player);
                         break;
                     case "historico":
+                        playClickAnimation(player, clickedItem);
                         abrirMenuHistorico(player);
                         break;
                 }
@@ -220,6 +233,7 @@ public class BancoEvent implements Listener {
             if (data.has(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING)) {
                 String itemId = data.get(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING);
                 if ("back_button".equals(itemId)) {
+                    playClickAnimation(player, clickedItem);
                     abrirMenuPrincipal(player);
                     return;
                 }
@@ -227,19 +241,7 @@ public class BancoEvent implements Listener {
                 // Lógica de empréstimo
                 switch (itemId) {
                     case "pedir_emprestimo":
-                        if (!Economia.temEmprestimo(player)) {
-                            double valorEmprestimo = 1000;
-                            if (Banco.getNexusCentralBank().getSaldo() >= valorEmprestimo) {
-                                Economia.concederEmprestimo(player, valorEmprestimo); // Exemplo: 1000 moly
-                                Banco.getNexusCentralBank().setSaldo(Banco.getNexusCentralBank().getSaldo() - valorEmprestimo);
-                                player.sendMessage(Component.text("✅ Você pegou um empréstimo de 1000 moly.").color(NamedTextColor.GREEN));
-                                abrirMenuEmprestimo(player);
-                            } else {
-                                player.sendMessage(Component.text("❌ O banco central não tem saldo suficiente para te dar um empréstimo.").color(NamedTextColor.RED));
-                            }
-                        } else {
-                            player.sendMessage(Component.text("❌ Você já tem um empréstimo ativo.").color(NamedTextColor.RED));
-                        }
+                        player.sendMessage(Component.text("❌ Você tentou pegar um emprestimo mas não foi aprovado. Entre em contato com um dos administradores para eles reavaliarem sobre o valor e juros.").color(NamedTextColor.RED));
                         break;
                     case "pagar_emprestimo":
                         double divida = Economia.getEmprestimo(player);
@@ -271,6 +273,7 @@ public class BancoEvent implements Listener {
             if (data.has(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING)) {
                 String itemId = data.get(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING);
                 if ("back_button".equals(itemId)) {
+                    playClickAnimation(player, clickedItem);
                     abrirMenuPrincipal(player);
                 }
             }
