@@ -25,7 +25,7 @@ public class BlocoUtils {
         switch (tipoBase) {
             case WHITE_CONCRETE:
                 return Material.valueOf(cor.name() + "_CONCRETE");
-            case TERRACOTTA:
+            case TERRACOTTA, WHITE_TERRACOTTA:
                 return Material.valueOf(cor.name() + "_TERRACOTTA");
             case WHITE_WOOL:
                 return Material.valueOf(cor.name() + "_WOOL");
@@ -33,8 +33,8 @@ public class BlocoUtils {
                 return Material.valueOf(cor.name() + "_STAINED_GLASS");
             case WHITE_STAINED_GLASS_PANE:
                 return Material.valueOf(cor.name() + "_STAINED_GLASS_PANE");
-            case GREEN_TERRACOTTA:
-                return Material.valueOf(cor.name() + "_TERRACOTTA");
+            case WHITE_GLAZED_TERRACOTTA:
+                return Material.valueOf(cor.name() + "_GLAZED_TERRACOTTA");
             default:
                 return tipoBase; // blocos não coloridos permanecem
         }

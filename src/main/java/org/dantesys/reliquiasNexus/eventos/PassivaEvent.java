@@ -150,8 +150,8 @@ public class PassivaEvent implements Listener {
                 });
             });
         }
-        if(assassino!=null){
-            Bukkit.getServer().getOnlinePlayers().forEach(player -> {
+        Bukkit.getServer().getOnlinePlayers().forEach(player -> {
+            if(assassino!=null){
                 Player p = Bukkit.getPlayer(assassino);
                 if(inAssassino && !temReliquia(player,"espiao")){
                     if(p!=null){
@@ -162,51 +162,51 @@ public class PassivaEvent implements Listener {
                         player.showPlayer(ReliquiasNexus.getPlugin(ReliquiasNexus.class),p);
                     }
                 }
-                PlayerInventory inv = player.getInventory();
-                for (int i = 0; i <= 8; i++) {
-                    ItemStack stack = inv.getItem(i);
-                    if(stack!=null && stack.getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)){
-                        String nome = stack.getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING);
-                        if (nome != null && nome.equals("mago")) {
-                            ItemMeta meta = stack.getItemMeta();
-                            NamespacedKey key = new NamespacedKey("nexus_texture","mago_base");
-                            int level = player.getPersistentDataContainer().getOrDefault(MAGO.key,PersistentDataType.INTEGER,1);
-                            switch (i){
-                                case 0 -> key = new NamespacedKey("nexus_texture","mago_vm1");
-                                case 1 -> key = new NamespacedKey("nexus_texture","mago_vm2");
-                                case 2 -> key = new NamespacedKey("nexus_texture","mago_vm3");
-                                case 3 -> key = level>5?new NamespacedKey("nexus_texture","mago_vm4"):new NamespacedKey("nexus_texture","mago_vm10");
-                                case 4 -> key = level>5?new NamespacedKey("nexus_texture","mago_vm5"):new NamespacedKey("nexus_texture","mago_vm10");
-                                case 5 -> key = level>10?new NamespacedKey("nexus_texture","mago_vm6"):new NamespacedKey("nexus_texture","mago_vm10");
-                                case 6 -> key = level>10?new NamespacedKey("nexus_texture","mago_vm7"):new NamespacedKey("nexus_texture","mago_vm10");
-                                case 7 -> key = level>15?new NamespacedKey("nexus_texture","mago_vm8"):new NamespacedKey("nexus_texture","mago_vm10");
-                                case 8 -> key = level>15?new NamespacedKey("nexus_texture","mago_vm9"):new NamespacedKey("nexus_texture","mago_vm10");
-                            }
-                            meta.setItemModel(key);
-                            stack.setItemMeta(meta);
-                            break;
+            }
+            PlayerInventory inv = player.getInventory();
+            for (int i = 0; i <= 8; i++) {
+                ItemStack stack = inv.getItem(i);
+                if(stack!=null && stack.getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)){
+                    String nome = stack.getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING);
+                    if (nome != null && nome.equals("mago")) {
+                        ItemMeta meta = stack.getItemMeta();
+                        NamespacedKey key = new NamespacedKey("nexus_texture","mago_base");
+                        int level = player.getPersistentDataContainer().getOrDefault(MAGO.key,PersistentDataType.INTEGER,1);
+                        switch (i){
+                            case 0 -> key = new NamespacedKey("nexus_texture","mago_vm1");
+                            case 1 -> key = new NamespacedKey("nexus_texture","mago_vm2");
+                            case 2 -> key = new NamespacedKey("nexus_texture","mago_vm3");
+                            case 3 -> key = level>5?new NamespacedKey("nexus_texture","mago_vm4"):new NamespacedKey("nexus_texture","mago_vm10");
+                            case 4 -> key = level>5?new NamespacedKey("nexus_texture","mago_vm5"):new NamespacedKey("nexus_texture","mago_vm10");
+                            case 5 -> key = level>10?new NamespacedKey("nexus_texture","mago_vm6"):new NamespacedKey("nexus_texture","mago_vm10");
+                            case 6 -> key = level>10?new NamespacedKey("nexus_texture","mago_vm7"):new NamespacedKey("nexus_texture","mago_vm10");
+                            case 7 -> key = level>15?new NamespacedKey("nexus_texture","mago_vm8"):new NamespacedKey("nexus_texture","mago_vm10");
+                            case 8 -> key = level>15?new NamespacedKey("nexus_texture","mago_vm9"):new NamespacedKey("nexus_texture","mago_vm10");
                         }
-                        if (nome != null && nome.equals("construtor")) {
-                            ItemStack corante = player.getInventory().getItemInOffHand();
-                            DyeColor cor = CoresUtils.getDyeColorFromItem(corante);
-                            ItemMeta meta = stack.getItemMeta();
-                            NamespacedKey key = new NamespacedKey("nexus_texture","construtor");
-                            switch (i){
-                                case 0 -> key = BlocoUtils.getBlocoColorido(Material.WHITE_CONCRETE,cor).getKey();
-                                case 1 -> key = BlocoUtils.getBlocoColorido(Material.GLASS,cor).getKey();
-                                case 2 -> key = BlocoUtils.getBlocoColorido(Material.GLASS_PANE,cor).getKey();
-                                case 3 -> key = BlocoUtils.getBlocoColorido(Material.TERRACOTTA,cor).getKey();
-                                case 4 -> key = BlocoUtils.getBlocoColorido(Material.WHITE_GLAZED_TERRACOTTA,cor).getKey();
-                                case 5 -> key = BlocoUtils.getBlocoColorido(Material.WHITE_WOOL,cor).getKey();
-                            }
-                            meta.setItemModel(key);
-                            stack.setItemMeta(meta);
-                            break;
+                        meta.setItemModel(key);
+                        stack.setItemMeta(meta);
+                        break;
+                    }
+                    if (nome != null && nome.equals("construtor")) {
+                        ItemStack corante = player.getInventory().getItemInOffHand();
+                        DyeColor cor = CoresUtils.getDyeColorFromItem(corante);
+                        ItemMeta meta = stack.getItemMeta();
+                        NamespacedKey key = new NamespacedKey("nexus_texture","construtor");
+                        switch (i){
+                            case 0 -> key = BlocoUtils.getBlocoColorido(Material.WHITE_CONCRETE,cor).getKey();
+                            case 1 -> key = BlocoUtils.getBlocoColorido(Material.GLASS,cor).getKey();
+                            case 2 -> key = BlocoUtils.getBlocoColorido(Material.GLASS_PANE,cor).getKey();
+                            case 3 -> key = BlocoUtils.getBlocoColorido(Material.TERRACOTTA,cor).getKey();
+                            case 4 -> key = BlocoUtils.getBlocoColorido(Material.WHITE_GLAZED_TERRACOTTA,cor).getKey();
+                            case 5 -> key = BlocoUtils.getBlocoColorido(Material.WHITE_WOOL,cor).getKey();
                         }
+                        meta.setItemModel(key);
+                        stack.setItemMeta(meta);
+                        break;
                     }
                 }
-            });
-        }
+            }
+        });
     }
     @EventHandler
     public void ataqueMobs(EntityDamageByEntityEvent event){
