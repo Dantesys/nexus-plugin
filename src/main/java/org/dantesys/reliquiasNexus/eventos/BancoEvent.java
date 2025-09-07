@@ -38,7 +38,6 @@ public class BancoEvent implements Listener {
 
     private final Map<UUID, Integer> animationTasks = new HashMap<>();
     private final Map<UUID, Integer> particleTasks = new HashMap<>();
-    private final Map<UUID, Integer> musicTasks = new HashMap<>();
     private final Map<UUID, List<ItemStack>> animatedItems = new HashMap<>();
 
     // Materiais para animação de ouro
@@ -57,7 +56,7 @@ public class BancoEvent implements Listener {
             Color.fromRGB(255, 255, 0),  // Amarelo
             Color.fromRGB(0, 255, 0),    // Verde
             Color.fromRGB(0, 0, 255),    // Azul
-            Color.fromRGB(75, 0, 130),   // Índigo
+            Color.fromRGB(75, 0, 130),    // Índigo
             Color.fromRGB(238, 130, 238) // Violeta
     };
 
@@ -93,7 +92,6 @@ public class BancoEvent implements Listener {
         player.openInventory(inv);
         startInventoryAnimation(player, inv);
         startParticleAnimation(player);
-        startMusic(player);
     }
 
     private void abrirMenuSaldo(Player player) {
@@ -247,9 +245,7 @@ public class BancoEvent implements Listener {
         UUID playerId = player.getUniqueId();
 
         // Cancelar animação anterior se existir
-        if (animationTasks.containsKey(playerId)) {
-            Bukkit.getScheduler().cancelTask(animationTasks.get(playerId));
-        }
+        stopInventoryAnimation(player);
 
         // Itens para animar (slots principais)
         int[] animatedSlots = {11, 13, 15, 22};
@@ -265,7 +261,8 @@ public class BancoEvent implements Listener {
         animatedItems.put(playerId, itemsToAnimate);
 
         int taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
-            if (!player.isOnline() || !player.getOpenInventory().getTopInventory().equals(inv)) {
+            if (!player.isOnline() || player.getOpenInventory() == null ||
+                    !player.getOpenInventory().getTopInventory().equals(inv)) {
                 stopInventoryAnimation(player);
                 return;
             }
@@ -294,12 +291,11 @@ public class BancoEvent implements Listener {
         UUID playerId = player.getUniqueId();
 
         // Cancelar animação anterior se existir
-        if (particleTasks.containsKey(playerId)) {
-            Bukkit.getScheduler().cancelTask(particleTasks.get(playerId));
-        }
+        stopParticleAnimation(player);
 
         int taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
-            if (!player.isOnline()) {
+            if (!player.isOnline() || player.getOpenInventory() == null ||
+                    !isBankMenuOpen(player)) {
                 stopParticleAnimation(player);
                 return;
             }
@@ -327,29 +323,11 @@ public class BancoEvent implements Listener {
         particleTasks.put(playerId, taskId);
     }
 
-    private void startMusic(Player player) {
-        UUID playerId = player.getUniqueId();
-
-        // Cancelar música anterior se existir
-        if (musicTasks.containsKey(playerId)) {
-            Bukkit.getScheduler().cancelTask(musicTasks.get(playerId));
-        }
-
-        // Tocar música PIGSTEP
-        player.stopSound(Sound.MUSIC_DISC_PIGSTEP);
-        player.playSound(player.getLocation(), Sound.MUSIC_DISC_PIGSTEP, 0.8f, 1.0f);
-
-        // Task para manter a música tocando
-        int taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
-            if (!player.isOnline() || !player.getOpenInventory().getTitle().contains("Banco")) {
-                stopMusic(player);
-                return;
-            }
-            // Manter a música tocando
-            player.playSound(player.getLocation(), Sound.MUSIC_DISC_PIGSTEP, 0.8f, 1.0f);
-        }, 0L, 200L); // Verificar a cada 10 segundos
-
-        musicTasks.put(playerId, taskId);
+    private boolean isBankMenuOpen(Player player) {
+        if (player.getOpenInventory() == null) return false;
+        String title = player.getOpenInventory().getTitle();
+        return title.contains("Banco") || title.contains("Saldo") ||
+                title.contains("Empréstimo") || title.contains("Histórico");
     }
 
     private void stopInventoryAnimation(Player player) {
@@ -369,13 +347,9 @@ public class BancoEvent implements Listener {
         }
     }
 
-    private void stopMusic(Player player) {
-        UUID playerId = player.getUniqueId();
-        if (musicTasks.containsKey(playerId)) {
-            Bukkit.getScheduler().cancelTask(musicTasks.get(playerId));
-            musicTasks.remove(playerId);
-        }
-        player.stopSound(Sound.MUSIC_DISC_PIGSTEP);
+    private void stopAllAnimations(Player player) {
+        stopInventoryAnimation(player);
+        stopParticleAnimation(player);
     }
 
     private void playClickAnimation(Player player) {
@@ -496,12 +470,15 @@ public class BancoEvent implements Listener {
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
+        Player player = (Player) event.getPlayer();
         String title = event.getView().getTitle();
-        if (title.contains("Banco") || title.contains("Saldo") || title.contains("Empréstimo") || title.contains("Histórico")) {
-            Player player = (Player) event.getPlayer();
-            stopInventoryAnimation(player);
-            stopParticleAnimation(player);
-            stopMusic(player);
+
+        // Verificar se é um menu do banco
+        if (title.contains("Banco") || title.contains("Saldo") ||
+                title.contains("Empréstimo") || title.contains("Histórico")) {
+
+            // Parar TODAS as animações instantaneamente
+            stopAllAnimations(player);
             playBankAnimation(player, false);
         }
     }
