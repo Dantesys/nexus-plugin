@@ -14,11 +14,13 @@ import java.util.UUID;
 
 public class PlayerListManager implements Listener {
     private final PlayerList playerList;
+    private final TagHead tagHead;
     private final ReliquiasNexus plugin;
 
     public PlayerListManager(ReliquiasNexus plugin) {
         this.plugin = plugin;
         this.playerList = new PlayerList(plugin);
+        this.tagHead = new TagHead(plugin, playerList);
         Bukkit.getPluginManager().registerEvents(this, plugin);
 
         // Iniciar task para atualizar informações do servidor periodicamente
@@ -30,7 +32,7 @@ public class PlayerListManager implements Listener {
         Player player = event.getPlayer();
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             playerList.updatePlayerList(player);
-            // Corrige o erro, chamando o método correto para atualizar todos os jogadores
+            tagHead.updatePlayerTag(player);
             playerList.updateForAllPlayers();
         }, 20L); // Delay de 1 segundo
     }
@@ -49,6 +51,7 @@ public class PlayerListManager implements Listener {
             public void run() {
                 playerList.updateServerInfo();
                 playerList.updateForAllPlayers();
+                tagHead.updateAllPlayerTags();
             }
         }.runTaskTimer(plugin, 0L, 100L); // Atualiza a cada 5 segundos
     }
@@ -57,8 +60,13 @@ public class PlayerListManager implements Listener {
         return playerList;
     }
 
+    public TagHead getTagHead() {
+        return tagHead;
+    }
+
     public void updateAllPlayerLists() {
         playerList.updateForAllPlayers();
+        tagHead.updateAllPlayerTags();
     }
 
     public void setPlayerRank(UUID playerUuid, String rank) {
@@ -67,6 +75,8 @@ public class PlayerListManager implements Listener {
         Player player = Bukkit.getPlayer(playerUuid);
         if (player != null) {
             playerList.updatePlayerList(player);
+            tagHead.updatePlayerTag(player);
+            updateAllPlayerLists();
         }
     }
 }

@@ -3,7 +3,6 @@ package org.dantesys.reliquiasNexus.tab;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
@@ -11,8 +10,6 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
-
-import java.util.UUID;
 
 public class PlayerList {
     private final ReliquiasNexus plugin;
@@ -70,6 +67,14 @@ public class PlayerList {
             case "ajudante":
                 teamName = "002ajudante";
                 prefix = Component.text("[Ajudante] ").color(NamedTextColor.GREEN);
+                break;
+            case "beta":
+                teamName = "003beta";
+                prefix = Component.text("[Beta] ").color(NamedTextColor.DARK_BLUE);
+                break;
+            case "amigo":
+                teamName = "004amigo";
+                prefix = Component.text("[Amigo] ").color(NamedTextColor.DARK_PURPLE);
                 break;
             case "membro":
             default:
@@ -129,6 +134,27 @@ public class PlayerList {
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             player.sendPlayerListHeaderAndFooter(header, footer);
+        }
+    }
+
+    // Método para obter o prefixo da tag de um jogador
+    public Component getPlayerTag(Player player) {
+        String rank = plugin.getConfig().getString("players." + player.getUniqueId().toString() + ".rank", "membro");
+
+        switch (rank.toLowerCase()) {
+            case "dono":
+                return Component.text("[Dono] ").color(NamedTextColor.RED);
+            case "staff":
+                return Component.text("[Staff] ").color(NamedTextColor.AQUA);
+            case "ajudante":
+                return Component.text("[Ajudante] ").color(NamedTextColor.GREEN);
+            case "beta":
+                return Component.text("[Beta] ").color(NamedTextColor.DARK_BLUE);
+            case "amigo":
+                return Component.text("[Amigo] ").color(NamedTextColor.DARK_PURPLE);
+            case "membro":
+            default:
+                return Component.text("[Membro] ").color(NamedTextColor.GRAY);
         }
     }
 }
