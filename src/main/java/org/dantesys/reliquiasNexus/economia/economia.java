@@ -5,8 +5,8 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
-import org.dantesys.reliquiasNexus.economia.Banco;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
+import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,6 +21,7 @@ public class economia {
 
     public static void setPlugin(ReliquiasNexus pluginInstance) {
         plugin = pluginInstance;
+        carregarDados(); // Carrega dados quando o plugin é definido
     }
 
     public static double getSaldo(Player player) {
@@ -38,6 +39,7 @@ public class economia {
     public static void setSaldo(Player player, double valor) {
         saldos.put(player.getUniqueId(), valor);
         adicionarAoHistorico(player.getUniqueId(), "Saldo definido para: " + String.format("%,.2f", valor) + " moly");
+        salvarDados(); // Salva após alteração
     }
 
     public static void setSaldoTime(String teamName, double valor) {
@@ -48,6 +50,7 @@ public class economia {
         double novoSaldo = getSaldo(player) + valor;
         saldos.put(player.getUniqueId(), novoSaldo);
         adicionarAoHistorico(player.getUniqueId(), "+" + String.format("%,.2f", valor) + " moly - " + motivo);
+        salvarDados(); // Salva após alteração
     }
 
     public static void adicionarSaldo(Banco banco, double valor, String motivo) {
@@ -58,6 +61,7 @@ public class economia {
         double novoSaldo = getSaldo(player) - valor;
         saldos.put(player.getUniqueId(), novoSaldo);
         adicionarAoHistorico(player.getUniqueId(), "-" + String.format("%,.2f", valor) + " moly - " + motivo);
+        salvarDados(); // Salva após alteração
     }
 
     public static void adicionarSaldoTime(String teamName, double valor, String motivo) {
@@ -81,6 +85,7 @@ public class economia {
     public static void finalizarEmprestimo(UUID jogador) {
         emprestimos.remove(jogador);
         adicionarAoHistorico(jogador, "Empréstimo finalizado");
+        salvarDados(); // Salva após alteração
     }
 
     public static List<String> getHistorico(Player player) {
@@ -148,6 +153,7 @@ public class economia {
             // Registra o empréstimo com juros
             emprestimos.put(player.getUniqueId(), valorComJuros);
             adicionarAoHistorico(player.getUniqueId(), "Empréstimo contraído: " + String.format("%,.2f", valor) + " moly (Juros: " + String.format("%,.2f", valorComJuros) + " moly)");
+            salvarDados(); // Salva após alteração
         } else {
             player.sendMessage(Component.text("❌ O banco central não tem fundos suficientes para o empréstimo.").color(NamedTextColor.RED));
         }
@@ -155,11 +161,94 @@ public class economia {
 
     // Método para carregar dados do arquivo de configuração
     public static void carregarDados() {
-        // Implementação para carregar saldos, empréstimos e histórico do arquivo
+        if (plugin == null) return;
+
+        saldos.clear();
+        emprestimos.clear();
+        historico.clear();
+
+        // Carregar saldos dos jogadores
+        if (plugin.getConfig().contains("player_balances")) {
+            ConfigurationSection balancesSection = plugin.getConfig().getConfigurationSection("player_balances");
+            if(balancesSection != null) {
+                for (String uuidStr : balancesSection.getKeys(false)) {
+                    try {
+                        UUID uuid = UUID.fromString(uuidStr);
+                        double balance = balancesSection.getDouble(uuidStr);
+                        saldos.put(uuid, balance);
+                    } catch (IllegalArgumentException e) {
+                        plugin.getLogger().warning("UUID inválido encontrado em player_balances: " + uuidStr);
+                    }
+                }
+            }
+        }
+
+        // Carregar empréstimos (se existirem)
+        if (plugin.getConfig().contains("emprestimos")) {
+            ConfigurationSection loansSection = plugin.getConfig().getConfigurationSection("emprestimos");
+            if(loansSection != null) {
+                for (String uuidStr : loansSection.getKeys(false)) {
+                    try {
+                        UUID uuid = UUID.fromString(uuidStr);
+                        double loanAmount = loansSection.getDouble(uuidStr);
+                        emprestimos.put(uuid, loanAmount);
+                    } catch (IllegalArgumentException e) {
+                        plugin.getLogger().warning("UUID inválido encontrado em emprestimos: " + uuidStr);
+                    }
+                }
+            }
+        }
+
+        // Carregar histórico (se existir)
+        if (plugin.getConfig().contains("historico")) {
+            ConfigurationSection historySection = plugin.getConfig().getConfigurationSection("historico");
+            if(historySection != null) {
+                for (String uuidStr : historySection.getKeys(false)) {
+                    try {
+                        UUID uuid = UUID.fromString(uuidStr);
+                        List<String> history = historySection.getStringList(uuidStr);
+                        historico.put(uuid, history);
+                    } catch (IllegalArgumentException e) {
+                        plugin.getLogger().warning("UUID inválido encontrado em historico: " + uuidStr);
+                    }
+                }
+            }
+        }
+
+        plugin.getLogger().info("Dados econômicos carregados: " + saldos.size() + " saldos, " + emprestimos.size() + " empréstimos");
     }
 
     // Método para salvar dados no arquivo de configuração
     public static void salvarDados() {
-        // Implementação para salvar saldos, empréstimos e histórico no arquivo
+        if (plugin == null) return;
+
+        // Limpar seções antes de salvar para evitar dados antigos
+        if (plugin.getConfig().contains("player_balances")) {
+            plugin.getConfig().set("player_balances", null);
+        }
+        if (plugin.getConfig().contains("emprestimos")) {
+            plugin.getConfig().set("emprestimos", null);
+        }
+        if (plugin.getConfig().contains("historico")) {
+            plugin.getConfig().set("historico", null);
+        }
+
+        // Salvar saldos dos jogadores
+        for (Map.Entry<UUID, Double> entry : saldos.entrySet()) {
+            plugin.getConfig().set("player_balances." + entry.getKey().toString(), entry.getValue());
+        }
+
+        // Salvar empréstimos
+        for (Map.Entry<UUID, Double> entry : emprestimos.entrySet()) {
+            plugin.getConfig().set("emprestimos." + entry.getKey().toString(), entry.getValue());
+        }
+
+        // Salvar histórico
+        for (Map.Entry<UUID, List<String>> entry : historico.entrySet()) {
+            plugin.getConfig().set("historico." + entry.getKey().toString(), entry.getValue());
+        }
+
+        plugin.saveConfig();
+        plugin.getLogger().info("Dados econômicos salvos: " + saldos.size() + " saldos, " + emprestimos.size() + " empréstimos");
     }
 }

@@ -83,6 +83,10 @@ public final class ReliquiasNexus extends JavaPlugin {
         saveResource("lang/en-us.yml",false);
         saveDefaultConfig();
         config = getConfig();
+
+        // Configurar a classe economia com este plugin e carregar os dados
+        Economia.setPlugin(this);
+
         String tipo = config.getString("lang");
         if(tipo==null){
             tipo="en-us";
@@ -108,6 +112,15 @@ public final class ReliquiasNexus extends JavaPlugin {
         bossManager = new BossManager(this);
 
         new UpdaterCheck(this, "dantesys/nexus-plugin").checkForUpdates();
+
+        // Salvamento automático periódico de dados econômicos
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                Economia.salvarDados();
+                getLogger().info("Dados econômicos salvos automaticamente.");
+            }
+        }.runTaskTimer(this, 20 * 60 * 5, 20 * 60 * 5); // Salva a cada 5 minutos
 
         // Comando /nexus principal
         LiteralArgumentBuilder<CommandSourceStack> nexusRoot = Commands.literal("nexus").executes(ctx -> {
@@ -1312,6 +1325,9 @@ public final class ReliquiasNexus extends JavaPlugin {
         if (nexusCentralBank != null) {
             config.set("nexus_central_bank.saldo", nexusCentralBank.getSaldo());
         }
+        // Salvar dados econômicos ao desligar
+        Economia.salvarDados();
+
         saveConfig();
         getServer().getConsoleSender().sendMessage("§4❌ §c[Nexus]: Plugin Desativado!");
     }

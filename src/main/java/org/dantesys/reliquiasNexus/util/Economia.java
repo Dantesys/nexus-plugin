@@ -3,6 +3,7 @@ package org.dantesys.reliquiasNexus.util;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
+import org.dantesys.reliquiasNexus.ReliquiasNexus;
 import org.dantesys.reliquiasNexus.economia.Banco;
 
 import java.util.*;
@@ -198,6 +199,10 @@ public class Economia {
     }
 
     public static void removerSaldo(Player player, double amount) {
+
+    }
+
+    public static void setPlugin(ReliquiasNexus reliquiasNexus) {
 
     }
 }

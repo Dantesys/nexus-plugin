@@ -35,7 +35,7 @@ xptolevel: 7
 sistema_renascimento_ativado: true
 
 # Ativa ou desativa a relíquia aleatória para novos jogadores.
-# Se ativado, um novo jogador receberá uma relíquia não utilizada ao entrar pela primeira vez.
+# Se ativado, um novo jogador recebeu uma relíquia não utilizada ao entrar pela primeira vez.
 dar_reliquia_ao_entrar: true
 
 # Registro das reliquias, quando algum jogador possui fica registrado o UUID dele
@@ -74,7 +74,16 @@ nexus:
 
 # Configurações do Banco Central do Nexus
 nexus_central_bank:
-  saldo: 25000.0
+  saldo: 25000000.0
+
+# REGISTRO DE SALDOS DOS JOGADORES (NOVO)
+player_balances: {}
+
+# REGISTRO DE EMPRÉSTIMOS (NOVO)
+emprestimos: {}
+
+# REGISTRO DE HISTÓRICO DE TRANSAÇÕES (NOVO)
+historico: {}
 
 # Registro de jogadores com permissões limitadas de OP
 op-players: {}
