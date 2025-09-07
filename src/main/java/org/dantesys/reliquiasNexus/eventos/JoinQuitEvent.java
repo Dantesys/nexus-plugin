@@ -15,6 +15,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
+import org.dantesys.reliquiasNexus.util.Economia;
 import org.dantesys.reliquiasNexus.util.NexusKeys;
 
 import java.util.List;
@@ -35,6 +36,8 @@ public class JoinQuitEvent implements Listener {
         boolean novato = container.getOrDefault(new NamespacedKey("nexus_novato","novato"),PersistentDataType.BOOLEAN,true);
         container.set(SPECIAL.key,PersistentDataType.INTEGER,qtd);
         container.set(SPECIAL.key, PersistentDataType.INTEGER,0);
+        double saldo = container.getOrDefault(SALDO.key,PersistentDataType.DOUBLE,0d);
+        Economia.adicionarSaldo(player,saldo,"JOIN");
         if(qtd==0 && novato){
             container.set(new NamespacedKey("nexus_novato","novato"),PersistentDataType.BOOLEAN,false);
             /*List<Nexus> reliquias = ItemsRegistro.getValidReliquia(ReliquiasNexus.getNexusConfig());
@@ -106,6 +109,8 @@ public class JoinQuitEvent implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
+        double saldo = Economia.getSaldo(player);
+        player.getPersistentDataContainer().set(SALDO.key,PersistentDataType.DOUBLE,saldo);
         ReliquiasNexus.saiu(player);
         String msg=ReliquiasNexus.getLang().getString("joinquit.quit");
         if(msg==null){

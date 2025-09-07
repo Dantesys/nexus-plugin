@@ -251,8 +251,8 @@ public class SpecialEvent implements Listener {
                     String nome = n.getNome();
                     ReliquiasNexus.setConfigSave("nexus."+nome,player.getUniqueId().toString());
                     plugin.saveConfig();
-                    player.getInventory().addItem(n.getItem(1))
-                    ;                    player.sendMessage(Component.text("✅ §aVocê recebeu a relíquia "+nome+"!")
+                    player.getInventory().addItem(n.getItem(1));
+                    player.sendMessage(Component.text("✅ §aVocê recebeu a relíquia "+nome+"!")
                             .color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD));
                 } else {
                     levelReward = (int) (1 * difficultyMultiplier);
