@@ -64,12 +64,12 @@ public class LojaEvent implements Listener {
         lore.add(Component.text("§aPreço: §65.000 Moly"));
         lore.add(Component.text("§aCompra única por jogador."));
         enderChestMeta.lore(lore);
-        enderChestItem.setItemMeta(enderChestMeta);
 
-        PersistentDataContainer metaPDC = enderChestItem.getItemMeta().getPersistentDataContainer();
-        metaPDC.set(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING, "ender_chest");
-        enderChestItem.setItemMeta(enderChestMeta);
+        // Adicionar dados persistentes para identificar o item
+        enderChestMeta.getPersistentDataContainer().set(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING, "ender_chest");
+        enderChestMeta.getPersistentDataContainer().set(new NamespacedKey(plugin, "preco"), PersistentDataType.DOUBLE, 5000.0);
 
+        enderChestItem.setItemMeta(enderChestMeta);
         inv.setItem(22, enderChestItem);
 
         // Adicionando Espada do Carrasco
@@ -83,6 +83,11 @@ public class LojaEvent implements Listener {
         carrascoLore.add(Component.text(""));
         carrascoLore.add(Component.text("§aPreço: §6666.000.000 Moly"));
         carrascoMeta.lore(carrascoLore);
+
+        // Adicionar dados persistentes para identificar o item
+        carrascoMeta.getPersistentDataContainer().set(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING, "espada_carrasco");
+        carrascoMeta.getPersistentDataContainer().set(new NamespacedKey(plugin, "preco"), PersistentDataType.DOUBLE, 666000000.0);
+
         carrascoItem.setItemMeta(carrascoMeta);
         inv.setItem(13, carrascoItem); // Adicionado em uma posição específica
 
@@ -251,33 +256,39 @@ public class LojaEvent implements Listener {
             event.setCancelled(true);
             if (data.has(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING)) {
                 String itemId = data.get(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING);
+
+                // Botão de voltar
                 if ("back_button".equals(itemId)) {
                     abrirMenuPrincipal(player);
                     return;
                 }
 
-                // Lógica para comprar Baú do Fim
-                if (itemId.equals("ender_chest")) {
-                    if (Economia.getSaldo(player) >= 5000) {
+                // Verificar se o item tem preço
+                if (data.has(new NamespacedKey(plugin, "preco"), PersistentDataType.DOUBLE)) {
+                    double preco = data.get(new NamespacedKey(plugin, "preco"), PersistentDataType.DOUBLE);
+                    double saldo = Economia.getSaldo(player);
+
+                    if (saldo < preco) {
+                        player.sendMessage(Component.text("❌ Saldo insuficiente para comprar este item.").color(NamedTextColor.RED));
+                        return;
+                    }
+
+                    // Lógica específica para o Baú do Fim
+                    if ("ender_chest".equals(itemId)) {
                         PersistentDataContainer playerData = player.getPersistentDataContainer();
                         if (playerData.has(NexusKeys.ENDER_CHEST_OWNED.key, PersistentDataType.BOOLEAN)) {
                             player.sendMessage(Component.text("❌ Você já comprou o Baú do Fim. Esta é uma compra única.").color(NamedTextColor.RED));
                             return;
                         }
 
-                        Economia.removerSaldo(player, 5000, "Compra de Baú do Fim");
+                        Economia.removerSaldo(player, preco, "Compra de Baú do Fim");
                         playerData.set(NexusKeys.ENDER_CHEST_OWNED.key, PersistentDataType.BOOLEAN, true);
                         player.sendMessage(Component.text("✅ Você comprou o Baú do Fim por 5.000 moly. Use o comando /ec para abri-lo.").color(NamedTextColor.GREEN));
-                    } else {
-                        player.sendMessage(Component.text("❌ Saldo insuficiente para comprar este item.").color(NamedTextColor.RED));
+                        return;
                     }
-                    return;
-                }
 
-                // Lógica para a Espada do Carrasco
-                if (meta.hasDisplayName() && "Espada do Carrasco".equals(componentToString(meta.displayName()))) {
-                    double preco = 666000000.0;
-                    if (Economia.getSaldo(player) >= preco) {
+                    // Lógica específica para a Espada do Carrasco
+                    if ("espada_carrasco".equals(itemId)) {
                         // Verifica se o jogador já possui a espada
                         if (player.getInventory().contains(ItemsRegistro.carrasco.getItem(1))) {
                             player.sendMessage(Component.text("❌ Você já possui a Espada do Carrasco.").color(NamedTextColor.RED));
@@ -287,29 +298,30 @@ public class LojaEvent implements Listener {
                         Economia.removerSaldo(player, preco, "Compra de Espada do Carrasco");
                         player.getInventory().addItem(ItemsRegistro.carrasco.getItem(1));
                         player.sendMessage(Component.text("✅ Você comprou a Espada do Carrasco!").color(NamedTextColor.GREEN));
-                    } else {
-                        player.sendMessage(Component.text("❌ Saldo insuficiente para comprar este item.").color(NamedTextColor.RED));
+                        return;
                     }
-                    return;
-                }
 
-                // Lógica de compra para outros itens
-                if (data.has(new NamespacedKey(plugin, "preco"), PersistentDataType.DOUBLE)) {
-                    double preco = data.get(new NamespacedKey(plugin, "preco"), PersistentDataType.DOUBLE);
-                    double saldo = Economia.getSaldo(player);
+                    // Lógica geral para outros itens
+                    if (player.getInventory().firstEmpty() != -1) {
+                        Economia.removerSaldo(player, preco, "Compra de item na loja");
 
-                    if (saldo >= preco) {
-                        if (player.getInventory().firstEmpty() != -1) {
-                            Economia.removerSaldo(player, preco, "Compra de item na loja");
-                            player.getInventory().addItem(new ItemStack(clickedItem.getType(), clickedItem.getAmount()));
-
-                            String nomeItem = meta.hasDisplayName() ? componentToString(meta.displayName()) : clickedItem.getType().toString();
-                            player.sendMessage(Component.text("✅ Você comprou " + nomeItem + " por " + preco + " moly.").color(NamedTextColor.GREEN));
-                        } else {
-                            player.sendMessage(Component.text("❌ Seu inventário está cheio!").color(NamedTextColor.RED));
+                        // Criar uma nova instância do item para evitar problemas de referência
+                        ItemStack itemComprado = new ItemStack(clickedItem.getType(), clickedItem.getAmount());
+                        ItemMeta itemMeta = itemComprado.getItemMeta();
+                        if (meta.hasDisplayName()) {
+                            itemMeta.displayName(meta.displayName());
                         }
+                        if (meta.hasLore()) {
+                            itemMeta.lore(meta.lore());
+                        }
+                        itemComprado.setItemMeta(itemMeta);
+
+                        player.getInventory().addItem(itemComprado);
+
+                        String nomeItem = meta.hasDisplayName() ? componentToString(meta.displayName()) : clickedItem.getType().toString();
+                        player.sendMessage(Component.text("✅ Você comprou " + nomeItem + " por " + preco + " moly.").color(NamedTextColor.GREEN));
                     } else {
-                        player.sendMessage(Component.text("❌ Saldo insuficiente para comprar este item.").color(NamedTextColor.RED));
+                        player.sendMessage(Component.text("❌ Seu inventário está cheio!").color(NamedTextColor.RED));
                     }
                 }
             }
