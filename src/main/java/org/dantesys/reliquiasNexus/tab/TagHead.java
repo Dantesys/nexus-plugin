@@ -20,6 +20,11 @@ public class TagHead implements Listener {
         this.plugin = plugin;
         this.playerList = playerList;
         Bukkit.getPluginManager().registerEvents(this, plugin);
+
+        // Atualizar tags de todos os jogadores online ao iniciar
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            updatePlayerTag(player);
+        }
     }
 
     @EventHandler
@@ -27,6 +32,11 @@ public class TagHead implements Listener {
         Player player = event.getPlayer();
         // Atualiza a tag do jogador para que ele veja a própria tag
         updatePlayerTag(player);
+
+        // Atualiza tags de todos os jogadores para incluir o novo jogador
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            updatePlayerTag(onlinePlayer);
+        }
     }
 
     @EventHandler
@@ -56,12 +66,10 @@ public class TagHead implements Listener {
         Bukkit.getServer().sendMessage(finalMessage);
     }
 
-    // Mudei de private para public
     public void updatePlayerTag(Player player) {
-        Scoreboard scoreboard = player.getScoreboard();
+        Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
         if (scoreboard == null) {
             scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-            player.setScoreboard(scoreboard);
         }
 
         String rank = plugin.getConfig().getString("players." + player.getUniqueId().toString() + ".rank", "membro");
@@ -94,12 +102,23 @@ public class TagHead implements Listener {
             team = scoreboard.registerNewTeam(teamName);
             Component prefix = playerList.getPlayerTag(player);
             team.prefix(prefix);
+            team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.ALWAYS);
+        }
+
+        // Remove o jogador de todos os outros times
+        for (Team otherTeam : scoreboard.getTeams()) {
+            if (otherTeam.hasEntry(player.getName())) {
+                otherTeam.removeEntry(player.getName());
+            }
         }
 
         // Garante que o jogador está no time correto para ver sua própria tag
         if (!team.hasEntry(player.getName())) {
             team.addEntry(player.getName());
         }
+
+        // Define o scoreboard para o jogador
+        player.setScoreboard(scoreboard);
     }
 
     public void updateAllPlayerTags() {

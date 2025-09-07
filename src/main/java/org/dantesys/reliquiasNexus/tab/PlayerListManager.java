@@ -6,7 +6,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
 
@@ -25,6 +24,9 @@ public class PlayerListManager implements Listener {
 
         // Iniciar task para atualizar informações do servidor periodicamente
         startUpdateTask();
+
+        // Atualizar todos os jogadores online ao iniciar
+        updateAllPlayerLists();
     }
 
     @EventHandler
@@ -34,6 +36,7 @@ public class PlayerListManager implements Listener {
             playerList.updatePlayerList(player);
             tagHead.updatePlayerTag(player);
             playerList.updateForAllPlayers();
+            tagHead.updateAllPlayerTags();
         }, 20L); // Delay de 1 segundo
     }
 
@@ -42,6 +45,7 @@ public class PlayerListManager implements Listener {
         // Atualizar a player list para todos os jogadores restantes
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             playerList.updateForAllPlayers();
+            tagHead.updateAllPlayerTags();
         }, 20L);
     }
 

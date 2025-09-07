@@ -564,23 +564,23 @@ public final class ReliquiasNexus extends JavaPlugin {
 
         // Comando /nexus vender
         nexusRoot.then(Commands.literal("vender").executes(ctx -> {
-                    if (ctx.getSource().getExecutor() instanceof Player player) {
-                        venderMinerio(player, player.getInventory().getItemInMainHand().getAmount());
-                        return Command.SINGLE_SUCCESS;
-                    }
-                    ctx.getSource().getSender().sendMessage(Component.text("❌ Apenas jogadores podem usar este comando!").color(NamedTextColor.RED));
-                    return Command.SINGLE_SUCCESS;
-                })
-                .then(Commands.argument("quantidade", IntegerArgumentType.integer(1))
-                        .executes(ctx -> {
                             if (ctx.getSource().getExecutor() instanceof Player player) {
-                                int quantidade = ctx.getArgument("quantidade", Integer.class);
-                                venderMinerio(player, quantidade);
+                                venderMinerio(player, player.getInventory().getItemInMainHand().getAmount());
                                 return Command.SINGLE_SUCCESS;
                             }
                             ctx.getSource().getSender().sendMessage(Component.text("❌ Apenas jogadores podem usar este comando!").color(NamedTextColor.RED));
                             return Command.SINGLE_SUCCESS;
-                        }))
+                        })
+                        .then(Commands.argument("quantidade", IntegerArgumentType.integer(1))
+                                .executes(ctx -> {
+                                    if (ctx.getSource().getExecutor() instanceof Player player) {
+                                        int quantidade = ctx.getArgument("quantidade", Integer.class);
+                                        venderMinerio(player, quantidade);
+                                        return Command.SINGLE_SUCCESS;
+                                    }
+                                    ctx.getSource().getSender().sendMessage(Component.text("❌ Apenas jogadores podem usar este comando!").color(NamedTextColor.RED));
+                                    return Command.SINGLE_SUCCESS;
+                                }))
         );
 
         // Comando oculto para renascer
@@ -1326,5 +1326,9 @@ public final class ReliquiasNexus extends JavaPlugin {
 
     public static void setConfigSave(String path,Object value){
         config.set(path,value);
+    }
+
+    public PlayerListManager getPlayerListManager() {
+        return playerListManager;
     }
 }
