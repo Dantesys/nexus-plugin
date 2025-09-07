@@ -101,7 +101,6 @@ public class JoinQuitEvent implements Listener {
         Component finalNome = prefix.append(Component.text(player.getName()).color(NamedTextColor.WHITE));
         player.setDisplayName(pf+player.getName());
         player.displayName(finalNome);
-        player.customName(finalNome);
         player.setCustomNameVisible(true);
     }
     @EventHandler
