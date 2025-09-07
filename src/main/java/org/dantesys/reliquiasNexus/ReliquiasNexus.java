@@ -36,7 +36,6 @@ import org.dantesys.reliquiasNexus.economia.Banco;
 import org.dantesys.reliquiasNexus.eventos.*;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
-import org.dantesys.reliquiasNexus.SpeciaisPassivas.Morte;
 import org.dantesys.reliquiasNexus.tab.PlayerListManager;
 import org.dantesys.reliquiasNexus.team.Team;
 import org.dantesys.reliquiasNexus.util.Economia;
@@ -492,17 +491,6 @@ public final class ReliquiasNexus extends JavaPlugin {
             sender.sendMessage(Component.text("❌ Apenas jogadores podem usar este comando!").color(NamedTextColor.RED));
             return Command.SINGLE_SUCCESS;
         }));
-
-        // Comando /nexus missao morte
-        nexusRoot.then(Commands.literal("missao").then(Commands.literal("morte").executes(ctx -> {
-            final CommandSender sender = ctx.getSource().getSender();
-            if (sender instanceof Player player) {
-                Morte.startMissaoMorte(player);
-            } else {
-                sender.sendMessage(Component.text("❌ Apenas jogadores podem usar este comando!").color(NamedTextColor.RED));
-            }
-            return Command.SINGLE_SUCCESS;
-        })));
 
         // Comando /nexus procurados
         nexusRoot.then(Commands.literal("procurados").executes(ctx -> {
@@ -1089,17 +1077,6 @@ public final class ReliquiasNexus extends JavaPlugin {
                         )
                 )
         );
-
-        // Novo comando para iniciar missão da Morte
-        nexuRoot.then(Commands.literal("missao_morte").executes(ctx -> {
-            CommandSender sender = ctx.getSource().getSender();
-            if (sender instanceof Player player) {
-                Morte.startMissaoMorte(player);
-            } else {
-                sender.sendMessage(Component.text("❌ Apenas jogadores podem usar este comando!").color(NamedTextColor.RED));
-            }
-            return Command.SINGLE_SUCCESS;
-        }));
 
         // Registrar comandos
         LiteralCommandNode<CommandSourceStack> nexusCommand = nexusRoot.build();

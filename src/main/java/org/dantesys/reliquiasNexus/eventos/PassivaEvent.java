@@ -43,7 +43,6 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static org.dantesys.reliquiasNexus.items.ItemsRegistro.morte;
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 
 public class PassivaEvent implements Listener {
