@@ -17,8 +17,6 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.BookMeta;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
@@ -35,7 +33,6 @@ import org.dantesys.reliquiasNexus.util.EntityToEgg;
 import org.dantesys.reliquiasNexus.util.NexusKeys;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static net.kyori.adventure.text.Component.text;
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
@@ -88,7 +85,7 @@ public class SpecialEvent implements Listener {
             return;
         }
 
-        int baseGoal = 0;
+        int baseGoal;
         int goal;
         int durationMinutes;
         Component mensagemMissao;
@@ -101,9 +98,9 @@ public class SpecialEvent implements Listener {
             default -> "§7Desconhecida";
         };
 
-        int xpReward = 0;
-        double molyReward = 0;
-        int levelReward = 0;
+        int xpReward;
+        double molyReward;
+        int levelReward;
         String rewardText;
 
         switch (missionType) {
@@ -138,7 +135,6 @@ public class SpecialEvent implements Listener {
         }
 
         double difficultyMultiplier = switch (difficulty) {
-            case "facil" -> 1.0;
             case "medio" -> 2.0;
             case "dificil" -> 3.0;
             case "extreme", "ender" -> 5.0;
@@ -151,14 +147,16 @@ public class SpecialEvent implements Listener {
         if (isSpecial) {
             if (missionType.equals("ender")) {
                 levelReward = 10;
-                rewardText = "§e+" + levelReward + " Levels, " + molyReward + " moly e Relíquia Cronossombra";
             } else {
                 levelReward = (int) (1 * difficultyMultiplier);
-                rewardText = "§e+" + levelReward + " Levels, " + molyReward + " moly e Relíquia Aleatória";
             }
+            rewardText = "§e+" + levelReward + " Levels, " + molyReward + " moly";
         } else {
             xpReward = (int) (2500 * difficultyMultiplier);
             rewardText = "§e+" + xpReward + " XP e " + molyReward + " moly";
+            if(difficultyMultiplier>=3){
+                rewardText = rewardText+" e uma relíquia aleatória";
+            }
         }
 
         mensagemMissao = text()
@@ -190,7 +188,7 @@ public class SpecialEvent implements Listener {
             public void run() {
                 PersistentDataContainer pdc = player.getPersistentDataContainer();
                 if (pdc.has(MISSAO_TIPO.key, PersistentDataType.STRING)) {
-                    long remainingTime = (pdc.get(MISSAO_ENDTIME.key, PersistentDataType.LONG) - System.currentTimeMillis()) / 1000;
+                    long remainingTime = (pdc.getOrDefault(MISSAO_ENDTIME.key, PersistentDataType.LONG,0L) - System.currentTimeMillis()) / 1000;
                     if (remainingTime <= 0) {
                         player.sendMessage(Component.text("❌ §cO tempo da sua missão acabou!")
                                 .color(NamedTextColor.RED));
@@ -231,18 +229,17 @@ public class SpecialEvent implements Listener {
             return;
         }
 
-        String missionType = pdc.get(MISSAO_TIPO.key, PersistentDataType.STRING);
+        String missionType = pdc.getOrDefault(MISSAO_TIPO.key, PersistentDataType.STRING,"");
         String missionName = getMissionNameForDisplay(missionType);
         boolean isSpecial = pdc.getOrDefault(MISSAO_SPECIAL.key, PersistentDataType.BOOLEAN, false);
         String difficulty = pdc.getOrDefault(MISSAO_DIFFICULTY.key, PersistentDataType.STRING, "facil");
 
         if (giveReward) {
-            int xpReward = 0;
-            double molyReward = 0;
-            int levelReward = 0;
+            int xpReward;
+            double molyReward;
+            int levelReward;
 
             double difficultyMultiplier = switch (difficulty) {
-                case "facil" -> 1.0;
                 case "medio" -> 2.0;
                 case "dificil" -> 3.0;
                 case "extreme", "ender" -> 5.0;
@@ -252,63 +249,39 @@ public class SpecialEvent implements Listener {
             molyReward = (500.0 * difficultyMultiplier);
 
             if (isSpecial) {
-                if (missionType.equals("ender")) {
-                    levelReward = 10;
-
-                    Nexus cronosombraNexus = ItemsRegistro.getFromNome("cronosombra");
-                    if (cronosombraNexus != null) {
-                        ItemStack itemReliquia = cronosombraNexus.getItem(1);
-                        ItemMeta meta = itemReliquia.getItemMeta();
-                        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING, player.getUniqueId().toString());
-                        itemReliquia.setItemMeta(meta);
-
-                        player.getInventory().addItem(itemReliquia);
-                        ReliquiasNexus.setConfigSave("nexus." + "cronosombra", player.getUniqueId().toString());
-                        plugin.saveConfig();
-
-                        player.sendMessage(Component.text("✅ §aVocê recebeu a relíquia Cronossombra!")
+                if (difficultyMultiplier>=3.0) {
+                    List<Nexus> reliquias = ItemsRegistro.getValidReliquia(ReliquiasNexus.getNexusConfig());
+                    Random rng = new Random();
+                    int escolhido = rng.nextInt(reliquias.size());
+                    Nexus n = reliquias.get(escolhido);
+                    String nome = n.getNome();
+                    ReliquiasNexus.setConfigSave("nexus."+nome,player.getUniqueId().toString());
+                    plugin.saveConfig();
+                    player.getInventory().addItem(n.getItem(1))
+;                    player.sendMessage(Component.text("✅ §aVocê recebeu a relíquia "+nome+"!")
                                 .color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD));
-                    } else {
-                        player.sendMessage(Component.text("❌ §cOcorreu um erro ao obter a relíquia Cronossombra.")
-                                .color(NamedTextColor.RED));
-                    }
                 } else {
                     levelReward = (int) (1 * difficultyMultiplier);
                     player.giveExpLevels(levelReward);
                     player.sendMessage(Component.text("✅ §aMissão '" + missionName + "' concluída! Você recebeu " + levelReward + " níveis!")
                             .color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD));
-
-                    Random random = new Random();
-                    List<String> names = plugin.names;
-
-                    List<String> availableRelics = names.stream()
-                            .filter(name -> plugin.getNexusConfig().getString("nexus." + name) == null)
-                            .collect(Collectors.toList());
-
-                    if (!availableRelics.isEmpty()) {
-                        String reliquiaAleatoria = availableRelics.get(random.nextInt(availableRelics.size()));
-                        Nexus nexus = ItemsRegistro.getFromNome(reliquiaAleatoria);
-                        if (nexus != null) {
-                            ItemStack itemReliquia = nexus.getItem(1);
-                            ItemMeta meta = itemReliquia.getItemMeta();
-                            meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING, player.getUniqueId().toString());
-                            itemReliquia.setItemMeta(meta);
-                            player.getInventory().addItem(itemReliquia);
-                            ReliquiasNexus.setConfigSave("nexus." + reliquiaAleatoria, player.getUniqueId().toString());
-                            plugin.saveConfig();
-                            player.sendMessage(Component.text("✅ §aVocê recebeu a relíquia " + reliquiaAleatoria + "!")
-                                    .color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD));
-                        }
-                    } else {
-                        player.sendMessage(Component.text("❌ §cNão há relíquias disponíveis para serem distribuídas no momento!")
-                                .color(NamedTextColor.RED));
-                    }
                 }
             } else {
                 xpReward = (int) (2500 * difficultyMultiplier);
                 player.giveExp(xpReward);
                 player.sendMessage(Component.text("✅ §aMissão '" + missionName + "' concluída! Você recebeu " + xpReward + " de XP!")
                         .color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD));
+                if (difficultyMultiplier>=3.0) {
+                    List<Nexus> reliquias = ItemsRegistro.getValidReliquia(ReliquiasNexus.getNexusConfig());
+                    Random rng = new Random();
+                    int escolhido = rng.nextInt(reliquias.size());
+                    Nexus n = reliquias.get(escolhido);
+                    String nome = n.getNome();
+                    ReliquiasNexus.setConfigSave("nexus."+nome,player.getUniqueId().toString());
+                    plugin.saveConfig();
+                    player.sendMessage(Component.text("✅ §aVocê recebeu a relíquia "+nome+"!")
+                            .color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD));
+                }
             }
             // Adiciona a recompensa de moly para todas as missões concluídas com sucesso
             Economia.adicionarSaldo(player, molyReward, "Missão Concluída");
@@ -348,9 +321,9 @@ public class SpecialEvent implements Listener {
             if (pdc.has(MISSAO_TIPO.key, PersistentDataType.STRING)) {
                 String missionType = pdc.get(MISSAO_TIPO.key, PersistentDataType.STRING);
 
-                if (missionType.equals("combate")) {
-                    int progress = pdc.get(MISSAO_PROGRESO.key, PersistentDataType.INTEGER) + 1;
-                    int goal = pdc.get(MISSAO_META.key, PersistentDataType.INTEGER);
+                if (missionType!=null && missionType.equals("combate")) {
+                    int progress = pdc.getOrDefault(MISSAO_PROGRESO.key, PersistentDataType.INTEGER,0) + 1;
+                    int goal = pdc.getOrDefault(MISSAO_META.key, PersistentDataType.INTEGER,0);
                     pdc.set(MISSAO_PROGRESO.key, PersistentDataType.INTEGER, progress);
 
                     killer.sendMessage(Component.text("⚔️ Progresso da Missão: " + progress + "/" + goal)
@@ -358,7 +331,7 @@ public class SpecialEvent implements Listener {
                     if (progress >= goal) {
                         finalizarMissao(killer);
                     }
-                } else if (missionType.equals("ender") && entity.getType() == EntityType.ENDER_DRAGON) {
+                } else if (missionType!=null && missionType.equals("ender") && entity.getType() == EntityType.ENDER_DRAGON) {
                     finalizarMissao(killer);
                 }
             }
@@ -373,9 +346,9 @@ public class SpecialEvent implements Listener {
         if (pdc.has(MISSAO_TIPO.key, PersistentDataType.STRING)) {
             String missionType = pdc.get(MISSAO_TIPO.key, PersistentDataType.STRING);
 
-            if (missionType.equals("coleta") && event.getBlock().getType().toString().contains("LOG")) {
-                int progress = pdc.get(MISSAO_PROGRESO.key, PersistentDataType.INTEGER) + 1;
-                int goal = pdc.get(MISSAO_META.key, PersistentDataType.INTEGER);
+            if (missionType!=null && missionType.equals("coleta") && event.getBlock().getType().toString().contains("LOG")) {
+                int progress = pdc.getOrDefault(MISSAO_PROGRESO.key, PersistentDataType.INTEGER,0) + 1;
+                int goal = pdc.getOrDefault(MISSAO_META.key, PersistentDataType.INTEGER,0);
                 pdc.set(MISSAO_PROGRESO.key, PersistentDataType.INTEGER, progress);
 
                 player.sendMessage(Component.text("🎯 Progresso da Missão: " + progress + "/" + goal)
@@ -384,9 +357,9 @@ public class SpecialEvent implements Listener {
                     finalizarMissao(player);
                     player.sendMessage(Component.text("🎁 Você também recebeu " + 500 * (player.getLevel()/10) + " moly(s)!").color(NamedTextColor.YELLOW));
                 }
-            } else if (missionType.equals("mineracao") && event.getBlock().getType() == Material.DIAMOND_ORE) {
-                int progress = pdc.get(MISSAO_PROGRESO.key, PersistentDataType.INTEGER) + 1;
-                int goal = pdc.get(MISSAO_META.key, PersistentDataType.INTEGER);
+            } else if (missionType!=null && missionType.equals("mineracao") && event.getBlock().getType() == Material.DIAMOND_ORE) {
+                int progress = pdc.getOrDefault(MISSAO_PROGRESO.key, PersistentDataType.INTEGER,0) + 1;
+                int goal = pdc.getOrDefault(MISSAO_META.key, PersistentDataType.INTEGER,0);
                 pdc.set(MISSAO_PROGRESO.key, PersistentDataType.INTEGER, progress);
 
                 player.sendMessage(Component.text("⛏️ Progresso da Missão: " + progress + "/" + goal)
@@ -403,9 +376,9 @@ public class SpecialEvent implements Listener {
         Player player = event.getPlayer();
         PersistentDataContainer pdc = player.getPersistentDataContainer();
 
-        if (event.getState() == org.bukkit.event.player.PlayerFishEvent.State.CAUGHT_FISH && pdc.has(MISSAO_TIPO.key, PersistentDataType.STRING) && pdc.get(MISSAO_TIPO.key, PersistentDataType.STRING).equals("pescaria")) {
-            int progress = pdc.get(MISSAO_PROGRESO.key, PersistentDataType.INTEGER) + 1;
-            int goal = pdc.get(MISSAO_META.key, PersistentDataType.INTEGER);
+        if (event.getState() == org.bukkit.event.player.PlayerFishEvent.State.CAUGHT_FISH && pdc.has(MISSAO_TIPO.key, PersistentDataType.STRING) && Objects.equals(pdc.get(MISSAO_TIPO.key, PersistentDataType.STRING), "pescaria")) {
+            int progress = pdc.getOrDefault(MISSAO_PROGRESO.key, PersistentDataType.INTEGER,0) + 1;
+            int goal = pdc.getOrDefault(MISSAO_META.key, PersistentDataType.INTEGER,0);
             pdc.set(MISSAO_PROGRESO.key, PersistentDataType.INTEGER, progress);
 
             player.sendMessage(Component.text("🎣 Progresso da Missão: " + progress + "/" + goal)
@@ -454,9 +427,7 @@ public class SpecialEvent implements Listener {
                                 Ladrao.getSpecialbyLevel(dataPlayer.getOrDefault(LADRAO.key, PersistentDataType.INTEGER, 1), player);
                                 event.setCancelled(true);
                             }
-                            case "domador" -> {
-                                Domador.getSpecialbyLevel(dataPlayer.getOrDefault(DOMADOR.key, PersistentDataType.INTEGER, 1), player);
-                            }
+                            case "domador" -> Domador.getSpecialbyLevel(dataPlayer.getOrDefault(DOMADOR.key, PersistentDataType.INTEGER, 1), player);
                             case "mago" -> {
                                 mago(player);
                                 event.setCancelled(true);
@@ -620,7 +591,7 @@ public class SpecialEvent implements Listener {
         Mago.getSpecialbyLevel(l,player,pos);
     }
     private String getDesc(String nome){
-        String desc="";
+        String desc;
         String msg=ReliquiasNexus.getLang().getString("livro."+nome);
         String r=ReliquiasNexus.getLang().getString("livro.reliquia");
         if(msg!=null){

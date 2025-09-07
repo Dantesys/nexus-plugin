@@ -6,7 +6,6 @@ import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -26,10 +25,6 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -55,7 +50,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 import org.bukkit.Material;
 
 
@@ -173,7 +167,7 @@ public final class ReliquiasNexus extends JavaPlugin {
             final CommandSender sender = ctx.getSource().getSender();
             if(ctx.getSource().getExecutor() instanceof Player player){
                 ItemStack stack = player.getInventory().getItemInMainHand();
-                if(stack == null || !stack.hasItemMeta()){
+                if(!stack.hasItemMeta()){
                     sender.sendMessage(Component.text("❌ §cVocê precisa segurar uma relíquia Nexus na mão!")
                             .color(NamedTextColor.RED));
                     return Command.SINGLE_SUCCESS;
@@ -186,8 +180,10 @@ public final class ReliquiasNexus extends JavaPlugin {
                     if(nome!=null){
                         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
                         NamespacedKey key = getKey(nome);
-                        int level = dataPlayer.getOrDefault(key, PersistentDataType.INTEGER, 1);
-                        evo.tentarEvoluir(player,stack,level,evo.getSlotOfItem(player,stack));
+                        if(key!=null){
+                            int level = dataPlayer.getOrDefault(key, PersistentDataType.INTEGER, 1);
+                            evo.tentarEvoluir(player,stack,level,evo.getSlotOfItem(player,stack));
+                        }
                     }else{
                         sender.sendMessage(Component.text("❌ §cRelíquia inválida!")
                                 .color(NamedTextColor.RED));
@@ -230,7 +226,7 @@ public final class ReliquiasNexus extends JavaPlugin {
                 final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogador", PlayerSelectorArgumentResolver.class);
                 final Player p = targetResolver.resolve(ctx.getSource()).getFirst();
                 ItemStack stack = player.getInventory().getItemInMainHand();
-                if(stack == null || !stack.hasItemMeta()){
+                if(!stack.hasItemMeta()){
                     sender.sendMessage(Component.text("❌ §cVocê precisa segurar uma relíquia Nexus na mão!")
                             .color(NamedTextColor.RED));
                     return Command.SINGLE_SUCCESS;
@@ -316,7 +312,7 @@ public final class ReliquiasNexus extends JavaPlugin {
                 }
 
                 ItemStack stack = player.getInventory().getItemInMainHand();
-                if(stack == null || !stack.hasItemMeta() || !stack.getItemMeta().getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)){
+                if(!stack.hasItemMeta() || !stack.getItemMeta().getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)){
                     sender.sendMessage(Component.text("❌ §cVocê precisa segurar uma relíquia Nexus na mão para aceitar a troca!")
                             .color(NamedTextColor.RED));
                     return Command.SINGLE_SUCCESS;
@@ -567,8 +563,7 @@ public final class ReliquiasNexus extends JavaPlugin {
         }));
 
         // Comando /nexus vender
-        nexusRoot.then(Commands.literal("vender")
-                .executes(ctx -> {
+        nexusRoot.then(Commands.literal("vender").executes(ctx -> {
                     if (ctx.getSource().getExecutor() instanceof Player player) {
                         venderMinerio(player, player.getInventory().getItemInMainHand().getAmount());
                         return Command.SINGLE_SUCCESS;
@@ -614,7 +609,7 @@ public final class ReliquiasNexus extends JavaPlugin {
         }).build();
 
         // Comando /nexu para operadores
-        LiteralArgumentBuilder<CommandSourceStack> nexuRoot = Commands.literal("nexu").requires(sender -> sender.getSender().isOp()).executes(ctx -> {
+        LiteralArgumentBuilder<CommandSourceStack> nexuRoot = Commands.literal("nexu").requires(sender -> sender.getSender().isOp() || sender.getSender().hasPermission("reliquiasnexus.opzim")).executes(ctx -> {
             Component mensagem = Component.text()
                     .append(Component.text("\n§4§l⚡ §c§lNEXU - COMANDOS DE OPERADOR §4§l⚡\n").decorate(TextDecoration.BOLD))
                     .append(Component.text("§7➤ §b/nexu setlevel <level> §f- Setar level da relíquia\n"))
@@ -766,7 +761,7 @@ public final class ReliquiasNexus extends JavaPlugin {
         nexuRoot.then(Commands.literal("setlevel").then(Commands.argument("level", IntegerArgumentType.integer()).executes(ctx -> {
             if(ctx.getSource().getExecutor() instanceof Player player){
                 ItemStack stack = player.getInventory().getItemInMainHand();
-                if(stack == null || !stack.hasItemMeta()){
+                if(!stack.hasItemMeta()){
                     player.sendMessage(Component.text("❌ §cSegure uma relíquia na mão!")
                             .color(NamedTextColor.RED));
                     return Command.SINGLE_SUCCESS;
@@ -1013,10 +1008,8 @@ public final class ReliquiasNexus extends JavaPlugin {
 
                 // Aplica a permissão imediatamente se o jogador estiver online
                 if (targetPlayer.isOnline()) {
-                    PermissionAttachment attachment = targetPlayer.addAttachment(this);
-                    attachment.setPermission("reliquiasnexus.command.nexus", true);
-                    attachment.setPermission("reliquiasnexus.command.nexu", true);
-                    opAttachments.put(targetPlayer.getUniqueId(), attachment);
+                    targetPlayer.addAttachment(this).setPermission("reliquiasnexus.opzim", true);
+                    opAttachments.put(targetPlayer.getUniqueId(), targetPlayer.addAttachment(this));
                 }
 
                 sender.sendMessage(Component.text("✅ " + targetPlayer.getName() + " agora tem permissões de OP limitadas.").color(NamedTextColor.GREEN));
@@ -1173,7 +1166,7 @@ public final class ReliquiasNexus extends JavaPlugin {
 
     private void venderMinerio(Player player, int quantidade) {
         ItemStack itemInHand = player.getInventory().getItemInMainHand();
-        if (itemInHand == null || itemInHand.getType() == Material.AIR) {
+        if (itemInHand.getType() == Material.AIR) {
             player.sendMessage(Component.text("❌ Você precisa segurar um minério para vendê-lo.").color(NamedTextColor.RED));
             return;
         }
@@ -1236,7 +1229,7 @@ public final class ReliquiasNexus extends JavaPlugin {
         try {
             // Verifica se a relíquia de P1 é realmente a que ele está segurando
             ItemStack stackP1 = player1.getInventory().getItemInMainHand();
-            if (stackP1 == null || !stackP1.hasItemMeta() || !stackP1.getItemMeta().getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING) || !stackP1.getItemMeta().getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING).equals(relic1)) {
+            if (!stackP1.hasItemMeta() || !stackP1.getItemMeta().getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING) || !Objects.equals(stackP1.getItemMeta().getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING), relic1)) {
                 player1.sendMessage(Component.text("❌ §cVocê não está segurando a relíquia que ofereceu!")
                         .color(NamedTextColor.RED));
                 return false;
@@ -1244,7 +1237,7 @@ public final class ReliquiasNexus extends JavaPlugin {
 
             // Verifica se a relíquia de P2 é realmente a que ele está segurando
             ItemStack stackP2 = player2.getInventory().getItemInMainHand();
-            if (stackP2 == null || !stackP2.hasItemMeta() || !stackP2.getItemMeta().getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING) || !stackP2.getItemMeta().getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING).equals(relic2)) {
+            if (!stackP2.hasItemMeta() || !stackP2.getItemMeta().getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING) || !Objects.equals(stackP2.getItemMeta().getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING), relic2)) {
                 player1.sendMessage(Component.text("❌ §cO outro jogador não está segurando a relíquia que ofereceu!")
                         .color(NamedTextColor.RED));
                 player2.sendMessage(Component.text("❌ §cVocê precisa segurar a relíquia que está trocando!")
@@ -1265,9 +1258,10 @@ public final class ReliquiasNexus extends JavaPlugin {
             // Criar e dar novos itens com os donos atualizados
             ItemStack item1 = criarItemReliquia(player2, relic1);
             ItemStack item2 = criarItemReliquia(player1, relic2);
-
-            player1.getInventory().addItem(item2);
-            player2.getInventory().addItem(item1);
+            if(item1!=null && item2!=null){
+                player1.getInventory().addItem(item2);
+                player2.getInventory().addItem(item1);
+            }
 
             return true;
         } catch (Exception e) {
@@ -1282,7 +1276,11 @@ public final class ReliquiasNexus extends JavaPlugin {
             if(nexus != null) {
                 PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
                 NamespacedKey key = getKey(nomeRelic);
-                int level = dataPlayer.getOrDefault(key, PersistentDataType.INTEGER, 1);
+                int level=1;
+                if(key!=null){
+                    level = dataPlayer.getOrDefault(key, PersistentDataType.INTEGER, 1);
+                }
+
 
                 ItemStack item = nexus.getItem(level);
                 ItemMeta meta = item.getItemMeta();
@@ -1299,7 +1297,7 @@ public final class ReliquiasNexus extends JavaPlugin {
 
     private void removerReliquiaMao(Player player) {
         ItemStack itemMao = player.getInventory().getItemInMainHand();
-        if(itemMao != null && itemMao.hasItemMeta()) {
+        if(itemMao.hasItemMeta()) {
             ItemMeta meta = itemMao.getItemMeta();
             PersistentDataContainer data = meta.getPersistentDataContainer();
             if(data.has(NEXUS.key, PersistentDataType.STRING)) {

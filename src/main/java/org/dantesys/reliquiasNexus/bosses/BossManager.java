@@ -176,6 +176,7 @@ public class BossManager {
             public void run() {
                 if (currentBoss != null && !currentBoss.isDead()) {
                     currentBoss.remove();
+                    bossBar = null;
                     Bukkit.broadcast(Component.text("§7O " + boss.getBossName() + " desapareceu por falta de desafio!"));
                 }
                 Bukkit.getOnlinePlayers().forEach(p -> p.hideBossBar(bossBar));

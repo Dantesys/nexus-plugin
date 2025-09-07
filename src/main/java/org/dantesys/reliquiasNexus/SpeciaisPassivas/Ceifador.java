@@ -113,7 +113,7 @@ public class Ceifador {
         final Location location = player.getLocation();
         final World world = player.getWorld();
         final List<LivingEntity> atingidos = new ArrayList<>();
-        Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 1,
+        Temporizador timer = new Temporizador(ReliquiasNexus.getPlugin(ReliquiasNexus.class), 5,
                 ()->{
                 },()-> {
         },(t)->{

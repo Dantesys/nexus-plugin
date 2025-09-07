@@ -19,6 +19,9 @@ commands:
     usage: /ec
 
 permissions:
+  reliquiasnexus.opzim:
+    description: Acesso aos comandos administrativos do Nexus
+    default: false
   reliquiasnexus.admin:
     description: Acesso aos comandos administrativos do Nexus
     default: op

@@ -1,6 +1,7 @@
 package org.dantesys.reliquiasNexus.eventos;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -80,6 +81,21 @@ public class JoinQuitEvent implements Listener {
             msg=msg.replace("<player>",player.getName());
             event.joinMessage(Component.text("§2"+msg));
         }
+        String rank = plugin.getConfig().getString("players." + player.getUniqueId().toString() + ".rank", "membro");
+        Component prefix = switch (rank.toLowerCase()) {
+            case "dono" -> Component.text("[Dono] ").color(NamedTextColor.RED);
+            case "staff" -> Component.text("[Staff] ").color(NamedTextColor.AQUA);
+            case "ajudante" -> Component.text("[Ajudante] ").color(NamedTextColor.GREEN);
+            default -> Component.text("[Membro] ").color(NamedTextColor.GRAY);
+        };
+        // Formata a mensagem com a tag e o nome do jogador
+        if(plugin.getConfig().getBoolean("op-players." + player.getUniqueId())){
+            player.addAttachment(plugin).setPermission("reliquiasnexus.opzim", true);
+        }
+        Component finalNome = prefix.append(Component.text(player.getName()).color(NamedTextColor.WHITE));
+        player.displayName(finalNome);
+        player.customName(finalNome);
+        player.setCustomNameVisible(true);
     }
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {

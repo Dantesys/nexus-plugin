@@ -17,6 +17,8 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
 import org.dantesys.reliquiasNexus.util.Economia;
@@ -82,7 +84,6 @@ public class MorteEvent implements Listener {
             relicsToKeep.clear(); // Limpa a lista de relíquias salvas
 
             player.setGameMode(GameMode.SPECTATOR);
-
             player.sendMessage(Component.text("§cVocê morreu!").color(NamedTextColor.RED));
             player.sendMessage(Component.text("§eEspere 1 minuto e 30 segundos para renascer. Seus itens (exceto relíquias) serão dropados no local da morte."));
 
@@ -101,7 +102,7 @@ public class MorteEvent implements Listener {
                     if (player.isOnline() && player.getGameMode() == GameMode.SPECTATOR && deathTimers.containsKey(playerUUID)) {
                         long timeElapsed = (System.currentTimeMillis() - deathTimers.get(playerUUID)) / 1000;
                         long remainingTime = 90 - timeElapsed; // 1 minuto e 30 segundos = 90 segundos
-
+                        player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS,100,0));
                         if (remainingTime <= 0) {
                             // Tempo acabou, revive o jogador e dropa os itens
                             player.setGameMode(GameMode.SURVIVAL);

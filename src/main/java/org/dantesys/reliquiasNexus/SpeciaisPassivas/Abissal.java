@@ -128,7 +128,7 @@ public class Abissal {
     private static void blackHole(int level, Player player) {
         World world = player.getWorld();
         Location centro = player.getEyeLocation().add(player.getEyeLocation().getDirection().normalize().multiply(5));
-        AtomicInteger raio= new AtomicInteger(5);
+        int raio= 20;
         double dano = 1 + level * 0.1;
         double forcaKnockback = 0.2 + 0.05 * level;
         List<Entity> jafoi = new ArrayList<>();
@@ -136,17 +136,14 @@ public class Abissal {
                 () -> {},
                 () -> world.createExplosion(centro,jafoi.size(),false,false,player),
                 (t) -> {
-                    world.spawnParticle(Particle.PORTAL, centro, 50, raio.get()/2.0, 1, raio.get()/2.0, 0);
-                    for (Entity entity : world.getNearbyEntities(centro, raio.get(), raio.get(), raio.get())) {
+                    world.spawnParticle(Particle.PORTAL, centro, 50, raio/2.0, 1, raio/2.0, 0);
+                    for (Entity entity : world.getNearbyEntities(centro, raio, raio, raio)) {
                         world.spawnParticle(Particle.PORTAL, entity.getLocation().add(0,1,0), 5, 0.3, 0.3, 0.3, 0);
                         if (entity instanceof LivingEntity living && entity != player) {
                             living.damage(dano, player);
                             Vector direcao = centro.toVector().subtract(living.getLocation().toVector()).normalize();
                             living.setVelocity(direcao.multiply(forcaKnockback).setY(0.2));
                         }
-                    }
-                    if(raio.get()>=50){
-                        t.stop();
                     }
                 }
         ).scheduleTimer(1L); // duração em ticks

@@ -2,11 +2,8 @@ package org.dantesys.reliquiasNexus.util;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Bukkit;
-import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 import org.dantesys.reliquiasNexus.economia.Banco;
-import org.dantesys.reliquiasNexus.ReliquiasNexus;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,11 +14,6 @@ public class Economia {
     private static final Map<UUID, Double> emprestimos = new ConcurrentHashMap<>();
     private static final Map<UUID, List<String>> historico = new ConcurrentHashMap<>();
 
-    private static ReliquiasNexus plugin;
-
-    public static void setPlugin(ReliquiasNexus pluginInstance) {
-        plugin = pluginInstance;
-    }
 
     public static double getSaldo(Player player) {
         return saldos.getOrDefault(player.getUniqueId(), 0.0);
@@ -92,16 +84,16 @@ public class Economia {
     }
 
     public static List<String> getHistorico(Player player) {
-        return historico.getOrDefault(player.getUniqueId(), Arrays.asList("Sem histórico disponível"));
+        return historico.getOrDefault(player.getUniqueId(), List.of("Sem histórico disponível"));
     }
 
     public static List<String> getHistorico(UUID playerId) {
-        return historico.getOrDefault(playerId, Arrays.asList("Sem histórico disponível"));
+        return historico.getOrDefault(playerId, List.of("Sem histórico disponível"));
     }
 
     private static void adicionarAoHistorico(UUID playerId, String transacao) {
         List<String> historicoPlayer = historico.getOrDefault(playerId, new ArrayList<>());
-        historicoPlayer.add(0, "[" + new Date() + "] " + transacao);
+        historicoPlayer.addFirst("[" + new Date() + "] " + transacao);
 
         // Manter apenas as últimas 20 transações
         if (historicoPlayer.size() > 20) {

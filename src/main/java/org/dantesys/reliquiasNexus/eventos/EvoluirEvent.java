@@ -706,6 +706,17 @@ public class EvoluirEvent implements Listener {
         ItemStack comida = event.getItem();
         PlayerInventory inv = player.getInventory();
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+        if(temReliquia(player,"cozinheiro")){
+            Nexus item = ItemsRegistro.getFromNome("cozinheiro");
+            if (comida.getType().isEdible() && item!=null) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION,100,0));
+                int comidas = dataPlayer.getOrDefault(MISSAOCOZINHEIRO.key, PersistentDataType.INTEGER, 0);
+                int level = dataPlayer.getOrDefault(COZINHEIRO.key,PersistentDataType.INTEGER,1);
+                comidas++;
+                dataPlayer.set(MISSAOCOZINHEIRO.key,PersistentDataType.INTEGER,comidas);
+                tentarEvoluir(player,item.getItem(level),level,getSlotOfItem(player,getReliquia(player,"cozinheiro")));
+            }
+        }
         for (int i = 0; i <= 8; i++) {
             ItemStack stack = inv.getItem(i);
             if(stack!=null && stack.getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)){
@@ -714,22 +725,13 @@ public class EvoluirEvent implements Listener {
                     Nexus item = ItemsRegistro.getFromNome(nome);
                     if(item!=null){
                         if(item.getNome().equals("cozineiro")){
-                            if (comida.getType().isEdible()
-                                    && comida.getType() != Material.POTION
-                                    && comida.getType() != Material.MILK_BUCKET) {
-
-                                // Recupera os dados da comida
-                                FoodComponent foodData = comida.getItemMeta().getFood();
-                                if (foodData != null) {
-                                    int hunger = foodData.getNutrition(); // quantidade de fome (meio pernil = 1)
-                                    float saturation = foodData.getSaturation(); // saturação base
-                                    player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION,hunger*20,(int) saturation));
-                                    int comidas = dataPlayer.getOrDefault(MISSAOCOZINHEIRO.key, PersistentDataType.INTEGER, 0);
-                                    int level = dataPlayer.getOrDefault(COZINHEIRO.key,PersistentDataType.INTEGER,1);
-                                    comidas++;
-                                    dataPlayer.set(MISSAOCOZINHEIRO.key,PersistentDataType.INTEGER,comidas);
-                                    tentarEvoluir(player,item.getItem(level),level,getSlotOfItem(player,stack));
-                                }
+                            if (comida.getType().isEdible()) {
+                                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION,100,0));
+                                int comidas = dataPlayer.getOrDefault(MISSAOCOZINHEIRO.key, PersistentDataType.INTEGER, 0);
+                                int level = dataPlayer.getOrDefault(COZINHEIRO.key,PersistentDataType.INTEGER,1);
+                                comidas++;
+                                dataPlayer.set(MISSAOCOZINHEIRO.key,PersistentDataType.INTEGER,comidas);
+                                tentarEvoluir(player,item.getItem(level),level,getSlotOfItem(player,stack));
                             }
                         }
                     }
