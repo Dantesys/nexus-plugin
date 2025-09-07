@@ -88,11 +88,18 @@ public class JoinQuitEvent implements Listener {
             case "ajudante" -> Component.text("[Ajudante] ").color(NamedTextColor.GREEN);
             default -> Component.text("[Membro] ").color(NamedTextColor.GRAY);
         };
+        String pf = switch (rank.toLowerCase()) {
+            case "dono" -> "[Dono] ";
+            case "staff" -> "[Staff] ";
+            case "ajudante" -> "[Ajudante] ";
+            default -> "[Membro] ";
+        };
         // Formata a mensagem com a tag e o nome do jogador
         if(plugin.getConfig().getBoolean("op-players." + player.getUniqueId())){
             player.addAttachment(plugin).setPermission("reliquiasnexus.opzim", true);
         }
         Component finalNome = prefix.append(Component.text(player.getName()).color(NamedTextColor.WHITE));
+        player.setDisplayName(pf+player.getName());
         player.displayName(finalNome);
         player.customName(finalNome);
         player.setCustomNameVisible(true);
