@@ -37,7 +37,7 @@ public class JoinQuitEvent implements Listener {
         container.set(SPECIAL.key, PersistentDataType.INTEGER,0);
         if(qtd==0 && novato){
             container.set(new NamespacedKey("nexus_novato","novato"),PersistentDataType.BOOLEAN,false);
-            List<Nexus> reliquias = ItemsRegistro.getValidReliquia(ReliquiasNexus.getNexusConfig());
+            /*List<Nexus> reliquias = ItemsRegistro.getValidReliquia(ReliquiasNexus.getNexusConfig());
             Random rng = new Random();
             int escolhido = rng.nextInt(reliquias.size());
             Nexus n = reliquias.get(escolhido);
@@ -56,7 +56,7 @@ public class JoinQuitEvent implements Listener {
             ItemMeta meta = stack.getItemMeta();
             meta.getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,player.getUniqueId().toString());
             stack.setItemMeta(meta);
-            player.getInventory().addItem(stack);
+            player.getInventory().addItem(stack);*/
 
             // Adiciona o livro de história ao inventário do jogador
             player.getInventory().addItem(ItemsRegistro.nexusStoryBook.getItem(1));
@@ -67,12 +67,12 @@ public class JoinQuitEvent implements Listener {
             }
             msg=msg.replace("<player>",player.getName());
             event.joinMessage(Component.text("§2"+msg));
-            String r=ReliquiasNexus.getLang().getString("joinquit.relic");
+            /*String r=ReliquiasNexus.getLang().getString("joinquit.relic");
             if(r==null){
                 r="Você recebeu a reliquia do <relic>";
             }
             r=r.replace("<relic>",nome);
-            player.sendMessage(Component.text("§2"+r));
+            player.sendMessage(Component.text("§2"+r));*/
         }else{
             String msg=ReliquiasNexus.getLang().getString("joinquit.join");
             if(msg==null){
