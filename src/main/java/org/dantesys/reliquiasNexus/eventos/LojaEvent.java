@@ -140,31 +140,42 @@ public class LojaEvent implements Listener {
             inv.setItem(i, borda);
         }
 
-        // Itens Normais exatos das imagens
+        // Itens Normais com os preços especificados
         adicionarItemComPreco(inv, 10, Material.DIAMOND, "Diamante", 500.0, 1);
         adicionarItemComPreco(inv, 11, Material.DIAMOND_SWORD, "Espada de Diamante", 1000.0, 1);
         adicionarItemComPreco(inv, 12, Material.DIAMOND_PICKAXE, "Picareta de Diamante", 1500.0, 1);
         adicionarItemComPreco(inv, 13, Material.DIAMOND_AXE, "Machado de Diamante", 1300.0, 1);
-        adicionarItemComPreco(inv, 14, Material.IRON_INGOT, "Barra de Ferro", 50.0, 1);
-        adicionarItemComPreco(inv, 15, Material.GOLD_INGOT, "Barra de Ouro", 75.0, 1);
-        adicionarItemComPreco(inv, 16, Material.OAK_LOG, "Toras de Carvalho", 10.0, 1);
-        adicionarItemComPreco(inv, 19, Material.COBBLESTONE, "Pedregulho", 5.0, 1);
-        adicionarItemComPreco(inv, 20, Material.DIAMOND_HELMET, "Capacete de Diamante", 1200.0, 1);
-        adicionarItemComPreco(inv, 21, Material.DIAMOND_CHESTPLATE, "Peitoral de Diamante", 2000.0, 1);
-        adicionarItemComPreco(inv, 22, Material.DIAMOND_LEGGINGS, "Calças de Diamante", 1800.0, 1);
-        adicionarItemComPreco(inv, 23, Material.DIAMOND_BOOTS, "Botas de Diamante", 1100.0, 1);
-        adicionarItemComPreco(inv, 24, Material.BEEF, "Bife", 25.0, 1);
-        adicionarItemComPreco(inv, 25, Material.COOKED_BEEF, "Bife Cozido", 30.0, 1);
-        adicionarItemComPreco(inv, 28, Material.GOLDEN_CARROT, "Cenoura Dourada", 40.0, 1);
-        adicionarItemComPreco(inv, 29, Material.ENCHANTED_BOOK, "Livro Encantado", 500.0, 1);
-        adicionarItemComPreco(inv, 30, Material.WATER_BUCKET, "Balde de Água", 15.0, 1);
-        adicionarItemComPreco(inv, 31, Material.LAVA_BUCKET, "Balde de Lava", 25.0, 1);
-        adicionarItemComPreco(inv, 32, Material.ARROW, "Flecha", 3.0, 1);
-        adicionarItemComPreco(inv, 33, Material.EXPERIENCE_BOTTLE, "Frasco de Experiência", 75.0, 1);
-        adicionarItemComPreco(inv, 34, Material.DIAMOND_HORSE_ARMOR, "Armadura de Diamante", 2000.0, 1);
 
-        // Bloco de Ferro da imagem
-        adicionarItemComPreco(inv, 35, Material.IRON_BLOCK, "Bloco de Ferro", 500.0, 1);
+        // Preços conforme especificado
+        adicionarItemComPreco(inv, 14, Material.IRON_INGOT, "Barra de Ferro", 100.0, 1);
+        adicionarItemComPreco(inv, 15, Material.GOLD_INGOT, "Barra de Ouro", 200.0, 1);
+        adicionarItemComPreco(inv, 16, Material.EMERALD, "Esmeralda", 300.0, 1);
+        adicionarItemComPreco(inv, 19, Material.NETHERITE_INGOT, "Barra de Netherite", 750.0, 1);
+        adicionarItemComPreco(inv, 20, Material.COAL, "Carvão", 50.0, 1);
+
+        adicionarItemComPreco(inv, 21, Material.OAK_LOG, "Toras de Carvalho", 10.0, 1);
+        adicionarItemComPreco(inv, 22, Material.COBBLESTONE, "Pedregulho", 5.0, 1);
+        adicionarItemComPreco(inv, 23, Material.DIAMOND_HELMET, "Capacete de Diamante", 1200.0, 1);
+        adicionarItemComPreco(inv, 24, Material.DIAMOND_CHESTPLATE, "Peitoral de Diamante", 2000.0, 1);
+        adicionarItemComPreco(inv, 25, Material.DIAMOND_LEGGINGS, "Calças de Diamante", 1800.0, 1);
+        adicionarItemComPreco(inv, 28, Material.DIAMOND_BOOTS, "Botas de Diamante", 1100.0, 1);
+        adicionarItemComPreco(inv, 29, Material.BEEF, "Bife", 25.0, 1);
+        adicionarItemComPreco(inv, 30, Material.COOKED_BEEF, "Bife Cozido", 30.0, 1);
+        adicionarItemComPreco(inv, 31, Material.GOLDEN_CARROT, "Cenoura Dourada", 40.0, 1);
+        adicionarItemComPreco(inv, 32, Material.ENCHANTED_BOOK, "Livro Encantado", 500.0, 1);
+        adicionarItemComPreco(inv, 33, Material.WATER_BUCKET, "Balde de Água", 15.0, 1);
+        adicionarItemComPreco(inv, 34, Material.LAVA_BUCKET, "Balde de Lava", 25.0, 1);
+        adicionarItemComPreco(inv, 35, Material.ARROW, "Flecha", 3.0, 1);
+        adicionarItemComPreco(inv, 36, Material.EXPERIENCE_BOTTLE, "Frasco de Experiência", 75.0, 1);
+        adicionarItemComPreco(inv, 37, Material.DIAMOND_HORSE_ARMOR, "Armadura de Diamante", 2000.0, 1);
+
+        // Blocos - Preços ajustados para serem mais caros que o equivalente em itens básicos
+        adicionarItemComPreco(inv, 38, Material.IRON_BLOCK, "Bloco de Ferro", 950.0, 1);      // 9 barras = 900, bloco = 950
+        adicionarItemComPreco(inv, 39, Material.GOLD_BLOCK, "Bloco de Ouro", 1850.0, 1);      // 9 barras = 1800, bloco = 1850
+        adicionarItemComPreco(inv, 40, Material.EMERALD_BLOCK, "Bloco de Esmeralda", 2750.0, 1); // 9 esmeraldas = 2700, bloco = 2750
+        adicionarItemComPreco(inv, 41, Material.DIAMOND_BLOCK, "Bloco de Diamante", 4600.0, 1);  // 9 diamantes = 4500, bloco = 4600
+        adicionarItemComPreco(inv, 42, Material.NETHERITE_BLOCK, "Bloco de Netherite", 6800.0, 1); // 9 barras = 6750, bloco = 6800
+        adicionarItemComPreco(inv, 43, Material.COAL_BLOCK, "Bloco de Carvão", 475.0, 1);      // 9 carvões = 450, bloco = 475
 
         // Botão de voltar
         ItemStack backArrow = criarCabecaComID(
