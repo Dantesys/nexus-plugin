@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
+import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.*;
@@ -39,7 +40,8 @@ import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 
 public class SpecialEvent implements Listener {
     private final ReliquiasNexus plugin;
-    private final List<String> missionTypes = List.of("coleta", "combate", "exploracao", "pescaria", "mineracao");
+    private final List<String> missionTypes = List.of("coleta", "combate", "pescaria");
+    private final Map<UUID, Set<Biome>> discoveredBiomes = new HashMap<>();
 
     public SpecialEvent(ReliquiasNexus plugin){
         this.plugin = plugin;
@@ -63,14 +65,16 @@ public class SpecialEvent implements Listener {
         }
 
         String difficulty;
-        if (highestRelicLevel < 5) {
-            difficulty = "facil";
-        } else if (highestRelicLevel < 10) {
-            difficulty = "medio";
-        } else if (highestRelicLevel < 20) {
-            difficulty = "dificil";
-        } else {
+        int playerLevel = player.getLevel();
+
+        if (playerLevel >= 150) {
             difficulty = "extreme";
+        } else if (playerLevel >= 90) {
+            difficulty = "dificil";
+        } else if (playerLevel >= 50) {
+            difficulty = "medio";
+        } else {
+            difficulty = "facil";
         }
 
         gerarMissao(player, missionType, difficulty, false);
@@ -112,17 +116,9 @@ public class SpecialEvent implements Listener {
                 baseGoal = 20;
                 durationMinutes = 15;
                 break;
-            case "exploracao":
-                baseGoal = 3;
-                durationMinutes = 20;
-                break;
             case "pescaria":
                 baseGoal = 15;
                 durationMinutes = 12;
-                break;
-            case "mineracao":
-                baseGoal = 32;
-                durationMinutes = 25;
                 break;
             case "ender":
                 baseGoal = 1;
@@ -152,7 +148,7 @@ public class SpecialEvent implements Listener {
             }
             rewardText = "§e+" + levelReward + " Levels, " + molyReward + " moly";
         } else {
-            xpReward = (int) (2500 * difficultyMultiplier);
+            xpReward = (int) (2500 * difficultyMultiplier * 0.25); // Reduzido em 75%
             rewardText = "§e+" + xpReward + " XP e " + molyReward + " moly";
             if(difficultyMultiplier>=3){
                 rewardText = rewardText+" e uma relíquia aleatória";
@@ -209,9 +205,7 @@ public class SpecialEvent implements Listener {
         return switch (missionType) {
             case "coleta" -> "Colete " + goal + " itens de madeira em " + duration + " minutos!";
             case "combate" -> "Derrote " + goal + " monstros em " + duration + " minutos!";
-            case "exploracao" -> "Visite " + goal + " biomas diferentes em " + duration + " minutos!";
             case "pescaria" -> "Pesque " + goal + " itens em " + duration + " minutos!";
-            case "mineracao" -> "Minere " + goal + " minérios de diamante em " + duration + " minutos!";
             case "ender" -> "Derrote o Ender Dragon!";
             default -> "Missão inválida.";
         };
@@ -258,8 +252,8 @@ public class SpecialEvent implements Listener {
                     ReliquiasNexus.setConfigSave("nexus."+nome,player.getUniqueId().toString());
                     plugin.saveConfig();
                     player.getInventory().addItem(n.getItem(1))
-;                    player.sendMessage(Component.text("✅ §aVocê recebeu a relíquia "+nome+"!")
-                                .color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD));
+                    ;                    player.sendMessage(Component.text("✅ §aVocê recebeu a relíquia "+nome+"!")
+                            .color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD));
                 } else {
                     levelReward = (int) (1 * difficultyMultiplier);
                     player.giveExpLevels(levelReward);
@@ -267,7 +261,7 @@ public class SpecialEvent implements Listener {
                             .color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD));
                 }
             } else {
-                xpReward = (int) (2500 * difficultyMultiplier);
+                xpReward = (int) (2500 * difficultyMultiplier * 0.25); // Reduzido em 75%
                 player.giveExp(xpReward);
                 player.sendMessage(Component.text("✅ §aMissão '" + missionName + "' concluída! Você recebeu " + xpReward + " de XP!")
                         .color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD));
@@ -297,15 +291,14 @@ public class SpecialEvent implements Listener {
         pdc.remove(MISSAO_ENDTIME.key);
         pdc.remove(MISSAO_SPECIAL.key);
         pdc.remove(MISSAO_DIFFICULTY.key);
+        discoveredBiomes.remove(player.getUniqueId());
     }
 
     private String getMissionNameForDisplay(String missionType) {
         return switch (missionType) {
             case "coleta" -> "Coleta Rápida";
             case "combate" -> "Caça aos Monstros";
-            case "exploracao" -> "Exploração";
             case "pescaria" -> "Pescaria";
-            case "mineracao" -> "Mineração";
             case "ender" -> "A Caça ao Dragão";
             default -> missionType;
         };
@@ -356,16 +349,6 @@ public class SpecialEvent implements Listener {
                 if (progress >= goal) {
                     finalizarMissao(player);
                     player.sendMessage(Component.text("🎁 Você também recebeu " + 500 * (player.getLevel()/10) + " moly(s)!").color(NamedTextColor.YELLOW));
-                }
-            } else if (missionType!=null && missionType.equals("mineracao") && event.getBlock().getType() == Material.DIAMOND_ORE) {
-                int progress = pdc.getOrDefault(MISSAO_PROGRESO.key, PersistentDataType.INTEGER,0) + 1;
-                int goal = pdc.getOrDefault(MISSAO_META.key, PersistentDataType.INTEGER,0);
-                pdc.set(MISSAO_PROGRESO.key, PersistentDataType.INTEGER, progress);
-
-                player.sendMessage(Component.text("⛏️ Progresso da Missão: " + progress + "/" + goal)
-                        .color(NamedTextColor.YELLOW));
-                if (progress >= goal) {
-                    finalizarMissao(player);
                 }
             }
         }
