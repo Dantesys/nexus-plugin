@@ -1303,6 +1303,10 @@ public final class ReliquiasNexus extends JavaPlugin {
             config.set("nexus_central_bank.saldo", nexusCentralBank.getSaldo());
         }
         // Salvar dados econômicos ao desligar
+        Bukkit.getOnlinePlayers().forEach(player -> {
+            double saldo = Economia.getSaldo(player);
+            player.getPersistentDataContainer().set(SALDO.key,PersistentDataType.DOUBLE,saldo);
+        });
         Economia.salvarDados();
 
         saveConfig();
