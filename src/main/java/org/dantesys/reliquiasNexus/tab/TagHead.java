@@ -48,10 +48,12 @@ public class TagHead implements Listener {
         Component messageComponent;
         String rank = plugin.getConfig().getString("players." + player.getUniqueId().toString() + ".rank", "membro");
 
-        if (rank.equalsIgnoreCase("membro")) {
-            messageComponent = Component.text(event.getMessage()).color(NamedTextColor.WHITE);
+        if (rank.equalsIgnoreCase("dono")) {
+            messageComponent = Component.text(event.getMessage()).color(NamedTextColor.RED);
+        } else if (rank.equalsIgnoreCase("staff")) {
+            messageComponent = Component.text(event.getMessage()).color(NamedTextColor.AQUA);
         } else {
-            messageComponent = Component.text(event.getMessage()).color(tag.color());
+            messageComponent = Component.text(event.getMessage()).color(NamedTextColor.WHITE);
         }
 
         Component finalMessage = Component.text()
