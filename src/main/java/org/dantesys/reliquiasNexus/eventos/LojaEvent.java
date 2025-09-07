@@ -76,6 +76,22 @@ public class LojaEvent implements Listener {
             inv.setItem(i, borda);
         }
 
+        // Baú do Fim (Ender Chest) - Item especial que libera comando /ec
+        ItemStack enderChestItem = new ItemStack(Material.ENDER_CHEST);
+        ItemMeta enderChestMeta = enderChestItem.getItemMeta();
+        enderChestMeta.displayName(Component.text("§5Baú do Fim"));
+        List<Component> enderLore = new ArrayList<>();
+        enderLore.add(Component.text("§7Permite o uso do comando §e/ec§7."));
+        enderLore.add(Component.text("§7Abre seu inventário do fim de qualquer lugar."));
+        enderLore.add(Component.text(""));
+        enderLore.add(Component.text("§aPreço: §65.000 Moly"));
+        enderLore.add(Component.text("§aCompra única por jogador."));
+        enderChestMeta.lore(enderLore);
+        enderChestMeta.getPersistentDataContainer().set(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING, "ender_chest");
+        enderChestMeta.getPersistentDataContainer().set(new NamespacedKey(plugin, "preco"), PersistentDataType.DOUBLE, 5000.0);
+        enderChestItem.setItemMeta(enderChestMeta);
+        inv.setItem(4, enderChestItem); // Posição destacada no topo
+
         // Itens OP exatos das imagens
         adicionarItemComPreco(inv, 10, Material.RESPAWN_ANCHOR, "Âncora de Respawn", 90000.0, 1);
         adicionarItemComPreco(inv, 11, Material.ELYTRA, "Elytra", 22000.0, 1);
@@ -276,6 +292,30 @@ public class LojaEvent implements Listener {
 
                 if ("back_button".equals(itemId)) {
                     abrirMenuPrincipal(player);
+                    return;
+                }
+
+                // Lógica específica para o Baú do Fim
+                if (itemId.equals("ender_chest")) {
+                    double preco = 5000.0;
+                    double saldo = Economia.getSaldo(player);
+
+                    if (saldo >= preco) {
+                        PersistentDataContainer playerData = player.getPersistentDataContainer();
+                        if (playerData.has(NexusKeys.ENDER_CHEST_OWNED.key, PersistentDataType.BOOLEAN)) {
+                            player.sendMessage(Component.text("❌ Você já comprou o Baú do Fim. Esta é uma compra única.").color(NamedTextColor.RED));
+                            playErrorSound(player);
+                            return;
+                        }
+
+                        Economia.removerSaldo(player, preco, "Compra de Baú do Fim");
+                        playerData.set(NexusKeys.ENDER_CHEST_OWNED.key, PersistentDataType.BOOLEAN, true);
+                        player.sendMessage(Component.text("✅ Você comprou o Baú do Fim por 5.000 moly. Use o comando /ec para abri-lo.").color(NamedTextColor.GREEN));
+                        playBuySound(player);
+                    } else {
+                        player.sendMessage(Component.text("❌ Saldo insuficiente para comprar este item.").color(NamedTextColor.RED));
+                        playErrorSound(player);
+                    }
                     return;
                 }
 
