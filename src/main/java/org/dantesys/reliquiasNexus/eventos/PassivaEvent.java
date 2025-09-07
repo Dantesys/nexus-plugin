@@ -241,10 +241,6 @@ public class PassivaEvent implements Listener {
                 }
             }
         }
-        // Ativar a perseguição da Morte quando o jogador acerta um alvo
-        if (entity instanceof Player player && player.hasMetadata("punhoDaMorteAtivo") && atacado instanceof LivingEntity) {
-            Morte.onHitPunhoDaMorte(player, (LivingEntity) atacado);
-        }
     }
     @EventHandler
     public void recuperacaoFenix(EntityDamageEvent event){
@@ -430,9 +426,6 @@ public class PassivaEvent implements Listener {
                                 }
                             }
                         }
-                    }
-                    case "morte" -> {
-                        Morte.aplicaEfeitoPassivo(player);
                     }
                 }
             }
