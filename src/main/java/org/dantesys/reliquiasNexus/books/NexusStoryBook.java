@@ -74,14 +74,6 @@ public class NexusStoryBook {
         addRelicStory(pages, "Alquimista", "⚗", "Transforma materiais e cria poções antigas.", "Cada transformação cobra preço, cada poção, consequência.", "Quem não entende perde tudo que toca.", "Pontos fortes: Criação de poções e elixires, transformação de materiais.\nPontos fracos: Ineficaz em combate, dependente de materiais.");
         addRelicStory(pages, "Golem", "🪨", "Encarnado em pedra, protege e destrói.", "Paciente, inabalável; cada movimento ecoa força ancestral.", "Quem não compreende sua rigidez é esmagado por ela.", "Pontos fortes: Alta defesa, invocação de golens.\nPontos fracos: Baixa mobilidade, portador se torna um alvo.");
         addRelicStory(pages, "Dragão", "🐉", "Forjada do fogo e escamas de dragão, antiga como o mundo.", "Seu rugido reverbera por vales e montanhas.", "Portadores sentem poder absoluto, mas com responsabilidade eterna.", "Pontos fortes: Voo, ataques de fogo.\nPontos fracos: Vulnerável a água, portador pode se cansar rapidamente.");
-        addRelicStory(pages, "Morte", "💀", "A Relíquia da Morte é a mais antiga de todas, nascida do primeiro fim. Ela não é má, apenas inevitável.", "Quem a empunha se torna um canal para o ciclo da vida e da morte, capaz de julgar almas e ceifar existências.", "Seu poder é absoluto, mas o preço é a própria mortalidade. O portador se torna um ser eterno, mas solitário, para sempre ligado ao fim de todas as coisas.", "Pontos fortes: Dano de vida inigualável, roubo de essência.\nPontos fracos: Depende de almas de inimigos para curar, não é eficaz contra mobs.");
-
-        // Ranking das Relíquias (última página)
-        pages.add(Component.text("§6Ranking de Poder das Relíquias\n\n" +
-                "§41º - Morte\n" +
-                "§b2º - Ceifador\n" +
-                "§a3º - Vida\n\n" +
-                "O ranking é baseado na destruição e poder em combate, mas a força de uma relíquia é tão forte quanto a determinação do seu portador."));
 
         meta.pages(pages);
         book.setItemMeta(meta);

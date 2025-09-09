@@ -79,7 +79,7 @@ public final class ReliquiasNexus extends JavaPlugin {
         NexusKeys.init(this);
         ItemsRegistro.init();
         saveResource("lang/pt-br.yml",true);
-        saveResource("lang/en-us.yml",false);
+        saveResource("lang/en-us.yml",true);
         saveDefaultConfig();
         config = getConfig();
 
