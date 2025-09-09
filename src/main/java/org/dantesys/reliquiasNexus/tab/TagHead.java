@@ -2,7 +2,9 @@ package org.dantesys.reliquiasNexus.tab;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -70,40 +72,18 @@ public class TagHead implements Listener {
 
     public void updatePlayerTag(Player player) {
         Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
-        if (scoreboard == null) {
-            scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-        }
 
         String rank = plugin.getConfig().getString("players." + player.getUniqueId().toString() + ".rank", "membro");
-        String teamName;
-
-        switch (rank.toLowerCase()) {
-            case "dono":
-                teamName = "000dono";
-                break;
-            case "staff":
-                teamName = "001staff";
-                break;
-            case "ajudante":
-                teamName = "002ajudante";
-                break;
-            case "beta":
-                teamName = "003beta";
-                break;
-            case "amigo":
-                teamName = "004amigo";
-                break;
-            case "membro":
-            default:
-                teamName = "999membro";
-                break;
-        }
-
+        String r = rank.substring(0, 1).toUpperCase();
+        String corrigido = r + rank.substring(1);
+        String teamName = player.getUniqueId()+corrigido;
+        Color cor = plugin.getConfig().getColor("cargo."+rank, Color.WHITE);
         Team team = scoreboard.getTeam(teamName);
         if (team == null) {
             team = scoreboard.registerNewTeam(teamName);
             Component prefix = playerList.getPlayerTag(player);
             team.prefix(prefix);
+            team.color(NamedTextColor.nearestTo(TextColor.color(cor.asRGB())));
             team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.ALWAYS);
         }
 

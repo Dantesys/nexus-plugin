@@ -2,6 +2,8 @@ package org.dantesys.reliquiasNexus.eventos;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.Color;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -38,9 +40,10 @@ public class JoinQuitEvent implements Listener {
         container.set(SPECIAL.key, PersistentDataType.INTEGER,0);
         double saldo = container.getOrDefault(SALDO.key,PersistentDataType.DOUBLE,0d);
         Economia.adicionarSaldo(player,saldo,"JOIN");
-        if(qtd==0 && novato){
+        boolean join = plugin.getConfig().getBoolean("reliquia_onjoin");
+        if(qtd==0 && novato && join){
             container.set(new NamespacedKey("nexus_novato","novato"),PersistentDataType.BOOLEAN,false);
-            /*List<Nexus> reliquias = ItemsRegistro.getValidReliquia(ReliquiasNexus.getNexusConfig());
+            List<Nexus> reliquias = ItemsRegistro.getValidReliquia(ReliquiasNexus.getNexusConfig());
             Random rng = new Random();
             int escolhido = rng.nextInt(reliquias.size());
             Nexus n = reliquias.get(escolhido);
@@ -59,7 +62,7 @@ public class JoinQuitEvent implements Listener {
             ItemMeta meta = stack.getItemMeta();
             meta.getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,player.getUniqueId().toString());
             stack.setItemMeta(meta);
-            player.getInventory().addItem(stack);*/
+            player.getInventory().addItem(stack);
 
             // Adiciona o livro de história ao inventário do jogador
             player.getInventory().addItem(ItemsRegistro.nexusStoryBook.getItem(1));
@@ -70,12 +73,12 @@ public class JoinQuitEvent implements Listener {
             }
             msg=msg.replace("<player>",player.getName());
             event.joinMessage(Component.text("§2"+msg));
-            /*String r=ReliquiasNexus.getLang().getString("joinquit.relic");
+            String r=ReliquiasNexus.getLang().getString("joinquit.relic");
             if(r==null){
                 r="Você recebeu a reliquia do <relic>";
             }
             r=r.replace("<relic>",nome);
-            player.sendMessage(Component.text("§2"+r));*/
+            player.sendMessage(Component.text("§2"+r));
         }else{
             String msg=ReliquiasNexus.getLang().getString("joinquit.join");
             if(msg==null){
@@ -85,24 +88,15 @@ public class JoinQuitEvent implements Listener {
             event.joinMessage(Component.text("§2"+msg));
         }
         String rank = plugin.getConfig().getString("players." + player.getUniqueId().toString() + ".rank", "membro");
-        Component prefix = switch (rank.toLowerCase()) {
-            case "dono" -> Component.text("[Dono] ").color(NamedTextColor.RED);
-            case "staff" -> Component.text("[Staff] ").color(NamedTextColor.AQUA);
-            case "ajudante" -> Component.text("[Ajudante] ").color(NamedTextColor.GREEN);
-            default -> Component.text("[Membro] ").color(NamedTextColor.GRAY);
-        };
-        String pf = switch (rank.toLowerCase()) {
-            case "dono" -> "[Dono] ";
-            case "staff" -> "[Staff] ";
-            case "ajudante" -> "[Ajudante] ";
-            default -> "[Membro] ";
-        };
+        String r = rank.substring(0, 1).toUpperCase();
+        String corrigido = r + rank.substring(1);
         // Formata a mensagem com a tag e o nome do jogador
         if(plugin.getConfig().getBoolean("op-players." + player.getUniqueId())){
             player.addAttachment(plugin).setPermission("reliquiasnexus.opzim", true);
         }
-        Component finalNome = prefix.append(Component.text(player.getName()).color(NamedTextColor.WHITE));
-        player.setDisplayName(pf+player.getName());
+        Color cor = plugin.getConfig().getColor("cargo."+rank, Color.WHITE);
+        Component finalNome = Component.text("["+corrigido+"]").color(TextColor.color(cor.asRGB())).append(Component.text(player.getName()).color(NamedTextColor.WHITE));
+        player.setDisplayName("["+corrigido+"]"+player.getName());
         player.displayName(finalNome);
         player.setCustomNameVisible(true);
     }

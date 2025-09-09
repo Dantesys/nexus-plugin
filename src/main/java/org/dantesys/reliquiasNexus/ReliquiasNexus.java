@@ -30,9 +30,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.dantesys.reliquiasNexus.economia.Banco;
 import org.dantesys.reliquiasNexus.eventos.*;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
@@ -53,26 +51,28 @@ import org.bukkit.Material;
 
 
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
-
+/*
+* TODO
+*  Criar comando de fazer rank e definir cor
+*  Modificar Sistema de loja e criar sistema de loja comunitaria
+*  Criar Comando TPA e HOME
+*  Criar Comando para definir custo de tpa e home
+*  Criar config para setar o nome do dinheiro
+*  Ajustar arquivo de tradução
+*  Refazer sistema de procurado
+*  Refazer sistema de missões
+*  Refazer sistema de bosses
+*/
 public final class ReliquiasNexus extends JavaPlugin {
     private static final Map<UUID, Troca> trocas = new ConcurrentHashMap<>();
     private static FileConfiguration config;
     private static YamlConfiguration lang;
-    private static final Map<UUID, PermissionAttachment> opAttachments = new HashMap<>();
-    private static Banco nexusCentralBank;
     private PlayerListManager playerListManager;
     private BossManager bossManager;
     public final List<String> names = List.of("guerreiro","ceifador","vida","mares","barbaro",
             "fazendeiro","espiao","arqueiro","cacador","tempestade","mineiro","fenix","protetor",
             "hulk","sculk","pescador","flash","mago","ladrao","domador","cozinheiro","construtor",
             "abissal","cronosombra","assassino","frostis","necromante","alquimista","golem","dragao");
-
-    public static void saiu(Player player) {
-    }
-
-    public static Banco getNexusCentralBank() {
-        return nexusCentralBank;
-    }
 
     @Override
     public void onEnable() {
@@ -100,52 +100,38 @@ public final class ReliquiasNexus extends JavaPlugin {
             throw new RuntimeException(e);
         }
 
-        // Inicializa o Nexus Central Bank com 25 milhões.
-        double saldoInicial = config.getDouble("nexus_central_bank.saldo", 25000000.0);
-        nexusCentralBank = new Banco("Nexus Central Bank", null, saldoInicial);
-        // Salva o saldo inicial no config
-        config.set("nexus_central_bank.saldo", nexusCentralBank.getSaldo());
-
         // Inicializar o gerenciador da player list e do boss
         playerListManager = new PlayerListManager(this);
         bossManager = new BossManager(this);
 
         new UpdaterCheck(this, "dantesys/nexus-plugin").checkForUpdates();
 
-        // Salvamento automático periódico de dados econômicos
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                Economia.salvarDados();
-                getLogger().info("Dados econômicos salvos automaticamente.");
-            }
-        }.runTaskTimer(this, 20 * 60 * 5, 20 * 60 * 5); // Salva a cada 5 minutos
-
-        // Comando /nexus principal
+        // Comando /nexus
         LiteralArgumentBuilder<CommandSourceStack> nexusRoot = Commands.literal("nexus").executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
-
-            Component mensagem = Component.text()
-                    .append(Component.text("\n§6§l⭐ §e§lNEXUS COMMANDS §6§l⭐\n").decorate(TextDecoration.BOLD))
-                    .append(Component.text("§7➤ §b/nexus livro §f- Receber livro das relíquias\n"))
-                    .append(Component.text("§7➤ §b/nexus historia §f- Conheça a história do servidor\n"))
-                    .append(Component.text("§7➤ §b/nexus evoluir §f- Evoluir relíquia na mão\n"))
-                    .append(Component.text("§7➤ §b/nexus expurgo §f- Ver status do expurgo\n"))
-                    .append(Component.text("§7➤ §b/nexus missao §f- Gerar uma missão aleatória\n"))
-                    .append(Component.text("§7➤ §b/nexus Loja §f- Abrir menu da loja\n"))
-                    .append(Component.text("§7➤ §b/nexus trocar <jogador> §f- Oferecer troca\n"))
-                    .append(Component.text("§7➤ §b/nexus banco §f- Abrir menu do banco\n"))
-                    .append(Component.text("§7➤ §b/nexus team §f- Comandos de equipe\n"))
-                    .append(Component.text("§7➤ §b/nexus list §f- Listar relíquias do servidor\n"))
-                    .append(Component.text("§7➤ §b/nexus level §f- Seus níveis de relíquias\n"))
-                    .append(Component.text("§7➤ §b/nexus procurados §f- Ver lista de procurados\n"))
-                    .append(Component.text("§6§l⭐ §e§lNEXUS COMMANDS §6§l⭐\n").decorate(TextDecoration.BOLD))
-                    .build();
-
+            List<String> nexus = lang.getStringList("nexus");
+            Component mensagem = Component.text("");
+            nexus.forEach(texto ->{
+                String revisado;
+                if(!texto.equals(nexus.getFirst()))revisado = "§7➤ §b"+texto.replace("<div>","§f-")+"\n";
+                else revisado = "\n§6§l⭐ §e§l"+texto+" §6§l⭐\n";
+                mensagem.append(Component.text(revisado));
+            });
+            mensagem.append(Component.text("§6§l⭐ §e§l"+nexus.getFirst()+" §6§l⭐\n").decorate(TextDecoration.BOLD));
             sender.sendMessage(mensagem);
             return Command.SINGLE_SUCCESS;
         });
-
+        // Comando /nexus livro
+        nexusRoot.then(Commands.literal("livro").executes(ctx -> {
+            final CommandSender sender = ctx.getSource().getSender();
+            if(ctx.getSource().getExecutor() instanceof Player player){
+                player.getInventory().addItem(ItemsRegistro.livro.getItem(1));
+                sender.sendMessage(Component.text("📖 "+lang.getString("livro.sucesso","Você recebeu o Livro das Relíquias!")).color(NamedTextColor.GREEN));
+            }else{
+                sender.sendMessage(Component.text("❌ "+lang.getString("livro.falha","Apenas jogadores podem usar este comando!")).color(NamedTextColor.RED));
+            }
+            return Command.SINGLE_SUCCESS;
+        }));
         // Novo comando /nexus historia
         nexusRoot.then(Commands.literal("historia").executes(ctx -> {
             CommandSender sender = ctx.getSource().getSender();
@@ -160,19 +146,7 @@ public final class ReliquiasNexus extends JavaPlugin {
             return Command.SINGLE_SUCCESS;
         }));
 
-        // Comando livro
-        nexusRoot.then(Commands.literal("livro").executes(ctx -> {
-            final CommandSender sender = ctx.getSource().getSender();
-            if(ctx.getSource().getExecutor() instanceof Player player){
-                player.getInventory().addItem(ItemsRegistro.livro.getItem(1));
-                sender.sendMessage(Component.text("📖 §aVocê recebeu o Livro das Relíquias!")
-                        .color(NamedTextColor.GREEN));
-            }else{
-                sender.sendMessage(Component.text("❌ §cApenas jogadores podem usar este comando!")
-                        .color(NamedTextColor.RED));
-            }
-            return Command.SINGLE_SUCCESS;
-        }));
+
 
         // Comando evoluir
         nexusRoot.then(Commands.literal("evoluir").executes(ctx -> {
@@ -677,25 +651,6 @@ public final class ReliquiasNexus extends JavaPlugin {
                 })))
         );
 
-        // Comando dar moly (operador)
-        nexuRoot.then(Commands.literal("dar").then(Commands.literal("moly").then(Commands.argument("jogador", ArgumentTypes.player()).then(Commands.argument("quantia", DoubleArgumentType.doubleArg()).executes(ctx -> {
-            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogador", PlayerSelectorArgumentResolver.class);
-            final Player player = targetResolver.resolve(ctx.getSource()).getFirst();
-            final double quantia = ctx.getArgument("quantia", Double.class);
-            final CommandSender sender = ctx.getSource().getSender();
-
-            if (nexusCentralBank.getSaldo() >= quantia) {
-                Economia.adicionarSaldo(player, quantia, "Comando de Operador");
-                nexusCentralBank.setSaldo(nexusCentralBank.getSaldo() - quantia);
-                sender.sendMessage(Component.text("✅ §a" + quantia + " moly(s) foram adicionados ao saldo de §b" + player.getName()).color(NamedTextColor.GREEN));
-                player.sendMessage(Component.text("🎁 §aVocê recebeu " + quantia + " moly(s) de um operador!").color(NamedTextColor.GREEN));
-            } else {
-                sender.sendMessage(Component.text("❌ O Banco Central não tem saldo suficiente para dar esta quantia.").color(NamedTextColor.RED));
-            }
-
-            return Command.SINGLE_SUCCESS;
-        })))));
-
         // Novo comando para dar almas (operador)
         nexuRoot.then(Commands.literal("alma").then(Commands.literal("dar").then(Commands.argument("player", ArgumentTypes.player()).then(Commands.argument("quantidade", IntegerArgumentType.integer()).executes(ctx -> {
             final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
@@ -1010,7 +965,6 @@ public final class ReliquiasNexus extends JavaPlugin {
                 // Aplica a permissão imediatamente se o jogador estiver online
                 if (targetPlayer.isOnline()) {
                     targetPlayer.addAttachment(this).setPermission("reliquiasnexus.opzim", true);
-                    opAttachments.put(targetPlayer.getUniqueId(), targetPlayer.addAttachment(this));
                 }
 
                 sender.sendMessage(Component.text("✅ " + targetPlayer.getName() + " agora tem permissões de OP limitadas.").color(NamedTextColor.GREEN));
@@ -1209,9 +1163,6 @@ public final class ReliquiasNexus extends JavaPlugin {
         itemInHand.setAmount(itemInHand.getAmount() - quantidade);
         Economia.adicionarSaldo(player, valorTotal, "Venda de " + nomeItem);
 
-        // Adiciona o valor ao saldo do banco central
-        nexusCentralBank.setSaldo(nexusCentralBank.getSaldo() + valorTotal);
-
         player.sendMessage(Component.text("✅ Você vendeu " + quantidade + " de " + nomeItem + " por " + valorTotal + " moly.").color(NamedTextColor.GREEN));
     }
 
@@ -1298,16 +1249,11 @@ public final class ReliquiasNexus extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        // Salva o saldo do banco central no desligamento do servidor
-        if (nexusCentralBank != null) {
-            config.set("nexus_central_bank.saldo", nexusCentralBank.getSaldo());
-        }
         // Salvar dados econômicos ao desligar
         Bukkit.getOnlinePlayers().forEach(player -> {
             double saldo = Economia.getSaldo(player);
             player.getPersistentDataContainer().set(SALDO.key,PersistentDataType.DOUBLE,saldo);
         });
-        Economia.salvarDados();
 
         saveConfig();
         getServer().getConsoleSender().sendMessage("§4❌ §c[Nexus]: Plugin Desativado!");
@@ -1325,7 +1271,4 @@ public final class ReliquiasNexus extends JavaPlugin {
         config.set(path,value);
     }
 
-    public PlayerListManager getPlayerListManager() {
-        return playerListManager;
-    }
 }

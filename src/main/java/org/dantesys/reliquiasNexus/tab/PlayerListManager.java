@@ -60,14 +60,6 @@ public class PlayerListManager implements Listener {
         }.runTaskTimer(plugin, 0L, 100L); // Atualiza a cada 5 segundos
     }
 
-    public PlayerList getPlayerList() {
-        return playerList;
-    }
-
-    public TagHead getTagHead() {
-        return tagHead;
-    }
-
     public void updateAllPlayerLists() {
         playerList.updateForAllPlayers();
         tagHead.updateAllPlayerTags();

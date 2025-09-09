@@ -1,6 +1,5 @@
 package org.dantesys.reliquiasNexus.items;
 
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
 
@@ -55,9 +54,5 @@ public class Nexus{
     }
     public void upgrade(){
         this.level=level+1;
-    }
-
-    public void aplicaEfeitoPassivo(Player player, int level) {
-
     }
 }

@@ -2,8 +2,10 @@ package org.dantesys.reliquiasNexus.tab;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
@@ -43,9 +45,9 @@ public class PlayerList {
 
     private void updatePlayerInfo(Player player) {
         Scoreboard scoreboard = player.getScoreboard();
-        if (scoreboard == null || scoreboard.getObjective("playerlist") == null) {
+        if (scoreboard.getObjective("playerlist") == null) {
             scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-            Objective objective = scoreboard.registerNewObjective("playerlist", "dummy");
+            Objective objective = scoreboard.registerNewObjective("playerlist","dummy");
             objective.setDisplaySlot(DisplaySlot.PLAYER_LIST);
             player.setScoreboard(scoreboard);
         }
@@ -53,35 +55,32 @@ public class PlayerList {
         String rank = plugin.getConfig().getString("players." + player.getUniqueId().toString() + ".rank", "membro");
 
         String teamName;
-        Component prefix;
-
-        switch (rank.toLowerCase()) {
-            case "dono":
+        Component prefix = switch (rank.toLowerCase()) {
+            case "dono" -> {
                 teamName = "000dono";
-                prefix = Component.text("[Dono] ").color(NamedTextColor.RED);
-                break;
-            case "staff":
+                yield Component.text("[Dono] ").color(NamedTextColor.RED);
+            }
+            case "staff" -> {
                 teamName = "001staff";
-                prefix = Component.text("[Staff] ").color(NamedTextColor.AQUA);
-                break;
-            case "ajudante":
+                yield Component.text("[Staff] ").color(NamedTextColor.AQUA);
+            }
+            case "ajudante" -> {
                 teamName = "002ajudante";
-                prefix = Component.text("[Ajudante] ").color(NamedTextColor.GREEN);
-                break;
-            case "beta":
+                yield Component.text("[Ajudante] ").color(NamedTextColor.GREEN);
+            }
+            case "beta" -> {
                 teamName = "003beta";
-                prefix = Component.text("[Beta] ").color(NamedTextColor.DARK_BLUE);
-                break;
-            case "amigo":
+                yield Component.text("[Beta] ").color(NamedTextColor.DARK_BLUE);
+            }
+            case "amigo" -> {
                 teamName = "004amigo";
-                prefix = Component.text("[Amigo] ").color(NamedTextColor.DARK_PURPLE);
-                break;
-            case "membro":
-            default:
+                yield Component.text("[Amigo] ").color(NamedTextColor.DARK_PURPLE);
+            }
+            default -> {
                 teamName = "999membro";
-                prefix = Component.text("[Membro] ").color(NamedTextColor.GRAY);
-                break;
-        }
+                yield Component.text("[Membro] ").color(NamedTextColor.GRAY);
+            }
+        };
 
         Team team = scoreboard.getTeam(teamName);
         if (team == null) {
@@ -140,21 +139,9 @@ public class PlayerList {
     // Método para obter o prefixo da tag de um jogador
     public Component getPlayerTag(Player player) {
         String rank = plugin.getConfig().getString("players." + player.getUniqueId().toString() + ".rank", "membro");
-
-        switch (rank.toLowerCase()) {
-            case "dono":
-                return Component.text("[Dono] ").color(NamedTextColor.RED);
-            case "staff":
-                return Component.text("[Staff] ").color(NamedTextColor.AQUA);
-            case "ajudante":
-                return Component.text("[Ajudante] ").color(NamedTextColor.GREEN);
-            case "beta":
-                return Component.text("[Beta] ").color(NamedTextColor.DARK_BLUE);
-            case "amigo":
-                return Component.text("[Amigo] ").color(NamedTextColor.DARK_PURPLE);
-            case "membro":
-            default:
-                return Component.text("[Membro] ").color(NamedTextColor.GRAY);
-        }
+        Color cor = plugin.getConfig().getColor("cargo."+rank, Color.WHITE);
+        String r = rank.substring(0, 1).toUpperCase();
+        String corrigido = r + rank.substring(1);
+        return Component.text("["+corrigido+"]").color(TextColor.color(cor.asRGB()));
     }
 }

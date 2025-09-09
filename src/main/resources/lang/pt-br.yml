@@ -1,3 +1,18 @@
+#Texto do comando /nexus
+nexus:
+  - "COMANDOS NEXUS"
+  - "/nexus livro <div> Receber livro das relíquias"
+  - "/nexus historia <div> Conheça a história do servidor"
+  - "/nexus evoluir <div> Evoluir relíquia na mão"
+  - "/nexus expurgo <div> Ver status do expurgo"
+  - "/nexus missao <div> Gerar uma missão aleatória"
+  - "/nexus trocar <jogador> <div> Oferecer troca"
+  - "/nexus list <div> Listar relíquias e seus donos do servidor"
+  - "/nexus level <div> Seus níveis de relíquias"
+#Texto do /nexus livro
+livro:
+  sucesso: "Você recebeu o Livro das Relíquias!"
+  falha: "Apenas jogadores podem usar este comando!"
 comandos:
   comando:
     - "livro"
@@ -120,7 +135,7 @@ special:
   cacador:
     ativado: "Modo Minigun Ativado!"
     tempo: "Modo Minigun acaba em <tempo> segundos!"
-livro:
+livror:
   reliquia: "Nexus do"
   base: "Todas as Reliquias precisam de Xp para evoluir.<break>As que possuem Special Manual para ativar tem que está agachado"
   guerreiro: "Level 1-7: Habilidade Rush!<break>Level 8-15: Muda a habilidade para 360°Slash!<break>Level 16+: Muda a habilidade para Slash!<break>Para evoluir precisa derrotar Monstros ou Bosses"
