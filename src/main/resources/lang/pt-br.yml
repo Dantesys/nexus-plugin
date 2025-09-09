@@ -5,14 +5,73 @@ nexus:
   - "/nexus historia <div> Conheça a história do servidor"
   - "/nexus evoluir <div> Evoluir relíquia na mão"
   - "/nexus expurgo <div> Ver status do expurgo"
-  - "/nexus missao <div> Gerar uma missão aleatória"
   - "/nexus trocar <jogador> <div> Oferecer troca"
   - "/nexus list <div> Listar relíquias e seus donos do servidor"
   - "/nexus level <div> Seus níveis de relíquias"
+  - "/nexus missao <div> Gerar uma missão aleatória"
 #Texto do /nexus livro
 livro:
+  comando: "livro"
   sucesso: "Você recebeu o Livro das Relíquias!"
   falha: "Apenas jogadores podem usar este comando!"
+#Texto do /nexus historia
+historia:
+  comando: "historia"
+  sucesso: "Você recebeu o livro Nexus Story!"
+  falha: "Apenas jogadores podem usar este comando!"
+#Texto do /nexus evoluir
+evoluir:
+  comando: "evoluir"
+  falhaMao: "Você precisa segurar uma relíquia Nexus na mão!"
+  falhaInvalida: "Relíquia inválida!"
+  falhaPlayer: "Apenas jogadores podem usar este comando!"
+#Texto do /nexus expurgo
+expurgo:
+  comando: "expurgo"
+  ativado: "MODO EXPURGO ATIVADO!<break>⚠ Todas as relíquias podem ser roubadas!"
+  desativado: "MODO EXPURGO DESATIVADO<break>✔ Suas relíquias estão seguras!"
+#Texto do /nexus troca
+troca:
+  comando: "troca"
+  desativado: "O comando trocar está desativada"
+  falhaMao: "Você precisa segurar uma relíquia Nexus na mão!"
+  falhaPlayer: "Apenas jogadores podem usar este comando!"
+  oferta:
+    - "Oferta de troca enviada para <player>!"
+    - "Relíquia: <nexus>"
+    - "Aguarde a resposta..."
+  recebido:
+    - "OFERTA DE TROCA RECEBIDA!"
+    - "De: <player>"
+    - "Relíquia: <nexus>"
+  aceita: "ACEITAR"
+  aceitaMsg: "Clique para aceitar a troca"
+  recusa: "RECUSAR"
+  recusaMsg: "Clique para recusar a troca"
+  invalida: "Esta oferta não é mais válida!"
+  falhaSaiu: "O jogador que ofereceu a troca saiu do servidor!"
+  aceitou: "Você aceitou a troca! A contagem regressiva irá começar."
+  aceitouSend: "<player> aceitou sua oferta! A troca será concluída em instantes."
+  contador: "Troca em andamento:"
+  sucesso: "Troca finalizada com sucesso!"
+  falha: "Falha na troca. Relíquias não encontradas."
+  recusou: "Você recusou a oferta de troca."
+  recusouSend: "<player> recusou sua oferta de troca!"
+#Texto do /nexus list
+list:
+  titulo: "RELÍQUIAS DO SERVIDOR"
+  desconhecido: "Desconhecido"
+  semdono: "Sem dono"
+#Texto do /nexus level
+level:
+  titulo: "SEUS NÍVEIS DE RELÍQUIAS"
+  nivel: "Nível:"
+  falha: "Apenas jogadores podem usar este comando!"
+#Texto do /nexus missao
+missao:
+  comando: "missao"
+  desativado: "O comando de missões está desativado"
+  falhaPlayer: "Apenas jogadores podem usar este comando!"
 comandos:
   comando:
     - "livro"

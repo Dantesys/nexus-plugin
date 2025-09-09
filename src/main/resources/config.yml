@@ -9,10 +9,15 @@ lang: pt-br
 # If the server is in purge, allow relic stealing if true
 expurgo: false
 
+# Lista de recursos para desativar durante o expurgo
+# List of resources to disable during purge
 recursos:
   troca: true
   loja: true
   missao: true
+  #Segundos
+  #Seconds
+  missaoCooldown: 300
   tpa: true
   tpacost: 100
   home: true
@@ -21,6 +26,10 @@ recursos:
   keepinvcost: 1000
   enderchest: true
   enderchestcost: 5000
+  economia: true
+  moneyName: "moly"
+  procurados: true
+  
 # Lista de comandos para desativar durante o expurgo
 # List of commands to disable during purge
 expurgo_comandos_desativados:
@@ -41,10 +50,6 @@ levelMax: 20
 # Quantidade de xp que precisa para evoluir, o calculo é xp*level
 # Amount of xp you need to evolve, the calculation is xp*level
 xptolevel: 7
-
-# Ativa ou desativa o sistema de renascimento com pagamento.
-# Se desativado, a tela de morte padrão do Minecraft será usada.
-sistema_renascimento_ativado: true
 
 # Ativa ou desativa a relíquia aleatória para novos jogadores.
 # Se ativado, um novo jogador recebeu uma relíquia não utilizada ao entrar pela primeira vez.
@@ -85,12 +90,17 @@ nexus:
   dragao: ""
 
 # Registro de jogadores com permissões limitadas de OP
+# Registering players with limited OP permissions
 op-players: {}
 
 # Registro de jogadores procurados
+# Register of wanted players
 procurados: {}
 
 # Configuração de jogadores e cargos
+# Player and role configuration
 players: {}
+
 # Cargos cores
+# Positions colors
 cargos: {}

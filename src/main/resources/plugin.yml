@@ -8,9 +8,9 @@ commands:
   nexus:
     description: Comando principal do Nexus
     usage: /nexus [subcomando]
-  nexu:
+  nexusAdmin:
     description: Comandos de operador do Nexus
-    usage: /nexu [subcomando]
+    usage: /nexusAdmin [subcomando]
   team:
     description: Comandos de equipe
     usage: /team [subcomando]
