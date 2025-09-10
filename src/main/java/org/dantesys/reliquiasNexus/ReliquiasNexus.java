@@ -61,18 +61,18 @@ import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 *  Criar Comando para definir custo de tpa e home - PENDENTE
 *  Criar Comando para setar o nome do dinheiro - PENDENTE
 *  Ajustar arquivo de tradução - Fazendo
+*  Ajustar comando EC - PEDENTE
 *  Refazer sistema de procurado - PENDENTE
 *  Refazer sistema de missões - Fazendo
-*  Criar comando para cancelar missão - Fazendo
 *  Refazer sistema de bosses - PENDENTE
 */
 public final class ReliquiasNexus extends JavaPlugin {
     private static final Map<UUID, Troca> trocas = new ConcurrentHashMap<>();
     private static final Map<UUID, List<Missao>> missoesOfertas = new ConcurrentHashMap<>();
-    private static final Map<UUID, Missao> missaoAtiva = new ConcurrentHashMap<>();
     private static FileConfiguration config;
     private static YamlConfiguration lang;
     private static YamlConfiguration missaoAtivaBK;
+    private MissoesManager missoesManager;
     private PlayerListManager playerListManager;
     private BossManager bossManager;
     public final List<String> names = List.of("guerreiro","ceifador","vida","mares","barbaro",
@@ -92,7 +92,7 @@ public final class ReliquiasNexus extends JavaPlugin {
 
         // Configurar a classe economia com este plugin e carregar os dados
         Economia.setPlugin(this);
-
+        missoesManager=new MissoesManager(this);
         String tipo = config.getString("lang");
         if(tipo==null){
             tipo="en-us";
@@ -105,7 +105,7 @@ public final class ReliquiasNexus extends JavaPlugin {
         List<String> uuids = missaoAtivaBK.getStringList("players");
         for(String uuid: uuids){
             Missao missao = missaoAtivaBK.getObject("missoes."+uuid,Missao.class);
-            missaoAtiva.put(UUID.fromString(uuid),missao);
+            missoesManager.aceitarMissao(UUID.fromString(uuid),missao);
         }
         saveConfig();
         try {
@@ -435,7 +435,7 @@ public final class ReliquiasNexus extends JavaPlugin {
             }
             return Command.SINGLE_SUCCESS;
         }));
-        // Comando /nexus missao
+        // Comando /nexus missao e /nexus missao cancelar
         nexusRoot.then(Commands.literal(lang.getString("missao.comando","missao")).executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
             if (config.getBoolean("expurgo") || !config.getBoolean("recursos.missao")) {
@@ -475,7 +475,18 @@ public final class ReliquiasNexus extends JavaPlugin {
             }
             sender.sendMessage(Component.text("❌ "+lang.getString("missao.falhaPlayer","Apenas jogadores podem usar este comando!")).color(NamedTextColor.RED));
             return Command.SINGLE_SUCCESS;
-        }));
+        })
+                .then(Commands.literal(lang.getString("missao.cancelar","cancelar")).executes(ctx -> {
+                    final CommandSender sender = ctx.getSource().getSender();
+                    if (ctx.getSource().getExecutor() instanceof Player player) {
+                        missoesManager.cancelarMissao(player);
+                        player.getPersistentDataContainer().set(MISSAOCOOLDOWN.key,PersistentDataType.INTEGER,config.getInt("recursos.missaoCooldown",300));
+                        sender.sendMessage(Component.text("❌ "+lang.getString("missao.cancelada","Missão cancelada!")).color(NamedTextColor.RED));
+                        return Command.SINGLE_SUCCESS;
+                    }
+                    sender.sendMessage(Component.text("❌ "+lang.getString("missao.falhaPlayer","Apenas jogadores podem usar este comando!")).color(NamedTextColor.RED));
+                    return Command.SINGLE_SUCCESS;
+                })));
         // Comando missaoaceitar (oculto)
         // Note: A visibilidade deste comando é intencionalmente restrita para não aparecer nas sugestões.
         nexusRoot.then(Commands.literal("missaoaceitar").then(Commands.argument("missao",IntegerArgumentType.integer(1,6)).executes(ctx -> {
@@ -488,14 +499,13 @@ public final class ReliquiasNexus extends JavaPlugin {
                 List<Missao> missoes = missoesOfertas.remove(player.getUniqueId());
                 int missao = ctx.getArgument("missao", int.class);
                 Missao m = missoes.get(missao);
-                m.iniciar(player);
-                missaoAtiva.put(player.getUniqueId(),m);
-
+                missoesManager.aceitarMissao(player,m);
             }else{
                 sender.sendMessage(Component.text("❌ "+lang.getString("missao.falhaPlayer","Apenas jogadores podem usar este comando!")).color(NamedTextColor.RED));
             }
             return Command.SINGLE_SUCCESS;
         })));
+
         // Comando /nexus procurados
         nexusRoot.then(Commands.literal("procurados").executes(ctx -> {
             CommandSender sender = ctx.getSource().getSender();
@@ -885,9 +895,6 @@ public final class ReliquiasNexus extends JavaPlugin {
             return builder.buildFuture();
         }).then(Commands.argument("tipoMissao", StringArgumentType.string()).suggests((context, builder) -> {
             SpecialEvent specialEvent = new SpecialEvent(this);
-            for (String type : specialEvent.getMissionTypes()) {
-                builder.suggest(type);
-            }
             builder.suggest("ender");
             return builder.buildFuture();
         }).then(Commands.argument("dificuldade", StringArgumentType.string()).suggests((context, builder) -> {
@@ -912,15 +919,11 @@ public final class ReliquiasNexus extends JavaPlugin {
                             .color(NamedTextColor.RED));
                     return Command.SINGLE_SUCCESS;
                 }
-                for (Player player : players) {
-                    specialEvent.gerarMissao(player, tipoMissao, dificuldade, true);
-                }
                 sender.sendMessage(Component.text("✅ §aMissão especial gerada para todos os jogadores online!")
                         .color(NamedTextColor.GREEN));
             } else {
                 Player player = Bukkit.getPlayer(alvo);
                 if (player != null && player.isOnline()) {
-                    specialEvent.gerarMissao(player, tipoMissao, dificuldade, true);
                     sender.sendMessage(Component.text("✅ §aMissão especial gerada para §b" + player.getName())
                             .color(NamedTextColor.GREEN));
                 } else {
@@ -939,7 +942,6 @@ public final class ReliquiasNexus extends JavaPlugin {
             final CommandSender sender = ctx.getSource().getSender();
 
             SpecialEvent specialEvent = new SpecialEvent(this);
-            specialEvent.finalizarMissao(player);
 
             sender.sendMessage(Component.text("✅ §aMissão de " + player.getName() + " foi finalizada!")
                     .color(NamedTextColor.GREEN));
@@ -1219,38 +1221,23 @@ public final class ReliquiasNexus extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        List<String> uuids = new ArrayList<>();
-        missaoAtiva.forEach((uuid,missao) ->{
-            uuids.add(uuid.toString());
-            missao.pausar();
-            missaoAtivaBK.set("missoes."+ uuid,missao);
-        });
-        missaoAtivaBK.set("players",uuids);
-        File ms = new File(this.getDataFolder(), "missaoAtiva.yml");
-        try {
-            missaoAtivaBK.save(ms);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        missoesManager.save(missaoAtivaBK);
         saveConfig();
         getServer().getConsoleSender().sendMessage("§4❌ §c[Nexus]: Plugin Desativado!");
     }
-
     public static FileConfiguration getNexusConfig(){
         return config;
     }
-
     public static FileConfiguration getLang(){
         return lang;
     }
-
     public static void setConfigSave(String path,Object value){
         config.set(path,value);
     }
     public void reiniciarMissao(Player player){
-        missaoAtiva.get(player.getUniqueId()).reiniciar();
+        missoesManager.reiniciarMissao(player);
     }
     public void pausarMissao(Player player){
-        missaoAtiva.get(player.getUniqueId()).pausar();
+        missoesManager.pausarMIssao(player);
     }
 }

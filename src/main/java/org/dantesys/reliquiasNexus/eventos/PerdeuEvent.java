@@ -16,17 +16,20 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
 
 import java.util.List;
 import static org.dantesys.reliquiasNexus.util.NexusKeys.NEXUS;
 
 public class PerdeuEvent implements Listener {
-    public PerdeuEvent(ReliquiasNexus reliquiasNexus) {
+    private final JavaPlugin plugin;
+    public PerdeuEvent(JavaPlugin plugin) {
+        this.plugin=plugin;
     }
-
     @EventHandler
     public void itemFrame(PlayerInteractEntityEvent event){
         Player player = event.getPlayer();
@@ -88,6 +91,7 @@ public class PerdeuEvent implements Listener {
             }
             event.getPlayer().sendMessage("§c"+msg);
         }
+        event.getItemDrop().setMetadata("DROPADO",new FixedMetadataValue(plugin,"DROPADO"));
     }
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {

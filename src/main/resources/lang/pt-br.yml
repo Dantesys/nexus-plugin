@@ -8,7 +8,8 @@ nexus:
   - "/nexus trocar <jogador> <div> Oferecer troca"
   - "/nexus list <div> Listar relíquias e seus donos do servidor"
   - "/nexus level <div> Seus níveis de relíquias"
-  - "/nexus missao <div> Gerar uma missão aleatória"
+  - "/nexus missao <div> Gerar missões para você escolher"
+  - "/nexus missao cancelar <div> Cancela sua missão atual"
 #Texto do /nexus livro
 livro:
   comando: "livro"
@@ -77,10 +78,13 @@ missao:
   cancelada: "Missão Cancelada!"
   concluida: "Missão Concluída com sucesso!"
   recompensa: "Você recebeu <xp> de xp e <money> de <nomeMoney>!"
-  disponivel: "MISSÕES DISPONIVEIS"
+  disponivel: "MISSÕES DISPONÍVEIS"
+  menu: "Missão"
   tipo: "Tipo: <nome>"
   dificuldade: "Dificuldade: "
   aceitar: "ACEITAR"
+  cancelar: "cancelar"
+  progresso: "Progresso"
   tipos:
     coleta: "Coleta"
     caca: "Caça"

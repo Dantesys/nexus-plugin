@@ -81,11 +81,12 @@ public class PassivaEvent implements Listener {
                     if(countDown>0){
                         e.setCancelled(true);
                         return;
+                    }else{
+                        int tempo = 120;
+                        player.getInventory().setItemInMainHand(item);
+                        player.getInventory().setItemInOffHand(item2);
+                        dataPlayer.set(TOTEM.key,PersistentDataType.INTEGER,tempo);
                     }
-                    int tempo = 120;
-                    player.getInventory().setItemInMainHand(item);
-                    player.getInventory().setItemInOffHand(item2);
-                    dataPlayer.set(TOTEM.key,PersistentDataType.INTEGER,tempo);
                 }
             }
         }
