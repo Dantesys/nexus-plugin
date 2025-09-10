@@ -99,10 +99,12 @@ public class JoinQuitEvent implements Listener {
         player.setDisplayName("["+corrigido+"]"+player.getName());
         player.displayName(finalNome);
         player.setCustomNameVisible(true);
+        plugin.reiniciarMissao(player);
     }
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
+        plugin.pausarMissao(player);
         double saldo = Economia.getSaldo(player);
         player.getPersistentDataContainer().set(SALDO.key,PersistentDataType.DOUBLE,saldo);
         String msg=ReliquiasNexus.getLang().getString("joinquit.quit");

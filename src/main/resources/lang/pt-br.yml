@@ -73,10 +73,20 @@ missao:
   desativado: "O comando de missões está desativado"
   falhaPlayer: "Apenas jogadores podem usar este comando!"
   falhaTempo: "Aguarde mais <time> segundos!"
-  tempoRestante: "Falta <segundo> segundos para acabar o tempo!"
+  tempoRestante: "Tempo Restante: <tempo>"
   cancelada: "Missão Cancelada!"
   concluida: "Missão Concluída com sucesso!"
   recompensa: "Você recebeu <xp> de xp e <money> de <nomeMoney>!"
+  disponivel: "MISSÕES DISPONIVEIS"
+  tipo: "Tipo: <nome>"
+  dificuldade: "Dificuldade: "
+  aceitar: "ACEITAR"
+  tipos:
+    coleta: "Coleta"
+    caca: "Caça"
+    mineracao: "Mineração"
+    lenhador: "Lenhador"
+    exploracao: "Exploração"
 comandos:
   comando:
     - "livro"

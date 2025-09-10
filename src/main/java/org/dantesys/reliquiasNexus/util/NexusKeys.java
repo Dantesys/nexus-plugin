@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public enum NexusKeys {
-    MISSAOTIME,
+    MISSAOCOOLDOWN,
+    MISSAOTEMPO,
     NEXUS,
     SLAVE,
     DRENO,
@@ -87,15 +88,9 @@ public enum NexusKeys {
     MISSAO_DIFFICULTY,
     LOJA_ITEM_KEY,
     SALDO,
-    HISTORICO_MOLY,
-    EMPRESTIMO_ATUAL,
-    EMPRESTIMO_VENCIMENTO,
-    EMPRESTIMO_JUROS,
     TEAM_NAME,
     TEAM_RANK,
-    TEAM_BALANCE,
-    ENDER_CHEST_OWNED,
-    NEXUS_BANK_SALDO;
+    ENDER_CHEST_OWNED;
 
     public NamespacedKey key;
 

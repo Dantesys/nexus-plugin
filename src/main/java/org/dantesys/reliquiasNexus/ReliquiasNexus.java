@@ -34,6 +34,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.dantesys.reliquiasNexus.eventos.*;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
+import org.dantesys.reliquiasNexus.missoes.Missao;
 import org.dantesys.reliquiasNexus.missoes.MissoesManager;
 import org.dantesys.reliquiasNexus.tab.PlayerListManager;
 import org.dantesys.reliquiasNexus.team.Team;
@@ -67,8 +68,11 @@ import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 */
 public final class ReliquiasNexus extends JavaPlugin {
     private static final Map<UUID, Troca> trocas = new ConcurrentHashMap<>();
+    private static final Map<UUID, List<Missao>> missoes = new ConcurrentHashMap<>();
+    private static final Map<UUID, Missao> missaoAtiva = new ConcurrentHashMap<>();
     private static FileConfiguration config;
     private static YamlConfiguration lang;
+    private static YamlConfiguration missaoAtivaBK;
     private PlayerListManager playerListManager;
     private BossManager bossManager;
     public final List<String> names = List.of("guerreiro","ceifador","vida","mares","barbaro",
@@ -82,6 +86,7 @@ public final class ReliquiasNexus extends JavaPlugin {
         ItemsRegistro.init();
         saveResource("lang/pt-br.yml",true);
         saveResource("lang/en-us.yml",true);
+        saveResource("missaoAtiva.yml",true);
         saveDefaultConfig();
         config = getConfig();
 
@@ -95,6 +100,13 @@ public final class ReliquiasNexus extends JavaPlugin {
         }
         File file = new File(this.getDataFolder(), "/lang/"+tipo+".yml");
         lang = YamlConfiguration.loadConfiguration(file);
+        File ms = new File(this.getDataFolder(), "missaoAtiva.yml");
+        missaoAtivaBK = YamlConfiguration.loadConfiguration(ms);
+        List<String> uuids = missaoAtivaBK.getStringList("players");
+        for(String uuid: uuids){
+            Missao missao = missaoAtivaBK.getObject("missoes."+uuid,Missao.class);
+            missaoAtiva.put(UUID.fromString(uuid),missao);
+        }
         saveConfig();
         try {
             lang.save(file);
@@ -431,9 +443,31 @@ public final class ReliquiasNexus extends JavaPlugin {
                 return Command.SINGLE_SUCCESS;
             }
             if (ctx.getSource().getExecutor() instanceof Player player) {
-                int tempo = player.getPersistentDataContainer().getOrDefault(MISSAOTIME.key,PersistentDataType.INTEGER,0);
+                int tempo = player.getPersistentDataContainer().getOrDefault(MISSAOCOOLDOWN.key,PersistentDataType.INTEGER,0);
                 if(tempo<=0){
-                    new MissoesManager(this).gerarNovaMissao(player);
+                    MissoesManager manager = new MissoesManager(this);
+                    List<Missao> plMissoes = missoes.containsKey(player.getUniqueId())?missoes.remove(player.getUniqueId()): manager.gerarMissoes(player);
+                    missoes.put(player.getUniqueId(),plMissoes);
+                    Component msg = Component.text("\n "+lang.getString("missao.disponivel","MISSÕES DISPONIVEIS")+"\n")
+                            .color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD);
+                    for(int i=0;i<plMissoes.size();i++){
+                        Missao m = plMissoes.get(i);
+                        String dif = switch(m.getDificuldade()){
+                            case 2 -> "★★☆☆☆";
+                            case 3 -> "★★★☆☆";
+                            case 4 -> "★★★★☆";
+                            case 5 -> "★★★★★";
+                            default -> "★☆☆☆☆";
+                        };
+                        msg.append(Component.text("\n"+lang.getString("missao.tipo","Tipo: <nome>").replace("<nome>",m.getTipo()))
+                                .color(NamedTextColor.GRAY))
+                           .append(Component.text("\n"+lang.getString("missao.dificuldade","Dificuldade: ")+dif)
+                                .color(NamedTextColor.GRAY))
+                           .append(Component.text("\n[✅"+lang.getString("missao.aceitar","ACEITAR")+"]")
+                                .color(NamedTextColor.GREEN)
+                                .clickEvent(ClickEvent.runCommand("/nexus missaoaceitar " + player.getUniqueId().toString() + i)));
+                    }
+                    player.sendMessage(msg);
                 }else{
                     sender.sendMessage(Component.text("❌ "+lang.getString("missao.falhaTempo","Aguarde mais <time> segundos!").replace("<time>",tempo+"")).color(NamedTextColor.RED));
                 }
@@ -1164,44 +1198,21 @@ public final class ReliquiasNexus extends JavaPlugin {
         return false;
     }
 
-    private ItemStack criarItemReliquia(Player player, String nomeRelic) {
-        try {
-            Nexus nexus = ItemsRegistro.getFromNome(nomeRelic);
-            if(nexus != null) {
-                PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-                NamespacedKey key = getKey(nomeRelic);
-                int level=1;
-                if(key!=null){
-                    level = dataPlayer.getOrDefault(key, PersistentDataType.INTEGER, 1);
-                }
-
-
-                ItemStack item = nexus.getItem(level);
-                ItemMeta meta = item.getItemMeta();
-                meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING, player.getUniqueId().toString());
-                item.setItemMeta(meta);
-
-                return item;
-            }
-        } catch (Exception e) {
-            getLogger().warning("Erro ao criar item: " + e.getMessage());
-        }
-        return null;
-    }
-
-    private void removerReliquiaMao(Player player) {
-        ItemStack itemMao = player.getInventory().getItemInMainHand();
-        if(itemMao.hasItemMeta()) {
-            ItemMeta meta = itemMao.getItemMeta();
-            PersistentDataContainer data = meta.getPersistentDataContainer();
-            if(data.has(NEXUS.key, PersistentDataType.STRING)) {
-                player.getInventory().setItemInMainHand(null);
-            }
-        }
-    }
-
     @Override
     public void onDisable() {
+        List<String> uuids = new ArrayList<>();
+        missaoAtiva.forEach((uuid,missao) ->{
+            uuids.add(uuid.toString());
+            missao.pausar();
+            missaoAtivaBK.set("missoes."+ uuid,missao);
+        });
+        missaoAtivaBK.set("players",uuids);
+        File ms = new File(this.getDataFolder(), "missaoAtiva.yml");
+        try {
+            missaoAtivaBK.save(ms);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         saveConfig();
         getServer().getConsoleSender().sendMessage("§4❌ §c[Nexus]: Plugin Desativado!");
     }
@@ -1216,5 +1227,11 @@ public final class ReliquiasNexus extends JavaPlugin {
 
     public static void setConfigSave(String path,Object value){
         config.set(path,value);
+    }
+    public void reiniciarMissao(Player player){
+        missaoAtiva.get(player.getUniqueId()).reiniciar();
+    }
+    public void pausarMissao(Player player){
+        missaoAtiva.get(player.getUniqueId()).pausar();
     }
 }
