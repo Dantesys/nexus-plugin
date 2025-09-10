@@ -63,12 +63,12 @@ import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 *  Ajustar arquivo de tradução - Fazendo
 *  Refazer sistema de procurado - PENDENTE
 *  Refazer sistema de missões - Fazendo
-*  Criar comando para cancelar missão - PENDENTE
+*  Criar comando para cancelar missão - Fazendo
 *  Refazer sistema de bosses - PENDENTE
 */
 public final class ReliquiasNexus extends JavaPlugin {
     private static final Map<UUID, Troca> trocas = new ConcurrentHashMap<>();
-    private static final Map<UUID, List<Missao>> missoes = new ConcurrentHashMap<>();
+    private static final Map<UUID, List<Missao>> missoesOfertas = new ConcurrentHashMap<>();
     private static final Map<UUID, Missao> missaoAtiva = new ConcurrentHashMap<>();
     private static FileConfiguration config;
     private static YamlConfiguration lang;
@@ -446,8 +446,8 @@ public final class ReliquiasNexus extends JavaPlugin {
                 int tempo = player.getPersistentDataContainer().getOrDefault(MISSAOCOOLDOWN.key,PersistentDataType.INTEGER,0);
                 if(tempo<=0){
                     MissoesManager manager = new MissoesManager(this);
-                    List<Missao> plMissoes = missoes.containsKey(player.getUniqueId())?missoes.remove(player.getUniqueId()): manager.gerarMissoes(player);
-                    missoes.put(player.getUniqueId(),plMissoes);
+                    List<Missao> plMissoes = missoesOfertas.containsKey(player.getUniqueId())? missoesOfertas.remove(player.getUniqueId()): manager.gerarMissoes(player);
+                    missoesOfertas.put(player.getUniqueId(),plMissoes);
                     Component msg = Component.text("\n "+lang.getString("missao.disponivel","MISSÕES DISPONIVEIS")+"\n")
                             .color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD);
                     for(int i=0;i<plMissoes.size();i++){
@@ -465,7 +465,7 @@ public final class ReliquiasNexus extends JavaPlugin {
                                 .color(NamedTextColor.GRAY))
                            .append(Component.text("\n[✅"+lang.getString("missao.aceitar","ACEITAR")+"]")
                                 .color(NamedTextColor.GREEN)
-                                .clickEvent(ClickEvent.runCommand("/nexus missaoaceitar " + player.getUniqueId().toString() + i)));
+                                .clickEvent(ClickEvent.runCommand("/nexus missaoaceitar " + i)));
                     }
                     player.sendMessage(msg);
                 }else{
@@ -476,7 +476,26 @@ public final class ReliquiasNexus extends JavaPlugin {
             sender.sendMessage(Component.text("❌ "+lang.getString("missao.falhaPlayer","Apenas jogadores podem usar este comando!")).color(NamedTextColor.RED));
             return Command.SINGLE_SUCCESS;
         }));
+        // Comando missaoaceitar (oculto)
+        // Note: A visibilidade deste comando é intencionalmente restrita para não aparecer nas sugestões.
+        nexusRoot.then(Commands.literal("missaoaceitar").then(Commands.argument("missao",IntegerArgumentType.integer(1,6)).executes(ctx -> {
+            final CommandSender sender = ctx.getSource().getSender();
+            if (config.getBoolean("expurgo") || !config.getBoolean("recursos.missao")) {
+                sender.sendMessage(Component.text("❌ "+lang.getString("missao.desativado","O comando de missões está desativado")).color(NamedTextColor.RED));
+                return Command.SINGLE_SUCCESS;
+            }
+            if (ctx.getSource().getExecutor() instanceof Player player) {
+                List<Missao> missoes = missoesOfertas.remove(player.getUniqueId());
+                int missao = ctx.getArgument("missao", int.class);
+                Missao m = missoes.get(missao);
+                m.iniciar(player);
+                missaoAtiva.put(player.getUniqueId(),m);
 
+            }else{
+                sender.sendMessage(Component.text("❌ "+lang.getString("missao.falhaPlayer","Apenas jogadores podem usar este comando!")).color(NamedTextColor.RED));
+            }
+            return Command.SINGLE_SUCCESS;
+        })));
         // Comando /nexus procurados
         nexusRoot.then(Commands.literal("procurados").executes(ctx -> {
             CommandSender sender = ctx.getSource().getSender();
