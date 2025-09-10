@@ -67,11 +67,16 @@ level:
   titulo: "SEUS NÍVEIS DE RELÍQUIAS"
   nivel: "Nível:"
   falha: "Apenas jogadores podem usar este comando!"
-#Texto do /nexus missao
+#Texto do /nexus missao e das missões
 missao:
   comando: "missao"
   desativado: "O comando de missões está desativado"
   falhaPlayer: "Apenas jogadores podem usar este comando!"
+  falhaTempo: "Aguarde mais <time> segundos!"
+  tempoRestante: "Falta <segundo> segundos para acabar o tempo!"
+  cancelada: "Missão Cancelada!"
+  concluida: "Missão Concluída com sucesso!"
+  recompensa: "Você recebeu <xp> de xp e <money> de <nomeMoney>!"
 comandos:
   comando:
     - "livro"

@@ -105,7 +105,6 @@ public class JoinQuitEvent implements Listener {
         Player player = event.getPlayer();
         double saldo = Economia.getSaldo(player);
         player.getPersistentDataContainer().set(SALDO.key,PersistentDataType.DOUBLE,saldo);
-        ReliquiasNexus.saiu(player);
         String msg=ReliquiasNexus.getLang().getString("joinquit.quit");
         if(msg==null){
             msg="O Jogador <player> saiu do jogo!";

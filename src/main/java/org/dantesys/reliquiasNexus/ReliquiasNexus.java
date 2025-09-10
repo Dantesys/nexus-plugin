@@ -431,7 +431,12 @@ public final class ReliquiasNexus extends JavaPlugin {
                 return Command.SINGLE_SUCCESS;
             }
             if (ctx.getSource().getExecutor() instanceof Player player) {
-                new MissoesManager(this).gerarNovaMissao(player);
+                int tempo = player.getPersistentDataContainer().getOrDefault(MISSAOTIME.key,PersistentDataType.INTEGER,0);
+                if(tempo<=0){
+                    new MissoesManager(this).gerarNovaMissao(player);
+                }else{
+                    sender.sendMessage(Component.text("❌ "+lang.getString("missao.falhaTempo","Aguarde mais <time> segundos!").replace("<time>",tempo+"")).color(NamedTextColor.RED));
+                }
                 return Command.SINGLE_SUCCESS;
             }
             sender.sendMessage(Component.text("❌ "+lang.getString("missao.falhaPlayer","Apenas jogadores podem usar este comando!")).color(NamedTextColor.RED));
@@ -622,23 +627,6 @@ public final class ReliquiasNexus extends JavaPlugin {
                     return Command.SINGLE_SUCCESS;
                 })))
         );
-
-        // Novo comando para dar almas (operador)
-        nexuRoot.then(Commands.literal("alma").then(Commands.literal("dar").then(Commands.argument("player", ArgumentTypes.player()).then(Commands.argument("quantidade", IntegerArgumentType.integer()).executes(ctx -> {
-            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
-            final Player player = targetResolver.resolve(ctx.getSource()).getFirst();
-            final int quantidade = ctx.getArgument("quantidade", Integer.class);
-            final CommandSender sender = ctx.getSource().getSender();
-
-            PersistentDataContainer pdc = player.getPersistentDataContainer();
-            int almasAtuais = pdc.getOrDefault(MISSAOMORTE.key, PersistentDataType.INTEGER, 0);
-            int novasAlmas = almasAtuais + quantidade;
-            pdc.set(MISSAOMORTE.key, PersistentDataType.INTEGER, novasAlmas);
-
-            sender.sendMessage(Component.text("✅ §a" + quantidade + " almas foram adicionadas para " + player.getName() + ".").color(NamedTextColor.GREEN));
-            player.sendMessage(Component.text("✨ Você recebeu " + quantidade + " almas de um operador!").color(NamedTextColor.YELLOW));
-            return Command.SINGLE_SUCCESS;
-        })))));
 
 
         // Novo comando para remover relíquia
@@ -1139,46 +1127,39 @@ public final class ReliquiasNexus extends JavaPlugin {
     }
 
     private boolean processarTroca(Player player1, Player player2, String relic1, String relic2) {
-        try {
-            // Verifica se a relíquia de P1 é realmente a que ele está segurando
-            ItemStack stackP1 = player1.getInventory().getItemInMainHand();
-            if (!stackP1.hasItemMeta() || !stackP1.getItemMeta().getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING) || !Objects.equals(stackP1.getItemMeta().getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING), relic1)) {
-                player1.sendMessage(Component.text("❌ §cVocê não está segurando a relíquia que ofereceu!")
-                        .color(NamedTextColor.RED));
-                return false;
+        boolean achou1=false;
+        ItemStack p1Item = null;
+        for (ItemStack item : player1.getInventory().getContents()) {
+            if (item != null && item.hasItemMeta()) {
+                PersistentDataContainer data = item.getItemMeta().getPersistentDataContainer();
+                if (relic1.equals(data.get(NEXUS.key, PersistentDataType.STRING))) {
+                    p1Item=item;
+                    player1.getInventory().remove(item);
+                    achou1 = true;
+                    break;
+                }
             }
-
-            // Verifica se a relíquia de P2 é realmente a que ele está segurando
-            ItemStack stackP2 = player2.getInventory().getItemInMainHand();
-            if (!stackP2.hasItemMeta() || !stackP2.getItemMeta().getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING) || !Objects.equals(stackP2.getItemMeta().getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING), relic2)) {
-                player1.sendMessage(Component.text("❌ §cO outro jogador não está segurando a relíquia que ofereceu!")
-                        .color(NamedTextColor.RED));
-                player2.sendMessage(Component.text("❌ §cVocê precisa segurar a relíquia que está trocando!")
-                        .color(NamedTextColor.RED));
-                return false;
+        }
+        boolean achou2=false;
+        ItemStack p2Item = null;
+        for (ItemStack item : player2.getInventory().getContents()) {
+            if (item != null && item.hasItemMeta()) {
+                PersistentDataContainer data = item.getItemMeta().getPersistentDataContainer();
+                if (relic2.equals(data.get(NEXUS.key, PersistentDataType.STRING))) {
+                    p2Item=item;
+                    player2.getInventory().remove(item);
+                    achou2 = true;
+                    break;
+                }
             }
-
-            // Lógica de troca - trocar os itens entre os jogadores
-            // Remover do inventário
-            removerReliquiaMao(player1);
-            removerReliquiaMao(player2);
-
-            // Trocar os donos das relíquias no config antes de dar os itens
+        }
+        if(achou1 && achou2){
             config.set("nexus." + relic1, player2.getUniqueId().toString());
             config.set("nexus." + relic2, player1.getUniqueId().toString());
+            player1.getInventory().addItem(p2Item);
+            player2.getInventory().addItem(p1Item);
             saveConfig();
-
-            // Criar e dar novos itens com os donos atualizados
-            ItemStack item1 = criarItemReliquia(player2, relic1);
-            ItemStack item2 = criarItemReliquia(player1, relic2);
-            if(item1!=null && item2!=null){
-                player1.getInventory().addItem(item2);
-                player2.getInventory().addItem(item1);
-            }
-
             return true;
-        } catch (Exception e) {
-            getLogger().warning("Erro ao processar troca: " + e.getMessage());
         }
         return false;
     }
@@ -1221,12 +1202,6 @@ public final class ReliquiasNexus extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        // Salvar dados econômicos ao desligar
-        Bukkit.getOnlinePlayers().forEach(player -> {
-            double saldo = Economia.getSaldo(player);
-            player.getPersistentDataContainer().set(SALDO.key,PersistentDataType.DOUBLE,saldo);
-        });
-
         saveConfig();
         getServer().getConsoleSender().sendMessage("§4❌ §c[Nexus]: Plugin Desativado!");
     }
@@ -1242,5 +1217,4 @@ public final class ReliquiasNexus extends JavaPlugin {
     public static void setConfigSave(String path,Object value){
         config.set(path,value);
     }
-
 }

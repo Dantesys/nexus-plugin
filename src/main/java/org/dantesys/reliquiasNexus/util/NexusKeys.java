@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public enum NexusKeys {
+    MISSAOTIME,
     NEXUS,
     SLAVE,
     DRENO,
@@ -78,8 +79,6 @@ public enum NexusKeys {
     MISSAOGOLEM,
     DRAGAO,
     MISSAODRAGAO,
-    MORTE,
-    MISSAOMORTE,
     MISSAO_TIPO,
     MISSAO_META,
     MISSAO_PROGRESO,
@@ -146,7 +145,6 @@ public enum NexusKeys {
         keys.add(ALQUIMISTA.key);
         keys.add(GOLEM.key);
         keys.add(DRAGAO.key);
-        keys.add(MORTE.key);
         return keys;
     }
 }
