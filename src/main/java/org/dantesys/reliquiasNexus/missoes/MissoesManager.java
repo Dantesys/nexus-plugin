@@ -48,12 +48,12 @@ public class MissoesManager implements Listener {
         Biome biome = ExploracaoBiomeDif.getByDif(rd.nextInt(difBiome.dificuldade) + 1);
 
         // Criar missões com tempo e quantidade proporcionais à dificuldade
-        Missao missaoColeta = new Missao(difColeta, 720 * difColeta.dificuldade, rd.nextInt(difColeta.dificuldade) + 1, plugin, coleta, false, false);
-        Missao missaoMineracao = new Missao(difMineracao, 720 * difMineracao.dificuldade, rd.nextInt(difMineracao.dificuldade) + 1, plugin, mineracao, true, false);
-        Missao missaoLenhador = new Missao(difLenhador, 720 * difLenhador.dificuldade, rd.nextInt(difLenhador.dificuldade) + 1, plugin, lenhador, false, true);
-        Missao missaoCaca = new Missao(difCaca, 720 * difCaca.dificuldade, rd.nextInt(difCaca.dificuldade) + 1, plugin, caca);
-        Missao missaoStructure = new Missao(difStructure, 720 * difStructure.dificuldade * 2, 1, plugin, structure);
-        Missao missaoBiome = new Missao(difBiome, 720 * difBiome.dificuldade * 2, 1, plugin, biome);
+        Missao missaoColeta = new Missao(difColeta, 720 * difColeta.dificuldade, rd.nextInt(10) + 1, plugin, coleta, false, false);
+        Missao missaoMineracao = new Missao(difMineracao, 720 * difMineracao.dificuldade, rd.nextInt(10) + 1, plugin, mineracao, true, false);
+        Missao missaoLenhador = new Missao(difLenhador, 720 * difLenhador.dificuldade, rd.nextInt(10) + 1, plugin, lenhador, false, true);
+        Missao missaoCaca = new Missao(difCaca, 720 * difCaca.dificuldade, rd.nextInt(10) + 1, plugin, caca);
+        Missao missaoStructure = new Missao(difStructure, 720 * difStructure.dificuldade * 2, plugin, structure);
+        Missao missaoBiome = new Missao(difBiome, 720 * difBiome.dificuldade * 2, plugin, biome);
 
         return List.of(missaoColeta, missaoMineracao, missaoLenhador, missaoCaca, missaoStructure, missaoBiome);
     }

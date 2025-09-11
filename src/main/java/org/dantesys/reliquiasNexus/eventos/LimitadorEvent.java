@@ -84,6 +84,7 @@ public class LimitadorEvent implements Listener {
         Player player = event.getPlayer();
         PlayerInventory inv = player.getInventory();
         List<ItemStack> manterRelics = new ArrayList<>();
+        List<ItemStack> bau = new ArrayList<>();
         Location localMorte = player.getLocation();
         if(player.getPersistentDataContainer().has(RENASCER.key,PersistentDataType.INTEGER)){
             int tempo = player.getPersistentDataContainer().getOrDefault(RENASCER.key,PersistentDataType.INTEGER,0);
@@ -116,7 +117,11 @@ public class LimitadorEvent implements Listener {
                             manterRelics.add(item);
                             event.getDrops().remove(item);
                         }
+                    }else{
+                        bau.add(item);
                     }
+                }else{
+                    bau.add(item);
                 }
             }
         }
@@ -190,11 +195,7 @@ public class LimitadorEvent implements Listener {
 
             // === 2. Colocar itens que seriam dropados no baú ===
             org.bukkit.block.Chest chest = (org.bukkit.block.Chest) blocoBau.getState();
-            for (ItemStack item : event.getDrops()) {
-                if (item != null && !item.getPersistentDataContainer().has(NEXUS.key,PersistentDataType.STRING)) {
-                    chest.getInventory().addItem(item);
-                }
-            }
+            bau.forEach(item -> chest.getBlockInventory().addItem(item));
             chest.update();
             // limpar drops do chão (já que foram para o baú)
             event.getDrops().clear();

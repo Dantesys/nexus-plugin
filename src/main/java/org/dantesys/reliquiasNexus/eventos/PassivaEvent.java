@@ -17,11 +17,9 @@ import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
@@ -29,7 +27,6 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
 import org.dantesys.reliquiasNexus.SpeciaisPassivas.*;
-import org.dantesys.reliquiasNexus.SpeciaisPassivas.Golem;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
 import org.dantesys.reliquiasNexus.util.AlquimistaUtils;
@@ -107,6 +104,15 @@ public class PassivaEvent implements Listener {
                     }
                 }else{
                     conteiner.set(SPECIAL.key, PersistentDataType.INTEGER,0);
+                }
+                if(conteiner.has(MISSAOCOOLDOWN.key,PersistentDataType.INTEGER)){
+                    int tempo = conteiner.getOrDefault(MISSAOCOOLDOWN.key,PersistentDataType.INTEGER,0);
+                    if(tempo>0){
+                        tempo--;
+                        conteiner.set(MISSAOCOOLDOWN.key,PersistentDataType.INTEGER,tempo);
+                    }
+                }else{
+                    conteiner.set(MISSAOCOOLDOWN.key, PersistentDataType.INTEGER,0);
                 }
                 if(player.getPersistentDataContainer().has(RUGIDO.key,PersistentDataType.INTEGER)){
                     int rg = player.getPersistentDataContainer().getOrDefault(RUGIDO.key,PersistentDataType.INTEGER,0);

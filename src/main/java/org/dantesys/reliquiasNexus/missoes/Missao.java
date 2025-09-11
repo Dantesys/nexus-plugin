@@ -58,12 +58,12 @@ public class Missao{
         this.entity=entity;
     }
     //EXPLORAÇÃO
-    public Missao(MissaoDificuldade dificuldade,int tempo,int condicao,JavaPlugin plugin,StructureType structure){
-        this(MissaoTipo.EXPLORACAO,dificuldade,tempo,condicao,plugin);
+    public Missao(MissaoDificuldade dificuldade,int tempo,JavaPlugin plugin,StructureType structure){
+        this(MissaoTipo.EXPLORACAO,dificuldade,tempo,1,plugin);
         this.structure=structure;
     }
-    public Missao(MissaoDificuldade dificuldade,int tempo,int condicao,JavaPlugin plugin,Biome biome){
-        this(MissaoTipo.EXPLORACAO,dificuldade,tempo,condicao,plugin);
+    public Missao(MissaoDificuldade dificuldade,int tempo,JavaPlugin plugin,Biome biome){
+        this(MissaoTipo.EXPLORACAO,dificuldade,tempo,1,plugin);
         this.biome=biome;
     }
     public String getTipo(){
@@ -111,17 +111,17 @@ public class Missao{
         msg = msg.replace("<nomeMoney>",ReliquiasNexus.getNexusConfig().getString("recursos.moneyName","Moly"));
         player.sendMessage(Component.text(msg).color(NamedTextColor.GREEN));
         player.giveExp(xp);
-        double real = player.getPersistentDataContainer().getOrDefault(SALDO.key,PersistentDataType.DOUBLE,0d);
-        player.getPersistentDataContainer().set(SALDO.key,PersistentDataType.DOUBLE,real+money);
-        if(dificuldade.dificuldade>4 || (dificuldade.dificuldade==4 && rng.nextInt(100)>=90)){
+        PersistentDataContainer container = player.getPersistentDataContainer();
+        double real = container.getOrDefault(SALDO.key,PersistentDataType.DOUBLE,0d);
+        container.set(SALDO.key,PersistentDataType.DOUBLE,real+money);
+        int qtd = container.getOrDefault(QTD.key, PersistentDataType.INTEGER,0);
+        if((dificuldade.dificuldade>4 || (dificuldade.dificuldade==4 && rng.nextInt(100)>=90)) && qtd<plugin.getConfig().getInt("limite",4)){
             List<Nexus> reliquias = ItemsRegistro.getValidReliquia(ReliquiasNexus.getNexusConfig());
             int escolhido = rng.nextInt(reliquias.size());
             Nexus n = reliquias.get(escolhido);
             String nome = n.getNome();
             ReliquiasNexus.setConfigSave("nexus."+nome,player.getUniqueId().toString());
             plugin.saveConfig();
-            PersistentDataContainer container = player.getPersistentDataContainer();
-            container.set(QTD.key, PersistentDataType.INTEGER,1);
             int level =1;
             NamespacedKey key = getKey(nome);
             if(key!=null && container.has(key,PersistentDataType.INTEGER)){
@@ -129,6 +129,7 @@ public class Missao{
             }else if(key!=null){
                 container.set(key,PersistentDataType.INTEGER,1);
             }
+            container.set(QTD.key, PersistentDataType.INTEGER,qtd+1);
             ItemStack stack = n.getItem(level);
             ItemMeta meta = stack.getItemMeta();
             meta.getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,player.getUniqueId().toString());
@@ -159,7 +160,6 @@ public class Missao{
                 missaoSB.updateProgresso(feito, condicao);
                 if (cancel) {
                     player.sendMessage(Component.text(ReliquiasNexus.getLang().getString("missao.cancelada","Missão Cancelada!")).color(NamedTextColor.RED));
-                    player.getPersistentDataContainer().remove(MISSAOTEMPO.key);
                     // Limpa o scoreboard do jogador
                     ScoreboardManager manager = Bukkit.getScoreboardManager();
                     Scoreboard vazio = manager.getNewScoreboard();

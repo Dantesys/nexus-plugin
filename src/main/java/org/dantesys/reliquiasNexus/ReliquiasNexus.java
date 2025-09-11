@@ -446,8 +446,9 @@ public final class ReliquiasNexus extends JavaPlugin {
             }
             if (ctx.getSource().getExecutor() instanceof Player player) {
                 int tempo = player.getPersistentDataContainer().getOrDefault(MISSAOCOOLDOWN.key,PersistentDataType.INTEGER,0);
-                if(tempo<=0){
-                    List<Missao> plMissoes = missoesManager.gerarMissoes(player);
+                int emMissao = player.getPersistentDataContainer().getOrDefault(MISSAOTEMPO.key,PersistentDataType.INTEGER,0);
+                if(tempo<=0 && emMissao<=0){
+                    List<Missao> plMissoes = missoesOfertas.containsKey(player.getUniqueId())?missoesOfertas.remove(player.getUniqueId()):missoesManager.gerarMissoes(player);
                     missoesOfertas.put(player.getUniqueId(),plMissoes);
                     Component msg = Component.text("\n "+lang.getString("missao.disponivel","MISSÕES DISPONIVEIS")+"\n")
                             .color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD);
@@ -461,15 +462,16 @@ public final class ReliquiasNexus extends JavaPlugin {
                             case 5 -> "★★★★★";
                             default -> "★☆☆☆☆";
                         };
-                        Component missao = Component.text("\n"+lang.getString("missao.tipo","Tipo: <nome> - ").replace("<nome>",m.getTipo())+dif)
+                        Component missao = Component.text("\n"+lang.getString("missao.tipo","Tipo: <nome> - ").replace("<nome>",m.getTipo()))
                                 .color(NamedTextColor.GRAY)
-                           .append(Component.text("\n["+lang.getString("missao.aceitar","ACEITAR")+"]")
+                                .append(Component.text(dif).color(NamedTextColor.YELLOW).decorate(TextDecoration.BOLD))
+                                .append(Component.text("\n["+lang.getString("missao.aceitar","ACEITAR")+"]")
                                 .color(NamedTextColor.GREEN)
                                 .clickEvent(ClickEvent.runCommand("/nexus missaoaceitar " + (i+1))));
                         player.sendMessage(missao);
                     }
                 }else{
-                    sender.sendMessage(Component.text("❌ "+lang.getString("missao.falhaTempo","Aguarde mais <time> segundos!").replace("<time>",tempo+"")).color(NamedTextColor.RED));
+                    sender.sendMessage(Component.text("❌ "+lang.getString("missao.falhaTempo","Aguarde mais <time> segundos!").replace("<time>",tempo<=0?emMissao+"":tempo+"")).color(NamedTextColor.RED));
                 }
                 return Command.SINGLE_SUCCESS;
             }
