@@ -180,7 +180,7 @@ public class LimitadorEvent implements Listener {
             player.getPersistentDataContainer().set(QTD.key,PersistentDataType.INTEGER,0);
         }
         player.getPersistentDataContainer().set(PROTECAO.key,PersistentDataType.STRING,"");
-        if(plugin.getConfig().getBoolean("recursos.bauMorte")){
+        if(plugin.getConfig().getBoolean("recursos.bauMorte") && !bau.isEmpty()){
             // === 1. Criar o túmulo (cabeça + baú) ===
             Block blocoBau = localMorte.getBlock();
             blocoBau.setType(Material.CHEST);
