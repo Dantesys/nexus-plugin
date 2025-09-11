@@ -115,7 +115,15 @@ public class Missao{
         double real = container.getOrDefault(SALDO.key,PersistentDataType.DOUBLE,0d);
         container.set(SALDO.key,PersistentDataType.DOUBLE,real+money);
         int qtd = container.getOrDefault(QTD.key, PersistentDataType.INTEGER,0);
-        if((dificuldade.dificuldade>4 || (dificuldade.dificuldade==4 && rng.nextInt(100)>=90)) && qtd<plugin.getConfig().getInt("limite",4)){
+        boolean ganha = switch (dificuldade.dificuldade){
+            case 1 ->  rng.nextInt(100)==99;
+            case 2 ->  rng.nextInt(100)>=95;
+            case 3 ->  rng.nextInt(100)>=90;
+            case 4 ->  rng.nextInt(100)>=80;
+            case 5 -> true;
+            default -> false;
+        };
+        if(ganha && qtd<plugin.getConfig().getInt("limite",4)){
             List<Nexus> reliquias = ItemsRegistro.getValidReliquia(ReliquiasNexus.getNexusConfig());
             int escolhido = rng.nextInt(reliquias.size());
             Nexus n = reliquias.get(escolhido);
@@ -192,7 +200,6 @@ public class Missao{
                     Scoreboard vazio = manager.getNewScoreboard();
                     player.setScoreboard(vazio);
                     cancel();
-                    return;
                 }
             }
         }.runTaskTimer(plugin, 0L, 20L);
