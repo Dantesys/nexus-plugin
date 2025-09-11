@@ -21,7 +21,6 @@ public class PlayerList {
     }
 
     public void updatePlayerList(Player player) {
-        // Header e Footer
         Component header = Component.text()
                 .append(Component.text("Nexus Etern\n")
                         .color(NamedTextColor.GOLD)
@@ -31,79 +30,20 @@ public class PlayerList {
                 .build();
 
         Component footer = Component.text()
-                .append(Component.text("----------------\n")
-                        .color(NamedTextColor.DARK_GRAY))
-                .append(Component.text("Nexus")
-                        .color(NamedTextColor.YELLOW))
+                .append(Component.text("----------------\n").color(NamedTextColor.DARK_GRAY))
+                .append(Component.text("Nexus").color(NamedTextColor.YELLOW))
                 .build();
 
         player.sendPlayerListHeaderAndFooter(header, footer);
 
-        // Atualizar informações do jogador no scoreboard
-        updatePlayerInfo(player);
+        updatePlayerName(player);
     }
 
-    private void updatePlayerInfo(Player player) {
-        Scoreboard scoreboard = player.getScoreboard();
-        if (scoreboard.getObjective("playerlist") == null) {
-            scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-            Objective objective = scoreboard.registerNewObjective("playerlist","dummy");
-            objective.setDisplaySlot(DisplaySlot.PLAYER_LIST);
-            player.setScoreboard(scoreboard);
-        }
-
-        String rank = plugin.getConfig().getString("players." + player.getUniqueId().toString() + ".rank", "membro");
-
-        String teamName;
-        Component prefix = switch (rank.toLowerCase()) {
-            case "dono" -> {
-                teamName = "000dono";
-                yield Component.text("[Dono] ").color(NamedTextColor.RED);
-            }
-            case "staff" -> {
-                teamName = "001staff";
-                yield Component.text("[Staff] ").color(NamedTextColor.AQUA);
-            }
-            case "ajudante" -> {
-                teamName = "002ajudante";
-                yield Component.text("[Ajudante] ").color(NamedTextColor.GREEN);
-            }
-            case "beta" -> {
-                teamName = "003beta";
-                yield Component.text("[Beta] ").color(NamedTextColor.DARK_BLUE);
-            }
-            case "amigo" -> {
-                teamName = "004amigo";
-                yield Component.text("[Amigo] ").color(NamedTextColor.DARK_PURPLE);
-            }
-            default -> {
-                teamName = "999membro";
-                yield Component.text("[Membro] ").color(NamedTextColor.GRAY);
-            }
-        };
-
-        Team team = scoreboard.getTeam(teamName);
-        if (team == null) {
-            team = scoreboard.registerNewTeam(teamName);
-            team.prefix(prefix);
-            team.setAllowFriendlyFire(false);
-            team.setCanSeeFriendlyInvisibles(true);
-        }
-
-        // Remove o jogador de todos os outros times
-        for (Team otherTeam : scoreboard.getTeams()) {
-            if (otherTeam.hasEntry(player.getName())) {
-                otherTeam.removeEntry(player.getName());
-            }
-        }
-
-        team.addEntry(player.getName());
-
-        // Atualizar o nome na tablist para o ping real
-        int playerPing = player.getPing();
-        player.playerListName(
-                prefix.append(Component.text(player.getName() + " | " + playerPing + "ms").color(NamedTextColor.WHITE))
-        );
+    private void updatePlayerName(Player player) {
+        String rank = plugin.getConfig().getString("players." + player.getUniqueId() + ".rank", "membro");
+        Component prefix = getPlayerTag(player);
+        int ping = player.getPing();
+        player.playerListName(prefix.append(Component.text(player.getName() + " | " + ping + "ms").color(NamedTextColor.WHITE)));
     }
 
     public void updateForAllPlayers() {
@@ -113,22 +53,15 @@ public class PlayerList {
     }
 
     public void updateServerInfo() {
-        double tps = Bukkit.getTPS()[0];
-        int onlinePlayers = Bukkit.getOnlinePlayers().size();
-
         Component header = Component.text()
-                .append(Component.text("Nexus Etern\n")
-                        .color(NamedTextColor.GOLD)
-                        .decorate(TextDecoration.BOLD))
-                .append(Component.text(String.format("TPS: %.1f | Online: %d", tps, onlinePlayers))
+                .append(Component.text("Nexus Etern\n").color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD))
+                .append(Component.text(String.format("TPS: %.1f | Online: %d", Bukkit.getTPS()[0], Bukkit.getOnlinePlayers().size()))
                         .color(NamedTextColor.GRAY))
                 .build();
 
         Component footer = Component.text()
-                .append(Component.text("----------------\n")
-                        .color(NamedTextColor.DARK_GRAY))
-                .append(Component.text("Nexus")
-                        .color(NamedTextColor.YELLOW))
+                .append(Component.text("----------------\n").color(NamedTextColor.DARK_GRAY))
+                .append(Component.text("Nexus").color(NamedTextColor.YELLOW))
                 .build();
 
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -136,12 +69,10 @@ public class PlayerList {
         }
     }
 
-    // Método para obter o prefixo da tag de um jogador
     public Component getPlayerTag(Player player) {
-        String rank = plugin.getConfig().getString("players." + player.getUniqueId().toString() + ".rank", "membro");
-        Color cor = plugin.getConfig().getColor("cargo."+rank, Color.WHITE);
-        String r = rank.substring(0, 1).toUpperCase();
-        String corrigido = r + rank.substring(1);
-        return Component.text("["+corrigido+"]").color(TextColor.color(cor.asRGB()));
+        String rank = plugin.getConfig().getString("players." + player.getUniqueId() + ".rank", "membro");
+        Color cor = plugin.getConfig().getColor("cargo." + rank, Color.WHITE);
+        String corrigido = rank.substring(0, 1).toUpperCase() + rank.substring(1);
+        return Component.text("[" + corrigido + "]").color(TextColor.color(cor.asRGB()));
     }
 }

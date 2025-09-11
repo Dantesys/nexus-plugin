@@ -3,6 +3,7 @@ package org.dantesys.reliquiasNexus.SpeciaisPassivas;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -24,7 +25,8 @@ public class Frostis {
     }
     private static void pilarCristalCongelante(int level,Player player) {
         World world = player.getWorld();
-        Location centro = player.getTargetBlockExact(5).getLocation();
+        Block bloco = player.getTargetBlockExact(5);
+        Location centro = bloco!=null?bloco.getLocation():player.getLocation();
         int raio = 2 + level;
         double dano = 1 + 0.5 * level;
 

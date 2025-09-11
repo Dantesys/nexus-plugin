@@ -31,7 +31,7 @@ public class JoinQuitEvent implements Listener {
         this.plugin=plugin;
     }
     @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
+    public void onPlayerJoin(PlayerJoinEvent event) throws Exception {
         Player player = event.getPlayer();
         PersistentDataContainer container = player.getPersistentDataContainer();
         int qtd = container.getOrDefault(QTD.key, PersistentDataType.INTEGER,0);
@@ -99,6 +99,7 @@ public class JoinQuitEvent implements Listener {
         player.setDisplayName("["+corrigido+"]"+player.getName());
         player.displayName(finalNome);
         player.setCustomNameVisible(true);
+        player.setResourcePack("https://github.com/Dantesys/nexus-plugin/raw/refs/heads/master/ResourcePackNexus/ResourcePackNexus.zip");
         plugin.reiniciarMissao(player);
     }
     @EventHandler

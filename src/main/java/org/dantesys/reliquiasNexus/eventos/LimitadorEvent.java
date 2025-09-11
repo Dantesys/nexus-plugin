@@ -2,6 +2,8 @@ package org.dantesys.reliquiasNexus.eventos;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.Skull;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -10,6 +12,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.CompassMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -29,6 +32,7 @@ public class LimitadorEvent implements Listener {
         this.plugin=plugin;
     }
     private final Map<UUID, List<ItemStack>> reliquiasSalvas = new HashMap<>();
+    private final Map<UUID,ItemStack> bussolaMortal = new HashMap<>();
     public static void checkLimit(Player player){
         if(passou(player)){
             player.setHealth(0);
@@ -80,6 +84,7 @@ public class LimitadorEvent implements Listener {
         Player player = event.getPlayer();
         PlayerInventory inv = player.getInventory();
         List<ItemStack> manterRelics = new ArrayList<>();
+        Location localMorte = player.getLocation();
         if(player.getPersistentDataContainer().has(RENASCER.key,PersistentDataType.INTEGER)){
             int tempo = player.getPersistentDataContainer().getOrDefault(RENASCER.key,PersistentDataType.INTEGER,0);
             if(tempo>0){
@@ -170,12 +175,44 @@ public class LimitadorEvent implements Listener {
             player.getPersistentDataContainer().set(QTD.key,PersistentDataType.INTEGER,0);
         }
         player.getPersistentDataContainer().set(PROTECAO.key,PersistentDataType.STRING,"");
+        if(plugin.getConfig().getBoolean("recursos.bauMorte")){
+            // === 1. Criar o túmulo (cabeça + baú) ===
+            Block blocoBau = localMorte.getBlock();
+            blocoBau.setType(Material.CHEST);
+
+            // colocar a cabeça em cima do baú
+            Block blocoCabeca = blocoBau.getRelative(0, 1, 0);
+            blocoCabeca.setType(Material.PLAYER_HEAD);
+            if (blocoCabeca.getState() instanceof Skull skull) {
+                skull.setOwningPlayer(player);
+                skull.update();
+            }
+
+            // === 2. Colocar itens que seriam dropados no baú ===
+            org.bukkit.block.Chest chest = (org.bukkit.block.Chest) blocoBau.getState();
+            for (ItemStack item : event.getDrops()) {
+                if (item != null && !item.getPersistentDataContainer().has(NEXUS.key,PersistentDataType.STRING)) {
+                    chest.getInventory().addItem(item);
+                }
+            }
+            chest.update();
+            // limpar drops do chão (já que foram para o baú)
+            event.getDrops().clear();
+            ItemStack bussola = new ItemStack(Material.COMPASS);
+            CompassMeta meta = (CompassMeta) bussola.getItemMeta();
+            if (meta != null) {
+                meta.setLodestone(localMorte);
+                meta.setLodestoneTracked(false);
+                bussola.setItemMeta(meta);
+            }
+            bussolaMortal.put(player.getUniqueId(),bussola);
+        }
     }
     @EventHandler
     public void onRespawn(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
         List<ItemStack> reliquias = reliquiasSalvas.remove(player.getUniqueId());
-
+        player.getInventory().addItem(bussolaMortal.remove(player.getUniqueId()));
         if (reliquias != null) {
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 for (ItemStack item : reliquias) {

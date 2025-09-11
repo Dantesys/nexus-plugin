@@ -29,24 +29,40 @@ public class MissoesManager implements Listener {
     public MissoesManager(JavaPlugin plugin){
         this.plugin=plugin;
     }
+    private MissaoDificuldade randomDificuldade(int playerLevel) {
+        MissaoDificuldade base = MissaoDificuldade.getByLevel(playerLevel);
+        int maxLevel = base.max == -1 ? base.min + 20 : base.max;
+        Random rd = new Random();
+        int levelAleatorio = rd.nextInt(maxLevel - base.min + 1) + base.min;
+        return MissaoDificuldade.getByLevel(levelAleatorio);
+    }
     public List<Missao> gerarMissoes(Player player){
         Random rd = new Random();
-        int level = player.getLevel();
-        MissaoDificuldade missaoDificuldade = MissaoDificuldade.getByLevel(level);
-        int dif = missaoDificuldade.dificuldade;
-        Material coleta = ColetaDif.getByDif(rd.nextInt(1,dif));
-        Missao missaoColeta = new Missao(missaoDificuldade,720*level,rd.nextInt(1,dif),plugin,coleta,false,false);
-        Material mineracao = MineracaoDif.getByDif(rd.nextInt(1,dif));
-        Missao missaoMineracao = new Missao(missaoDificuldade,720*level,rd.nextInt(1,dif),plugin,mineracao,true,false);
-        Material lenhador = LenhadorDif.getByDif(rd.nextInt(1,dif));
-        Missao missaoLenhador = new Missao(missaoDificuldade,720*level,rd.nextInt(1,dif),plugin,lenhador,false,true);
-        EntityType caca = CacaDif.getByDif(rd.nextInt(1,dif));
-        Missao missaoCaca = new Missao(missaoDificuldade,720*level,rd.nextInt(1,dif),plugin,caca);
-        StructureType structure = ExploracaoStructureDif.getByDif(rd.nextInt(1,dif));
-        Missao missaoStructure = new Missao(missaoDificuldade,720*level*2,1,plugin,structure);
-        Biome biome = ExploracaoBiomeDif.getByDif(rd.nextInt(1,dif));
-        Missao missaoBiome = new Missao(missaoDificuldade,720*level*2,1,plugin,biome);
-        return List.of(missaoColeta,missaoMineracao,missaoLenhador,missaoCaca,missaoStructure,missaoBiome);
+        int playerLevel = player.getLevel();
+        // Gerar dificuldades aleatórias para cada tipo de missão
+        MissaoDificuldade difColeta = randomDificuldade(playerLevel);
+        MissaoDificuldade difMineracao = randomDificuldade(playerLevel);
+        MissaoDificuldade difLenhador = randomDificuldade(playerLevel);
+        MissaoDificuldade difCaca = randomDificuldade(playerLevel);
+        MissaoDificuldade difStructure = randomDificuldade(playerLevel);
+        MissaoDificuldade difBiome = randomDificuldade(playerLevel);
+        // Escolher materiais e entidades aleatórios dentro da dificuldade
+        Material coleta = ColetaDif.getByDif(rd.nextInt(difColeta.dificuldade) + 1);
+        Material mineracao = MineracaoDif.getByDif(rd.nextInt(difMineracao.dificuldade) + 1);
+        Material lenhador = LenhadorDif.getByDif(rd.nextInt(difLenhador.dificuldade) + 1);
+        EntityType caca = CacaDif.getByDif(rd.nextInt(difCaca.dificuldade) + 1);
+        StructureType structure = ExploracaoStructureDif.getByDif(rd.nextInt(difStructure.dificuldade) + 1);
+        Biome biome = ExploracaoBiomeDif.getByDif(rd.nextInt(difBiome.dificuldade) + 1);
+
+        // Criar missões com tempo e quantidade proporcionais à dificuldade
+        Missao missaoColeta = new Missao(difColeta, 720 * difColeta.dificuldade, rd.nextInt(difColeta.dificuldade) + 1, plugin, coleta, false, false);
+        Missao missaoMineracao = new Missao(difMineracao, 720 * difMineracao.dificuldade, rd.nextInt(difMineracao.dificuldade) + 1, plugin, mineracao, true, false);
+        Missao missaoLenhador = new Missao(difLenhador, 720 * difLenhador.dificuldade, rd.nextInt(difLenhador.dificuldade) + 1, plugin, lenhador, false, true);
+        Missao missaoCaca = new Missao(difCaca, 720 * difCaca.dificuldade, rd.nextInt(difCaca.dificuldade) + 1, plugin, caca);
+        Missao missaoStructure = new Missao(difStructure, 720 * difStructure.dificuldade * 2, 1, plugin, structure);
+        Missao missaoBiome = new Missao(difBiome, 720 * difBiome.dificuldade * 2, 1, plugin, biome);
+
+        return List.of(missaoColeta, missaoMineracao, missaoLenhador, missaoCaca, missaoStructure, missaoBiome);
     }
     public void aceitarMissao(UUID uuid,Missao missao){
         missaoAtiva.put(uuid,missao);
@@ -56,13 +72,13 @@ public class MissoesManager implements Listener {
         aceitarMissao(player.getUniqueId(),missao);
     }
     public void reiniciarMissao(Player player){
-        missaoAtiva.get(player.getUniqueId()).reiniciar();
+        if(missaoAtiva.containsKey(player.getUniqueId()))missaoAtiva.get(player.getUniqueId()).reiniciar();
     }
     public void pausarMIssao(Player player){
-        missaoAtiva.get(player.getUniqueId()).pausar();
+        if(missaoAtiva.containsKey(player.getUniqueId()))missaoAtiva.get(player.getUniqueId()).pausar();
     }
     public void cancelarMissao(Player player){
-        missaoAtiva.remove(player.getUniqueId()).cancelar();
+        if(missaoAtiva.containsKey(player.getUniqueId()))missaoAtiva.remove(player.getUniqueId()).cancelar();
     }
     public void save(YamlConfiguration missaoAtivaBK){
         List<String> uuids = new ArrayList<>();
@@ -117,7 +133,7 @@ public class MissoesManager implements Listener {
         if(missaoAtiva.containsKey(player.getUniqueId())){
             Missao m = missaoAtiva.get(player.getUniqueId());
             String tipo = m.getTipo();
-            if(tipo.equals(MissaoTipo.MINERACAO.nome) || tipo.equals(MissaoTipo.LENHADOR.nome)){
+            if(tipo.equals(MissaoTipo.CACA.nome)){
                 EntityType mat = (EntityType) m.get("entity");
                 EntityType entity = event.getEntity().getType();
                 if(entity.equals(mat)){

@@ -19,25 +19,18 @@ recursos:
   #Seconds
   missaoCooldown: 300
   tpa: true
+  #money
   tpacost: 100
   home: true
+  #money
   homecost: 1000
-  keepinv: true
-  keepinvcost: 1000
+  bauMorte: true
   enderchest: true
+  #money
   enderchestcost: 5000
   economia: true
   moneyName: "moly"
   procurados: true
-  
-# Lista de comandos para desativar durante o expurgo
-# List of commands to disable during purge
-expurgo_comandos_desativados:
-  - "trocar"
-  - "loja"
-  - "missoes"
-  - "banco"
-  - "team"
 
 # Limite de reliquias que um jogador pode ter, se o jogador passar disso ele é derrotado e é deixado com apenas 1 reliquia
 # Limit of relics that a player can have, if the player exceeds this he is defeated and is left with only 1 relic

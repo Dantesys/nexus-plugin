@@ -4,7 +4,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
-import org.dantesys.reliquiasNexus.economia.Banco;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,10 +40,6 @@ public class Economia {
         double novoSaldo = getSaldo(player) + valor;
         saldos.put(player.getUniqueId(), novoSaldo);
         adicionarAoHistorico(player.getUniqueId(), "+" + String.format("%,.2f", valor) + " moly - " + motivo);
-    }
-
-    public static void adicionarSaldo(Banco banco, double valor, String motivo) {
-        banco.setSaldo(banco.getSaldo() + valor);
     }
 
     public static void removerSaldo(Player player, double valor, String motivo) {
@@ -105,54 +100,20 @@ public class Economia {
     }
 
     public static void processarVendaMinerio(Player player, double valor) {
-        Banco centralBank = Banco.getNexusCentralBank();
         double bonusBanco = valor * 0.5; // 50% a mais para o banco
 
         // Adiciona valor ao jogador
         adicionarSaldo(player, valor, "Venda de Minério");
 
-        // Adiciona valor + bônus ao banco
-        centralBank.setSaldo(centralBank.getSaldo() + valor + bonusBanco);
-
         player.sendMessage(Component.text("✅ Você vendeu minérios por " + String.format("%,.2f", valor) + " moly!").color(NamedTextColor.GREEN));
     }
 
     public static void processarRecompensaMissao(Player player, double valor) {
-        Banco centralBank = Banco.getNexusCentralBank();
         double bonusBanco = valor * 0.5; // 50% a mais para o banco
-
-        // Verifica se o banco tem saldo suficiente
-        if (centralBank.getSaldo() >= valor) {
-            // Adiciona valor ao jogador
-            adicionarSaldo(player, valor, "Recompensa de Missão");
-
-            // Remove valor do banco mas adiciona o bônus
-            centralBank.setSaldo(centralBank.getSaldo() - valor + bonusBanco);
-
-            player.sendMessage(Component.text("✅ Você recebeu " + String.format("%,.2f", valor) + " moly pela missão!").color(NamedTextColor.GREEN));
-        } else {
-            player.sendMessage(Component.text("❌ O banco central não tem fundos suficientes para pagar a recompensa.").color(NamedTextColor.RED));
-        }
     }
 
     public static void processarEmprestimo(Player player, double valor) {
-        Banco centralBank = Banco.getNexusCentralBank();
         double valorComJuros = valor * 1.5; // 50% de juros
-
-        if (centralBank.getSaldo() >= valor) {
-            // Adiciona valor ao jogador
-            adicionarSaldo(player, valor, "Empréstimo Bancário");
-
-            // Remove valor do banco
-            centralBank.setSaldo(centralBank.getSaldo() - valor);
-
-            // Registra o empréstimo com juros
-            setEmprestimo(player.getUniqueId(), valorComJuros);
-            player.sendMessage(Component.text("✅ Empréstimo de " + String.format("%,.2f", valor) +
-                    " moly concedido! Total a pagar: " + String.format("%,.2f", valorComJuros) + " moly (50% de juros)").color(NamedTextColor.GREEN));
-        } else {
-            player.sendMessage(Component.text("❌ O banco central não tem fundos suficientes para o empréstimo.").color(NamedTextColor.RED));
-        }
     }
 
     public static boolean pagarEmprestimo(Player player) {
@@ -168,10 +129,6 @@ public class Economia {
         if (saldoPlayer >= divida) {
             // Remove o valor do jogador
             removerSaldo(player, divida, "Pagamento de Empréstimo");
-
-            // Adiciona o valor ao banco
-            Banco centralBank = Banco.getNexusCentralBank();
-            centralBank.setSaldo(centralBank.getSaldo() + divida);
 
             // Finaliza o empréstimo
             finalizarEmprestimo(playerId);

@@ -44,7 +44,10 @@ public class Temporizador implements Runnable {
         this.taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this, 0L, periodo);
     }
     public void stop(){
-        this.taskId = null;
+        if (taskId != null) {
+            Bukkit.getScheduler().cancelTask(taskId);
+            taskId = null;
+        }
     }
 
 }
