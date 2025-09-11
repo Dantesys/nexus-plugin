@@ -29,23 +29,16 @@ public class MissoesManager implements Listener {
     public MissoesManager(JavaPlugin plugin){
         this.plugin=plugin;
     }
-    private MissaoDificuldade randomDificuldade(int playerLevel) {
-        MissaoDificuldade base = MissaoDificuldade.getByLevel(playerLevel);
-        int maxLevel = base.max == -1 ? base.min + 20 : base.max;
-        Random rd = new Random();
-        int levelAleatorio = rd.nextInt(maxLevel - base.min + 1) + base.min;
-        return MissaoDificuldade.getByLevel(levelAleatorio);
-    }
     public List<Missao> gerarMissoes(Player player){
         Random rd = new Random();
         int playerLevel = player.getLevel();
         // Gerar dificuldades aleatórias para cada tipo de missão
-        MissaoDificuldade difColeta = randomDificuldade(playerLevel);
-        MissaoDificuldade difMineracao = randomDificuldade(playerLevel);
-        MissaoDificuldade difLenhador = randomDificuldade(playerLevel);
-        MissaoDificuldade difCaca = randomDificuldade(playerLevel);
-        MissaoDificuldade difStructure = randomDificuldade(playerLevel);
-        MissaoDificuldade difBiome = randomDificuldade(playerLevel);
+        MissaoDificuldade difColeta = MissaoDificuldade.getByLevel(rd.nextInt(playerLevel));
+        MissaoDificuldade difMineracao = MissaoDificuldade.getByLevel(rd.nextInt(playerLevel));
+        MissaoDificuldade difLenhador = MissaoDificuldade.getByLevel(rd.nextInt(playerLevel));
+        MissaoDificuldade difCaca = MissaoDificuldade.getByLevel(rd.nextInt(playerLevel));
+        MissaoDificuldade difStructure = MissaoDificuldade.getByLevel(rd.nextInt(playerLevel));
+        MissaoDificuldade difBiome = MissaoDificuldade.getByLevel(rd.nextInt(playerLevel));
         // Escolher materiais e entidades aleatórios dentro da dificuldade
         Material coleta = ColetaDif.getByDif(rd.nextInt(difColeta.dificuldade) + 1);
         Material mineracao = MineracaoDif.getByDif(rd.nextInt(difMineracao.dificuldade) + 1);
