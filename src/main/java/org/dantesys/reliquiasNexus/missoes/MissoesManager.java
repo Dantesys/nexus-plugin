@@ -17,6 +17,7 @@ import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.generator.structure.StructureType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.StructureSearchResult;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,20 +32,18 @@ public class MissoesManager implements Listener {
     }
     public List<Missao> gerarMissoes(Player player){
         Random rd = new Random();
-        int playerLevel = player.getLevel();
+        int playerLevel = Math.max(player.getLevel(), 1);
         // Gerar dificuldades aleatórias para cada tipo de missão
         MissaoDificuldade difColeta = MissaoDificuldade.getByLevel(rd.nextInt(playerLevel));
         MissaoDificuldade difMineracao = MissaoDificuldade.getByLevel(rd.nextInt(playerLevel));
         MissaoDificuldade difLenhador = MissaoDificuldade.getByLevel(rd.nextInt(playerLevel));
         MissaoDificuldade difCaca = MissaoDificuldade.getByLevel(rd.nextInt(playerLevel));
-        MissaoDificuldade difStructure = MissaoDificuldade.getByLevel(rd.nextInt(playerLevel));
         MissaoDificuldade difBiome = MissaoDificuldade.getByLevel(rd.nextInt(playerLevel));
         // Escolher materiais e entidades aleatórios dentro da dificuldade
         Material coleta = ColetaDif.getByDif(rd.nextInt(difColeta.dificuldade) + 1);
         Material mineracao = MineracaoDif.getByDif(rd.nextInt(difMineracao.dificuldade) + 1);
         Material lenhador = LenhadorDif.getByDif(rd.nextInt(difLenhador.dificuldade) + 1);
         EntityType caca = CacaDif.getByDif(rd.nextInt(difCaca.dificuldade) + 1);
-        StructureType structure = ExploracaoStructureDif.getByDif(rd.nextInt(difStructure.dificuldade) + 1);
         Biome biome = ExploracaoBiomeDif.getByDif(rd.nextInt(difBiome.dificuldade) + 1);
 
         // Criar missões com tempo e quantidade proporcionais à dificuldade
@@ -52,10 +51,9 @@ public class MissoesManager implements Listener {
         Missao missaoMineracao = new Missao(difMineracao, 720 * difMineracao.dificuldade, rd.nextInt(10) + 1, plugin, mineracao, true, false);
         Missao missaoLenhador = new Missao(difLenhador, 720 * difLenhador.dificuldade, rd.nextInt(10) + 1, plugin, lenhador, false, true);
         Missao missaoCaca = new Missao(difCaca, 720 * difCaca.dificuldade, rd.nextInt(10) + 1, plugin, caca);
-        Missao missaoStructure = new Missao(difStructure, 720 * difStructure.dificuldade * 2, plugin, structure);
         Missao missaoBiome = new Missao(difBiome, 720 * difBiome.dificuldade * 2, plugin, biome);
 
-        return List.of(missaoColeta, missaoMineracao, missaoLenhador, missaoCaca, missaoStructure, missaoBiome);
+        return List.of(missaoColeta, missaoMineracao, missaoLenhador, missaoCaca, missaoBiome);
     }
     public void aceitarMissao(UUID uuid,Missao missao){
         missaoAtiva.put(uuid,missao);
@@ -153,9 +151,13 @@ public class MissoesManager implements Listener {
                                 missaoAtiva.replace(player.getUniqueId(),m);
                             }
                         }else{
-                            if(player.getWorld().locateNearestStructure(loc,mat,50,false)!=null){
-                                m.atualizaCondicao();
-                                missaoAtiva.replace(player.getUniqueId(),m);
+                            StructureSearchResult result = player.getWorld().locateNearestStructure(loc, mat, 50, false);
+                            if(result != null){
+                                Location structureLoc = result.getLocation();
+                                if(structureLoc.distance(loc) < 10){ // ajuste a tolerância
+                                    m.atualizaCondicao();
+                                    missaoAtiva.replace(player.getUniqueId(), m);
+                                }
                             }
                         }
                     }

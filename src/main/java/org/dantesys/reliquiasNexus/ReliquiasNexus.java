@@ -464,7 +464,7 @@ public final class ReliquiasNexus extends JavaPlugin {
                         };
                         Component missao = Component.text("\n"+lang.getString("missao.tipo","Tipo: <nome> - ").replace("<nome>",m.getTipo()))
                                 .color(NamedTextColor.GRAY)
-                                .append(Component.text(dif).color(NamedTextColor.YELLOW).decorate(TextDecoration.BOLD))
+                                .append(Component.text(dif).color(NamedTextColor.YELLOW))
                                 .append(Component.text("\n["+lang.getString("missao.aceitar","ACEITAR")+"]")
                                 .color(NamedTextColor.GREEN)
                                 .clickEvent(ClickEvent.runCommand("/nexus missaoaceitar " + (i+1))));
@@ -491,7 +491,7 @@ public final class ReliquiasNexus extends JavaPlugin {
                 })));
         // Comando missaoaceitar (oculto)
         // Note: A visibilidade deste comando é intencionalmente restrita para não aparecer nas sugestões.
-        nexusRoot.then(Commands.literal("missaoaceitar").then(Commands.argument("missao",IntegerArgumentType.integer(1,6)).executes(ctx -> {
+        nexusRoot.then(Commands.literal("missaoaceitar").then(Commands.argument("missao",IntegerArgumentType.integer(1,5)).executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
             if (config.getBoolean("expurgo") || !config.getBoolean("recursos.missao")) {
                 sender.sendMessage(Component.text("❌ "+lang.getString("missao.desativado","O comando de missões está desativado")).color(NamedTextColor.RED));

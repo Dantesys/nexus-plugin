@@ -8,7 +8,6 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.generator.structure.StructureType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -36,7 +35,6 @@ public class Missao{
     private final JavaPlugin plugin;
     private Material material;
     private EntityType entity;
-    private StructureType structure;
     private Biome biome;
     private boolean cancel;
     public Missao(MissaoTipo tipo,MissaoDificuldade dificuldade,int tempo,int condicao,JavaPlugin plugin){
@@ -58,10 +56,6 @@ public class Missao{
         this.entity=entity;
     }
     //EXPLORAÇÃO
-    public Missao(MissaoDificuldade dificuldade,int tempo,JavaPlugin plugin,StructureType structure){
-        this(MissaoTipo.EXPLORACAO,dificuldade,tempo,1,plugin);
-        this.structure=structure;
-    }
     public Missao(MissaoDificuldade dificuldade,int tempo,JavaPlugin plugin,Biome biome){
         this(MissaoTipo.EXPLORACAO,dificuldade,tempo,1,plugin);
         this.biome=biome;
@@ -72,7 +66,6 @@ public class Missao{
     public Object get(String opcao){
         return switch (opcao){
             case "entity" -> entity;
-            case "structure" -> structure;
             case "biome" -> biome;
             default -> material;
         };
@@ -84,12 +77,14 @@ public class Missao{
     public void reiniciar(){
         pausa=false;
         runTempo();
+        System.out.println("VOLTOU");
     }
     public void pausar(){
         pausa=true;
+        tempo=player.getPersistentDataContainer().getOrDefault(MISSAOTEMPO.key,PersistentDataType.INTEGER,tempo);
+        System.out.println("PAUSOU");
     }
     public void cancelar(){
-        pausa=false;
         cancel=true;
     }
     public int getDificuldade(){
@@ -177,6 +172,7 @@ public class Missao{
                 }
                 if (pausa) {
                     tempo = tempoRestante;
+                    player.getPersistentDataContainer().set(MISSAOTEMPO.key, PersistentDataType.INTEGER, tempo);
                     cancel();
                     return;
                 }
@@ -208,7 +204,7 @@ public class Missao{
         return switch (tipo){
             case COLETA,MINERACAO,LENHADOR -> material.name();
             case CACA -> entity.name();
-            case EXPLORACAO -> structure!=null?structure.toString():biome.translationKey();
+            case EXPLORACAO -> biome.translationKey();
         };
     }
 }

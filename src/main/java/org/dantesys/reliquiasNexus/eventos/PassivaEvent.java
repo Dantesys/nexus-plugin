@@ -105,14 +105,15 @@ public class PassivaEvent implements Listener {
                 }else{
                     conteiner.set(SPECIAL.key, PersistentDataType.INTEGER,0);
                 }
-                if(conteiner.has(MISSAOCOOLDOWN.key,PersistentDataType.INTEGER)){
-                    int tempo = conteiner.getOrDefault(MISSAOCOOLDOWN.key,PersistentDataType.INTEGER,0);
-                    if(tempo>0){
-                        tempo--;
-                        conteiner.set(MISSAOCOOLDOWN.key,PersistentDataType.INTEGER,tempo);
+                Integer tempoCD = conteiner.get(MISSAOCOOLDOWN.key, PersistentDataType.INTEGER);
+                if (tempoCD != null) {
+                    if (tempoCD > 0) {
+                        conteiner.set(MISSAOCOOLDOWN.key, PersistentDataType.INTEGER, tempoCD - 1);
+                    } else {
+                        conteiner.set(MISSAOCOOLDOWN.key, PersistentDataType.INTEGER, 0);
                     }
-                }else{
-                    conteiner.set(MISSAOCOOLDOWN.key, PersistentDataType.INTEGER,0);
+                } else {
+                    conteiner.set(MISSAOCOOLDOWN.key, PersistentDataType.INTEGER, 0);
                 }
                 if(player.getPersistentDataContainer().has(RUGIDO.key,PersistentDataType.INTEGER)){
                     int rg = player.getPersistentDataContainer().getOrDefault(RUGIDO.key,PersistentDataType.INTEGER,0);
