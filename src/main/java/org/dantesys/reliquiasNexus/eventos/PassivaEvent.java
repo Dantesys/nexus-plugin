@@ -414,7 +414,6 @@ public class PassivaEvent implements Listener {
                         int level = player.getPersistentDataContainer().getOrDefault(DRAGAO.key,PersistentDataType.INTEGER,1);
                         if(level>5){
                             player.setAllowFlight(true);
-                            player.setFlying(true);
                         }
                         if(player.getHealth()<=player.getAttribute(Attribute.MAX_HEALTH).getBaseValue()*0.25){
                             if(player.getPersistentDataContainer().has(RUGIDO.key,PersistentDataType.INTEGER)){
