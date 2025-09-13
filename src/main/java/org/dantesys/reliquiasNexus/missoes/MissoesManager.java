@@ -16,13 +16,18 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.generator.structure.StructureType;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.StructureSearchResult;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static org.bukkit.Bukkit.getServer;
+import static org.dantesys.reliquiasNexus.util.NexusKeys.MISSAOTEMPO;
 
 public class MissoesManager implements Listener {
     private static final Map<UUID, Missao> missaoAtiva = new ConcurrentHashMap<>();
@@ -55,12 +60,22 @@ public class MissoesManager implements Listener {
 
         return List.of(missaoColeta, missaoMineracao, missaoLenhador, missaoCaca, missaoBiome);
     }
-    public void aceitarMissao(UUID uuid,Missao missao){
+    public void aceitarMissao(UUID uuid,YamlConfiguration missaoAtivaBK){
+        MissaoTipo tipo =  MissaoTipo.get(missaoAtivaBK.getString("missoes."+ uuid+".tipo"));
+        MissaoDificuldade dif = MissaoDificuldade.getByDif(missaoAtivaBK.getInt("missoes."+ uuid+".dificuldade"));
+        Material m = switch (tipo){
+            case LENHADOR -> LenhadorDif.getByDif(dif.dificuldade);
+            case MINERACAO -> MineracaoDif.getByDif(dif.dificuldade);
+            default -> ColetaDif.getByDif(dif.dificuldade);
+        };
+        int condicao = missaoAtivaBK.getInt("missoes."+ uuid+".condicao");
+        int tempo = Bukkit.getOfflinePlayer(uuid).getPersistentDataContainer().getOrDefault(MISSAOTEMPO.key, PersistentDataType.INTEGER,0);
+        Missao missao = new Missao(dif,tempo,condicao,plugin,m,tipo.equals(MissaoTipo.MINERACAO),tipo.equals(MissaoTipo.LENHADOR));
         missaoAtiva.put(uuid,missao);
     }
     public void aceitarMissao(Player player,Missao missao){
         missao.iniciar(player);
-        aceitarMissao(player.getUniqueId(),missao);
+        missaoAtiva.put(player.getUniqueId(),missao);
     }
     public void reiniciarMissao(Player player){
         if(missaoAtiva.containsKey(player.getUniqueId()))missaoAtiva.get(player.getUniqueId()).reiniciar(player);
@@ -75,8 +90,7 @@ public class MissoesManager implements Listener {
         List<String> uuids = new ArrayList<>();
         missaoAtiva.forEach((uuid,missao) ->{
             uuids.add(uuid.toString());
-            missao.pausar();
-            missaoAtivaBK.set("missoes."+ uuid,missao);
+            missao.save(missaoAtivaBK);
         });
         missaoAtivaBK.set("players",uuids);
         File ms = new File(plugin.getDataFolder(), "missaoAtiva.yml");
@@ -137,7 +151,7 @@ public class MissoesManager implements Listener {
     @EventHandler
     public void achou(ServerTickEndEvent event){
         if(event.getTickNumber()%20==0){
-            Bukkit.getServer().getOnlinePlayers().forEach(player -> {
+            getServer().getOnlinePlayers().forEach(player -> {
                 if(missaoAtiva.containsKey(player.getUniqueId())){
                     Missao m = missaoAtiva.get(player.getUniqueId());
                     String tipo = m.getTipo();

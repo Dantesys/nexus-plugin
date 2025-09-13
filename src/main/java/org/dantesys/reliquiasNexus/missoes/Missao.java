@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Biome;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -21,6 +22,7 @@ import org.dantesys.reliquiasNexus.items.Nexus;
 
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 
@@ -60,6 +62,12 @@ public class Missao{
         this(MissaoTipo.EXPLORACAO,dificuldade,tempo,1,plugin);
         this.biome=biome;
     }
+    public void save(YamlConfiguration missaoAtivaBK){
+        UUID uuid = player.getUniqueId();
+        missaoAtivaBK.set("missoes."+ uuid+".tipo",tipo.nome);
+        missaoAtivaBK.set("missoes."+ uuid+".dificuldade",dificuldade.dificuldade);
+        missaoAtivaBK.set("missoes."+ uuid+".condicao",condicao);
+    }
     public String getTipo(){
         return tipo.nome;
     }
@@ -79,7 +87,6 @@ public class Missao{
         pausa=false;
         tempo=player.getPersistentDataContainer().getOrDefault(MISSAOTEMPO.key,PersistentDataType.INTEGER,tempo);
         runTempo();
-        System.out.println("VOLTOU");
     }
     public void pausar(){
         pausa=true;
@@ -166,6 +173,7 @@ public class Missao{
                     // Limpa o scoreboard do jogador
                     ScoreboardManager manager = Bukkit.getScoreboardManager();
                     Scoreboard vazio = manager.getNewScoreboard();
+                    player.getPersistentDataContainer().remove(MISSAOTEMPO.key);
                     player.setScoreboard(vazio);
                     cancel();
                     return;

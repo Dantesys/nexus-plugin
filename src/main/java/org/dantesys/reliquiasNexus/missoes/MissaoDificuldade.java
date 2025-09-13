@@ -25,4 +25,13 @@ public enum MissaoDificuldade {
         }
         return FACIL;
     }
+
+    public static MissaoDificuldade getByDif(int difi) {
+        for(MissaoDificuldade dif: values()){
+            if(dif.dificuldade==difi){
+                return dif;
+            }
+        }
+        return FACIL;
+    }
 }

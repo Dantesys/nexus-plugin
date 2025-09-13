@@ -86,7 +86,7 @@ public final class ReliquiasNexus extends JavaPlugin {
         ItemsRegistro.init();
         saveResource("lang/pt-br.yml",true);
         saveResource("lang/en-us.yml",true);
-        saveResource("missaoAtiva.yml",true);
+        saveResource("missaoAtiva.yml",false);
         saveDefaultConfig();
         config = getConfig();
 
@@ -104,14 +104,13 @@ public final class ReliquiasNexus extends JavaPlugin {
         missaoAtivaBK = YamlConfiguration.loadConfiguration(ms);
         List<String> uuids = missaoAtivaBK.getStringList("players");
         for (String uuid : uuids) {
-            Missao missao = missaoAtivaBK.getObject("missoes." + uuid, Missao.class);
-            if(missao!=null){
-                missoesManager.aceitarMissao(UUID.fromString(uuid), missao);
-            }
+            missoesManager.aceitarMissao(UUID.fromString(uuid),missaoAtivaBK);
         }
+        missaoAtivaBK.set("players",List.of());
         saveConfig();
         try {
             lang.save(file);
+            missaoAtivaBK.save(ms);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -483,6 +482,7 @@ public final class ReliquiasNexus extends JavaPlugin {
                     if (ctx.getSource().getExecutor() instanceof Player player) {
                         missoesManager.cancelarMissao(player);
                         player.getPersistentDataContainer().set(MISSAOCOOLDOWN.key,PersistentDataType.INTEGER,config.getInt("recursos.missaoCooldown",300));
+                        player.getPersistentDataContainer().remove(MISSAOTEMPO.key);
                         sender.sendMessage(Component.text("❌ "+lang.getString("missao.cancelada","Missão cancelada!")).color(NamedTextColor.RED));
                         return Command.SINGLE_SUCCESS;
                     }

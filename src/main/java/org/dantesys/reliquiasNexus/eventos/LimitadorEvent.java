@@ -3,6 +3,7 @@ package org.dantesys.reliquiasNexus.eventos;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.block.Skull;
 import org.bukkit.entity.Player;
@@ -143,7 +144,6 @@ public class LimitadorEvent implements Listener {
                 msg=msg.replace("<fish>",peixe);
                 event.deathMessage(Component.text("§c"+msgAll));
                 event.deathScreenMessageOverride(Component.text("§c"+msg));
-
             }
         }
         if(passou(player)){
@@ -182,11 +182,10 @@ public class LimitadorEvent implements Listener {
             player.getPersistentDataContainer().set(QTD.key,PersistentDataType.INTEGER,0);
         }
         player.getPersistentDataContainer().set(PROTECAO.key,PersistentDataType.STRING,"");
-        if(plugin.getConfig().getBoolean("recursos.bauMorte") && !bau.isEmpty()){
+        if(plugin.getConfig().getBoolean("recursos.bauMorte",true) && !bau.isEmpty()){
             // === 1. Criar o túmulo (cabeça + baú) ===
             Block blocoBau = localMorte.getBlock();
             blocoBau.setType(Material.CHEST);
-
             // colocar a cabeça em cima do baú
             Block blocoCabeca = blocoBau.getRelative(0, 1, 0);
             blocoCabeca.setType(Material.PLAYER_HEAD);
@@ -194,15 +193,18 @@ public class LimitadorEvent implements Listener {
                 skull.setOwningPlayer(player);
                 skull.update();
             }
-
-            // === 2. Colocar itens que seriam dropados no baú ===
-            Chest chest = (Chest) blocoBau.getState();
-            Inventory chestInv = chest.getBlockInventory();
-            bau.forEach(item -> {
-                System.out.println(item.getType());
-                chestInv.addItem(item);
+            // 3) agenda pro próximo tick para garantir que o bloco/estado foi aplicado
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                BlockState state = blocoBau.getState();
+                if (state instanceof Chest chest) {
+                    Inventory chestInv = chest.getSnapshotInventory();
+                    bau.forEach(chestInv::addItem);
+                    chest.update(true,true);
+                } else {
+                    plugin.getLogger().warning("Esperava CHEST, mas encontrei: " + state.getClass().getName());
+                }
             });
-            chest.update();
+
             // limpar drops do chão (já que foram para o baú)
             event.getDrops().clear();
             ItemStack bussola = new ItemStack(Material.COMPASS);
@@ -219,7 +221,9 @@ public class LimitadorEvent implements Listener {
     public void onRespawn(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
         List<ItemStack> reliquias = reliquiasSalvas.remove(player.getUniqueId());
-        player.getInventory().addItem(bussolaMortal.remove(player.getUniqueId()));
+        if(bussolaMortal.containsKey(player.getUniqueId())){
+            player.getInventory().addItem(bussolaMortal.remove(player.getUniqueId()));
+        }
         if (reliquias != null) {
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 for (ItemStack item : reliquias) {
