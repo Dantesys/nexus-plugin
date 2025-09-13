@@ -63,9 +63,9 @@ public class MissoesManager implements Listener {
         aceitarMissao(player.getUniqueId(),missao);
     }
     public void reiniciarMissao(Player player){
-        if(missaoAtiva.containsKey(player.getUniqueId()))missaoAtiva.get(player.getUniqueId()).reiniciar();
+        if(missaoAtiva.containsKey(player.getUniqueId()))missaoAtiva.get(player.getUniqueId()).reiniciar(player);
     }
-    public void pausarMIssao(Player player){
+    public void pausarMissao(Player player){
         if(missaoAtiva.containsKey(player.getUniqueId()))missaoAtiva.get(player.getUniqueId()).pausar();
     }
     public void cancelarMissao(Player player){

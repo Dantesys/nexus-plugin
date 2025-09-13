@@ -3,6 +3,7 @@ package org.dantesys.reliquiasNexus.eventos;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
 import org.bukkit.block.Skull;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -10,6 +11,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.CompassMeta;
@@ -194,8 +196,12 @@ public class LimitadorEvent implements Listener {
             }
 
             // === 2. Colocar itens que seriam dropados no baú ===
-            org.bukkit.block.Chest chest = (org.bukkit.block.Chest) blocoBau.getState();
-            bau.forEach(item -> chest.getBlockInventory().addItem(item));
+            Chest chest = (Chest) blocoBau.getState();
+            Inventory chestInv = chest.getBlockInventory();
+            bau.forEach(item -> {
+                System.out.println(item.getType());
+                chestInv.addItem(item);
+            });
             chest.update();
             // limpar drops do chão (já que foram para o baú)
             event.getDrops().clear();

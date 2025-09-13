@@ -74,15 +74,15 @@ public class Missao{
         this.player=player;
         runTempo();
     }
-    public void reiniciar(){
+    public void reiniciar(Player player){
+        this.player = player;
         pausa=false;
+        tempo=player.getPersistentDataContainer().getOrDefault(MISSAOTEMPO.key,PersistentDataType.INTEGER,tempo);
         runTempo();
         System.out.println("VOLTOU");
     }
     public void pausar(){
         pausa=true;
-        tempo=player.getPersistentDataContainer().getOrDefault(MISSAOTEMPO.key,PersistentDataType.INTEGER,tempo);
-        System.out.println("PAUSOU");
     }
     public void cancelar(){
         cancel=true;
@@ -171,8 +171,8 @@ public class Missao{
                     return;
                 }
                 if (pausa) {
+                    player.getPersistentDataContainer().set(MISSAOTEMPO.key, PersistentDataType.INTEGER, tempoRestante);
                     tempo = tempoRestante;
-                    player.getPersistentDataContainer().set(MISSAOTEMPO.key, PersistentDataType.INTEGER, tempo);
                     cancel();
                     return;
                 }

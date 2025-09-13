@@ -1140,6 +1140,6 @@ public final class ReliquiasNexus extends JavaPlugin {
         missoesManager.reiniciarMissao(player);
     }
     public void pausarMissao(Player player){
-        missoesManager.pausarMIssao(player);
+        missoesManager.pausarMissao(player);
     }
 }
