@@ -523,18 +523,16 @@ public final class ReliquiasNexus extends JavaPlugin {
             return Command.SINGLE_SUCCESS;
         }));
 
-        // Comando /nexus banco (player) - Abrir menu do banco
-        nexusRoot.then(Commands.literal("banco").executes(ctx -> {
+        // Comando /nexus saldo (player) - Abrir menu do banco
+        nexusRoot.then(Commands.literal(lang.getString("saldo.comando","saldo")).executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
-            if (config.getBoolean("expurgo")) {
-                sender.sendMessage(Component.text("❌ O comando de banco está desativado durante o expurgo.").color(NamedTextColor.RED));
-                return Command.SINGLE_SUCCESS;
-            }
             if (ctx.getSource().getExecutor() instanceof Player player) {
-                new BancoEvent(this).abrirMenuPrincipal(player);
+                double saldo = player.getPersistentDataContainer().getOrDefault(SALDO.key,PersistentDataType.DOUBLE,0d);
+                String formatado = String.format("%.2f", saldo);
+                player.sendMessage(Component.text(lang.getString("saldo.info","Seu saldo é de $")+formatado+" "+config.getString("recursos.moneyName","Moly")).color(NamedTextColor.GREEN));
                 return Command.SINGLE_SUCCESS;
             }
-            sender.sendMessage(Component.text("❌ Apenas jogadores podem usar este comando!").color(NamedTextColor.RED));
+            sender.sendMessage(Component.text("❌ "+lang.getString("saldo.falhaPlayer","Apenas jogadores podem usar este comando!")).color(NamedTextColor.RED));
             return Command.SINGLE_SUCCESS;
         }));
 
