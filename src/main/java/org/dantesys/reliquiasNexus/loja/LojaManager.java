@@ -1,5 +1,6 @@
 package org.dantesys.reliquiasNexus.loja;
 
+import com.destroystokyo.paper.event.server.ServerTickEndEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -30,7 +31,6 @@ import java.util.*;
 import static org.dantesys.reliquiasNexus.util.NexusKeys.SALDO;
 
 public class LojaManager implements Listener {
-    //TODO RECARREGAMENTO POR HORA
     private final JavaPlugin plugin;
     private List<LojaItem> todosItens;
     private List<LojaItem> itensAtuais;
@@ -419,6 +419,12 @@ public class LojaManager implements Listener {
         return PlainTextComponentSerializer.plainText().serialize(component);
     }
 
+    @EventHandler
+    public void tickUpdate(ServerTickEndEvent event){
+        if(event.getTickNumber()%72000==0){
+            gerarItensAtuais();
+        }
+    }
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
