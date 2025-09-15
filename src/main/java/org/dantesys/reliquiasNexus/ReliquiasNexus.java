@@ -34,7 +34,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.dantesys.reliquiasNexus.eventos.*;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
-import org.dantesys.reliquiasNexus.loja.LojaEvent;
+import org.dantesys.reliquiasNexus.loja.LojaManager;
 import org.dantesys.reliquiasNexus.missoes.Missao;
 import org.dantesys.reliquiasNexus.missoes.MissoesManager;
 import org.dantesys.reliquiasNexus.tab.PlayerListManager;
@@ -73,7 +73,9 @@ public final class ReliquiasNexus extends JavaPlugin {
     private static FileConfiguration config;
     private static YamlConfiguration lang;
     private static YamlConfiguration missaoAtivaBK;
+    private static YamlConfiguration lojaSV;
     private MissoesManager missoesManager;
+    private LojaManager lojaManager;
     private PlayerListManager playerListManager;
     private BossManager bossManager;
     public final List<String> names = List.of("guerreiro","ceifador","vida","mares","barbaro",
@@ -88,11 +90,10 @@ public final class ReliquiasNexus extends JavaPlugin {
         saveResource("lang/pt-br.yml",true);
         saveResource("lang/en-us.yml",true);
         saveResource("missaoAtiva.yml",false);
+        saveResource("loja.yml",false);
         saveDefaultConfig();
         config = getConfig();
-
-        // Configurar a classe economia com este plugin e carregar os dados
-        Economia.setPlugin(this);
+        lojaManager = new LojaManager(this);
         missoesManager=new MissoesManager(this);
         String tipo = config.getString("lang");
         if(tipo==null){
@@ -101,6 +102,13 @@ public final class ReliquiasNexus extends JavaPlugin {
         }
         File file = new File(this.getDataFolder(), "/lang/"+tipo+".yml");
         lang = YamlConfiguration.loadConfiguration(file);
+        File lojafile = new File(this.getDataFolder(), "loja.yml");
+        lojaSV = YamlConfiguration.loadConfiguration(lojafile);
+        if(config.get("servidor") == null){
+            lojaManager.gerarDefault(lojaSV);
+        }else{
+            lojaManager.load(lojaSV);
+        }
         File ms = new File(this.getDataFolder(), "missaoAtiva.yml");
         missaoAtivaBK = YamlConfiguration.loadConfiguration(ms);
         List<String> uuids = missaoAtivaBK.getStringList("players");
@@ -518,7 +526,7 @@ public final class ReliquiasNexus extends JavaPlugin {
                 return Command.SINGLE_SUCCESS;
             }
             if (ctx.getSource().getExecutor() instanceof Player player) {
-                new LojaEvent(this).abrirMenuPrincipal(player);
+                lojaManager.abrirMenuPrincipal(player);
                 return Command.SINGLE_SUCCESS;
             }
             sender.sendMessage(Component.text("❌ "+lang.getString("loja.falhaPlayer","Apenas jogadores podem usar este comando!")).color(NamedTextColor.RED));
@@ -1014,7 +1022,7 @@ public final class ReliquiasNexus extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PerdeuEvent(this), this);
         getServer().getPluginManager().registerEvents(new EvoluirEvent(this), this);
         getServer().getPluginManager().registerEvents(new SpecialEvent(this), this);
-        getServer().getPluginManager().registerEvents(new LojaEvent(this), this);
+        getServer().getPluginManager().registerEvents(lojaManager, this);
         getServer().getPluginManager().registerEvents(new BancoEvent(this), this);
         getServer().getPluginManager().registerEvents(playerListManager, this);
         getServer().getPluginManager().registerEvents(new ChatListener(this), this);
@@ -1122,6 +1130,7 @@ public final class ReliquiasNexus extends JavaPlugin {
     @Override
     public void onDisable() {
         missoesManager.save(missaoAtivaBK);
+        lojaManager.save(lojaSV);
         saveConfig();
         getServer().getConsoleSender().sendMessage("§4❌ §c[Nexus]: Plugin Desativado!");
     }

@@ -112,6 +112,12 @@ loja:
   ec: "Permite o uso do comando"
   voltar: "Voltar"
   voltarTooltip: "Clique para voltar ao menu principal"
+  comprou: "Você comprou <item> por <cost>"
+  falhaInv: "Seu inventario está cheio!"
+  falhaSaldo: "Você não tem saldo o suficiente"
+  falhaEstoque: "Item sem estoque"
+  falhaEnd: "Você já comprou o Baú do Fim. Esta é uma compra única."
+  end: "acesso ao /ec"
 comandos:
   comando:
     - "livro"

@@ -20,6 +20,9 @@ public class LojaItem {
     public int getEstoque(){
         return this.estoque;
     }
+    public void compra(){
+        estoque--;
+    }
     public void gerarVenda(){
         this.estoque = (int) (1+(Math.random()*20));
         double variacao = 0.95+(Math.random()*0.1);
