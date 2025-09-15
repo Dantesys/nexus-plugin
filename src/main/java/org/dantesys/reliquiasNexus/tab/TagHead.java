@@ -40,6 +40,7 @@ public class TagHead implements Listener {
         Component tag = playerList.getPlayerTag(player);
 
         String rank = plugin.getConfig().getString("players." + player.getUniqueId() + ".rank", "membro");
+        Color cor = plugin.getConfig().getColor("cargo." + rank, Color.WHITE);
         NamedTextColor color = switch(rank.toLowerCase()) {
             case "dono" -> NamedTextColor.RED;
             case "staff" -> NamedTextColor.AQUA;
@@ -47,7 +48,7 @@ public class TagHead implements Listener {
         };
 
         Component finalMessage = Component.text()
-                .append(tag)
+                .append(tag).color(TextColor.color(cor.asRGB()))
                 .append(Component.text(player.getName()).color(NamedTextColor.WHITE))
                 .append(Component.text(": ").color(NamedTextColor.GRAY))
                 .append(Component.text(event.getMessage()).color(color))

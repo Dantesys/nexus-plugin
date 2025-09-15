@@ -34,6 +34,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.dantesys.reliquiasNexus.eventos.*;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
+import org.dantesys.reliquiasNexus.loja.LojaEvent;
 import org.dantesys.reliquiasNexus.missoes.Missao;
 import org.dantesys.reliquiasNexus.missoes.MissoesManager;
 import org.dantesys.reliquiasNexus.tab.PlayerListManager;
@@ -125,15 +126,13 @@ public final class ReliquiasNexus extends JavaPlugin {
         LiteralArgumentBuilder<CommandSourceStack> nexusRoot = Commands.literal("nexus").executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
             List<String> nexus = lang.getStringList("nexus");
-            Component mensagem = Component.text("");
             nexus.forEach(texto ->{
                 String revisado;
                 if(!texto.equals(nexus.getFirst()))revisado = "§7➤ §b"+texto.replace("<div>","§f-")+"\n";
                 else revisado = "\n§6§l⭐ §e§l"+texto+" §6§l⭐\n";
-                mensagem.append(Component.text(revisado));
+                sender.sendMessage(Component.text(revisado));
             });
-            mensagem.append(Component.text("§6§l⭐ §e§l"+nexus.getFirst()+" §6§l⭐\n").decorate(TextDecoration.BOLD));
-            sender.sendMessage(mensagem);
+            sender.sendMessage(Component.text("§6§l⭐ §e§l"+nexus.getFirst()+" §6§l⭐\n").decorate(TextDecoration.BOLD));
             return Command.SINGLE_SUCCESS;
         });
         // Comando /nexus livro
@@ -501,28 +500,30 @@ public final class ReliquiasNexus extends JavaPlugin {
                 List<Missao> missoes = missoesOfertas.remove(player.getUniqueId());
                 int missao = ctx.getArgument("missao", int.class);
                 Missao m = missoes.get(missao-1);
-                missoesManager.aceitarMissao(player,m);
+                if(m!=null){
+                    missoesManager.aceitarMissao(player,m);
+                }else{
+                    sender.sendMessage(Component.text("❌ "+lang.getString("missao.falhaNao","Você etá em missão ou a missão não existe!")).color(NamedTextColor.RED));
+                }
             }else{
                 sender.sendMessage(Component.text("❌ "+lang.getString("missao.falhaPlayer","Apenas jogadores podem usar este comando!")).color(NamedTextColor.RED));
             }
             return Command.SINGLE_SUCCESS;
         })));
-
-        // Comando Loja (player) - Abrir menu da loja
-        nexusRoot.then(Commands.literal("Loja").executes(ctx -> {
+        // Comando /nexus loja
+        nexusRoot.then(Commands.literal(lang.getString("loja.comando","loja")).executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
-            if (config.getBoolean("expurgo")) {
-                sender.sendMessage(Component.text("❌ O comando de loja está desativado durante o expurgo.").color(NamedTextColor.RED));
+            if (config.getBoolean("expurgo") || config.getBoolean("recursos.loja")) {
+                sender.sendMessage(Component.text("❌ "+lang.getString("loja.desativado","O comando de loja está desativado.")).color(NamedTextColor.RED));
                 return Command.SINGLE_SUCCESS;
             }
             if (ctx.getSource().getExecutor() instanceof Player player) {
                 new LojaEvent(this).abrirMenuPrincipal(player);
                 return Command.SINGLE_SUCCESS;
             }
-            sender.sendMessage(Component.text("❌ Apenas jogadores podem usar este comando!").color(NamedTextColor.RED));
+            sender.sendMessage(Component.text("❌ "+lang.getString("loja.falhaPlayer","Apenas jogadores podem usar este comando!")).color(NamedTextColor.RED));
             return Command.SINGLE_SUCCESS;
         }));
-
         // Comando /nexus saldo (player) - Abrir menu do banco
         nexusRoot.then(Commands.literal(lang.getString("saldo.comando","saldo")).executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
@@ -535,7 +536,6 @@ public final class ReliquiasNexus extends JavaPlugin {
             sender.sendMessage(Component.text("❌ "+lang.getString("saldo.falhaPlayer","Apenas jogadores podem usar este comando!")).color(NamedTextColor.RED));
             return Command.SINGLE_SUCCESS;
         }));
-
         // Comando /nexus team
         nexusRoot.then(Commands.literal("team").executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();

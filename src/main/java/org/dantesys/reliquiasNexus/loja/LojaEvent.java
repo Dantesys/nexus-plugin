@@ -1,4 +1,4 @@
-package org.dantesys.reliquiasNexus.eventos;
+package org.dantesys.reliquiasNexus.loja;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -29,17 +29,19 @@ import java.util.List;
 public class LojaEvent implements Listener {
 
     private final ReliquiasNexus plugin;
-    private final String MAIN_MENU_TITLE = "Loja";
-    private final String OP_ITEMS_MENU_TITLE = "Itens OP";
-    private final String NORMAL_ITEMS_MENU_TITLE = "Itens Normais";
+    private final String MAIN_MENU_TITLE;
+    private final String SERVER_ITEMS_MENU_TITLE;
+    private final String NORMAL_ITEMS_MENU_TITLE;
 
     public LojaEvent(ReliquiasNexus plugin) {
         this.plugin = plugin;
+        this.MAIN_MENU_TITLE = ReliquiasNexus.getLang().getString("loja.titulo","Loja Nexus");
+        this.SERVER_ITEMS_MENU_TITLE = ReliquiasNexus.getLang().getString("loja.serverItens","Itens do servidor");
+        this.NORMAL_ITEMS_MENU_TITLE = ReliquiasNexus.getLang().getString("loja.playerItens","Itens de jogadores");
     }
 
     public void abrirMenuPrincipal(Player player) {
         Inventory inv = Bukkit.createInventory(null, 27, Component.text(MAIN_MENU_TITLE));
-
         // Adicionar bordas cinzas
         ItemStack borda = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         ItemMeta metaBorda = borda.getItemMeta();
@@ -50,11 +52,11 @@ public class LojaEvent implements Listener {
             inv.setItem(i, borda);
         }
 
-        ItemStack opItems = criarItemComID(Material.DIAMOND_SWORD, "§bItens OP",
-                Arrays.asList("§7Clique para ver itens OP"), "op_items");
+        ItemStack opItems = criarItemComID(Material.DIAMOND_BLOCK, "§b"+SERVER_ITEMS_MENU_TITLE,
+                Arrays.asList("§7"+ReliquiasNexus.getLang().getString("loja.serverTooltip","Clique para ver os itens do servidor")), "op_items");
 
-        ItemStack normalItems = criarItemComID(Material.IRON_INGOT, "§aItens Normais",
-                Arrays.asList("§7Clique para ver itens normais"), "normal_items");
+        ItemStack normalItems = criarItemComID(Material.IRON_BLOCK, "§a"+NORMAL_ITEMS_MENU_TITLE,
+                Arrays.asList("§7"+ReliquiasNexus.getLang().getString("loja.playerTooltip","Clique para ver os itens de jogadores")), "normal_items");
 
         inv.setItem(11, opItems);
         inv.setItem(15, normalItems);
@@ -64,7 +66,7 @@ public class LojaEvent implements Listener {
     }
 
     private void abrirMenuOpItems(Player player) {
-        Inventory inv = Bukkit.createInventory(null, 54, Component.text(OP_ITEMS_MENU_TITLE));
+        Inventory inv = Bukkit.createInventory(null, 54, Component.text(SERVER_ITEMS_MENU_TITLE));
 
         // Adicionar bordas
         ItemStack borda = new ItemStack(Material.PURPLE_STAINED_GLASS_PANE);
@@ -79,20 +81,17 @@ public class LojaEvent implements Listener {
         // Baú do Fim (Ender Chest) - Item especial que libera comando /ec
         ItemStack enderChestItem = new ItemStack(Material.ENDER_CHEST);
         ItemMeta enderChestMeta = enderChestItem.getItemMeta();
-        enderChestMeta.displayName(Component.text("§5Baú do Fim"));
         List<Component> enderLore = new ArrayList<>();
-        enderLore.add(Component.text("§7Permite o uso do comando §e/ec§7."));
-        enderLore.add(Component.text("§7Abre seu inventário do fim de qualquer lugar."));
+        double preco = plugin.getConfig().getDouble("recursos.enderchestcost",5000.0);
+        enderLore.add(Component.text("§7"+ReliquiasNexus.getLang().getString("loja.ec","Permite o uso do comando ")+" §e/ec§7."));
         enderLore.add(Component.text(""));
-        enderLore.add(Component.text("§aPreço: §65.000 Moly"));
-        enderLore.add(Component.text("§aCompra única por jogador."));
+        enderLore.add(Component.text("§aPreço: §6$"+preco+" "+plugin.getConfig().getString("recursos.moneyName","moly")));
         enderChestMeta.lore(enderLore);
         enderChestMeta.getPersistentDataContainer().set(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING, "ender_chest");
-        enderChestMeta.getPersistentDataContainer().set(new NamespacedKey(plugin, "preco"), PersistentDataType.DOUBLE, 5000.0);
+        enderChestMeta.getPersistentDataContainer().set(new NamespacedKey(plugin, "preco"), PersistentDataType.DOUBLE, (double) preco);
         enderChestItem.setItemMeta(enderChestMeta);
         inv.setItem(4, enderChestItem); // Posição destacada no topo
-
-        // Itens OP exatos das imagens
+        //TODO SISTEMA DE ESTOQUE QUE MUDA COM O TEMPO E PODE ACABA
         adicionarItemComPreco(inv, 10, Material.RESPAWN_ANCHOR, "Âncora de Respawn", 90000.0, 1);
         adicionarItemComPreco(inv, 11, Material.ELYTRA, "Elytra", 22000.0, 1);
         adicionarItemComPreco(inv, 12, Material.NETHERITE_SWORD, "Espada de Netherite", 50000.0, 1);
@@ -118,8 +117,8 @@ public class LojaEvent implements Listener {
         // Botão de voltar
         ItemStack backArrow = criarCabecaComID(
                 "MHF_ArrowLeft",
-                "§cVoltar",
-                Arrays.asList("§7Clique para voltar ao menu principal."),
+                "§c"+ReliquiasNexus.getLang().getString("loja.voltar","Voltar"),
+                Arrays.asList("§7"+ReliquiasNexus.getLang().getString("loja.voltarTooltip","Clique para voltar ao menu principal")),
                 "back_button");
         inv.setItem(49, backArrow);
 
@@ -296,7 +295,7 @@ public class LojaEvent implements Listener {
                         break;
                 }
             }
-        } else if (inventoryTitle.equals(OP_ITEMS_MENU_TITLE) || inventoryTitle.equals(NORMAL_ITEMS_MENU_TITLE)) {
+        } else if (inventoryTitle.equals(SERVER_ITEMS_MENU_TITLE) || inventoryTitle.equals(NORMAL_ITEMS_MENU_TITLE)) {
             event.setCancelled(true);
             if (data.has(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING)) {
                 String itemId = data.get(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING);
@@ -308,7 +307,7 @@ public class LojaEvent implements Listener {
 
                 // Lógica específica para o Baú do Fim
                 if (itemId.equals("ender_chest")) {
-                    double preco = 5000.0;
+                    double preco = plugin.getConfig().getDouble("recursos.enderchestcost",5000.0);
                     double saldo = Economia.getSaldo(player);
 
                     if (saldo >= preco) {

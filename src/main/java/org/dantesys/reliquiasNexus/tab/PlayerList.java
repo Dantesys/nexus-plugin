@@ -7,10 +7,6 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.Team;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
 
 public class PlayerList {
@@ -40,7 +36,6 @@ public class PlayerList {
     }
 
     private void updatePlayerName(Player player) {
-        String rank = plugin.getConfig().getString("players." + player.getUniqueId() + ".rank", "membro");
         Component prefix = getPlayerTag(player);
         int ping = player.getPing();
         player.playerListName(prefix.append(Component.text(player.getName() + " | " + ping + "ms").color(NamedTextColor.WHITE)));

@@ -11,6 +11,7 @@ nexus:
   - "/nexus missao <div> Gerar missões para você escolher"
   - "/nexus missao cancelar <div> Cancela sua missão atual"
   - "/nexus saldo <div> Mostra o seu saldo"
+  - "/nexus loja <div> Abre a loja do servidor"
 #Texto do /nexus livro
 livro:
   comando: "livro"
@@ -75,6 +76,7 @@ missao:
   desativado: "O comando de missões está desativado"
   falhaPlayer: "Apenas jogadores podem usar este comando!"
   falhaTempo: "Aguarde mais <time> segundos!"
+  falhaNao: "Você etá em missão ou a missão não existe!"
   tempoRestante: "Tempo Restante: "
   cancelada: "Missão Cancelada!"
   concluida: "Missão Concluída com sucesso!"
@@ -92,10 +94,24 @@ missao:
     mineracao: "Mineração"
     lenhador: "Lenhador"
     exploracao: "Exploração"
+#Texto do /nexus saldo
 saldo:
   comando: "saldo"
   falhaPlayer: "Apenas jogadores podem usar este comando!"
   info: "Seu saldo é de $"
+#Texto do /nexus loja
+loja:
+  comando: "loja"
+  desativado: "O comando de loja está desativado."
+  falhaPlayer: "Apenas jogadores podem usar este comando!"
+  titulo: "Loja Nexus"
+  serverItems: "Itens do servidor"
+  serverTooltip: "Clique para ver os itens do servidor"
+  playerItems: "Itens de jogadores"
+  playerTooltip: "Clique para ver os itens de jogadores"
+  ec: "Permite o uso do comando"
+  voltar: "Voltar"
+  voltarTooltip: "Clique para voltar ao menu principal"
 comandos:
   comando:
     - "livro"
