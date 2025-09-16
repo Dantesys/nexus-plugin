@@ -98,7 +98,7 @@ public class LojaManager implements Listener {
                 "next_button_player");
         page = new LojaPage(lojaPlayer,backArrow,nextArrow);
     }
-    private void gerarItensAtuais(){
+    public void gerarItensAtuais(){
         itensAtuais = new ArrayList<>();
         List<LojaItem> copy = new ArrayList<>(todosItens);
         Collections.shuffle(copy); // embaralha

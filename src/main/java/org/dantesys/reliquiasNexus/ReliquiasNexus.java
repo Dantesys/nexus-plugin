@@ -1004,6 +1004,7 @@ public final class ReliquiasNexus extends JavaPlugin {
         getServer().getPluginManager().registerEvents(missoesManager, this);
 
         getServer().getConsoleSender().sendMessage("§2✅ §a[Nexus]: Plugin Ativado com Sucesso!");
+        lojaManager.gerarItensAtuais();
     }
 
     private boolean processarTroca(Player player1, Player player2, String relic1, String relic2) {

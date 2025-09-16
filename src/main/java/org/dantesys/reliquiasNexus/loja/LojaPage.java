@@ -88,23 +88,26 @@ public class LojaPage {
         this.itens=itens;
     }
     public void showPage(Inventory inv){
-        List<LojaItem> sub = itens.subList(numero*21,21*(numero+1));
-        int slot=10;
-        int cont=1;
-        for(LojaItem item: sub){
-            inv.setItem(slot,item.getItem());
-            cont++;
-            if(cont>=7){
-                slot+=2;
-            }else{
-                slot++;
+        if(!itens.isEmpty()){
+            int maxPage = itens.size()/21;
+            List<LojaItem> sub = itens.subList(numero==maxPage && maxPage<=1?0:numero*21,numero==maxPage?itens.size():(21+(numero*21)));
+            int slot=10;
+            int cont=1;
+            for(LojaItem item: sub){
+                inv.setItem(slot,item.getItem());
+                cont++;
+                if(cont>=7){
+                    slot+=2;
+                }else{
+                    slot++;
+                }
             }
-        }
-        if(hasBack()){
-            inv.setItem(18,back);
-        }
-        if(hasNext()){
-            inv.setItem(26,next);
+            if(hasBack()){
+                inv.setItem(18,back);
+            }
+            if(hasNext()){
+                inv.setItem(26,next);
+            }
         }
     }
     public boolean hasNext(){

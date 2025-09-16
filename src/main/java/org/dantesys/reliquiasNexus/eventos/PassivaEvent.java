@@ -233,7 +233,8 @@ public class PassivaEvent implements Listener {
                 }
             }
             if(temReliquia(player,"alquimista")){
-                if(event.getEntity() instanceof LivingEntity vivo){
+                ItemStack stack = player.getInventory().getItemInMainHand();
+                if(stack.getPersistentDataContainer().getOrDefault(NEXUS.key,PersistentDataType.STRING,"").equals("alquimista") && event.getEntity() instanceof LivingEntity vivo){
                     Material mat = EntityToEgg.getEntityEgg(vivo.getType());
                     if(mat!=null){
                         vivo.getWorld().dropItemNaturally(vivo.getLocation(),new ItemStack(mat));
@@ -300,14 +301,6 @@ public class PassivaEvent implements Listener {
                 if(causes.contains(cause)){
                     player.heal(20);
                     event.setCancelled(true);
-                }
-            }
-            if(temReliquia(player, "morte")){
-                if (event.getFinalDamage() >= player.getHealth()) {
-                    event.setCancelled(true);
-                    player.setHealth(1);
-                    player.sendMessage("§4A Morte não pode ser ceifada!");
-                    player.getWorld().playSound(player.getLocation(), Sound.BLOCK_GLASS_BREAK, 1.0f, 1.0f);
                 }
             }
         }
