@@ -92,8 +92,6 @@ public final class ReliquiasNexus extends JavaPlugin {
         saveResource("loja.yml",false);
         saveDefaultConfig();
         config = getConfig();
-        lojaManager = new LojaManager(this);
-        missoesManager=new MissoesManager(this);
         String tipo = config.getString("lang");
         if(tipo==null){
             tipo="en-us";
@@ -101,6 +99,8 @@ public final class ReliquiasNexus extends JavaPlugin {
         }
         File file = new File(this.getDataFolder(), "/lang/"+tipo+".yml");
         lang = YamlConfiguration.loadConfiguration(file);
+        lojaManager = new LojaManager(this,lang);
+        missoesManager=new MissoesManager(this);
         File ms = new File(this.getDataFolder(), "missaoAtiva.yml");
         missaoAtivaBK = YamlConfiguration.loadConfiguration(ms);
         List<String> uuids = missaoAtivaBK.getStringList("players");

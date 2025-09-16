@@ -40,11 +40,11 @@ public class LojaManager implements Listener {
     private final String MAIN_MENU_TITLE;
     private final String SERVER_ITEMS_MENU_TITLE;
     private final String NORMAL_ITEMS_MENU_TITLE;
-    public LojaManager(JavaPlugin plugin){
+    public LojaManager(JavaPlugin plugin,YamlConfiguration lang){
         this.plugin=plugin;
-        this.MAIN_MENU_TITLE = ReliquiasNexus.getLang().getString("loja.titulo","Loja Nexus");
-        this.SERVER_ITEMS_MENU_TITLE = ReliquiasNexus.getLang().getString("loja.serverItens","Itens do servidor");
-        this.NORMAL_ITEMS_MENU_TITLE = ReliquiasNexus.getLang().getString("loja.playerItens","Itens de jogadores");
+        this.MAIN_MENU_TITLE = lang.getString("loja.titulo","Loja Nexus");
+        this.SERVER_ITEMS_MENU_TITLE = lang.getString("loja.serverItens","Itens do servidor");
+        this.NORMAL_ITEMS_MENU_TITLE = lang.getString("loja.playerItens","Itens de jogadores");
 
     }
     private Map<String, Object> criarItem(ItemStack item, double preco) {
