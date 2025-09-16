@@ -187,6 +187,10 @@ public class SpecialEvent implements Listener {
                         player.getWorld().dropItemNaturally(bloco.getLocation(),new ItemStack(Material.BEDROCK));
                         bloco.setType(Material.AIR);
                     }
+                    if(bloco.getType()==Material.REINFORCED_DEEPSLATE){
+                        player.getWorld().dropItemNaturally(bloco.getLocation(),new ItemStack(Material.REINFORCED_DEEPSLATE));
+                        bloco.setType(Material.AIR);
+                    }
                     if(bloco.getType()==Material.END_PORTAL_FRAME){
                         player.getWorld().dropItemNaturally(bloco.getLocation(),new ItemStack(Material.END_PORTAL_FRAME));
                         bloco.setType(Material.AIR);
