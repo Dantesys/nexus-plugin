@@ -58,11 +58,10 @@ import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 * TODO
 *  Criar comando de fazer rank e definir cor - PENDENTE
 *  Modificar Sistema de loja e criar sistema de loja comunitaria - Testando
-*  Criar Comando TPA e HOME - PENDENTE
-*  Criar Comando para definir custo de tpa e home - PENDENTE
+*  Criar Comando TPA e HOME - PENDENTE (VER NESSECIDADE)
+*  Criar Comando para definir custo de tpa e home - PENDENTE (VER NESSECIDADE)
 *  Criar Comando para setar o nome do dinheiro - PENDENTE
 *  Ajustar arquivo de tradução - Fazendo e Testando
-*  Ajustar comando EC - PEDENTE
 *  Refazer sistema de procurado - PENDENTE
 *  Refazer sistema de bosses - PENDENTE
 *  Refazer sistema de economia - Testando
@@ -571,21 +570,6 @@ public final class ReliquiasNexus extends JavaPlugin {
             sender.sendMessage(Component.text("❌ "+lang.getString("saldo.falhaPlayer","Apenas jogadores podem usar este comando!")).color(NamedTextColor.RED));
             return Command.SINGLE_SUCCESS;
         }));
-        // Comando /nexus team
-        nexusRoot.then(Commands.literal("team").executes(ctx -> {
-            final CommandSender sender = ctx.getSource().getSender();
-            if (config.getBoolean("expurgo")) {
-                sender.sendMessage(Component.text("❌ Os comandos de time estão desativados durante o expurgo.").color(NamedTextColor.RED));
-                return Command.SINGLE_SUCCESS;
-            }
-            if (ctx.getSource().getExecutor() instanceof Player player) {
-                Team.abrirMenuTeam(player);
-            } else {
-                sender.sendMessage(Component.text("❌ Apenas jogadores podem usar este comando!").color(NamedTextColor.RED));
-            }
-            return Command.SINGLE_SUCCESS;
-        }));
-
         // Comando para abrir o ender chest
         LiteralCommandNode<CommandSourceStack> ecCommandNode = Commands.literal("ec").executes(ctx -> {
             if (ctx.getSource().getExecutor() instanceof Player player) {
@@ -602,29 +586,15 @@ public final class ReliquiasNexus extends JavaPlugin {
 
         // Comando /nexusAdmin para operadores
         LiteralArgumentBuilder<CommandSourceStack> nexuRoot = Commands.literal("nexusAdmin").requires(sender -> sender.getSender().isOp() || sender.getSender().hasPermission("reliquiasnexus.opzim")).executes(ctx -> {
-            Component mensagem = Component.text()
-                    .append(Component.text("\n§4§l⚡ §c§lNEXU - COMANDOS DE OPERADOR §4§l⚡\n").decorate(TextDecoration.BOLD))
-                    .append(Component.text("§7➤ §b/nexu setlevel <level> §f- Setar level da relíquia\n"))
-                    .append(Component.text("§7➤ §b/nexu expurgar <true/false> §f- Ativar/desativar expurgo\n"))
-                    .append(Component.text("§7➤ §b/nexu receber <jogadores> §f- Dar relíquia aleatória\n"))
-                    .append(Component.text("§7➤ §b/nexu dar <jogador> <reliquia> §f- Dar relíquia específica\n"))
-                    .append(Component.text("§7➤ §b/nexu remo <jogador> <reliquia> §f- Remover relíquia de jogador\n"))
-                    .append(Component.text("§7➤ §b/nexu missao <jogador/all> <tipo> <dificuldade> §f- Gerar missão especial\n"))
-                    .append(Component.text("§7➤ §b/nexu finalizarmissao <jogador> §f- Finalizar missão de jogador\n"))
-                    .append(Component.text("§7➤ §b/nexu dar moly <jogador> <quantia> §f- Dar moly a um jogador\n"))
-                    .append(Component.text("§7➤ §b/nexu limite <valor> §f- Alterar limite de relíquias\n"))
-                    .append(Component.text("§7➤ §b/nexu reliquia receber ao entrar <on/off> §f- Ativar/Desativar reliquia inicial\n"))
-                    .append(Component.text("§7➤ §b/nexu sistema renascer <on/off> §f- Ativar/Desativar sistema de renascimento\n"))
-                    .append(Component.text("§7➤ §b/nexu op <player> §f- Dar permissões de OP limitadas ao jogador\n"))
-                    .append(Component.text("§7➤ §b/nexu alma dar <player> <quantidade> §f- Dar almas para um jogador\n"))
-                    .append(Component.text("§7➤ §b/nexu procurado <player> <valor> §f- Marcar jogador como procurado\n"))
-                    .append(Component.text("§7➤ §b/nexu playerlist all §f- Forçar atualização da player list\n"))
-                    .append(Component.text("§7➤ §b/nexu addlist <player> <cargo> §f- Adicionar cargo na player list\n"))
-                    .append(Component.text("§7➤ §b/nexu boss <raridade> §f- Invocar um boss de uma raridade específica\n"))
-                    .append(Component.text("§4§l⚡ §c§lNEXU - COMANDOS DE OPERADOR §4§l⚡\n").decorate(TextDecoration.BOLD))
-                    .build();
-
-            ctx.getSource().getSender().sendMessage(mensagem);
+            final CommandSender sender = ctx.getSource().getSender();
+            List<String> nexus = lang.getStringList("nexusAdmin");
+            nexus.forEach(texto ->{
+                String revisado;
+                if(!texto.equals(nexus.getFirst()))revisado = "§7➤ §b"+texto.replace("<div>","§f-")+"\n";
+                else revisado = "\n§6§l⭐ §e§l"+texto+" §6§l⭐\n";
+                sender.sendMessage(Component.text(revisado));
+            });
+            sender.sendMessage(Component.text("§6§l⭐ §e§l"+nexus.getFirst()+" §6§l⭐\n").decorate(TextDecoration.BOLD));
             return Command.SINGLE_SUCCESS;
         });
 

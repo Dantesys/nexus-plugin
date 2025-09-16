@@ -2,10 +2,7 @@ package org.dantesys.reliquiasNexus.eventos;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.Chest;
-import org.bukkit.block.Skull;
+import org.bukkit.block.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -22,7 +19,6 @@ import org.bukkit.persistence.PersistentDataType;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
 import org.dantesys.reliquiasNexus.items.ItemsRegistro;
 import org.dantesys.reliquiasNexus.items.Nexus;
-import org.dantesys.reliquiasNexus.util.NexusKeys;
 
 
 import java.util.*;
@@ -65,7 +61,7 @@ public class LimitadorEvent implements Listener {
                         int qtd = playerData.getOrDefault(QTD.key,PersistentDataType.INTEGER,0);
                         qtd++;
                         int level=1;
-                        NamespacedKey key = NexusKeys.getKey(nome);
+                        NamespacedKey key = getKey(nome);
                         if(key!=null && playerData.has(key,PersistentDataType.INTEGER)){
                             level=playerData.getOrDefault(key,PersistentDataType.INTEGER,1);
                         }
@@ -185,6 +181,7 @@ public class LimitadorEvent implements Listener {
         if(plugin.getConfig().getBoolean("recursos.bauMorte",true) && !bau.isEmpty()){
             // === 1. Criar o túmulo (cabeça + baú) ===
             Block blocoBau = localMorte.getBlock();
+            Block blocoBau2;
             blocoBau.setType(Material.CHEST);
             // colocar a cabeça em cima do baú
             Block blocoCabeca = blocoBau.getRelative(0, 1, 0);
@@ -193,15 +190,31 @@ public class LimitadorEvent implements Listener {
                 skull.setOwningPlayer(player);
                 skull.update();
             }
+            List<ItemStack> overflow;
+            if(bau.size()>27){
+                blocoBau2 = localMorte.clone().add(1,0,0).getBlock();
+                blocoBau2.setType(Material.CHEST);
+                overflow=bau.subList(27,bau.size());
+                bau=bau.subList(0,27);
+            } else {
+                blocoBau2 = null;
+                overflow = null;
+            }
             // 3) agenda pro próximo tick para garantir que o bloco/estado foi aplicado
+            List<ItemStack> finalBau = bau;
             Bukkit.getScheduler().runTask(plugin, () -> {
                 BlockState state = blocoBau.getState();
                 if (state instanceof Chest chest) {
                     Inventory chestInv = chest.getSnapshotInventory();
-                    bau.forEach(chestInv::addItem);
+                    finalBau.forEach(chestInv::addItem);
                     chest.update(true,true);
                 } else {
                     plugin.getLogger().warning("Esperava CHEST, mas encontrei: " + state.getClass().getName());
+                }
+                if(overflow != null && blocoBau2.getState() instanceof Chest chest){
+                    Inventory chestInv = chest.getSnapshotInventory();
+                    overflow.forEach(chestInv::addItem);
+                    chest.update(true,true);
                 }
             });
 

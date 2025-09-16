@@ -237,6 +237,7 @@ public class PassivaEvent implements Listener {
                     Material mat = EntityToEgg.getEntityEgg(vivo.getType());
                     if(mat!=null){
                         vivo.getWorld().dropItemNaturally(vivo.getLocation(),new ItemStack(mat));
+                        vivo.remove();
                     }
                 }
             }

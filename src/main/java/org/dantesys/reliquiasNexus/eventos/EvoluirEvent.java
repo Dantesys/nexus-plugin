@@ -1129,10 +1129,10 @@ public class EvoluirEvent implements Listener {
                                     }
                                     player.sendMessage(msg);
                                 }else{
-                                    roubar=rouboPlayer(player,pinv);
+                                    roubar=rouboPlayer(player,pinv,roubado);
                                 }
                             }else{
-                                roubar=rouboPlayer(player,pinv);
+                                roubar=rouboPlayer(player,pinv,roubado);
                             }
                         }else{
                             EntityEquipment equipa = furto.getEquipment();
@@ -1225,12 +1225,10 @@ public class EvoluirEvent implements Listener {
                     vivo.damage(event.getFinalDamage()*(level*0.02));
                 }
                 stack = getReliquia(player,"golem");
-                if(stack!=null && (atacante instanceof Boss || atacante instanceof Monster)){
-                    double protecao = player.getPersistentDataContainer().getOrDefault(MISSAOGOLEM.key, PersistentDataType.DOUBLE, 0d);
-                    protecao+=event.getDamage();
-                    player.getPersistentDataContainer().set(MISSAOGOLEM.key, PersistentDataType.DOUBLE, protecao);
-                    tentarEvoluir(player,stack,level,getSlotOfItem(player,stack));
-                }
+                double protecao = player.getPersistentDataContainer().getOrDefault(MISSAOGOLEM.key, PersistentDataType.DOUBLE, 0d);
+                protecao+=event.getDamage();
+                player.getPersistentDataContainer().set(MISSAOGOLEM.key, PersistentDataType.DOUBLE, protecao);
+                tentarEvoluir(player,stack,level,getSlotOfItem(player,stack));
             }
             if(player.isBlocking()){
                 stack = player.getInventory().getItemInMainHand();
@@ -1291,7 +1289,7 @@ public class EvoluirEvent implements Listener {
             }
         }
     }
-    private ItemStack rouboPlayer(Player player,PlayerInventory pinv){
+    private ItemStack rouboPlayer(Player player,PlayerInventory pinv,Player roubado){
         Random rd = new Random();
         int escolhido = rd.nextInt(0,pinv.getContents().length);
         ItemStack roubar = pinv.getItem(escolhido);
@@ -1333,11 +1331,21 @@ public class EvoluirEvent implements Listener {
             }
         }
         else{
-            String msg = ReliquiasNexus.getLang().getString("ladrao.nada");
-            if(msg==null){
-                msg="Você não conseguiu roubar nada!";
+            double saldo = roubado.getPersistentDataContainer().getOrDefault(SALDO.key,PersistentDataType.DOUBLE,0.0);
+            if(saldo<=0.0){
+                String msg = ReliquiasNexus.getLang().getString("ladrao.nada");
+                if(msg==null){
+                    msg="Você não conseguiu roubar nada!";
+                }
+                player.sendMessage(msg);
+            }else{
+                double roubo = rd.nextDouble(saldo);
+                roubado.getPersistentDataContainer().set(SALDO.key,PersistentDataType.DOUBLE,saldo-roubo);
+                String msg = "Você roubou $<valor> "+plugin.getConfig().getString("recursos.moneyName","moly");
+                String rouboStr = String.format("%.2f", roubo);
+                msg.replace("<valor>",rouboStr);
+                player.sendMessage(msg);
             }
-            player.sendMessage(msg);
         }
         return roubar;
     }

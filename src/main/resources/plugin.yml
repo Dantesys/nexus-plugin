@@ -11,9 +11,6 @@ commands:
   nexusAdmin:
     description: Comandos de operador do Nexus
     usage: /nexusAdmin [subcomando]
-  team:
-    description: Comandos de equipe
-    usage: /team [subcomando]
   ec:
     description: Abrir ender chest
     usage: /ec
@@ -34,6 +31,6 @@ permissions:
   reliquiasnexus.command.nexus:
     description: Usar comando /nexus
     default: true
-  reliquiasnexus.command.nexu:
-    description: Usar comando /nexu
+  reliquiasnexus.command.nexusAdmin:
+    description: Usar comando /nexusAdmin
     default: op

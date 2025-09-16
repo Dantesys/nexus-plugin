@@ -126,6 +126,29 @@ loja:
   end: "acesso ao /ec"
   vendeu: "Você vendeu <item> por <valor>"
   vendaSuccess: "Item colocado na loja com sucesso!"
+#Texto do /nexusAdmin
+nexusAdmin:
+  - "NEXUS ADMIN - COMANDOS DE OPERADOR"
+  - "/nexusAdmin rank <div> Lista todos os ranks ativos"
+  - "/nexusAdmin rank <nome> <cor> <div> Cria um novo rank com a cor definida"
+  - "/nexusAdmin setlevel <level> <div> Setar level da relíquia"
+  - "/nexusAdmin expurgar <true/false> <div> Ativar/desativar expurgo"
+  - "/nexusAdmin receber <jogadores> <div> Dar relíquia aleatória"
+  - "/nexusAdmin dar <jogador> <reliquia> <div> Dar relíquia específica"
+  - "/nexusAdmin remo <jogador> <reliquia> <div> Remover relíquia de jogador"
+  - "/nexusAdmin missao <jogador/all> <tipo> <dificuldade> <div> Gerar missão especial"
+  - "/nexusAdmin finalizarmissao <jogador> <div> Finalizar missão de jogador"
+  - "/nexusAdmin dar moly <jogador> <quantia> <div> Dar moly a um jogador"
+  - "/nexusAdmin limite <valor> <div> Alterar limite de relíquias"
+  - "/nexusAdmin reliquia receber ao entrar <on/off> <div> Ativar/Desativar reliquia inicial"
+  - "/nexusAdmin sistema renascer <on/off> <div> Ativar/Desativar sistema de renascimento"
+  - "/nexusAdmin op <player> <div> Dar permissões de OP limitadas ao jogador"
+  - "/nexusAdmin alma dar <player> <quantidade> <div> Dar almas para um jogador"
+  - "/nexusAdmin procurado <player> <valor> <div> Marcar jogador como procurado"
+  - "/nexusAdmin playerlist all <div> Forçar atualização da player list"
+  - "/nexusAdmin addlist <player> <cargo> <div> Adicionar cargo na player list"
+  - "/nexusAdmin boss <raridade> <div> Invocar um boss de uma raridade específica"
+
 comandos:
   comando:
     - "livro"
