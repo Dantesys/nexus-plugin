@@ -519,7 +519,7 @@ public final class ReliquiasNexus extends JavaPlugin {
         // Comando /nexus loja e nexus loja vender <valor>
         nexusRoot.then(Commands.literal(lang.getString("loja.comando","loja")).executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
-            if (config.getBoolean("expurgo") || config.getBoolean("recursos.loja")) {
+            if (config.getBoolean("expurgo") || !config.getBoolean("recursos.loja")) {
                 sender.sendMessage(Component.text("❌ "+lang.getString("loja.desativado","O comando de loja está desativado.")).color(NamedTextColor.RED));
                 return Command.SINGLE_SUCCESS;
             }
