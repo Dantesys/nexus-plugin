@@ -861,6 +861,26 @@ public class EvoluirEvent implements Listener {
                     }
                 }
             }
+            stack = player.getInventory().getItemInMainHand();
+            if(stack!=null){
+                if (stack.getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)) {
+                    String nome = stack.getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING);
+                    if (nome != null && !nome.isBlank()) {
+                        Nexus item = ItemsRegistro.getFromNome(nome);
+                        if(item!=null){
+                            if(item.getNome().equals("cronosombra")){
+                                int l=dataPlayer.getOrDefault(CRONOSOMBRA.key,PersistentDataType.INTEGER,1);
+                                int usos=dataPlayer.getOrDefault(MISSAOCRONOSOMBRA.key,PersistentDataType.INTEGER,0);
+                                usos++;
+                                Cronosombra.getSpecialbyLevel(l,player);
+                                dataPlayer.set(SPECIAL.key,PersistentDataType.INTEGER,60);
+                                dataPlayer.set(MISSAOCRONOSOMBRA.key,PersistentDataType.INTEGER,usos);
+                                tentarEvoluir(player,stack,l,getSlotOfItem(player,stack));
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
     @EventHandler

@@ -9,6 +9,7 @@ import java.util.List;
 public enum NexusKeys {
     MISSAOCOOLDOWN,
     MISSAOTEMPO,
+    LOJAPLAYER,
     NEXUS,
     SLAVE,
     DRENO,

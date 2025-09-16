@@ -5,6 +5,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Color;
 import org.bukkit.NamespacedKey;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,6 +21,8 @@ import org.dantesys.reliquiasNexus.items.Nexus;
 import org.dantesys.reliquiasNexus.util.Economia;
 import org.dantesys.reliquiasNexus.util.NexusKeys;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 
@@ -38,32 +41,37 @@ public class JoinQuitEvent implements Listener {
         boolean novato = container.getOrDefault(new NamespacedKey("nexus_novato","novato"),PersistentDataType.BOOLEAN,true);
         container.set(SPECIAL.key,PersistentDataType.INTEGER,qtd);
         container.set(SPECIAL.key, PersistentDataType.INTEGER,0);
-        double saldo = container.getOrDefault(SALDO.key,PersistentDataType.DOUBLE,0d);
-        Economia.adicionarSaldo(player,saldo,"JOIN");
         boolean join = plugin.getConfig().getBoolean("reliquia_onjoin");
-        if(qtd==0 && novato && join){
+        if(novato){
             container.set(new NamespacedKey("nexus_novato","novato"),PersistentDataType.BOOLEAN,false);
-            List<Nexus> reliquias = ItemsRegistro.getValidReliquia(ReliquiasNexus.getNexusConfig());
-            Random rng = new Random();
-            int escolhido = rng.nextInt(reliquias.size());
-            Nexus n = reliquias.get(escolhido);
-            String nome = n.getNome();
-            ReliquiasNexus.setConfigSave("nexus."+nome,player.getUniqueId().toString());
-            plugin.saveConfig();
-            container.set(QTD.key,PersistentDataType.INTEGER,1);
-            int level =1;
-            NamespacedKey key = NexusKeys.getKey(nome);
-            if(key!=null && container.has(key,PersistentDataType.INTEGER)){
-                level=container.getOrDefault(key,PersistentDataType.INTEGER,1);
-            }else if(key!=null){
-                container.set(key,PersistentDataType.INTEGER,1);
+            if(join){
+                List<Nexus> reliquias = ItemsRegistro.getValidReliquia(ReliquiasNexus.getNexusConfig());
+                Random rng = new Random();
+                int escolhido = rng.nextInt(reliquias.size());
+                Nexus n = reliquias.get(escolhido);
+                String nome = n.getNome();
+                ReliquiasNexus.setConfigSave("nexus."+nome,player.getUniqueId().toString());
+                plugin.saveConfig();
+                container.set(QTD.key,PersistentDataType.INTEGER,1);
+                int level =1;
+                NamespacedKey key = NexusKeys.getKey(nome);
+                if(key!=null && container.has(key,PersistentDataType.INTEGER)){
+                    level=container.getOrDefault(key,PersistentDataType.INTEGER,1);
+                }else if(key!=null){
+                    container.set(key,PersistentDataType.INTEGER,1);
+                }
+                ItemStack stack = n.getItem(level);
+                ItemMeta meta = stack.getItemMeta();
+                meta.getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,player.getUniqueId().toString());
+                stack.setItemMeta(meta);
+                player.getInventory().addItem(stack);
+                String r=ReliquiasNexus.getLang().getString("joinquit.relic");
+                if(r==null){
+                    r="Você recebeu a reliquia do <relic>";
+                }
+                r=r.replace("<relic>",nome);
+                player.sendMessage(Component.text("§2"+r));
             }
-            ItemStack stack = n.getItem(level);
-            ItemMeta meta = stack.getItemMeta();
-            meta.getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,player.getUniqueId().toString());
-            stack.setItemMeta(meta);
-            player.getInventory().addItem(stack);
-
             // Adiciona o livro de história ao inventário do jogador
             player.getInventory().addItem(ItemsRegistro.nexusStoryBook.getItem(1));
 
@@ -73,12 +81,6 @@ public class JoinQuitEvent implements Listener {
             }
             msg=msg.replace("<player>",player.getName());
             event.joinMessage(Component.text("§2"+msg));
-            String r=ReliquiasNexus.getLang().getString("joinquit.relic");
-            if(r==null){
-                r="Você recebeu a reliquia do <relic>";
-            }
-            r=r.replace("<relic>",nome);
-            player.sendMessage(Component.text("§2"+r));
         }else{
             String msg=ReliquiasNexus.getLang().getString("joinquit.join");
             if(msg==null){
@@ -101,6 +103,16 @@ public class JoinQuitEvent implements Listener {
         player.setCustomNameVisible(true);
         player.setResourcePack("https://github.com/Dantesys/nexus-plugin/raw/refs/heads/master/ResourcePackNexus/ResourcePackNexus.zip");
         plugin.reiniciarMissao(player);
+        File file = new File(ReliquiasNexus.getPlugin(ReliquiasNexus.class).getDataFolder(), "vendas.yml");
+        YamlConfiguration saldoOff = YamlConfiguration.loadConfiguration(file);
+        double saldo = saldoOff.getDouble(player.getUniqueId().toString(),0.0);
+        container.set(SALDO.key,PersistentDataType.DOUBLE,saldo);
+        saldoOff.set(player.getUniqueId().toString(),0.0);
+        try {
+            saldoOff.save(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {

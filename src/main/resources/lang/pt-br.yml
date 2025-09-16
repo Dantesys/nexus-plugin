@@ -12,6 +12,7 @@ nexus:
   - "/nexus missao cancelar <div> Cancela sua missão atual"
   - "/nexus saldo <div> Mostra o seu saldo"
   - "/nexus loja <div> Abre a loja do servidor"
+  - "/nexus loja vender <money> vende o item que está na sua mão"
 #Texto do /nexus livro
 livro:
   comando: "livro"
@@ -102,8 +103,10 @@ saldo:
 #Texto do /nexus loja
 loja:
   comando: "loja"
+  comandoVender: "vender"
   desativado: "O comando de loja está desativado."
   falhaPlayer: "Apenas jogadores podem usar este comando!"
+  falhaReliquia: "Itens Nexus não podem ser vendidos!"
   titulo: "Loja Nexus"
   serverItems: "Itens do servidor"
   serverTooltip: "Clique para ver os itens do servidor"
@@ -112,12 +115,17 @@ loja:
   ec: "Permite o uso do comando"
   voltar: "Voltar"
   voltarTooltip: "Clique para voltar ao menu principal"
+  proximo: "Proximo"
+  proximoTooltip: "Clique para ir a próxima pagina"
+  backTooltip: "Clique para voltar a pagina"
   comprou: "Você comprou <item> por <cost>"
   falhaInv: "Seu inventario está cheio!"
   falhaSaldo: "Você não tem saldo o suficiente"
   falhaEstoque: "Item sem estoque"
   falhaEnd: "Você já comprou o Baú do Fim. Esta é uma compra única."
   end: "acesso ao /ec"
+  vendeu: "Você vendeu <item> por <valor>"
+  vendaSuccess: "Item colocado na loja com sucesso!"
 comandos:
   comando:
     - "livro"
@@ -264,7 +272,7 @@ livror:
   ladrao: "Level 1-7: Habilidade Smoke Bomb!<break>Level 11-15: Muda a habilidade para Gravitational Theft!<break>Level 16+: Muda a habilidade para Escape!<break>Para evoluir precisa roubar itens com a reliquia"
   domador: "Level 1-5: Lobinho!<break>Level 6-10: Muda a habilidade para Lobo!<break>Level 11-15: Muda a habilidade para Alcateia!<break>Level 16+: Muda a habilidade para Alcateia Omega!<break>Para evoluir precisa domesticas animais/pets"
   alquimista: "Level 1-7: Explosão de Elixires!<break>Level 8-15: Muda a habilidade para Bolas de Elixir!<break>Level 16+: Muda a habilidade para Transmutação!<break>Para evoluir precisa usar a habilidade"
-  assassino: "Level 1-7: Dash Venenoso!<break>Level 8-15: Muda a habilidade para Execução Silenciosa!<break>Level 16+: Muda a habilidade para Invisibilidade Verdadeira!<break>Para evoluir precisa usar a habilidade"
+  assassino: "Level 1-7: Dash Venenoso!<break>Level 8-15: Muda a habilidade para Execução Silenciosa!<break>Level 16+: Muda a habilidade para Invisibilidade Verdadeira!<break>Para evoluir precisa derrotar mobs com ataque critico"
   construtor: "Level 1-7: Canteiro de Obras!<break>Level 8-15: Muda a habilidade para Pilar Elevador!<break>Level 16+: Muda a habilidade para Formiga Voadora!<break>Para evoluir precisa construir"
   cronosombra: "Level 1-7: Sombra Congelante!<break>Level 8-15: Muda a habilidade para Eclipse Temporal!<break>Level 16+: Muda a habilidade para Paradoxo Temporal!<break>Para evoluir precisa usar a habilidade"
   cozinheiro: "Level 1-7: Chuva de Comida!<break>Level 8-15: Muda a habilidade para Banquete do Glutão!<break>Level 16+: Muda a habilidade para Bolo do Caos!<break>Para evoluir precisa se alimentar"

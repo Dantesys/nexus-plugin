@@ -57,15 +57,15 @@ import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 /*
 * TODO
 *  Criar comando de fazer rank e definir cor - PENDENTE
-*  Modificar Sistema de loja e criar sistema de loja comunitaria - PENDENTE
+*  Modificar Sistema de loja e criar sistema de loja comunitaria - Testando
 *  Criar Comando TPA e HOME - PENDENTE
 *  Criar Comando para definir custo de tpa e home - PENDENTE
 *  Criar Comando para setar o nome do dinheiro - PENDENTE
-*  Ajustar arquivo de tradução - Fazendo
+*  Ajustar arquivo de tradução - Fazendo e Testando
 *  Ajustar comando EC - PEDENTE
 *  Refazer sistema de procurado - PENDENTE
 *  Refazer sistema de bosses - PENDENTE
-*  Refazer sistema de economia - PEDENTE
+*  Refazer sistema de economia - Testando
 */
 public final class ReliquiasNexus extends JavaPlugin {
     private static final Map<UUID, Troca> trocas = new ConcurrentHashMap<>();
@@ -518,7 +518,7 @@ public final class ReliquiasNexus extends JavaPlugin {
             }
             return Command.SINGLE_SUCCESS;
         })));
-        // Comando /nexus loja
+        // Comando /nexus loja e nexus loja vender <valor>
         nexusRoot.then(Commands.literal(lang.getString("loja.comando","loja")).executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
             if (config.getBoolean("expurgo") || config.getBoolean("recursos.loja")) {
@@ -531,7 +531,34 @@ public final class ReliquiasNexus extends JavaPlugin {
             }
             sender.sendMessage(Component.text("❌ "+lang.getString("loja.falhaPlayer","Apenas jogadores podem usar este comando!")).color(NamedTextColor.RED));
             return Command.SINGLE_SUCCESS;
-        }));
+        })
+                .then(Commands.literal(lang.getString("loja.comandoVender","vender")).then(Commands.argument("money",DoubleArgumentType.doubleArg(0.0))).executes(ctx -> {
+                    final CommandSender sender = ctx.getSource().getSender();
+                    if (config.getBoolean("expurgo") || !config.getBoolean("recursos.loja")) {
+                        sender.sendMessage(Component.text("❌ "+lang.getString("loja.desativado","O comando de loja está desativado.")).color(NamedTextColor.RED));
+                        return Command.SINGLE_SUCCESS;
+                    }
+                    if (ctx.getSource().getExecutor() instanceof Player player) {
+                        double preco = ctx.getArgument("money",double.class);
+                        ItemStack item = player.getInventory().getItemInMainHand();
+                        if (!item.getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)) {
+                            ItemMeta meta = item.getItemMeta();
+                            meta.getPersistentDataContainer().set(LOJAPLAYER.key, PersistentDataType.STRING, player.getUniqueId().toString());
+                            item.setItemMeta(meta);
+                            List<Map<String, Object>> itensSalvosPlayers = (List<Map<String, Object>>) lojaSV.getList("players",new ArrayList<>());
+                            Map<String, Object> mp = new HashMap<>();
+                            mp.put("item",item);
+                            mp.put("preco",preco);
+                            itensSalvosPlayers.add(mp);
+                            sender.sendMessage(Component.text(lang.getString("loja.vendaSuccess", "Item colocado na loja com sucesso!")).color(NamedTextColor.GREEN));
+                        } else {
+                            sender.sendMessage(Component.text("❌ " + lang.getString("loja.falhaReliquia", "Itens Nexus não podem ser vendidos!")).color(NamedTextColor.RED));
+                        }
+                        return Command.SINGLE_SUCCESS;
+                    }
+                    sender.sendMessage(Component.text("❌ "+lang.getString("loja.falhaPlayer","Apenas jogadores podem usar este comando!")).color(NamedTextColor.RED));
+                    return Command.SINGLE_SUCCESS;
+                })));
         // Comando /nexus saldo (player) - Abrir menu do banco
         nexusRoot.then(Commands.literal(lang.getString("saldo.comando","saldo")).executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
@@ -558,27 +585,6 @@ public final class ReliquiasNexus extends JavaPlugin {
             }
             return Command.SINGLE_SUCCESS;
         }));
-
-        // Comando /nexus vender
-        nexusRoot.then(Commands.literal("vender").executes(ctx -> {
-                            if (ctx.getSource().getExecutor() instanceof Player player) {
-                                venderMinerio(player, player.getInventory().getItemInMainHand().getAmount());
-                                return Command.SINGLE_SUCCESS;
-                            }
-                            ctx.getSource().getSender().sendMessage(Component.text("❌ Apenas jogadores podem usar este comando!").color(NamedTextColor.RED));
-                            return Command.SINGLE_SUCCESS;
-                        })
-                        .then(Commands.argument("quantidade", IntegerArgumentType.integer(1))
-                                .executes(ctx -> {
-                                    if (ctx.getSource().getExecutor() instanceof Player player) {
-                                        int quantidade = ctx.getArgument("quantidade", Integer.class);
-                                        venderMinerio(player, quantidade);
-                                        return Command.SINGLE_SUCCESS;
-                                    }
-                                    ctx.getSource().getSender().sendMessage(Component.text("❌ Apenas jogadores podem usar este comando!").color(NamedTextColor.RED));
-                                    return Command.SINGLE_SUCCESS;
-                                }))
-        );
 
         // Comando para abrir o ender chest
         LiteralCommandNode<CommandSourceStack> ecCommandNode = Commands.literal("ec").executes(ctx -> {
@@ -1031,64 +1037,6 @@ public final class ReliquiasNexus extends JavaPlugin {
         getServer().getConsoleSender().sendMessage("§2✅ §a[Nexus]: Plugin Ativado com Sucesso!");
     }
 
-    private void venderMinerio(Player player, int quantidade) {
-        ItemStack itemInHand = player.getInventory().getItemInMainHand();
-        if (itemInHand.getType() == Material.AIR) {
-            player.sendMessage(Component.text("❌ Você precisa segurar um minério para vendê-lo.").color(NamedTextColor.RED));
-            return;
-        }
-
-        Material material = itemInHand.getType();
-
-        if (itemInHand.getAmount() < quantidade) {
-            player.sendMessage(Component.text("❌ Você não tem a quantidade necessária para vender.").color(NamedTextColor.RED));
-            return;
-        }
-
-        String nomeItem = "";
-        double valorUnitario = 0;
-        switch (material) {
-            case NETHERITE_INGOT:
-                valorUnitario = 750;
-                nomeItem = "Barra de Netherite";
-                break;
-            case DIAMOND:
-                valorUnitario = 500;
-                nomeItem = "Diamante";
-                break;
-            case EMERALD:
-                valorUnitario = 300;
-                nomeItem = "Esmeralda";
-                break;
-            case GOLD_INGOT:
-                valorUnitario = 200;
-                nomeItem = "Barra de Ouro";
-                break;
-            case IRON_INGOT:
-                valorUnitario = 100;
-                nomeItem = "Barra de Ferro";
-                break;
-            case COAL:
-                valorUnitario = 50;
-                nomeItem = "Carvão";
-                break;
-            case REDSTONE:
-                valorUnitario = 75;
-                nomeItem = "Redstone";
-                break;
-            default:
-                player.sendMessage(Component.text("❌ Este item não pode ser vendido.").color(NamedTextColor.RED));
-                return;
-        }
-
-        double valorTotal = valorUnitario * quantidade;
-
-        itemInHand.setAmount(itemInHand.getAmount() - quantidade);
-        Economia.adicionarSaldo(player, valorTotal, "Venda de " + nomeItem);
-
-        player.sendMessage(Component.text("✅ Você vendeu " + quantidade + " de " + nomeItem + " por " + valorTotal + " moly.").color(NamedTextColor.GREEN));
-    }
-
     private boolean processarTroca(Player player1, Player player2, String relic1, String relic2) {
         boolean achou1=false;
         ItemStack p1Item = null;
@@ -1140,6 +1088,7 @@ public final class ReliquiasNexus extends JavaPlugin {
     public static FileConfiguration getLang(){
         return lang;
     }
+    public static YamlConfiguration getLoja(){ return lojaSV;}
     public static void setConfigSave(String path,Object value){
         config.set(path,value);
     }

@@ -28,12 +28,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+import static org.dantesys.reliquiasNexus.util.NexusKeys.LOJAPLAYER;
 import static org.dantesys.reliquiasNexus.util.NexusKeys.SALDO;
 
 public class LojaManager implements Listener {
     private final JavaPlugin plugin;
     private List<LojaItem> todosItens;
     private List<LojaItem> itensAtuais;
+    private LojaPage page;
     private final String MAIN_MENU_TITLE;
     private final String SERVER_ITEMS_MENU_TITLE;
     private final String NORMAL_ITEMS_MENU_TITLE;
@@ -52,10 +54,10 @@ public class LojaManager implements Listener {
     }
     public void load(YamlConfiguration lojaSV){
         todosItens = new ArrayList<>();
-        List<Map<?, ?>> itensSalvos = (List<Map<?, ?>>) lojaSV.getList("servidor");
+        List<Map<String, Object>> itensSalvos = (List<Map<String, Object>>) lojaSV.getList("servidor");
         if(itensSalvos == null) return;
 
-        for(Map<?, ?> map : itensSalvos){
+        for(Map<String, Object> map : itensSalvos){
             ItemStack item = (ItemStack) map.get("item");
             double preco = 0;
             Object precoObj = map.get("preco");
@@ -68,6 +70,32 @@ public class LojaManager implements Listener {
             todosItens.add(lojaItem);
         }
         gerarItensAtuais();
+        List<Map<String, Object>> itensSalvosPlayers = (List<Map<String, Object>>) lojaSV.getList("players");
+        if(itensSalvosPlayers == null) return;
+        List<LojaItem> lojaPlayer = new ArrayList<>();
+        for(Map<String, Object> map : itensSalvosPlayers){
+            ItemStack item = (ItemStack) map.get("item");
+            double preco = 0;
+            Object precoObj = map.get("preco");
+            if(precoObj instanceof Double){
+                preco = (Double) precoObj;
+            } else if(precoObj instanceof Integer){
+                preco = ((Integer) precoObj).doubleValue();
+            }
+            LojaItem lojaItem = new LojaItem(item, preco);
+            lojaPlayer.add(lojaItem);
+        }
+        ItemStack backArrow = criarCabecaComID(
+                "MHF_ArrowLeft",
+                "§c"+ReliquiasNexus.getLang().getString("loja.voltar","Voltar"),
+                Arrays.asList("§7"+ReliquiasNexus.getLang().getString("loja.backTooltip","Clique para voltar a pagina")),
+                "back_button_player");
+        ItemStack nextArrow = criarCabecaComID(
+                "MHF_ArrowRight",
+                "§c"+ReliquiasNexus.getLang().getString("loja.proximo","Proximo"),
+                Arrays.asList("§7"+ReliquiasNexus.getLang().getString("loja.proximoTooltip","Clique para ir a próxima pagina")),
+                "next_button_player");
+        page = new LojaPage(lojaPlayer,backArrow,nextArrow);
     }
     private void gerarItensAtuais(){
         itensAtuais = new ArrayList<>();
@@ -260,7 +288,6 @@ public class LojaManager implements Listener {
         enderChestMeta.getPersistentDataContainer().set(new NamespacedKey(plugin, "preco"), PersistentDataType.DOUBLE, (double) preco);
         enderChestItem.setItemMeta(enderChestMeta);
         inv.setItem(4, enderChestItem); // Posição destacada no topo
-        //TODO SISTEMA DE ESTOQUE QUE MUDA COM O TEMPO E PODE ACABA
         showView(inv);
         // Botão de voltar
         ItemStack backArrow = criarCabecaComID(
@@ -286,49 +313,12 @@ public class LojaManager implements Listener {
         for (int i = 0; i < 54; i++) {
             inv.setItem(i, borda);
         }
-
-        // Itens Normais com os preços especificados
-        adicionarItemComPreco(inv, 10, Material.DIAMOND, "Diamante", 500.0, 1);
-        adicionarItemComPreco(inv, 11, Material.DIAMOND_SWORD, "Espada de Diamante", 1000.0, 1);
-        adicionarItemComPreco(inv, 12, Material.DIAMOND_PICKAXE, "Picareta de Diamante", 1500.0, 1);
-        adicionarItemComPreco(inv, 13, Material.DIAMOND_AXE, "Machado de Diamante", 1300.0, 1);
-
-        // Preços conforme especificado
-        adicionarItemComPreco(inv, 14, Material.IRON_INGOT, "Barra de Ferro", 100.0, 1);
-        adicionarItemComPreco(inv, 15, Material.GOLD_INGOT, "Barra de Ouro", 200.0, 1);
-        adicionarItemComPreco(inv, 16, Material.EMERALD, "Esmeralda", 300.0, 1);
-        adicionarItemComPreco(inv, 19, Material.NETHERITE_INGOT, "Barra de Netherite", 750.0, 1);
-        adicionarItemComPreco(inv, 20, Material.COAL, "Carvão", 50.0, 1);
-
-        adicionarItemComPreco(inv, 21, Material.OAK_LOG, "Toras de Carvalho", 10.0, 1);
-        adicionarItemComPreco(inv, 22, Material.COBBLESTONE, "Pedregulho", 5.0, 1);
-        adicionarItemComPreco(inv, 23, Material.DIAMOND_HELMET, "Capacete de Diamante", 1200.0, 1);
-        adicionarItemComPreco(inv, 24, Material.DIAMOND_CHESTPLATE, "Peitoral de Diamante", 2000.0, 1);
-        adicionarItemComPreco(inv, 25, Material.DIAMOND_LEGGINGS, "Calças de Diamante", 1800.0, 1);
-        adicionarItemComPreco(inv, 28, Material.DIAMOND_BOOTS, "Botas de Diamante", 1100.0, 1);
-        adicionarItemComPreco(inv, 29, Material.BEEF, "Bife", 25.0, 1);
-        adicionarItemComPreco(inv, 30, Material.COOKED_BEEF, "Bife Cozido", 30.0, 1);
-        adicionarItemComPreco(inv, 31, Material.GOLDEN_CARROT, "Cenoura Dourada", 40.0, 1);
-        adicionarItemComPreco(inv, 32, Material.ENCHANTED_BOOK, "Livro Encantado", 500.0, 1);
-        adicionarItemComPreco(inv, 33, Material.WATER_BUCKET, "Balde de Água", 15.0, 1);
-        adicionarItemComPreco(inv, 34, Material.LAVA_BUCKET, "Balde de Lava", 25.0, 1);
-        adicionarItemComPreco(inv, 35, Material.ARROW, "Flecha", 3.0, 1);
-        adicionarItemComPreco(inv, 36, Material.EXPERIENCE_BOTTLE, "Frasco de Experiência", 75.0, 1);
-        adicionarItemComPreco(inv, 37, Material.DIAMOND_HORSE_ARMOR, "Armadura de Diamante", 2000.0, 1);
-
-        // Blocos - Preços ajustados para serem mais caros que o equivalente em itens básicos
-        adicionarItemComPreco(inv, 38, Material.IRON_BLOCK, "Bloco de Ferro", 950.0, 1);      // 9 barras = 900, bloco = 950
-        adicionarItemComPreco(inv, 39, Material.GOLD_BLOCK, "Bloco de Ouro", 1850.0, 1);      // 9 barras = 1800, bloco = 1850
-        adicionarItemComPreco(inv, 40, Material.EMERALD_BLOCK, "Bloco de Esmeralda", 2750.0, 1); // 9 esmeraldas = 2700, bloco = 2750
-        adicionarItemComPreco(inv, 41, Material.DIAMOND_BLOCK, "Bloco de Diamante", 4600.0, 1);  // 9 diamantes = 4500, bloco = 4600
-        adicionarItemComPreco(inv, 42, Material.NETHERITE_BLOCK, "Bloco de Netherite", 6800.0, 1); // 9 barras = 6750, bloco = 6800
-        adicionarItemComPreco(inv, 43, Material.COAL_BLOCK, "Bloco de Carvão", 475.0, 1);      // 9 carvões = 450, bloco = 475
-
+        page.showPage(inv);
         // Botão de voltar
         ItemStack backArrow = criarCabecaComID(
                 "MHF_ArrowLeft",
-                "§cVoltar",
-                Arrays.asList("§7Clique para voltar ao menu principal."),
+                "§c"+ReliquiasNexus.getLang().getString("loja.voltar","Voltar"),
+                Arrays.asList("§7"+ReliquiasNexus.getLang().getString("loja.voltarTooltip","Clique para voltar ao menu principal")),
                 "back_button");
         inv.setItem(49, backArrow);
 
@@ -369,24 +359,6 @@ public class LojaManager implements Listener {
         return head;
     }
 
-    private void adicionarItemComPreco(Inventory inv, int slot, Material material, String nome, double preco, int quantidade) {
-        ItemStack item = new ItemStack(material, quantidade);
-        ItemMeta meta = item.getItemMeta();
-        meta.displayName(Component.text(nome));
-
-        List<Component> lore = new ArrayList<>();
-        lore.add(Component.text("§7Preço: §6" + preco + " moly"));
-        lore.add(Component.text("§aClique para comprar!"));
-
-        meta.lore(lore);
-        meta.getPersistentDataContainer().set(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING,
-                nome.replaceAll("§.", "").replaceAll(" ", "_"));
-        meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "preco"), PersistentDataType.DOUBLE, preco);
-        item.setItemMeta(meta);
-
-        inv.setItem(slot, item);
-    }
-
     private void playOpenSound(Player player) {
         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.5f);
 
@@ -424,6 +396,27 @@ public class LojaManager implements Listener {
         if(event.getTickNumber()%72000==0){
             gerarItensAtuais();
         }
+        if(event.getTickNumber()%200==0){
+            List<Map<String, Object>> itensSalvosPlayers = (List<Map<String, Object>>) ReliquiasNexus.getLoja().getList("players");
+            if(itensSalvosPlayers == null) return;
+            List<LojaItem> lojaPlayer = new ArrayList<>();
+            for(Map<String, Object> map : itensSalvosPlayers){
+                ItemStack item = (ItemStack) map.get("item");
+                ItemMeta meta = item.getItemMeta();
+                meta.getPersistentDataContainer().set(LOJAPLAYER.key,PersistentDataType.BOOLEAN,true);
+                item.setItemMeta(meta);
+                double preco = 0;
+                Object precoObj = map.get("preco");
+                if(precoObj instanceof Double){
+                    preco = (Double) precoObj;
+                } else if(precoObj instanceof Integer){
+                    preco = ((Integer) precoObj).doubleValue();
+                }
+                LojaItem lojaItem = new LojaItem(item, preco);
+                lojaPlayer.add(lojaItem);
+            }
+            page.updateItens(lojaPlayer);
+        }
     }
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
@@ -440,12 +433,15 @@ public class LojaManager implements Listener {
             event.setCancelled(true);
             if (data.has(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING)) {
                 String itemId = data.get(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING);
+                if(itemId==null)itemId="";
                 switch (itemId) {
                     case "op_items":
                         abrirMenuOpItems(player);
                         break;
                     case "normal_items":
                         abrirMenuNormalItems(player);
+                        break;
+                    default:
                         break;
                 }
             }
@@ -458,9 +454,19 @@ public class LojaManager implements Listener {
                     abrirMenuPrincipal(player);
                     return;
                 }
+                if ("back_button_player".equals(itemId)) {
+                    page.backPage();
+                    abrirMenuNormalItems(player);
+                    return;
+                }
+                if ("next_button_player".equals(itemId)) {
+                    page.nextPage();
+                    abrirMenuNormalItems(player);
+                    return;
+                }
 
                 // Lógica específica para o Baú do Fim
-                if (itemId.equals("ender_chest")) {
+                if (itemId!=null && itemId.equals("ender_chest")) {
                     double preco = plugin.getConfig().getDouble("recursos.enderchestcost",5000.0);
                     if (saldo >= preco) {
                         PersistentDataContainer playerData = player.getPersistentDataContainer();
@@ -509,6 +515,37 @@ public class LojaManager implements Listener {
                     }else{
                         player.sendMessage(Component.text("❌ "+ReliquiasNexus.getLang().getString("loja.falhaEstoque","Item sem estoque")).color(NamedTextColor.RED));
                         playErrorSound(player);
+                    }
+                }else{
+                    LojaItem item = page.getItem(clickedItem);
+                    LojaPageResult result = page.comprar(item,player);
+                    switch(result){
+                        case NULO -> {
+                            player.sendMessage(Component.text("❌ "+ReliquiasNexus.getLang().getString("loja.falhaEstoque","Item sem estoque")).color(NamedTextColor.RED));
+                            playErrorSound(player);
+                        }
+                        case INVFULL -> {
+                            player.sendMessage(Component.text("❌ "+ReliquiasNexus.getLang().getString("loja.falhaInv","Seu inventario está cheio!")).color(NamedTextColor.RED));
+                            playErrorSound(player);
+                        }
+                        case SEMSALDO -> {
+                            player.sendMessage(Component.text("❌ "+ReliquiasNexus.getLang().getString("loja.falhaSaldo","Você não tem saldo o suficiente")).color(NamedTextColor.RED));
+                            playErrorSound(player);
+                        }
+                        case SUCCESS -> {
+                            Component nomeComp = item.getItem().displayName();
+                            String nome = PlainTextComponentSerializer.plainText().serialize(nomeComp);
+                            String precoStr = String.format("%.2f", item.getPreco(true));
+                            player.sendMessage(Component.text("✅ "+ReliquiasNexus.getLang().getString("loja.comprou","Você comprou <item> por <cost>").replace("<item>",nome).replace("<cost>",precoStr)).color(NamedTextColor.GREEN));
+                            playBuySound(player);
+                            List<Map<String,Object>> itensSalvos = (List<Map<String,Object>>) ReliquiasNexus.getLoja().getList("players", new ArrayList<>());
+                            itensSalvos.removeIf(map -> {
+                                ItemStack stack = (ItemStack) map.get("item");
+                                return stack != null && stack.equals(item.getItem());
+                            });
+                            ReliquiasNexus.getLoja().set("players", itensSalvos);
+                            save(ReliquiasNexus.getLoja());
+                        }
                     }
                 }
             }
