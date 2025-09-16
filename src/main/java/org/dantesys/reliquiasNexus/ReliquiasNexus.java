@@ -101,13 +101,6 @@ public final class ReliquiasNexus extends JavaPlugin {
         }
         File file = new File(this.getDataFolder(), "/lang/"+tipo+".yml");
         lang = YamlConfiguration.loadConfiguration(file);
-        File lojafile = new File(this.getDataFolder(), "loja.yml");
-        lojaSV = YamlConfiguration.loadConfiguration(lojafile);
-        if(config.get("servidor") == null){
-            lojaManager.gerarDefault(lojaSV);
-        }else{
-            lojaManager.load(lojaSV);
-        }
         File ms = new File(this.getDataFolder(), "missaoAtiva.yml");
         missaoAtivaBK = YamlConfiguration.loadConfiguration(ms);
         List<String> uuids = missaoAtivaBK.getStringList("players");
@@ -122,7 +115,13 @@ public final class ReliquiasNexus extends JavaPlugin {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
+        File lojafile = new File(this.getDataFolder(), "loja.yml");
+        lojaSV = YamlConfiguration.loadConfiguration(lojafile);
+        if(config.get("servidor") == null){
+            lojaManager.gerarDefault(lojaSV);
+        }else{
+            lojaManager.load(lojaSV);
+        }
         // Inicializar o gerenciador da player list e do boss
         playerListManager = new PlayerListManager(this);
         bossManager = new BossManager(this);
