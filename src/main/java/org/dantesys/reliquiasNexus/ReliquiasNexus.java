@@ -715,7 +715,7 @@ public final class ReliquiasNexus extends JavaPlugin {
                     config.set("cargos."+rank,cor.asHexString());
                     return Command.SINGLE_SUCCESS;
         })))))
-                .then(Commands.literal("set").then(Commands.argument("player",ArgumentTypes.player())).then(Commands.argument("rank",StringArgumentType.string()).suggests( (_, builder) -> {
+                .then(Commands.literal("set").then(Commands.argument("player",ArgumentTypes.player())).then(Commands.argument("rank",StringArgumentType.string()).suggests( (ctx, builder) -> {
                     List<String> ranks = config.getStringList("ranks");
                     if(ranks.isEmpty())return builder.buildFuture();
                     for (String rank : ranks) {
@@ -825,7 +825,7 @@ public final class ReliquiasNexus extends JavaPlugin {
             }
             return Command.SINGLE_SUCCESS;
         })
-                .then(Commands.argument("nexus",StringArgumentType.string()).suggests( (_, builder) -> {
+                .then(Commands.argument("nexus",StringArgumentType.string()).suggests( (ctx, builder) -> {
                    for (String nome : names) {
                        String r = config.getString("nexus."+nome,"");
                        if(!r.isBlank()){
