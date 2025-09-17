@@ -16,10 +16,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -50,13 +49,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import org.bukkit.Material;
 
 
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 /*
 * TODO
-*  Criar comando de fazer rank e definir cor - PENDENTE
+*  Criar comando de fazer rank e definir cor - Testando
 *  Modificar Sistema de loja e criar sistema de loja comunitaria - Testando
 *  Criar Comando TPA e HOME - PENDENTE (VER NESSECIDADE)
 *  Criar Comando para definir custo de tpa e home - PENDENTE (VER NESSECIDADE)
@@ -571,6 +569,17 @@ public final class ReliquiasNexus extends JavaPlugin {
             sender.sendMessage(Component.text("❌ "+lang.getString("saldo.falhaPlayer","Apenas jogadores podem usar este comando!")).color(NamedTextColor.RED));
             return Command.SINGLE_SUCCESS;
         }));
+        nexusRoot.then(Commands.literal("chatcor").executes(ctx -> {
+            final CommandSender sender = ctx.getSource().getSender();
+            if (ctx.getSource().getExecutor() instanceof Player player) {
+                boolean cor = player.getPersistentDataContainer().getOrDefault(COR.key,PersistentDataType.BOOLEAN,false);
+                player.getPersistentDataContainer().set(COR.key,PersistentDataType.BOOLEAN,!cor);
+                player.sendMessage(Component.text("✅ "+lang.getString("chatcor."+(!cor?"habilitado":"desabilitado"),"Cor do rank/cargo "+(cor?"habilitada":"desabilitada"))).color(NamedTextColor.GREEN));
+                return Command.SINGLE_SUCCESS;
+            }
+            sender.sendMessage(Component.text("❌ "+lang.getString("chatcor.falhaPlayer","Apenas jogadores podem usar este comando!")).color(NamedTextColor.RED));
+            return Command.SINGLE_SUCCESS;
+        }));
         // Comando para abrir o ender chest
         LiteralCommandNode<CommandSourceStack> ecCommandNode = Commands.literal("ec").executes(ctx -> {
             if (ctx.getSource().getExecutor() instanceof Player player) {
@@ -586,7 +595,7 @@ public final class ReliquiasNexus extends JavaPlugin {
         }).build();
 
         // Comando /nexusAdmin para operadores
-        LiteralArgumentBuilder<CommandSourceStack> nexuRoot = Commands.literal("nexusAdmin").requires(sender -> sender.getSender().isOp() || sender.getSender().hasPermission("reliquiasnexus.opzim")).executes(ctx -> {
+        LiteralArgumentBuilder<CommandSourceStack> nexusAdminRoot = Commands.literal("nexusAdmin").requires(sender -> sender.getSender().isOp() || sender.getSender().hasPermission("reliquiasnexus.opzim")).executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
             List<String> nexus = lang.getStringList("nexusAdmin");
             nexus.forEach(texto ->{
@@ -598,9 +607,251 @@ public final class ReliquiasNexus extends JavaPlugin {
             sender.sendMessage(Component.text("§6§l⭐ §e§l"+nexus.getFirst()+" §6§l⭐\n").decorate(TextDecoration.BOLD));
             return Command.SINGLE_SUCCESS;
         });
+        // Comando /nexusAdmin rank e derivados
+        nexusAdminRoot.then(Commands.literal("rank").requires(sender -> sender.getSender().isOp() || sender.getSender().hasPermission("reliquiasnexus.opzim")).executes( ctx -> {
+            final CommandSender sender = ctx.getSource().getSender();
+            List<String> ranks = config.getStringList("ranks");
+            sender.sendMessage(Component.text("-="+lang.getString("rank.titulo","Lista de ranks/cargos do servidor")+"=-"));
+            ranks.forEach(rank -> {
+                Color cor = config.getColor("cargo."+rank, Color.WHITE);
+                sender.sendMessage(Component.text("➤ "+rank).color(TextColor.color(cor.asRGB())));
+            });
+            return Command.SINGLE_SUCCESS;
+        })
+                .then(Commands.literal("new").then(Commands.argument("nome",StringArgumentType.string()).then(Commands.argument("cor",ArgumentTypes.hexColor()).executes(ctx -> {
+                    final CommandSender sender = ctx.getSource().getSender();
+                    String rank = StringArgumentType.getString(ctx,"nome");
+                    List<String> ranks = config.getStringList("ranks");
+                    if(!ranks.contains(rank)){
+                        ranks.add(rank);
+                        config.set("ranks",ranks);
+                        sender.sendMessage(Component.text(lang.getString("rank.novo","Novo rank criado com sucesso!")).color(NamedTextColor.GREEN));
+                    }else{
+                        sender.sendMessage(Component.text(lang.getString("rank.cor","Cor atualizada com sucesso!")).color(NamedTextColor.GREEN));
+                    }
+                    TextColor cor = ctx.getArgument("cor", TextColor.class);
 
+                    config.set("cargos."+rank,cor.asHexString());
+                    return Command.SINGLE_SUCCESS;
+        })))))
+                .then(Commands.literal("set").then(Commands.argument("player",ArgumentTypes.player())).then(Commands.argument("rank",StringArgumentType.string()).suggests( (_, builder) -> {
+                    List<String> ranks = config.getStringList("ranks");
+                    if(ranks.isEmpty())return builder.buildFuture();
+                    for (String rank : ranks) {
+                        builder.suggest(rank);
+                    }
+                    return builder.buildFuture();
+                })
+                        .executes(ctx -> {
+                    final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogador", PlayerSelectorArgumentResolver.class);
+                    final Player player = targetResolver.resolve(ctx.getSource()).getFirst();
+                    final String rank = ctx.getArgument("rank", String.class);
+                    final CommandSender sender = ctx.getSource().getSender();
+                    List<String> ranks = config.getStringList("ranks");
+                    if(ranks.contains(rank)){
+                        config.set("players."+player.getUniqueId(),rank);
+                        player.sendMessage(Component.text("✅ "+lang.getString("rank.mudaPlayer","Seu rank foi alterado para ")+rank).color(NamedTextColor.GREEN));
+                        sender.sendMessage(Component.text("✅ "+lang.getString("rank.muda","Rank alterado com sucesso")).color(NamedTextColor.GREEN));
+                    }else{
+                        sender.sendMessage(Component.text("❌ "+lang.getString("rank.falhaInvalido","Rank invalido!")).color(NamedTextColor.RED));
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })));
+        // Comando /nexusAdmin setlevel
+        nexusAdminRoot.then(Commands.literal("setlevel").then(Commands.argument("level", IntegerArgumentType.integer(1,config.getInt("levelMax",20))).executes(ctx -> {
+            if(ctx.getSource().getExecutor() instanceof Player player){
+                ItemStack stack = player.getInventory().getItemInMainHand();
+                if(!stack.hasItemMeta()){
+                    player.sendMessage(Component.text("❌ "+lang.getString("setlevel.falhaMao","Segure uma relíquia Nexus na mão!"))
+                            .color(NamedTextColor.RED));
+                    return Command.SINGLE_SUCCESS;
+                }
+                int level = ctx.getArgument("level", int.class);
+                ItemMeta meta = stack.getItemMeta();
+                PersistentDataContainer data = meta.getPersistentDataContainer();
+                if(data.has(NEXUS.key,PersistentDataType.STRING)){
+                    String nome = data.get(NEXUS.key,PersistentDataType.STRING);
+                    if(nome!=null){
+                        NamespacedKey key = getKey(nome);
+                        if(key!=null){
+                            player.getPersistentDataContainer().set(key,PersistentDataType.INTEGER,level);
+                            player.sendMessage(Component.text("✅ "+lang.getString("setlevel.sucesso","Level do Nexus definido para:")+ "" + level)
+                                    .color(NamedTextColor.GREEN));
+                        }
+                    }
+                } else {
+                    player.sendMessage(Component.text("❌ "+lang.getString("setlevel.falhaMao","Segure uma relíquia Nexus na mão!"))
+                            .color(NamedTextColor.RED));
+                }
+            }else{
+                ctx.getSource().getSender().sendMessage(Component.text("❌ "+lang.getString("setlevel.falhaPlayer","Apenas jogadores podem usar este comando!"))
+                        .color(NamedTextColor.RED));
+            }
+            return Command.SINGLE_SUCCESS;
+        })));
+        // Comando /nexusAdmin expurgar
+        nexusAdminRoot.then(Commands.literal(lang.getString("expurgar.comando","expurgar")).then(Commands.argument("exp", BoolArgumentType.bool()).executes(ctx -> {
+            boolean exp = ctx.getArgument("exp", boolean.class);
+            config.set("expurgo",exp);
+            saveConfig();
+            Bukkit.getOnlinePlayers().forEach(player -> {
+                if(exp){
+                    player.sendMessage(Component.text("⚡ "+lang.getString("expurgar.ativado","MODO EXPURGO ATIVADO!<break>⚠ Todas as relíquias podem ser roubadas!").replace("<break>","\n"))
+                            .color(NamedTextColor.RED).decorate(TextDecoration.BOLD));
+                }else{
+                    player.sendMessage(Component.text("🛡️ "+lang.getString("expurgar.desativado","MODO EXPURGO DESATIVADO<break>✔ Suas relíquias estão seguras!").replace("<break>","\n"))
+                            .color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD));
+                }
+            });
+            ctx.getSource().getSender().sendMessage(Component.text("✅ "+lang.getString("expurgar.comando","expurgar")+": " + exp)
+                    .color(NamedTextColor.GREEN));
+            return Command.SINGLE_SUCCESS;
+        })));
+        // Comando /nexusAdmin reliquia e derivados
+        nexusAdminRoot.then(Commands.literal(lang.getString("reliquia.comando","reliquia"))
+                .then(Commands.literal("send").then(Commands.argument("player",ArgumentTypes.player()).executes(ctx -> {
+            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
+            final Player player = targetResolver.resolve(ctx.getSource()).getFirst();
+            PersistentDataContainer container = player.getPersistentDataContainer();
+            int qtd = container.getOrDefault(QTD.key,PersistentDataType.INTEGER,0);
+            CommandSender sender = ctx.getSource().getSender();
+            if(qtd<config.getInt("limite",4)){
+                List<Nexus> reliquias = ItemsRegistro.getValidReliquia(config);
+                Random rng = new Random();
+                int escolhido = rng.nextInt(reliquias.size());
+                Nexus n = reliquias.get(escolhido);
+                String nome = n.getNome();
+                ReliquiasNexus.setConfigSave("nexus."+nome,player.getUniqueId().toString());
+                this.saveConfig();
+                container.set(QTD.key,PersistentDataType.INTEGER,qtd+1);
+                int level = 1;
+                NamespacedKey key = NexusKeys.getKey(nome);
+                if(key!=null && container.has(key,PersistentDataType.INTEGER)){
+                    level=container.getOrDefault(key,PersistentDataType.INTEGER,1);
+                }else if(key!=null){
+                    container.set(key,PersistentDataType.INTEGER,1);
+                }
+                ItemStack stack = n.getItem(level);
+                ItemMeta meta = stack.getItemMeta();
+                meta.getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,player.getUniqueId().toString());
+                stack.setItemMeta(meta);
+                player.getInventory().addItem(stack);
+                String r=ReliquiasNexus.getLang().getString("reliquia.send","Você recebeu o nexus do <relic>");
+                player.sendMessage(Component.text(r).color(NamedTextColor.GREEN));
+                sender.sendMessage(Component.text(lang.getString("reliquia.sendSuccess","O jogador recebeu o nexus!")).color(NamedTextColor.GREEN));
+            }else{
+                sender.sendMessage(Component.text(lang.getString("reliquia.limite","O jogador já está no limite de nexus!")).color(NamedTextColor.RED));
+            }
+            return Command.SINGLE_SUCCESS;
+        })
+                .then(Commands.argument("nexus",StringArgumentType.string()).suggests( (_, builder) -> {
+                   for (String nome : names) {
+                       String r = config.getString("nexus."+nome,"");
+                       if(!r.isBlank()){
+                           try{
+                               UUID uuid = UUID.fromString(r);
+                               OfflinePlayer offlinePlayer = getServer().getOfflinePlayer(uuid);
+                               String nomeJogador = offlinePlayer.getName() != null ? offlinePlayer.getName() : "";
+                               if(nomeJogador.isBlank()){
+                                   builder.suggest(nome);
+                               }
+                           }catch(IllegalArgumentException ignored){
+                               builder.suggest(nome);
+                           }
+                       }else{
+                           builder.suggest(nome);
+                       }
+                    }
+                    return builder.buildFuture();
+                })
+                        .executes(ctx -> {
+                            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
+                            final Player player = targetResolver.resolve(ctx.getSource()).getFirst();
+                            final String nome = ctx.getArgument("nexus", String.class);
+                            final CommandSender sender = ctx.getSource().getSender();
+                            String r = config.getString("nexus."+nome,"");
+                            if(!r.isBlank()){
+                                try{
+                                    UUID uuid = UUID.fromString(r);
+                                    OfflinePlayer offlinePlayer = getServer().getOfflinePlayer(uuid);
+                                    String nomeJogador = offlinePlayer.getName() != null ? offlinePlayer.getName() : "";
+                                    if(!nomeJogador.isBlank()){
+                                        sender.sendMessage(Component.text("❌ "+lang.getString("reliquia.falhaDono","Esse Nexus já possui dono"))
+                                                .color(NamedTextColor.RED));
+                                        return Command.SINGLE_SUCCESS;
+                                    }
+                                }catch(IllegalArgumentException ignored){}
+                            }
+                            Nexus nexus = ItemsRegistro.getFromNome(nome.toLowerCase());
+                            PersistentDataContainer container = player.getPersistentDataContainer();
+                            int qtd = container.getOrDefault(QTD.key,PersistentDataType.INTEGER,0);
+                            if(nexus!=null && qtd<config.getInt("limite",4)){
+                                ReliquiasNexus.setConfigSave("nexus."+nome,player.getUniqueId().toString());
+                                this.saveConfig();
+                                container.set(QTD.key,PersistentDataType.INTEGER,qtd+1);
+                                int level = 1;
+                                NamespacedKey key = NexusKeys.getKey(nome);
+                                if(key!=null && container.has(key,PersistentDataType.INTEGER)){
+                                    level=container.getOrDefault(key,PersistentDataType.INTEGER,1);
+                                }else if(key!=null){
+                                    container.set(key,PersistentDataType.INTEGER,1);
+                                }
+                                ItemStack stack = nexus.getItem(level);
+                                ItemMeta meta = stack.getItemMeta();
+                                meta.getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,player.getUniqueId().toString());
+                                stack.setItemMeta(meta);
+                                player.getInventory().addItem(stack);
+                                String msg=ReliquiasNexus.getLang().getString("reliquia.send","Você recebeu o nexus do <relic>");
+                                player.sendMessage(Component.text(msg).color(NamedTextColor.GREEN));
+                                sender.sendMessage(Component.text(lang.getString("reliquia.sendSuccess","O jogador recebeu o nexus!")).color(NamedTextColor.GREEN));
+                            }else{
+                                sender.sendMessage(Component.text(lang.getString("reliquia.limite","O jogador já está no limite de nexus!")).color(NamedTextColor.RED));
+                            }
+                            return Command.SINGLE_SUCCESS;
+                        }))))
+                .then(Commands.literal("remove").then(Commands.argument("player",ArgumentTypes.player()).then(Commands.argument("nexus",StringArgumentType.string()).suggests((ctx,builder)->{
+                    for (String reliquia : names) {
+                        builder.suggest(reliquia);
+                    }
+                    return builder.buildFuture();
+                }))
+                        .executes(ctx -> {
+                            final CommandSender sender = ctx.getSource().getSender();
+                            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogador", PlayerSelectorArgumentResolver.class);
+                            final Player player = targetResolver.resolve(ctx.getSource()).getFirst();
+                            final String reliquiaNome = ctx.getArgument("nexus", String.class).toLowerCase();
+                            String donoStr = config.getString("nexus."+reliquiaNome,"");
+                            if(donoStr.equals(player.getUniqueId().toString())){
+                                for (ItemStack itemStack : player.getInventory()) {
+                                    ItemMeta meta = itemStack.getItemMeta();
+                                    if(meta!=null){
+                                        String itemNome = meta.getPersistentDataContainer().getOrDefault(NEXUS.key,PersistentDataType.STRING,"");
+                                        if(itemNome.equals(reliquiaNome)){
+                                            player.getInventory().remove(itemStack);
+                                            break;
+                                        }
+                                    }
+                                }
+                                config.set("nexus." + reliquiaNome, "");
+                                saveConfig();
+                                sender.sendMessage(Component.text(lang.getString("reliquia.remove","Nexus removido com sucesso!")).color(NamedTextColor.GREEN));
+                            }else{
+                                sender.sendMessage(Component.text(lang.getString("reliquia.falhaNaoDono","O jogador não é o dono do Nexus!")).color(NamedTextColor.GREEN));
+                            }
+                            return Command.SINGLE_SUCCESS;
+                }))));
+        // Comando /nexusAdmin limite
+        nexusAdminRoot.then(Commands.literal("limite").then(Commands.argument("valor", IntegerArgumentType.integer()).executes(ctx -> {
+            int valor = ctx.getArgument("valor", int.class);
+            config.set("limite", valor);
+            saveConfig();
+            ctx.getSource().getSender().sendMessage(Component.text("✅ "+lang.getString("limite","Limite definido para:")+" "+ valor)
+                    .color(NamedTextColor.GREEN));
+            return Command.SINGLE_SUCCESS;
+        })));
+        //TODO continuar ajusta tradução a partir daqui
         // Novo comando /nexu boss
-        nexuRoot.then(Commands.literal("boss").then(Commands.argument("rarity", StringArgumentType.string()).suggests((ctx, builder) -> {
+        nexusAdminRoot.then(Commands.literal("boss").then(Commands.argument("rarity", StringArgumentType.string()).suggests((ctx, builder) -> {
             for (BossRarity rarity : BossRarity.values()) {
                 builder.suggest(rarity.name().toLowerCase());
             }
@@ -617,215 +868,8 @@ public final class ReliquiasNexus extends JavaPlugin {
             return Command.SINGLE_SUCCESS;
         })));
 
-        // Novo comando /nexu playerlist all
-        nexuRoot.then(Commands.literal("playerlist").then(Commands.literal("all").executes(ctx -> {
-            playerListManager.updateAllPlayerLists();
-            ctx.getSource().getSender().sendMessage(Component.text("✅ Player list atualizada para todos os jogadores!")
-                    .color(NamedTextColor.GREEN));
-            return Command.SINGLE_SUCCESS;
-        })));
-
-        // Novo comando /nexu addlist
-        nexuRoot.then(Commands.literal("addlist").then(Commands.argument("player", ArgumentTypes.player()).then(Commands.argument("cargo", StringArgumentType.string()).executes(ctx -> {
-                    final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
-                    final Player player = targetResolver.resolve(ctx.getSource()).getFirst();
-                    final String cargo = ctx.getArgument("cargo", String.class).toLowerCase();
-                    final CommandSender sender = ctx.getSource().getSender();
-
-                    playerListManager.setPlayerRank(player.getUniqueId(), cargo);
-                    sender.sendMessage(Component.text("✅ Cargo de " + player.getName() + " definido para " + cargo + ".").color(NamedTextColor.GREEN));
-
-                    return Command.SINGLE_SUCCESS;
-                })))
-        );
-
-
-        // Novo comando para remover relíquia
-        nexuRoot.then(Commands.literal("remo").then(Commands.argument("jogador", ArgumentTypes.player()).then(Commands.argument("reliquia", StringArgumentType.string()).suggests((ctx, builder) -> {
-            for (String reliquia : names) {
-                builder.suggest(reliquia);
-            }
-            return builder.buildFuture();
-        }).executes(ctx -> {
-            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogador", PlayerSelectorArgumentResolver.class);
-            final Player player = targetResolver.resolve(ctx.getSource()).getFirst();
-            final String reliquiaNome = ctx.getArgument("reliquia", String.class).toLowerCase();
-            final CommandSender sender = ctx.getSource().getSender();
-
-            if (!names.contains(reliquiaNome)) {
-                sender.sendMessage(Component.text("❌ §cRelíquia inválida! Use uma das seguintes: " + String.join(", ", names))
-                        .color(NamedTextColor.RED));
-                return Command.SINGLE_SUCCESS;
-            }
-
-            // Remove do inventário
-            boolean removedFromInv = false;
-            for (ItemStack item : player.getInventory().getContents()) {
-                if (item != null && item.hasItemMeta()) {
-                    PersistentDataContainer data = item.getItemMeta().getPersistentDataContainer();
-                    if (reliquiaNome.equals(data.get(NEXUS.key, PersistentDataType.STRING))) {
-                        player.getInventory().remove(item);
-                        removedFromInv = true;
-                        break;
-                    }
-                }
-            }
-
-            // Remove do registro do servidor
-            config.set("nexus." + reliquiaNome, null);
-            saveConfig();
-
-            if (removedFromInv) {
-                sender.sendMessage(Component.text("✅ §aA relíquia '" + reliquiaNome + "' foi removida do jogador '" + player.getName() + "'.").color(NamedTextColor.GREEN));
-                player.sendMessage(Component.text("❌ §cA relíquia '" + reliquiaNome + "' foi removida de você por um administrador.").color(NamedTextColor.RED));
-            } else {
-                sender.sendMessage(Component.text("❌ §cO jogador '" + player.getName() + "' não possui a relíquia '" + reliquiaNome + "'. Mas o registro foi limpo.").color(NamedTextColor.YELLOW));
-            }
-            return Command.SINGLE_SUCCESS;
-        }))));
-
-        // Comando setlevel (operador)
-        nexuRoot.then(Commands.literal("setlevel").then(Commands.argument("level", IntegerArgumentType.integer()).executes(ctx -> {
-            if(ctx.getSource().getExecutor() instanceof Player player){
-                ItemStack stack = player.getInventory().getItemInMainHand();
-                if(!stack.hasItemMeta()){
-                    player.sendMessage(Component.text("❌ §cSegure uma relíquia na mão!")
-                            .color(NamedTextColor.RED));
-                    return Command.SINGLE_SUCCESS;
-                }
-                int level = ctx.getArgument("level", int.class);
-                ItemMeta meta = stack.getItemMeta();
-                PersistentDataContainer data = meta.getPersistentDataContainer();
-                if(data.has(NEXUS.key,PersistentDataType.STRING)){
-                    String nome = data.get(NEXUS.key,PersistentDataType.STRING);
-                    if(nome!=null){
-                        NamespacedKey key = getKey(nome);
-                        if(key!=null){
-                            player.getPersistentDataContainer().set(key,PersistentDataType.INTEGER,level);
-                            player.sendMessage(Component.text("✅ §aLevel da relíquia definido para: " + level)
-                                    .color(NamedTextColor.GREEN));
-                        }
-                    }
-                } else {
-                    player.sendMessage(Component.text("❌ §cSegure uma relíquia Nexus na mão!")
-                            .color(NamedTextColor.RED));
-                }
-            }else{
-                ctx.getSource().getSender().sendMessage(Component.text("❌ §cApenas jogadores podem usar este comando!")
-                        .color(NamedTextColor.RED));
-            }
-            return Command.SINGLE_SUCCESS;
-        })));
-
-        // Comando expurgar (operador)
-        nexuRoot.then(Commands.literal("expurgar").then(Commands.argument("exp", BoolArgumentType.bool()).executes(ctx -> {
-            boolean exp = ctx.getArgument("exp", boolean.class);
-            config.set("expurgo",exp);
-            saveConfig();
-            if(exp){
-                Bukkit.getOnlinePlayers().forEach(player -> {
-                    player.sendMessage(Component.text("⚡ §c§lMODO EXPURGO ATIVADO!\n§4⚠ §cTodas as relíquias dropam ao morrer!")
-                            .color(NamedTextColor.RED).decorate(TextDecoration.BOLD));
-                });
-            }else{
-                Bukkit.getOnlinePlayers().forEach(player -> {
-                    playerListManager.updateAllPlayerLists();
-                });
-                ctx.getSource().getSender().sendMessage(Component.text("🛡️ §a§lMODO EXPURGO DESATIVADO\n§2✔ §aSuas relíquias estão seguras!")
-                        .color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD));
-            }
-            ctx.getSource().getSender().sendMessage(Component.text("✅ §aExpurgo definido para: " + exp)
-                    .color(NamedTextColor.GREEN));
-            return Command.SINGLE_SUCCESS;
-        })));
-
-        // Comando receber (operador) - Dar relíquia aleatória para jogadores
-        nexuRoot.then(Commands.literal("receber").then(Commands.argument("jogadores", ArgumentTypes.players()).executes(ctx -> {
-            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogadores", PlayerSelectorArgumentResolver.class);
-            final Collection<Player> players = targetResolver.resolve(ctx.getSource());
-            final CommandSender sender = ctx.getSource().getSender();
-
-            if (players.isEmpty()) {
-                sender.sendMessage(Component.text("❌ §cNenhum jogador encontrado!")
-                        .color(NamedTextColor.RED));
-                return Command.SINGLE_SUCCESS;
-            }
-
-            Random random = new Random();
-            String reliquiaAleatoria = names.get(random.nextInt(names.size()));
-            Nexus nexus = ItemsRegistro.getFromNome(reliquiaAleatoria);
-
-            if (nexus == null) {
-                sender.sendMessage(Component.text("❌ §cRelíquia não encontrada!")
-                        .color(NamedTextColor.RED));
-                return Command.SINGLE_SUCCESS;
-            }
-
-            for (Player player : players) {
-                ItemStack item = nexus.getItem(1);
-                ItemMeta meta = item.getItemMeta();
-                meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING, player.getUniqueId().toString());
-                item.setItemMeta(meta);
-
-                player.getInventory().addItem(item);
-                config.set("nexus." + reliquiaAleatoria, player.getUniqueId().toString());
-
-                player.sendMessage(Component.text("🎁 §aVocê recebeu a relíquia: §6" + reliquiaAleatoria)
-                        .color(NamedTextColor.GREEN));
-            }
-
-            saveConfig();
-            sender.sendMessage(Component.text("✅ §aRelíquia §6" + reliquiaAleatoria + " §adada para " + players.size() + " jogador(es)!")
-                    .color(NamedTextColor.GREEN));
-
-            return Command.SINGLE_SUCCESS;
-        })));
-
-        // Comando dar (operador) - Dar relíquia específica para jogador
-        nexuRoot.then(Commands.literal("dar").then(Commands.argument("jogador", ArgumentTypes.player()).then(Commands.argument("reliquia", StringArgumentType.string()).suggests( (ctx, builder) -> {
-            for (String reliquia : names) {
-                builder.suggest(reliquia);
-            }
-            return builder.buildFuture();
-        }).executes(ctx -> {
-            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogador", PlayerSelectorArgumentResolver.class);
-            final Player player = targetResolver.resolve(ctx.getSource()).getFirst();
-            final String reliquia = ctx.getArgument("reliquia", String.class);
-            final CommandSender sender = ctx.getSource().getSender();
-
-            if (!names.contains(reliquia.toLowerCase())) {
-                sender.sendMessage(Component.text("❌ §cRelíquia inválida! Use uma das seguintes: " + String.join(", ", names))
-                        .color(NamedTextColor.RED));
-                return Command.SINGLE_SUCCESS;
-            }
-
-            Nexus nexus = ItemsRegistro.getFromNome(reliquia.toLowerCase());
-
-            if (nexus == null) {
-                sender.sendMessage(Component.text("❌ §cRelíquia não encontrada!")
-                        .color(NamedTextColor.RED));
-                return Command.SINGLE_SUCCESS;
-            }
-
-            ItemStack item = nexus.getItem(1);
-            ItemMeta meta = item.getItemMeta();
-            meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING, player.getUniqueId().toString());
-            item.setItemMeta(meta);
-
-            player.getInventory().addItem(item);
-            config.set("nexus." + reliquia.toLowerCase(), player.getUniqueId().toString());
-            saveConfig();
-
-            player.sendMessage(Component.text("🎁 §aVocê recebeu a relíquia: §6" + reliquia)
-                    .color(NamedTextColor.GREEN));
-            sender.sendMessage(Component.text("✅ §aRelíquia §6" + reliquia + " §adada para §b" + player.getName())
-                    .color(NamedTextColor.GREEN));
-
-            return Command.SINGLE_SUCCESS;
-        }))));
-
         // Comando para controlar se relíquias são dadas ao entrar
-        nexuRoot.then(Commands.literal("reliquia").then(Commands.literal("receber").then(Commands.literal("ao").then(Commands.literal("entrar").then(Commands.argument("on/off", BoolArgumentType.bool()).executes(ctx -> {
+        nexusAdminRoot.then(Commands.literal("reliquia").then(Commands.literal("receber").then(Commands.literal("ao").then(Commands.literal("entrar").then(Commands.argument("on/off", BoolArgumentType.bool()).executes(ctx -> {
             boolean status = ctx.getArgument("on/off", boolean.class);
             config.set("dar_reliquia_ao_entrar", status);
             saveConfig();
@@ -834,19 +878,8 @@ public final class ReliquiasNexus extends JavaPlugin {
             return Command.SINGLE_SUCCESS;
         }))))));
 
-        // Comando limite (operador)
-        nexuRoot.then(Commands.literal("limite").then(Commands.argument("valor", IntegerArgumentType.integer()).executes(ctx -> {
-            int valor = ctx.getArgument("valor", int.class);
-            config.set("limite", valor);
-            saveConfig();
-
-            ctx.getSource().getSender().sendMessage(Component.text("✅ §aLimite de relíquias definido para: " + valor)
-                    .color(NamedTextColor.GREEN));
-            return Command.SINGLE_SUCCESS;
-        })));
-
         // Novo comando /nexu op
-        nexuRoot.then(Commands.literal("op").then(Commands.argument("player", ArgumentTypes.player()).executes(ctx -> {
+        nexusAdminRoot.then(Commands.literal("op").then(Commands.argument("player", ArgumentTypes.player()).executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
             if (!sender.isOp()) {
                 sender.sendMessage(Component.text("❌ Você não tem permissão para usar este comando!").color(NamedTextColor.RED));
@@ -876,7 +909,7 @@ public final class ReliquiasNexus extends JavaPlugin {
         })));
 
         // Comando para controlar o sistema de renascimento
-        nexuRoot.then(Commands.literal("sistema").then(Commands.literal("renascer").then(Commands.argument("on/off", BoolArgumentType.bool()).executes(ctx -> {
+        nexusAdminRoot.then(Commands.literal("sistema").then(Commands.literal("renascer").then(Commands.argument("on/off", BoolArgumentType.bool()).executes(ctx -> {
             boolean status = ctx.getArgument("on/off", boolean.class);
             config.set("sistema_renascimento_ativado", status);
             saveConfig();
@@ -885,22 +918,8 @@ public final class ReliquiasNexus extends JavaPlugin {
             return Command.SINGLE_SUCCESS;
         }))));
 
-        // Comando para abrir o ender chest
-        LiteralCommandNode<CommandSourceStack> eccommandNode = Commands.literal("ec").executes(ctx -> {
-            if (ctx.getSource().getExecutor() instanceof Player player) {
-                PersistentDataContainer playerData = player.getPersistentDataContainer();
-                if (playerData.has(ENDER_CHEST_OWNED.key, PersistentDataType.BOOLEAN) || player.isOp()) {
-                    player.openInventory(player.getEnderChest());
-                } else {
-                    player.sendMessage(Component.text("❌ Você não tem a permissão para usar este comando! Compre o Baú do Fim na loja.").color(NamedTextColor.RED));
-                }
-                return Command.SINGLE_SUCCESS;
-            }
-            return Command.SINGLE_SUCCESS;
-        }).build();
-
         // Novo comando /nexu procurado [player] {valor}
-        nexuRoot.then(Commands.literal("procurado")
+        nexusAdminRoot.then(Commands.literal("procurado")
                 .then(Commands.argument("player", ArgumentTypes.player())
                         .then(Commands.argument("valor", DoubleArgumentType.doubleArg(0.1))
                                 .executes(ctx -> {
@@ -935,60 +954,11 @@ public final class ReliquiasNexus extends JavaPlugin {
 
         // Registrar comandos
         LiteralCommandNode<CommandSourceStack> nexusCommand = nexusRoot.build();
-        LiteralCommandNode<CommandSourceStack> nexuCommand = nexuRoot.build();
-
-        ArgumentTypes Arguments = null;
-        LiteralCommandNode<CommandSourceStack> nexusTeamRoot = Commands.literal("team")
-                .executes(ctx -> {
-                    if (ctx.getSource().getExecutor() instanceof Player player) {
-                        Team.abrirMenuTeam(player);
-                    } else {
-                        ctx.getSource().getSender().sendMessage(Component.text("❌ §cApenas jogadores podem usar este comando!").color(NamedTextColor.RED));
-                    }
-                    return Command.SINGLE_SUCCESS;
-                })
-                .then(Commands.literal("criar").then(Commands.argument("nome", StringArgumentType.string()).executes(ctx -> {
-                    if (ctx.getSource().getExecutor() instanceof Player player) {
-                        String teamName = ctx.getArgument("nome", String.class);
-                        Team.criarTeam(player, teamName);
-                    }
-                    return Command.SINGLE_SUCCESS;
-                })))
-                .then(Commands.literal("convidar").then(Commands.argument("player", ArgumentTypes.player()).executes(ctx -> {
-                    if (ctx.getSource().getExecutor() instanceof Player player) {
-                        final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
-                        final Player targetPlayer = targetResolver.resolve(ctx.getSource()).getFirst();
-                        Team.convidarPlayer(player, targetPlayer);
-                    }
-                    return Command.SINGLE_SUCCESS;
-                })))
-                .then(Commands.literal("aceitar").then(Commands.argument("team", StringArgumentType.string()).executes(ctx -> {
-                            if (ctx.getSource().getExecutor() instanceof Player player) {
-                                String teamName = ctx.getArgument("team", String.class);
-                                Team.aceitarConvite(player, teamName);
-                            }
-                            return Command.SINGLE_SUCCESS;
-                        }))
-                )
-                .then(Commands.literal("sair").executes(ctx -> {
-                    if (ctx.getSource().getExecutor() instanceof Player player) {
-                        Team.sairTeam(player);
-                    }
-                    return Command.SINGLE_SUCCESS;
-                }))
-                .then(Commands.literal("depositar").then(Commands.argument("valor", DoubleArgumentType.doubleArg(0)).executes(ctx -> {
-                    if (ctx.getSource().getExecutor() instanceof Player player) {
-                        double valor = ctx.getArgument("valor", Double.class);
-                        Team.depositar(player, valor);
-                    }
-                    return Command.SINGLE_SUCCESS;
-                })))
-                .build();
+        LiteralCommandNode<CommandSourceStack> nexusAdminCommand = nexusAdminRoot.build();
 
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
             commands.registrar().register(nexusCommand);
-            commands.registrar().register(nexuCommand);
-            commands.registrar().register(nexusTeamRoot);
+            commands.registrar().register(nexusAdminCommand);
             commands.registrar().register(ecCommandNode);
         });
 

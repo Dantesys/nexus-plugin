@@ -977,9 +977,7 @@ public class EvoluirEvent implements Listener {
             if(nome.equals("assassino")){
                 int kills = data.getOrDefault(MISSAOASSASSINO.key, PersistentDataType.INTEGER, 0);
                 int level = data.getOrDefault(ASSASSINO.key, PersistentDataType.INTEGER, 1);
-                boolean isCrit = !killer.isOnGround() && killer.getFallDistance() > 0.0F &&
-                        !killer.isInsideVehicle() && !killer.hasPotionEffect(PotionEffectType.BLINDNESS) &&
-                        !killer.isSprinting() && killer.getAttackCooldown() > 0.9F;
+                boolean isCrit = !killer.isOnGround() && killer.getFallDistance() > 0.0F;
                 if (isCrit) {
                     data.set(MISSAOASSASSINO.key, PersistentDataType.INTEGER, kills + 1);
                     tentarEvoluir(killer,stack,level,getSlotOfItem(killer,stack));

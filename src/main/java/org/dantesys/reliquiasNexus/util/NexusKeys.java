@@ -10,6 +10,7 @@ public enum NexusKeys {
     MISSAOCOOLDOWN,
     MISSAOTEMPO,
     LOJAPLAYER,
+    COR,
     NEXUS,
     SLAVE,
     DRENO,

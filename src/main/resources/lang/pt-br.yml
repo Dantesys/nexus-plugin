@@ -12,7 +12,8 @@ nexus:
   - "/nexus missao cancelar <div> Cancela sua missão atual"
   - "/nexus saldo <div> Mostra o seu saldo"
   - "/nexus loja <div> Abre a loja do servidor"
-  - "/nexus loja vender <money> vende o item que está na sua mão"
+  - "/nexus loja vender <money> <div> Vende o item que está na sua mão"
+  - "/nexus chatcor <div> Habilita/Desabilita para usar a cor do seu rank/cargo"
 #Texto do /nexus livro
 livro:
   comando: "livro"
@@ -126,29 +127,57 @@ loja:
   end: "acesso ao /ec"
   vendeu: "Você vendeu <item> por <valor>"
   vendaSuccess: "Item colocado na loja com sucesso!"
+#Texto do /nexus chatcor
+chatcor:
+  habilitado: "Cor do rank/cargo habilitada"
+  desabilitado: "Cor do rank/cargo desabilitado"
+  falhaPlayer: "Apenas jogadores podem usar este comando!"
 #Texto do /nexusAdmin
 nexusAdmin:
   - "NEXUS ADMIN - COMANDOS DE OPERADOR"
   - "/nexusAdmin rank <div> Lista todos os ranks ativos"
-  - "/nexusAdmin rank <nome> <cor> <div> Cria um novo rank com a cor definida"
+  - "/nexusAdmin rank new <nome> <cor> <div> Cria um novo rank com a cor definida"
+  - "/nexusAdmin rank set <player> <rank> <div> Defini o rank de um jogador"
   - "/nexusAdmin setlevel <level> <div> Setar level da relíquia"
   - "/nexusAdmin expurgar <true/false> <div> Ativar/desativar expurgo"
-  - "/nexusAdmin receber <jogadores> <div> Dar relíquia aleatória"
-  - "/nexusAdmin dar <jogador> <reliquia> <div> Dar relíquia específica"
-  - "/nexusAdmin remo <jogador> <reliquia> <div> Remover relíquia de jogador"
-  - "/nexusAdmin missao <jogador/all> <tipo> <dificuldade> <div> Gerar missão especial"
-  - "/nexusAdmin finalizarmissao <jogador> <div> Finalizar missão de jogador"
-  - "/nexusAdmin dar moly <jogador> <quantia> <div> Dar moly a um jogador"
+  - "/nexusAdmin reliquia send <player> <div> Envia um nexus aleatório não utilizado para o jogador"
+  - "/nexusAdmin reliquia send <player> <nexus> <div> Envia um nexus especifico para o jogador"
+  - "/nexusAdmin reliquia remove <player> <nexus> <div> Remove um nexus especifico do jogador"
   - "/nexusAdmin limite <valor> <div> Alterar limite de relíquias"
   - "/nexusAdmin reliquia receber ao entrar <on/off> <div> Ativar/Desativar reliquia inicial"
   - "/nexusAdmin sistema renascer <on/off> <div> Ativar/Desativar sistema de renascimento"
   - "/nexusAdmin op <player> <div> Dar permissões de OP limitadas ao jogador"
-  - "/nexusAdmin alma dar <player> <quantidade> <div> Dar almas para um jogador"
   - "/nexusAdmin procurado <player> <valor> <div> Marcar jogador como procurado"
-  - "/nexusAdmin playerlist all <div> Forçar atualização da player list"
-  - "/nexusAdmin addlist <player> <cargo> <div> Adicionar cargo na player list"
   - "/nexusAdmin boss <raridade> <div> Invocar um boss de uma raridade específica"
-
+#Texto do /nexusAdmin rank
+rank:
+  titulo: "Lista de ranks/cargos do servidor"
+  novo: "Novo rank criado com sucesso!"
+  cor: "Cor atualizada com sucesso!"
+  falhaInvalido: "Rank invalido!"
+  mudaPlayer: "Seu rank foi alterado para"
+  muda: "Rank alterado com sucesso"
+#Texto do /nexusAdmin setlevel
+setlevel:
+  falhaPlayer: "Apenas jogadores podem usar este comando!"
+  falhaMao: "Segure uma relíquia Nexus na mão!"
+  sucesso: "Level do Nexus definido para:"
+#Texto do /nexusAdmin expurgar
+expurgar:
+  comando: "expurgar"
+  ativado: "MODO EXPURGO ATIVADO!<break>⚠ Todas as relíquias podem ser roubadas!"
+  desativado: "MODO EXPURGO DESATIVADO<break>✔ Suas relíquias estão seguras!"
+#Texto do /nexusAdmin reliquia
+reliquia:
+  comando: "reliquia"
+  limite: "O jogador já está no limite de nexus!"
+  send: "Você recebeu o nexus do <relic>"
+  sendSuccess: "O jogador recebeu o nexus!"
+  falhaDono: "Esse Nexus já possui dono"
+  falhaNaoDono: "O jogador não é o dono do Nexus!"
+  remove: "Nexus removido com sucesso!"
+#Texto do /nexusAdmin limite
+limite: "Limite definido para:"
 comandos:
   comando:
     - "livro"

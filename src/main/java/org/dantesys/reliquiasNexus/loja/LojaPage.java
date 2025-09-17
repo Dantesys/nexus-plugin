@@ -96,8 +96,9 @@ public class LojaPage {
             for(LojaItem item: sub){
                 inv.setItem(slot,item.getItem());
                 cont++;
-                if(cont>=7){
-                    slot+=2;
+                if(cont>7){
+                    slot+=3;
+                    cont=1;
                 }else{
                     slot++;
                 }

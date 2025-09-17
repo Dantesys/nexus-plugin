@@ -12,6 +12,15 @@ expurgo: false
 # Lista de recursos para desativar durante o expurgo
 # List of resources to disable during purge
 recursos:
+  list:
+    - "troca"
+    - "loja"
+    - "missao"
+    - "tpa"
+    - "home"
+    - "bauMorte"
+    - "enderchest"
+    - "procurados"
   troca: true
   loja: true
   missao: true
@@ -28,7 +37,6 @@ recursos:
   enderchest: true
   #money
   enderchestcost: 5000
-  economia: true
   moneyName: "moly"
   procurados: true
 
@@ -94,6 +102,11 @@ procurados: {}
 # Player and role configuration
 players: {}
 
+# Configuração de ranks/cargos
+# Rank/Role configuration
+ranks:
+  - "Membro"
 # Cargos cores
 # Positions colors
-cargos: {}
+cargos:
+  Membro: "#ffffff"

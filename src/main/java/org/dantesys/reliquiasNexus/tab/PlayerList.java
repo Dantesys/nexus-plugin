@@ -5,7 +5,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
-import org.bukkit.Color;
 import org.bukkit.entity.Player;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
 
@@ -65,9 +64,9 @@ public class PlayerList {
     }
 
     public Component getPlayerTag(Player player) {
-        String rank = plugin.getConfig().getString("players." + player.getUniqueId() + ".rank", "membro");
-        Color cor = plugin.getConfig().getColor("cargo." + rank, Color.WHITE);
+        String rank = plugin.getConfig().getString("players." + player.getUniqueId() + ".rank", "Membro");
+        String cor = plugin.getConfig().getString("cargo." + rank, "#ffffff");
         String corrigido = rank.substring(0, 1).toUpperCase() + rank.substring(1);
-        return Component.text("[" + corrigido + "]").color(TextColor.color(cor.asRGB()));
+        return Component.text("[" + corrigido + "]").color(TextColor.fromHexString(cor));
     }
 }

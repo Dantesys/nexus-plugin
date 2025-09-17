@@ -4,15 +4,17 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
-import org.bukkit.Color;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
+
+import static org.dantesys.reliquiasNexus.util.NexusKeys.COR;
 
 public class TagHead implements Listener {
     private final ReliquiasNexus plugin;
@@ -39,19 +41,15 @@ public class TagHead implements Listener {
         Player player = event.getPlayer();
         Component tag = playerList.getPlayerTag(player);
 
-        String rank = plugin.getConfig().getString("players." + player.getUniqueId() + ".rank", "membro");
-        Color cor = plugin.getConfig().getColor("cargo." + rank, Color.WHITE);
-        NamedTextColor color = switch(rank.toLowerCase()) {
-            case "dono" -> NamedTextColor.RED;
-            case "staff" -> NamedTextColor.AQUA;
-            default -> NamedTextColor.WHITE;
-        };
-
+        String rank = plugin.getConfig().getString("players." + player.getUniqueId() + ".rank", "Membro");
+        String cor = plugin.getConfig().getString("cargo." + rank, "#ffffff");
+        boolean corAtiva = player.getPersistentDataContainer().getOrDefault(COR.key, PersistentDataType.BOOLEAN,false);
+        TextColor textColor = corAtiva?TextColor.fromHexString(cor):TextColor.fromHexString("#ffffff");
         Component finalMessage = Component.text()
-                .append(tag).color(TextColor.color(cor.asRGB()))
+                .append(tag).color(TextColor.fromHexString(cor))
                 .append(Component.text(player.getName()).color(NamedTextColor.WHITE))
                 .append(Component.text(": ").color(NamedTextColor.GRAY))
-                .append(Component.text(event.getMessage()).color(color))
+                .append(Component.text(event.getMessage()).color(textColor))
                 .build();
 
         event.setCancelled(true);
@@ -62,15 +60,15 @@ public class TagHead implements Listener {
         Scoreboard scoreboard = player.getScoreboard();
         if (scoreboard == null) scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
 
-        String rank = plugin.getConfig().getString("players." + player.getUniqueId() + ".rank", "membro");
+        String rank = plugin.getConfig().getString("players." + player.getUniqueId() + ".rank", "Membro");
         String teamName = player.getUniqueId() + rank;
-        Color cor = plugin.getConfig().getColor("cargo." + rank, Color.WHITE);
+        String cor = plugin.getConfig().getString("cargo." + rank, "#ffffff");
 
         Team team = scoreboard.getTeam(teamName);
         if (team == null) {
             team = scoreboard.registerNewTeam(teamName);
             team.prefix(playerList.getPlayerTag(player));
-            team.color(NamedTextColor.nearestTo(TextColor.color(cor.asRGB())));
+            team.color(NamedTextColor.nearestTo(TextColor.fromHexString(cor)));
             team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.ALWAYS);
         }
 

@@ -45,7 +45,17 @@ public class LojaManager implements Listener {
         this.MAIN_MENU_TITLE = lang.getString("loja.titulo","Loja Nexus");
         this.SERVER_ITEMS_MENU_TITLE = lang.getString("loja.serverItens","Itens do servidor");
         this.NORMAL_ITEMS_MENU_TITLE = lang.getString("loja.playerItens","Itens de jogadores");
-
+        ItemStack backArrowPlayer = criarCabecaComID(
+                "MHF_ArrowLeft",
+                "§c"+ReliquiasNexus.getLang().getString("loja.proximo","Proximo"),
+                Arrays.asList("§7"+ReliquiasNexus.getLang().getString("loja.proximoTooltip","Clique para ir a próxima pagina")),
+                "back_button_player");
+        ItemStack nextArrowPlayer = criarCabecaComID(
+                "MHF_ArrowRight",
+                "§c"+ReliquiasNexus.getLang().getString("loja.voltar","Voltar"),
+                Arrays.asList("§7"+ReliquiasNexus.getLang().getString("loja.backTooltip","Clique para voltar a pagina")),
+                "back_button_player");
+        this.page = new LojaPage(null,backArrowPlayer,nextArrowPlayer);
     }
     private Map<String, Object> criarItem(ItemStack item, double preco) {
         Map<String, Object> map = new HashMap<>();
@@ -86,17 +96,7 @@ public class LojaManager implements Listener {
             LojaItem lojaItem = new LojaItem(item, preco);
             lojaPlayer.add(lojaItem);
         }
-        ItemStack backArrow = criarCabecaComID(
-                "MHF_ArrowLeft",
-                "§c"+ReliquiasNexus.getLang().getString("loja.voltar","Voltar"),
-                Arrays.asList("§7"+ReliquiasNexus.getLang().getString("loja.backTooltip","Clique para voltar a pagina")),
-                "back_button_player");
-        ItemStack nextArrow = criarCabecaComID(
-                "MHF_ArrowRight",
-                "§c"+ReliquiasNexus.getLang().getString("loja.proximo","Proximo"),
-                Arrays.asList("§7"+ReliquiasNexus.getLang().getString("loja.proximoTooltip","Clique para ir a próxima pagina")),
-                "next_button_player");
-        page = new LojaPage(lojaPlayer,backArrow,nextArrow);
+        page.updateItens(lojaPlayer);
     }
     public void gerarItensAtuais(){
         itensAtuais = new ArrayList<>();
@@ -166,7 +166,7 @@ public class LojaManager implements Listener {
         itens.add(criarItem(new ItemStack(Material.HEAVY_CORE,1),50000.0));
         ItemStack item = new ItemStack(Material.BOOK);
         ItemMeta meta = item.getItemMeta();
-        meta.addEnchant(Enchantment.MENDING,0,false);
+        meta.addEnchant(Enchantment.MENDING,1,false);
         item.setItemMeta(meta);
         itens.add(criarItem(item,100000.0));
         ItemStack item2 = new ItemStack(Material.BOOK);
@@ -255,7 +255,7 @@ public class LojaManager implements Listener {
         for(LojaItem item: itensAtuais){
             ItemStack stack = item.getItem();
             ItemMeta meta = stack.getItemMeta();
-            String precoStr = String.format("Sem Impostos/descontos é de $ %.2f "+plugin.getConfig().getString("recursos.moneyName","moly"), item.getPreco(true));
+            String precoStr = String.format("Preço de $ %.2f "+plugin.getConfig().getString("recursos.moneyName","moly"), item.getPreco(false));
             List<Component>lore=List.of(Component.text(precoStr));
             meta.lore(lore);
             stack.setItemMeta(meta);
