@@ -596,7 +596,7 @@ public final class ReliquiasNexus extends JavaPlugin {
         // Comando /tpa
         LiteralArgumentBuilder<CommandSourceStack> tpaNode = Commands.literal("tpa").then(Commands.argument("player",ArgumentTypes.player()).executes(ctx->{
             final CommandSender sender = ctx.getSource().getSender();
-            if(config.getBoolean("expurgo",false) && config.getBoolean("recurssos.tpa",true)){
+            if(!config.getBoolean("expurgo",false) && config.getBoolean("recursos.tpa",true)){
                 final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
                 final Player alvo = targetResolver.resolve(ctx.getSource()).getFirst();
                 if(sender instanceof Player player){
