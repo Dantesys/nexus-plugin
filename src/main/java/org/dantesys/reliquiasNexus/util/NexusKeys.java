@@ -8,6 +8,7 @@ import java.util.List;
 
 public enum NexusKeys {
     MISSAOCOOLDOWN,
+    TPACOOLDOWN,
     MISSAOTEMPO,
     LOJAPLAYER,
     COR,

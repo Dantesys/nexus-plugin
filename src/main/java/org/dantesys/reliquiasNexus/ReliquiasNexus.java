@@ -548,6 +548,7 @@ public final class ReliquiasNexus extends JavaPlugin {
                             mp.put("preco",preco);
                             itensSalvosPlayers.add(mp);
                             lojaSV.set("jogadors",itensSalvosPlayers);
+                            lojaManager.save(lojaSV);
                             sender.sendMessage(Component.text(lang.getString("loja.vendaSuccess", "Item colocado na loja com sucesso!")).color(NamedTextColor.GREEN));
                         } else {
                             sender.sendMessage(Component.text("❌ " + lang.getString("loja.falhaReliquia", "Itens Nexus não podem ser vendidos!")).color(NamedTextColor.RED));
@@ -689,13 +690,13 @@ public final class ReliquiasNexus extends JavaPlugin {
             return Command.SINGLE_SUCCESS;
         });
         // Comando /nexusAdmin rank e derivados
-        nexusAdminRoot.then(Commands.literal("rank").requires(sender -> sender.getSender().isOp() || sender.getSender().hasPermission("reliquiasnexus.opzim")).executes( ctx -> {
+        nexusAdminRoot.then(Commands.literal("rank").executes( ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
             List<String> ranks = config.getStringList("ranks");
             sender.sendMessage(Component.text("-="+lang.getString("rank.titulo","Lista de ranks/cargos do servidor")+"=-"));
             ranks.forEach(rank -> {
-                Color cor = config.getColor("cargo."+rank, Color.WHITE);
-                sender.sendMessage(Component.text("➤ "+rank).color(TextColor.color(cor.asRGB())));
+                String cor = config.getString("cargo."+rank, "#ffffff");
+                sender.sendMessage(Component.text("➤ "+rank).color(TextColor.fromHexString(cor)));
             });
             return Command.SINGLE_SUCCESS;
         })
@@ -711,19 +712,19 @@ public final class ReliquiasNexus extends JavaPlugin {
                         sender.sendMessage(Component.text(lang.getString("rank.cor","Cor atualizada com sucesso!")).color(NamedTextColor.GREEN));
                     }
                     TextColor cor = ctx.getArgument("cor", TextColor.class);
-
                     config.set("cargos."+rank,cor.asHexString());
+                    saveConfig();
                     return Command.SINGLE_SUCCESS;
-        })))))
-                .then(Commands.literal("set").then(Commands.argument("player",ArgumentTypes.player())).then(Commands.argument("rank",StringArgumentType.string()).suggests( (ctx, builder) -> {
-                    List<String> ranks = config.getStringList("ranks");
-                    if(ranks.isEmpty())return builder.buildFuture();
-                    for (String rank : ranks) {
-                        builder.suggest(rank);
-                    }
-                    return builder.buildFuture();
-                })
-                        .executes(ctx -> {
+        })))));
+        nexusAdminRoot.then(Commands.literal("rank").then(Commands.literal("set").then(Commands.argument("player",ArgumentTypes.player())).then(Commands.argument("rank",StringArgumentType.string()).suggests( (ctx, builder) -> {
+            List<String> ranks = config.getStringList("ranks");
+            if(ranks.isEmpty())return builder.buildFuture();
+            for (String rank : ranks) {
+                builder.suggest(rank);
+            }
+            return builder.buildFuture();
+        })
+                .executes(ctx -> {
                     final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogador", PlayerSelectorArgumentResolver.class);
                     final Player player = targetResolver.resolve(ctx.getSource()).getFirst();
                     final String rank = ctx.getArgument("rank", String.class);
@@ -737,7 +738,7 @@ public final class ReliquiasNexus extends JavaPlugin {
                         sender.sendMessage(Component.text("❌ "+lang.getString("rank.falhaInvalido","Rank invalido!")).color(NamedTextColor.RED));
                     }
                     return Command.SINGLE_SUCCESS;
-                })));
+                }))));
         // Comando /nexusAdmin setlevel
         nexusAdminRoot.then(Commands.literal("setlevel").then(Commands.argument("level", IntegerArgumentType.integer(1,config.getInt("levelMax",20))).executes(ctx -> {
             if(ctx.getSource().getExecutor() instanceof Player player){
@@ -1014,10 +1015,10 @@ public final class ReliquiasNexus extends JavaPlugin {
                     targetPlayer.getPersistentDataContainer().set(SALDO.key,PersistentDataType.DOUBLE,saldo+valor);
                     String preco = String.format("%.2f", valor);
                     String msg = valor>0?lang.getString("saldoadm.lucro","Foi adicionado <valor> ao saldo do jogador"):lang.getString("saldoadm.desconto","Foi descontado <valor> do saldo do jogador");
-                    msg.replace("<valor>",preco);
+                    msg = msg.replace("<valor>",preco);
                     sender.sendMessage(Component.text(msg).color(NamedTextColor.GREEN));
                     String msgPlayer = valor>0?lang.getString("saldoadm.lucroPlayer","Você ganhou"):lang.getString("saldoadm.descontoPlayer","Você perdeu");
-                    sender.sendMessage(Component.text(msgPlayer+" "+preco).color(valor>0?NamedTextColor.GREEN:NamedTextColor.RED));
+                    targetPlayer.sendMessage(Component.text(msgPlayer+" "+preco).color(valor>0?NamedTextColor.GREEN:NamedTextColor.RED));
                     return Command.SINGLE_SUCCESS;
                 })))));
         // Novo comando /nexu boss

@@ -88,7 +88,7 @@ public class LojaPage {
         this.itens=itens;
     }
     public void showPage(Inventory inv){
-        if(!itens.isEmpty()){
+        if(itens!=null && !itens.isEmpty()){
             int maxPage = itens.size()/21;
             List<LojaItem> sub = itens.subList(numero==maxPage && maxPage<=1?0:numero*21,numero==maxPage?itens.size():(21+(numero*21)));
             int slot=10;

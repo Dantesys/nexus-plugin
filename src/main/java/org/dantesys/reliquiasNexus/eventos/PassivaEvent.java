@@ -79,9 +79,11 @@ public class PassivaEvent implements Listener {
                         e.setCancelled(true);
                     }else{
                         int tempo = 120;
-                        player.getInventory().setItemInMainHand(item);
-                        player.getInventory().setItemInOffHand(item2);
                         dataPlayer.set(TOTEM.key,PersistentDataType.INTEGER,tempo);
+                        Bukkit.getScheduler().runTask(ReliquiasNexus.getPlugin(ReliquiasNexus.class), () -> {
+                            player.getInventory().setItemInMainHand(item);
+                            player.getInventory().setItemInOffHand(item2);
+                        });
                     }
                 }
             }
@@ -113,6 +115,16 @@ public class PassivaEvent implements Listener {
                     }
                 } else {
                     conteiner.set(MISSAOCOOLDOWN.key, PersistentDataType.INTEGER, 0);
+                }
+                Integer tpaCD = conteiner.get(TPACOOLDOWN.key, PersistentDataType.INTEGER);
+                if (tpaCD != null) {
+                    if (tpaCD > 0) {
+                        conteiner.set(TPACOOLDOWN.key, PersistentDataType.INTEGER, tpaCD - 1);
+                    } else {
+                        conteiner.set(TPACOOLDOWN.key, PersistentDataType.INTEGER, 0);
+                    }
+                } else {
+                    conteiner.set(TPACOOLDOWN.key, PersistentDataType.INTEGER, 0);
                 }
                 if(player.getPersistentDataContainer().has(RUGIDO.key,PersistentDataType.INTEGER)){
                     int rg = player.getPersistentDataContainer().getOrDefault(RUGIDO.key,PersistentDataType.INTEGER,0);
