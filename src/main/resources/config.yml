@@ -12,15 +12,6 @@ expurgo: false
 # Lista de recursos para desativar durante o expurgo
 # List of resources to disable during purge
 recursos:
-  list:
-    - "troca"
-    - "loja"
-    - "missao"
-    - "tpa"
-    - "home"
-    - "bauMorte"
-    - "enderchest"
-    - "procurados"
   troca: true
   loja: true
   missao: true
@@ -29,16 +20,19 @@ recursos:
   missaoCooldown: 300
   tpa: true
   #money
-  tpacost: 100
+  tpacost: 100.0
   home: true
   #money
-  homecost: 1000
+  homecost: 1000.0
   bauMorte: true
   enderchest: true
   #money
-  enderchestcost: 5000
+  enderchestcost: 5000.0
   moneyName: "moly"
   procurados: true
+  # Ativa ou desativa a relíquia aleatória para novos jogadores.
+  # Se ativado, um novo jogador recebeu uma relíquia não utilizada ao entrar pela primeira vez.
+  nexus_onjoin: false
 
 # Limite de reliquias que um jogador pode ter, se o jogador passar disso ele é derrotado e é deixado com apenas 1 reliquia
 # Limit of relics that a player can have, if the player exceeds this he is defeated and is left with only 1 relic
@@ -51,10 +45,6 @@ levelMax: 20
 # Quantidade de xp que precisa para evoluir, o calculo é xp*level
 # Amount of xp you need to evolve, the calculation is xp*level
 xptolevel: 7
-
-# Ativa ou desativa a relíquia aleatória para novos jogadores.
-# Se ativado, um novo jogador recebeu uma relíquia não utilizada ao entrar pela primeira vez.
-reliquia_onjoin: false
 
 # Registro das reliquias, quando algum jogador possui fica registrado o UUID dele
 # Registration of relics, when a player has one, his UUID is registered

@@ -144,9 +144,12 @@ nexusAdmin:
   - "/nexusAdmin reliquia send <player> <nexus> <div> Envia um nexus especifico para o jogador"
   - "/nexusAdmin reliquia remove <player> <nexus> <div> Remove um nexus especifico do jogador"
   - "/nexusAdmin limite <valor> <div> Alterar limite de relíquias"
-  - "/nexusAdmin reliquia receber ao entrar <on/off> <div> Ativar/Desativar reliquia inicial"
-  - "/nexusAdmin sistema renascer <on/off> <div> Ativar/Desativar sistema de renascimento"
+  - "/nexusAdmin recursos <recurso> true/false <div> Serve para ativar ou desativar alguns recursos"
   - "/nexusAdmin op <player> <div> Dar permissões de OP limitadas ao jogador"
+  - "/nexusAdmin deop <player> <div> Remove permissões de OP limitadas ao jogador"
+  - "/nexusAdmin tpacost <div> Define o custo do tpa"
+  - "/nexusAdmin saldo <player> <div> Ver o saldo de um jogador especifico"
+  - "/nexusAdmin saldo <player> add <valor> <div> Adiciona valor ao saldo, se for negativo remove"
   - "/nexusAdmin procurado <player> <valor> <div> Marcar jogador como procurado"
   - "/nexusAdmin boss <raridade> <div> Invocar um boss de uma raridade específica"
 #Texto do /nexusAdmin rank
@@ -178,6 +181,48 @@ reliquia:
   remove: "Nexus removido com sucesso!"
 #Texto do /nexusAdmin limite
 limite: "Limite definido para:"
+#Texto do /nexusAdmin recursos
+recursos:
+  comando: "recursos"
+  list:
+    - "troca"
+    - "loja"
+    - "missao"
+    - "tpa"
+    - "home"
+    - "bauMorte"
+    - "enderchest"
+    - "procurados"
+    - "nexus_onjoin"
+#Texto do /nexusAdmin op e deop
+ops:
+  isOP: "já é um OP"
+  isNOP: "não é um OP"
+  setOP: "agora você tem acesso ao /nexusAdmin"
+  setNOP: "agora você não tem mais acesso ao /nexusAdmin"
+  setPlayerOP: "agora tem permissões de OP"
+  setPlayerNOP: "agora não tem mais permissões de OP"
+#Texto do /nexusAdmin tpacost
+tpacost: "Custo do tpa definido para"
+#Texto do /nexusAdmin saldo
+saldoadm:
+  comando: "saldo"
+  player: "O jogador tem"
+  lucro: "Foi adicionado <valor> ao saldo do jogador"
+  lucroPlayer: "Você ganhou"
+  desconto: "Foi descontado <valor> do saldo do jogador"
+  descontoPlayer: "Você perdeu"
+#Texto do /tpa
+tpa:
+  desativado: "Comando tpa desativado!"
+  aceitar: "ACEITAR"
+  cancelar: "CANCELAR"
+  falhaPlayer: "Apenas jogadores podem se teleportar!"
+  send: "Pedido enviado!"
+  sendPlayer: "quer se teleportar até você!"
+  falhaSaldo: "Você não tem saldo suficiente para usar tpa!"
+  pagou: "Você pagou <valor> por usar o tpa!"
+  cancelado: "Seu pedido foi cancelado!"
 comandos:
   comando:
     - "livro"

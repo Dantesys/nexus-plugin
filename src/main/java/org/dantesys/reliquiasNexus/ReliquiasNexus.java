@@ -38,10 +38,7 @@ import org.dantesys.reliquiasNexus.missoes.Missao;
 import org.dantesys.reliquiasNexus.missoes.MissoesManager;
 import org.dantesys.reliquiasNexus.tab.PlayerListManager;
 import org.dantesys.reliquiasNexus.team.Team;
-import org.dantesys.reliquiasNexus.util.Economia;
-import org.dantesys.reliquiasNexus.util.NexusKeys;
-import org.dantesys.reliquiasNexus.util.Troca;
-import org.dantesys.reliquiasNexus.util.UpdaterCheck;
+import org.dantesys.reliquiasNexus.util.*;
 import org.dantesys.reliquiasNexus.bosses.BossManager;
 import org.dantesys.reliquiasNexus.bosses.BossRarity;
 
@@ -56,8 +53,10 @@ import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 * TODO
 *  Criar comando de fazer rank e definir cor - Testando
 *  Modificar Sistema de loja e criar sistema de loja comunitaria - Testando
-*  Criar Comando TPA e HOME - PENDENTE (VER NESSECIDADE)
-*  Criar Comando para definir custo de tpa e home - PENDENTE (VER NESSECIDADE)
+*  Criar Comando TPA - Fazendo
+*  Criar Comando HOME - PENDENTE (VER NESSECIDADE)
+*  Criar Comando para definir custo de tpa - Fazendo
+*  Criar Comando para definir custo de home - PENDENTE (VER NESSECIDADE)
 *  Criar Comando para setar o nome do dinheiro - PENDENTE
 *  Ajustar arquivo de tradução - Fazendo e Testando
 *  Refazer sistema de procurado - PENDENTE
@@ -67,13 +66,14 @@ import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 public final class ReliquiasNexus extends JavaPlugin {
     private static final Map<UUID, Troca> trocas = new ConcurrentHashMap<>();
     private static final Map<UUID, List<Missao>> missoesOfertas = new ConcurrentHashMap<>();
+    private final Map<UUID,TpaRequest> tpaRequests = new HashMap<>();
+    private final Map<UUID,Long> cooldowns = new HashMap<>();
     private static FileConfiguration config;
     private static YamlConfiguration lang;
     private static YamlConfiguration missaoAtivaBK;
     private static YamlConfiguration lojaSV;
     private MissoesManager missoesManager;
     private LojaManager lojaManager;
-    private PlayerListManager playerListManager;
     private BossManager bossManager;
     public final List<String> names = List.of("guerreiro","ceifador","vida","mares","barbaro",
             "fazendeiro","espiao","arqueiro","cacador","tempestade","mineiro","fenix","protetor",
@@ -121,7 +121,7 @@ public final class ReliquiasNexus extends JavaPlugin {
             lojaManager.load(lojaSV);
         }
         // Inicializar o gerenciador da player list e do boss
-        playerListManager = new PlayerListManager(this);
+        PlayerListManager playerListManager = new PlayerListManager(this);
         bossManager = new BossManager(this);
 
         new UpdaterCheck(this, "dantesys/nexus-plugin").checkForUpdates();
@@ -593,7 +593,88 @@ public final class ReliquiasNexus extends JavaPlugin {
             }
             return Command.SINGLE_SUCCESS;
         }).build();
-
+        // Comando /tpa
+        LiteralArgumentBuilder<CommandSourceStack> tpaNode = Commands.literal("tpa").then(Commands.argument("player",ArgumentTypes.player()).executes(ctx->{
+            final CommandSender sender = ctx.getSource().getSender();
+            if(config.getBoolean("expurgo",false) && config.getBoolean("recurssos.tpa",true)){
+                final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
+                final Player alvo = targetResolver.resolve(ctx.getSource()).getFirst();
+                if(sender instanceof Player player){
+                    long last = cooldowns.getOrDefault(player.getUniqueId(),0L);
+                    if(System.currentTimeMillis()-last<30){
+                        cooldowns.put(player.getUniqueId(),System.currentTimeMillis());
+                        TpaRequest request = new TpaRequest(player,alvo);
+                        tpaRequests.put(alvo.getUniqueId(),request);
+                        player.sendMessage(Component.text(lang.getString("tpa.send","Pedido enviado!"))
+                                .color(NamedTextColor.GREEN));
+                        alvo.sendMessage(Component.text(player.getName()+" "+lang.getString("tpa.sendPlayer","quer se teleportar até você!"))
+                                .color(NamedTextColor.YELLOW));
+                        alvo.sendMessage(Component.text("\n["+lang.getString("tpa.aceitar","ACEITAR")+"]")
+                                .color(NamedTextColor.GREEN)
+                                .clickEvent(ClickEvent.runCommand("/tpa aceitar"))
+                                .append(Component.text("\n["+lang.getString("tpa.cancelar","CANCELAR")+"]")
+                                        .color(NamedTextColor.GREEN)
+                                        .clickEvent(ClickEvent.runCommand("/tpa cancelar"))));
+                    }else{
+                        sender.sendMessage(Component.text("❌ Cooldown: "+(System.currentTimeMillis()-last))
+                                .color(NamedTextColor.RED));
+                    }
+                }else{
+                    sender.sendMessage(Component.text("❌ "+lang.getString("tpa.falhaPlayer","Apenas jogadores podem se teleportar!"))
+                            .color(NamedTextColor.RED));
+                }
+            }else{
+                sender.sendMessage(Component.text("❌ "+lang.getString("tpa.desativado","Comando tpa desativado!"))
+                        .color(NamedTextColor.RED));
+            }
+            return Command.SINGLE_SUCCESS;
+        })
+                .then(Commands.literal("aceitar").executes(ctx->{
+                    final CommandSender sender = ctx.getSource().getSender();
+                    if(sender instanceof Player player){
+                        TpaRequest request = tpaRequests.remove(player.getUniqueId());
+                        if(request!=null){
+                            Player rqPlayer = request.getRequest();
+                            if(rqPlayer.isOnline()){
+                                double saldo = rqPlayer.getPersistentDataContainer().getOrDefault(SALDO.key,PersistentDataType.DOUBLE,0.0);
+                                double custo = config.getDouble("recursos.tpacost",100.0);
+                                if(saldo>=custo){
+                                    rqPlayer.getPersistentDataContainer().set(SALDO.key,PersistentDataType.DOUBLE,saldo-custo);
+                                    rqPlayer.teleport(player.getLocation());
+                                    String preco = String.format("%.2f", custo);
+                                    rqPlayer.sendMessage(Component.text(lang.getString("tpa.pagou","Você pagou <valor> por usar o tpa!").replace("<>valor",preco))
+                                            .color(NamedTextColor.GREEN));
+                                }else{
+                                    rqPlayer.sendMessage(Component.text("❌ "+lang.getString("tpa.falhaSaldo","Você não tem saldo suficiente para usar tpa!"))
+                                            .color(NamedTextColor.RED));
+                                }
+                            }
+                        }
+                    }
+                    else{
+                        sender.sendMessage(Component.text("❌ "+lang.getString("tpa.falhaPlayer","Apenas jogadores podem se teleportar!"))
+                                .color(NamedTextColor.RED));
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })
+                .then(Commands.literal("cancelar").executes(ctx->{
+                    final CommandSender sender = ctx.getSource().getSender();
+                    if(sender instanceof Player player){
+                        TpaRequest request = tpaRequests.remove(player.getUniqueId());
+                        if(request!=null){
+                            Player rqPlayer = request.getRequest();
+                            if(rqPlayer.isOnline()){
+                                rqPlayer.sendMessage(Component.text("❌ "+lang.getString("tpa.cancelado","Seu pedido foi cancelado!"))
+                                        .color(NamedTextColor.RED));
+                            }
+                        }
+                    }
+                    else{
+                        sender.sendMessage(Component.text("❌ "+lang.getString("tpa.falhaPlayer","Apenas jogadores podem se teleportar!"))
+                                .color(NamedTextColor.RED));
+                    }
+                    return Command.SINGLE_SUCCESS;
+                }))));
         // Comando /nexusAdmin para operadores
         LiteralArgumentBuilder<CommandSourceStack> nexusAdminRoot = Commands.literal("nexusAdmin").requires(sender -> sender.getSender().isOp() || sender.getSender().hasPermission("reliquiasnexus.opzim")).executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
@@ -675,7 +756,7 @@ public final class ReliquiasNexus extends JavaPlugin {
                         NamespacedKey key = getKey(nome);
                         if(key!=null){
                             player.getPersistentDataContainer().set(key,PersistentDataType.INTEGER,level);
-                            player.sendMessage(Component.text("✅ "+lang.getString("setlevel.sucesso","Level do Nexus definido para:")+ "" + level)
+                            player.sendMessage(Component.text("✅ "+lang.getString("setlevel.sucesso","Level do Nexus definido para:")+ " " + level)
                                     .color(NamedTextColor.GREEN));
                         }
                     }
@@ -849,7 +930,96 @@ public final class ReliquiasNexus extends JavaPlugin {
                     .color(NamedTextColor.GREEN));
             return Command.SINGLE_SUCCESS;
         })));
-        //TODO continuar ajusta tradução a partir daqui
+        // Comando /nexusAdmin recursos
+        nexusAdminRoot.then(Commands.literal(lang.getString("recursos.comando","recursos")).then(Commands.argument("recurso",StringArgumentType.string()).suggests((ctx,builder) -> {
+            List<String> recursos = lang.getStringList("recursos.list");
+            for (String nome : recursos) {
+                builder.suggest(nome);
+            }
+            return builder.buildFuture();
+        })
+                .then(Commands.argument("ativado",BoolArgumentType.bool())).executes(ctx -> {
+                    String recurso=ctx.getArgument("recurso", String.class).toLowerCase();;
+                    boolean ativado = ctx.getArgument("ativado", boolean.class);
+                    config.set("recursos."+recurso,ativado);
+                    saveConfig();
+                    ctx.getSource().getSender().sendMessage(Component.text("✅ " + recurso + ": "+ativado).color(NamedTextColor.GREEN));
+                    return Command.SINGLE_SUCCESS;
+                })));
+        // Comando /nexusAdmin op
+        nexusAdminRoot.then(Commands.literal("op").then(Commands.argument("player", ArgumentTypes.player()).executes(ctx -> {
+            final CommandSender sender = ctx.getSource().getSender();
+            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
+            final Player targetPlayer = targetResolver.resolve(ctx.getSource()).getFirst();
+            boolean isOP = config.getBoolean("op-players." + targetPlayer.getUniqueId(),false);
+            // Adiciona a permissão persistente
+            if (isOP) {
+                sender.sendMessage(Component.text("❌ "+targetPlayer.getName()+" "+lang.getString("op.isOP","já é um OP")).color(NamedTextColor.RED));
+            } else {
+                config.set("op-players." + targetPlayer.getUniqueId(), true);
+                saveConfig();
+                // Aplica a permissão imediatamente se o jogador estiver online
+                if (targetPlayer.isOnline()) {
+                    targetPlayer.addAttachment(this).setPermission("reliquiasnexus.opzim", true);
+                }
+                sender.sendMessage(Component.text("✅ " + targetPlayer.getName() + " "+lang.getString("op.setPlayerOP","agora tem permissões de OP")).color(NamedTextColor.GREEN));
+                targetPlayer.sendMessage(Component.text("⚡ "+lang.getString("op.setOP","agora você tem acesso ao /nexusAdmin")).color(NamedTextColor.GOLD));
+            }
+            return Command.SINGLE_SUCCESS;
+        })));
+        // Comando /nexusAdmin deop
+        nexusAdminRoot.then(Commands.literal("deop").then(Commands.argument("player", ArgumentTypes.player()).executes(ctx -> {
+            final CommandSender sender = ctx.getSource().getSender();
+            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
+            final Player targetPlayer = targetResolver.resolve(ctx.getSource()).getFirst();
+            boolean isOP = config.getBoolean("op-players." + targetPlayer.getUniqueId(),false);
+            if (!isOP) {
+                sender.sendMessage(Component.text("❌ "+targetPlayer.getName()+" "+lang.getString("op.isNOP","não é um OP")).color(NamedTextColor.RED));
+            } else {
+                config.set("op-player."+ targetPlayer.getUniqueId(),false);
+                saveConfig();
+                if (targetPlayer.isOnline()) {
+                    targetPlayer.addAttachment(this).setPermission("reliquiasnexus.opzim", false);
+                }
+                sender.sendMessage(Component.text("✅ " + targetPlayer.getName() + " "+lang.getString("op.setPlayerNOP","agora não tem mais permissões de OP")).color(NamedTextColor.GREEN));
+                targetPlayer.sendMessage(Component.text("⚡ "+lang.getString("op.setNOP","agora você não tem mais acesso ao /nexusAdmin")).color(NamedTextColor.GOLD));
+            }
+            return Command.SINGLE_SUCCESS;
+        })));
+        // Comando /nexusAdmin tpacost
+        nexusAdminRoot.then(Commands.literal("tpacost").then(Commands.argument("cost",DoubleArgumentType.doubleArg(0.0)).executes(ctx -> {
+            double cost = ctx.getArgument("cost", double.class);
+            config.set("recursos.tpacost",cost);
+            saveConfig();
+            String preco = String.format("%.2f", cost);
+            ctx.getSource().getSender().sendMessage(Component.text(lang.getString("tpacost","Custo do tpa definido para")+" $"+preco+" "+config.getString("recursos.moneyName","moly")).color(NamedTextColor.GREEN));
+            return Command.SINGLE_SUCCESS;
+        })));
+        // Comando /nexusAdmin saldo e derivados
+        nexusAdminRoot.then(Commands.literal(lang.getString("saldoadm.comando","saldo")).then(Commands.argument("player", ArgumentTypes.player()).executes(ctx -> {
+            final CommandSender sender = ctx.getSource().getSender();
+            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
+            final Player targetPlayer = targetResolver.resolve(ctx.getSource()).getFirst();
+            double saldo = targetPlayer.getPersistentDataContainer().getOrDefault(SALDO.key,PersistentDataType.DOUBLE,0.0);
+            String saldoStr = String.format("%.2f", saldo);
+            sender.sendMessage(Component.text(lang.getString("saldoadm.player","O jogador tem")+" $"+saldoStr+" "+config.getString("recursos,moneyName","moly")).color(NamedTextColor.GREEN));
+            return Command.SINGLE_SUCCESS;
+        })
+                .then(Commands.literal("add").then(Commands.argument("valor",DoubleArgumentType.doubleArg()).executes(ctx -> {
+                    final CommandSender sender = ctx.getSource().getSender();
+                    final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
+                    final Player targetPlayer = targetResolver.resolve(ctx.getSource()).getFirst();
+                    double saldo = targetPlayer.getPersistentDataContainer().getOrDefault(SALDO.key,PersistentDataType.DOUBLE,0.0);
+                    double valor = ctx.getArgument("valor", double.class);
+                    targetPlayer.getPersistentDataContainer().set(SALDO.key,PersistentDataType.DOUBLE,saldo+valor);
+                    String preco = String.format("%.2f", valor);
+                    String msg = valor>0?lang.getString("saldoadm.lucro","Foi adicionado <valor> ao saldo do jogador"):lang.getString("saldoadm.desconto","Foi descontado <valor> do saldo do jogador");
+                    msg.replace("<valor>",preco);
+                    sender.sendMessage(Component.text(msg).color(NamedTextColor.GREEN));
+                    String msgPlayer = valor>0?lang.getString("saldoadm.lucroPlayer","Você ganhou"):lang.getString("saldoadm.descontoPlayer","Você perdeu");
+                    sender.sendMessage(Component.text(msgPlayer+" "+preco).color(valor>0?NamedTextColor.GREEN:NamedTextColor.RED));
+                    return Command.SINGLE_SUCCESS;
+                })))));
         // Novo comando /nexu boss
         nexusAdminRoot.then(Commands.literal("boss").then(Commands.argument("rarity", StringArgumentType.string()).suggests((ctx, builder) -> {
             for (BossRarity rarity : BossRarity.values()) {
@@ -867,56 +1037,6 @@ public final class ReliquiasNexus extends JavaPlugin {
             }
             return Command.SINGLE_SUCCESS;
         })));
-
-        // Comando para controlar se relíquias são dadas ao entrar
-        nexusAdminRoot.then(Commands.literal("reliquia").then(Commands.literal("receber").then(Commands.literal("ao").then(Commands.literal("entrar").then(Commands.argument("on/off", BoolArgumentType.bool()).executes(ctx -> {
-            boolean status = ctx.getArgument("on/off", boolean.class);
-            config.set("dar_reliquia_ao_entrar", status);
-            saveConfig();
-
-            ctx.getSource().getSender().sendMessage(Component.text("✅ §aRelíquia aleatória ao entrar: " + (status ? "Ativado" : "Desativado")).color(NamedTextColor.GREEN));
-            return Command.SINGLE_SUCCESS;
-        }))))));
-
-        // Novo comando /nexu op
-        nexusAdminRoot.then(Commands.literal("op").then(Commands.argument("player", ArgumentTypes.player()).executes(ctx -> {
-            final CommandSender sender = ctx.getSource().getSender();
-            if (!sender.isOp()) {
-                sender.sendMessage(Component.text("❌ Você não tem permissão para usar este comando!").color(NamedTextColor.RED));
-                return Command.SINGLE_SUCCESS;
-            }
-
-            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
-            final Player targetPlayer = targetResolver.resolve(ctx.getSource()).getFirst();
-
-            // Adiciona a permissão persistente
-            if (config.contains("op-players." + targetPlayer.getUniqueId())) {
-                sender.sendMessage(Component.text("❌ " + targetPlayer.getName() + " já é um OP limitado.").color(NamedTextColor.RED));
-            } else {
-                config.set("op-players." + targetPlayer.getUniqueId(), true);
-                saveConfig();
-
-                // Aplica a permissão imediatamente se o jogador estiver online
-                if (targetPlayer.isOnline()) {
-                    targetPlayer.addAttachment(this).setPermission("reliquiasnexus.opzim", true);
-                }
-
-                sender.sendMessage(Component.text("✅ " + targetPlayer.getName() + " agora tem permissões de OP limitadas.").color(NamedTextColor.GREEN));
-                targetPlayer.sendMessage(Component.text("⚡ Você recebeu permissões de OP limitadas. Use /nexus e /nexu para ver os comandos!").color(NamedTextColor.GOLD));
-            }
-
-            return Command.SINGLE_SUCCESS;
-        })));
-
-        // Comando para controlar o sistema de renascimento
-        nexusAdminRoot.then(Commands.literal("sistema").then(Commands.literal("renascer").then(Commands.argument("on/off", BoolArgumentType.bool()).executes(ctx -> {
-            boolean status = ctx.getArgument("on/off", boolean.class);
-            config.set("sistema_renascimento_ativado", status);
-            saveConfig();
-
-            ctx.getSource().getSender().sendMessage(Component.text("✅ §aSistema de Renascimento: " + (status ? "Ativado" : "Desativado")).color(NamedTextColor.GREEN));
-            return Command.SINGLE_SUCCESS;
-        }))));
 
         // Novo comando /nexu procurado [player] {valor}
         nexusAdminRoot.then(Commands.literal("procurado")
@@ -955,11 +1075,12 @@ public final class ReliquiasNexus extends JavaPlugin {
         // Registrar comandos
         LiteralCommandNode<CommandSourceStack> nexusCommand = nexusRoot.build();
         LiteralCommandNode<CommandSourceStack> nexusAdminCommand = nexusAdminRoot.build();
-
+        LiteralCommandNode<CommandSourceStack> tpaCommand = tpaNode.build();
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
             commands.registrar().register(nexusCommand);
             commands.registrar().register(nexusAdminCommand);
             commands.registrar().register(ecCommandNode);
+            commands.registrar().register(tpaCommand);
         });
 
         // Registrar eventos

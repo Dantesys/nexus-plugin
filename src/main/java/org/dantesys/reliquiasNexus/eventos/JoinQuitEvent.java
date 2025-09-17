@@ -41,7 +41,7 @@ public class JoinQuitEvent implements Listener {
         boolean novato = container.getOrDefault(new NamespacedKey("nexus_novato","novato"),PersistentDataType.BOOLEAN,true);
         container.set(SPECIAL.key,PersistentDataType.INTEGER,qtd);
         container.set(SPECIAL.key, PersistentDataType.INTEGER,0);
-        boolean join = plugin.getConfig().getBoolean("reliquia_onjoin");
+        boolean join = plugin.getConfig().getBoolean("recursos.nexus_onjoin");
         if(novato){
             container.set(new NamespacedKey("nexus_novato","novato"),PersistentDataType.BOOLEAN,false);
             if(join){
