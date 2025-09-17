@@ -104,8 +104,15 @@ public class Missao{
         this.feito=feito+i;
     }
     private void entregaRecompensa(){
-        int xp = 10*dificuldade.dificuldade;
-        int money = 30*dificuldade.dificuldade;
+        int mutiplicador = switch (dificuldade){
+            case MEDIO -> 3;
+            case DIFICIL -> 7;
+            case EXPERT -> 15;
+            case INSANO -> 30;
+            default -> 1;
+        };
+        int xp = 100*mutiplicador;
+        int money = 50*mutiplicador;
         Random rng = new Random();
         String msg = ReliquiasNexus.getLang().getString("missao.recompensa","Você recebeu <xp> de xp e <money> de <nomeMoney>!");
         msg = msg.replace("<xp>",xp+"");

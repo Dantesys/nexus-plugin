@@ -530,16 +530,17 @@ public final class ReliquiasNexus extends JavaPlugin {
             sender.sendMessage(Component.text("❌ "+lang.getString("loja.falhaPlayer","Apenas jogadores podem usar este comando!")).color(NamedTextColor.RED));
             return Command.SINGLE_SUCCESS;
         })
-                .then(Commands.literal(lang.getString("loja.comandoVender","vender")).then(Commands.argument("money",DoubleArgumentType.doubleArg(0.0))).executes(ctx -> {
+                .then(Commands.literal(lang.getString("loja.comandoVender","vender")).then(Commands.argument("money",DoubleArgumentType.doubleArg()).executes(ctx -> {
                     final CommandSender sender = ctx.getSource().getSender();
                     if (config.getBoolean("expurgo") || !config.getBoolean("recursos.loja")) {
                         sender.sendMessage(Component.text("❌ "+lang.getString("loja.desativado","O comando de loja está desativado.")).color(NamedTextColor.RED));
                         return Command.SINGLE_SUCCESS;
                     }
                     if (ctx.getSource().getExecutor() instanceof Player player) {
-                        double preco = ctx.getArgument("money",double.class);
+                        double preco = DoubleArgumentType.getDouble(ctx,"money");
                         ItemStack item = player.getInventory().getItemInMainHand();
                         if (!item.getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)) {
+                            player.getInventory().remove(item);
                             ItemMeta meta = item.getItemMeta();
                             meta.getPersistentDataContainer().set(LOJAPLAYER.key, PersistentDataType.STRING, player.getUniqueId().toString());
                             item.setItemMeta(meta);
@@ -548,6 +549,7 @@ public final class ReliquiasNexus extends JavaPlugin {
                             mp.put("item",item);
                             mp.put("preco",preco);
                             itensSalvosPlayers.add(mp);
+                            lojaSV.set("jogadors",itensSalvosPlayers);
                             sender.sendMessage(Component.text(lang.getString("loja.vendaSuccess", "Item colocado na loja com sucesso!")).color(NamedTextColor.GREEN));
                         } else {
                             sender.sendMessage(Component.text("❌ " + lang.getString("loja.falhaReliquia", "Itens Nexus não podem ser vendidos!")).color(NamedTextColor.RED));
@@ -556,7 +558,7 @@ public final class ReliquiasNexus extends JavaPlugin {
                     }
                     sender.sendMessage(Component.text("❌ "+lang.getString("loja.falhaPlayer","Apenas jogadores podem usar este comando!")).color(NamedTextColor.RED));
                     return Command.SINGLE_SUCCESS;
-                })));
+                }))));
         // Comando /nexus saldo (player) - Abrir menu do banco
         nexusRoot.then(Commands.literal(lang.getString("saldo.comando","saldo")).executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
@@ -1004,6 +1006,7 @@ public final class ReliquiasNexus extends JavaPlugin {
         getServer().getPluginManager().registerEvents(missoesManager, this);
 
         getServer().getConsoleSender().sendMessage("§2✅ §a[Nexus]: Plugin Ativado com Sucesso!");
+        lojaManager.load(lojaSV);
         lojaManager.gerarItensAtuais();
     }
 

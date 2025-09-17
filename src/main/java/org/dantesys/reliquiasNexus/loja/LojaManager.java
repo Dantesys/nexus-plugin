@@ -253,10 +253,19 @@ public class LojaManager implements Listener {
         int slot=10;
         int cont=1;
         for(LojaItem item: itensAtuais){
-            inv.setItem(slot,item.getItem());
+            ItemStack stack = item.getItem();
+            ItemMeta meta = stack.getItemMeta();
+            String precoStr = String.format("Sem Impostos/descontos é de $ %.2f "+plugin.getConfig().getString("recursos.moneyName","moly"), item.getPreco(true));
+            List<Component>lore=List.of(Component.text(precoStr));
+            meta.lore(lore);
+            stack.setItemMeta(meta);
+            ItemStack novo = stack.clone();
+            novo.setItemMeta(meta);
+            inv.setItem(slot,novo);
             cont++;
-            if(cont>=7){
-                slot+=2;
+            if(cont>7){
+                slot+=3;
+                cont=1;
             }else{
                 slot++;
             }
@@ -506,16 +515,6 @@ public class LojaManager implements Listener {
                     abrirMenuPrincipal(player);
                     return;
                 }
-                if ("back_button_player".equals(itemId)) {
-                    page.backPage();
-                    abrirMenuNormalItems(player);
-                    return;
-                }
-                if ("next_button_player".equals(itemId)) {
-                    page.nextPage();
-                    abrirMenuNormalItems(player);
-                    return;
-                }
 
                 // Lógica específica para o Baú do Fim
                 if (itemId!=null && itemId.equals("ender_chest")) {
@@ -539,6 +538,7 @@ public class LojaManager implements Listener {
                     }
                     return;
                 }
+            }else{
                 // Verificar se o item tem preço
                 LojaItem ljItem = getBySlot(event.getSlot());
                 int index = getIndex(event.getSlot());
@@ -568,41 +568,54 @@ public class LojaManager implements Listener {
                         player.sendMessage(Component.text("❌ "+ReliquiasNexus.getLang().getString("loja.falhaEstoque","Item sem estoque")).color(NamedTextColor.RED));
                         playErrorSound(player);
                     }
-                }else{
-                    LojaItem item = page.getItem(clickedItem);
-                    LojaPageResult result = page.comprar(item,player);
-                    switch(result){
-                        case NULO -> {
-                            player.sendMessage(Component.text("❌ "+ReliquiasNexus.getLang().getString("loja.falhaEstoque","Item sem estoque")).color(NamedTextColor.RED));
-                            playErrorSound(player);
-                        }
-                        case INVFULL -> {
-                            player.sendMessage(Component.text("❌ "+ReliquiasNexus.getLang().getString("loja.falhaInv","Seu inventario está cheio!")).color(NamedTextColor.RED));
-                            playErrorSound(player);
-                        }
-                        case SEMSALDO -> {
-                            player.sendMessage(Component.text("❌ "+ReliquiasNexus.getLang().getString("loja.falhaSaldo","Você não tem saldo o suficiente")).color(NamedTextColor.RED));
-                            playErrorSound(player);
-                        }
-                        case SUCCESS -> {
-                            Component nomeComp = item.getItem().displayName();
-                            String nome = PlainTextComponentSerializer.plainText().serialize(nomeComp);
-                            String precoStr = String.format("%.2f", item.getPreco(true));
-                            player.sendMessage(Component.text("✅ "+ReliquiasNexus.getLang().getString("loja.comprou","Você comprou <item> por <cost>").replace("<item>",nome).replace("<cost>",precoStr)).color(NamedTextColor.GREEN));
-                            playBuySound(player);
-                            List<Map<String,Object>> itensSalvos = (List<Map<String,Object>>) ReliquiasNexus.getLoja().getList("players", new ArrayList<>());
-                            itensSalvos.removeIf(map -> {
-                                ItemStack stack = (ItemStack) map.get("item");
-                                return stack != null && stack.equals(item.getItem());
-                            });
-                            ReliquiasNexus.getLoja().set("players", itensSalvos);
-                            save(ReliquiasNexus.getLoja());
-                        }
-                    }
                 }
             }
         } else if(inventoryTitle.equals(NORMAL_ITEMS_MENU_TITLE)){
             event.setCancelled(true);
+            if (data.has(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING)) {
+                String itemId = data.get(NexusKeys.LOJA_ITEM_KEY.key, PersistentDataType.STRING);
+                if ("back_button_player".equals(itemId)) {
+                    page.backPage();
+                    abrirMenuNormalItems(player);
+                    return;
+                }
+                if ("next_button_player".equals(itemId)) {
+                    page.nextPage();
+                    abrirMenuNormalItems(player);
+                    return;
+                }
+            }else{
+                LojaItem item = page.getItem(clickedItem);
+                LojaPageResult result = page.comprar(item,player);
+                switch(result){
+                    case NULO -> {
+                        player.sendMessage(Component.text("❌ "+ReliquiasNexus.getLang().getString("loja.falhaEstoque","Item sem estoque")).color(NamedTextColor.RED));
+                        playErrorSound(player);
+                    }
+                    case INVFULL -> {
+                        player.sendMessage(Component.text("❌ "+ReliquiasNexus.getLang().getString("loja.falhaInv","Seu inventario está cheio!")).color(NamedTextColor.RED));
+                        playErrorSound(player);
+                    }
+                    case SEMSALDO -> {
+                        player.sendMessage(Component.text("❌ "+ReliquiasNexus.getLang().getString("loja.falhaSaldo","Você não tem saldo o suficiente")).color(NamedTextColor.RED));
+                        playErrorSound(player);
+                    }
+                    case SUCCESS -> {
+                        Component nomeComp = item.getItem().displayName();
+                        String nome = PlainTextComponentSerializer.plainText().serialize(nomeComp);
+                        String precoStr = String.format("%.2f", item.getPreco(true));
+                        player.sendMessage(Component.text("✅ "+ReliquiasNexus.getLang().getString("loja.comprou","Você comprou <item> por <cost>").replace("<item>",nome).replace("<cost>",precoStr)).color(NamedTextColor.GREEN));
+                        playBuySound(player);
+                        List<Map<String,Object>> itensSalvos = (List<Map<String,Object>>) ReliquiasNexus.getLoja().getList("players", new ArrayList<>());
+                        itensSalvos.removeIf(map -> {
+                            ItemStack stack = (ItemStack) map.get("item");
+                            return stack != null && stack.equals(item.getItem());
+                        });
+                        ReliquiasNexus.getLoja().set("players", itensSalvos);
+                        save(ReliquiasNexus.getLoja());
+                    }
+                }
+            }
         }
     }
 }

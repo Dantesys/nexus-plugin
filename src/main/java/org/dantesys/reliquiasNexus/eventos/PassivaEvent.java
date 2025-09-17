@@ -77,7 +77,6 @@ public class PassivaEvent implements Listener {
                     int countDown = dataPlayer.getOrDefault(TOTEM.key, PersistentDataType.INTEGER,0);
                     if(countDown>0){
                         e.setCancelled(true);
-                        return;
                     }else{
                         int tempo = 120;
                         player.getInventory().setItemInMainHand(item);

@@ -106,7 +106,8 @@ public class JoinQuitEvent implements Listener {
         File file = new File(ReliquiasNexus.getPlugin(ReliquiasNexus.class).getDataFolder(), "vendas.yml");
         YamlConfiguration saldoOff = YamlConfiguration.loadConfiguration(file);
         double saldo = saldoOff.getDouble(player.getUniqueId().toString(),0.0);
-        container.set(SALDO.key,PersistentDataType.DOUBLE,saldo);
+        double atual = container.getOrDefault(SALDO.key,PersistentDataType.DOUBLE,0.0);
+        container.set(SALDO.key,PersistentDataType.DOUBLE,saldo+atual);
         saldoOff.set(player.getUniqueId().toString(),0.0);
         try {
             saldoOff.save(file);
@@ -118,8 +119,6 @@ public class JoinQuitEvent implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         plugin.pausarMissao(player);
-        double saldo = Economia.getSaldo(player);
-        player.getPersistentDataContainer().set(SALDO.key,PersistentDataType.DOUBLE,saldo);
         String msg=ReliquiasNexus.getLang().getString("joinquit.quit");
         if(msg==null){
             msg="O Jogador <player> saiu do jogo!";
