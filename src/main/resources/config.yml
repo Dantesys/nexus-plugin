@@ -21,9 +21,6 @@ recursos:
   tpa: true
   #money
   tpacost: 100.0
-  home: true
-  #money
-  homecost: 1000.0
   bauMorte: true
   enderchest: true
   #money

@@ -52,10 +52,8 @@ import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 * TODO
 *  Modificar Sistema de loja e criar sistema de loja comunitaria - Testando
 *  Criar Comando TPA - Testanddo
-*  Criar Comando HOME - PENDENTE (VER NESSECIDADE)
 *  Criar Comando para definir custo de tpa - Testando
-*  Criar Comando para definir custo de home - PENDENTE (VER NESSECIDADE)
-*  Criar Comando para setar o nome do dinheiro - PENDENTE
+*  Criar Comando para setar o nome do dinheiro - Testando
 *  Ajustar arquivo de tradução - Fazendo e Testando
 *  Refazer sistema de procurado - PENDENTE
 *  Refazer sistema de bosses - PENDENTE
@@ -1020,6 +1018,14 @@ public final class ReliquiasNexus extends JavaPlugin {
                     targetPlayer.sendMessage(Component.text(msgPlayer+" "+preco).color(valor>0?NamedTextColor.GREEN:NamedTextColor.RED));
                     return Command.SINGLE_SUCCESS;
                 })))));
+        // Comando /nexusAdmin moneyNome
+        nexusAdminRoot.then(Commands.literal("moneyNome").then(Commands.argument("name",StringArgumentType.string()).executes(ctx -> {
+            String nome = ctx.getArgument("name", String.class);
+            config.set("recursos.moneyName",nome);
+            saveConfig();
+            ctx.getSource().getSender().sendMessage(Component.text(lang.getString("moneyName","Nome alterado para")+": "+config.getString("recursos.moneyName","moly")).color(NamedTextColor.GREEN));
+            return Command.SINGLE_SUCCESS;
+        })));
         // Novo comando /nexu boss
         nexusAdminRoot.then(Commands.literal("boss").then(Commands.argument("rarity", StringArgumentType.string()).suggests((ctx, builder) -> {
             for (BossRarity rarity : BossRarity.values()) {

@@ -150,6 +150,7 @@ nexusAdmin:
   - "/nexusAdmin tpacost <div> Define o custo do tpa"
   - "/nexusAdmin saldo <player> <div> Ver o saldo de um jogador especifico"
   - "/nexusAdmin saldo <player> add <valor> <div> Adiciona valor ao saldo, se for negativo remove"
+  - "/nexusAdmin moneyName <name> <div> Altera o nome do dinheiro do servidor"
   - "/nexusAdmin procurado <player> <valor> <div> Marcar jogador como procurado"
   - "/nexusAdmin boss <raridade> <div> Invocar um boss de uma raridade específica"
 #Texto do /nexusAdmin rank
@@ -189,7 +190,6 @@ recursos:
     - "loja"
     - "missao"
     - "tpa"
-    - "home"
     - "bauMorte"
     - "enderchest"
     - "procurados"
@@ -212,6 +212,8 @@ saldoadm:
   lucroPlayer: "Você ganhou"
   desconto: "Foi descontado <valor> do saldo do jogador"
   descontoPlayer: "Você perdeu"
+#Texto do /nexusAdmin moneyName
+moneyName: "Nome alterado para"
 #Texto do /tpa
 tpa:
   desativado: "Comando tpa desativado!"
