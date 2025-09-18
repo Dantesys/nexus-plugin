@@ -263,7 +263,6 @@ public class LojaManager implements Listener {
             String precoStr = String.format("Preço de $ %.2f "+plugin.getConfig().getString("recursos.moneyName","moly"), item.getPreco(false));
             List<Component>lore=List.of(Component.text(precoStr));
             meta.lore(lore);
-            stack.setItemMeta(meta);
             ItemStack novo = stack.clone();
             novo.setItemMeta(meta);
             inv.setItem(slot,novo);
