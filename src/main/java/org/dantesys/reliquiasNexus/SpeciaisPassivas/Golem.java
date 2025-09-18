@@ -36,7 +36,6 @@ public class Golem {
             golem.getAttribute(Attribute.MOVEMENT_EFFICIENCY).setBaseValue(1);
             golem.getAttribute(Attribute.SCALE).setBaseValue(0.25);
             golem.setRemoveWhenFarAway(false); // Não some longe
-            golem.setPlayerCreated(true);
         }
     }
     public static void spawnMiniGolems(int level,Player player) {
@@ -56,7 +55,6 @@ public class Golem {
             golem.getAttribute(Attribute.MOVEMENT_EFFICIENCY).setBaseValue(1);
             golem.getAttribute(Attribute.SCALE).setBaseValue(0.5);
             golem.setRemoveWhenFarAway(false); // Não some longe
-            golem.setPlayerCreated(true);
         }
     }
     public static void spawnGolems(int level,Player player) {
@@ -76,6 +74,5 @@ public class Golem {
         golem.getAttribute(Attribute.MOVEMENT_EFFICIENCY).setBaseValue(1);
         golem.getAttribute(Attribute.SCALE).setBaseValue(0.75);
         golem.setRemoveWhenFarAway(false); // Não some longe
-        golem.setPlayerCreated(true);
     }
 }

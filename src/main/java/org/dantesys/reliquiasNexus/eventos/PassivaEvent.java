@@ -274,6 +274,12 @@ public class PassivaEvent implements Listener {
                     event.setCancelled(true);
                 }
             }
+            if(temReliquia(player,"golem")){
+                if(entity instanceof LivingEntity vivo && vivo.getType()==EntityType.IRON_GOLEM){
+                    player.heal(20);
+                    event.setCancelled(true);
+                }
+            }
         }
     }
     @EventHandler
@@ -321,7 +327,7 @@ public class PassivaEvent implements Listener {
             if(temReliquia(player,"dragao")){
                 DamageCause cause = event.getCause();
                 List<DamageCause> causes = List.of(DamageCause.CAMPFIRE,DamageCause.FIRE,DamageCause.FIRE_TICK,DamageCause.HOT_FLOOR,
-                        DamageCause.LAVA);
+                        DamageCause.LAVA,DamageCause.VOID,DamageCause.WORLD_BORDER,DamageCause.CONTACT,DamageCause.MAGIC,DamageCause.DRAGON_BREATH);
                 if(causes.contains(cause)){
                     player.heal(20);
                     event.setCancelled(true);
@@ -433,13 +439,14 @@ public class PassivaEvent implements Listener {
                         if(level>5){
                             player.setAllowFlight(true);
                         }
-                        if(player.getHealth()<=player.getAttribute(Attribute.MAX_HEALTH).getBaseValue()*0.25){
+                        double max = player.getAttribute(Attribute.MAX_HEALTH)!=null?player.getAttribute(Attribute.MAX_HEALTH).getValue():20;
+                        if(player.getHealth()<=max*0.25){
                             if(player.getPersistentDataContainer().has(RUGIDO.key,PersistentDataType.INTEGER)){
                                 int rg = player.getPersistentDataContainer().getOrDefault(RUGIDO.key,PersistentDataType.INTEGER,0);
                                 if(rg<=0){
                                     player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 2.0f, 1.0f);
                                     player.getWorld().spawnParticle(Particle.DRAGON_BREATH, player.getLocation(), 200, 3, 1, 3, 0.1);
-                                    for (Entity e : player.getNearbyEntities(6, 6, 6)) {
+                                    for (Entity e : player.getNearbyEntities(10, 10, 10)) {
                                         if (e instanceof LivingEntity && e != player) {
                                             Vector knockback = e.getLocation().toVector().subtract(player.getLocation().toVector()).normalize().multiply(1.5);
                                             e.setVelocity(knockback);
@@ -566,6 +573,11 @@ public class PassivaEvent implements Listener {
         }
         if(e.getEntity().getType() == EntityType.ENDER_DRAGON){
             if(e.getTarget() instanceof Player player && temReliquia(player,"dragao")){
+                e.setCancelled(true);
+            }
+        }
+        if(e.getEntity().getType() == EntityType.IRON_GOLEM){
+            if(e.getTarget() instanceof Player player && temReliquia(player,"golem")){
                 e.setCancelled(true);
             }
         }
