@@ -206,7 +206,7 @@ public class LojaManager implements Listener {
         itens.add(criarItem(item7,20000.0));
         ItemStack item8 = new ItemStack(Material.BOOK);
         ItemMeta meta8 = item8.getItemMeta();
-        meta8.addEnchant(Enchantment.UNBREAKING,2,false);
+        meta8.addEnchant(Enchantment.UNBREAKING,3,false);
         item8.setItemMeta(meta8);
         itens.add(criarItem(item8,20000.0));
         ItemStack item9 = new ItemStack(Material.BOOK);

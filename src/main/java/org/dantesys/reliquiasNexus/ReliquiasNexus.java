@@ -37,7 +37,6 @@ import org.dantesys.reliquiasNexus.loja.LojaManager;
 import org.dantesys.reliquiasNexus.missoes.Missao;
 import org.dantesys.reliquiasNexus.missoes.MissoesManager;
 import org.dantesys.reliquiasNexus.tab.PlayerListManager;
-import org.dantesys.reliquiasNexus.team.Team;
 import org.dantesys.reliquiasNexus.util.*;
 import org.dantesys.reliquiasNexus.bosses.BossManager;
 import org.dantesys.reliquiasNexus.bosses.BossRarity;
@@ -51,11 +50,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 /*
 * TODO
-*  Criar comando de fazer rank e definir cor - Testando
 *  Modificar Sistema de loja e criar sistema de loja comunitaria - Testando
-*  Criar Comando TPA - Fazendo
+*  Criar Comando TPA - Testanddo
 *  Criar Comando HOME - PENDENTE (VER NESSECIDADE)
-*  Criar Comando para definir custo de tpa - Fazendo
+*  Criar Comando para definir custo de tpa - Testando
 *  Criar Comando para definir custo de home - PENDENTE (VER NESSECIDADE)
 *  Criar Comando para setar o nome do dinheiro - PENDENTE
 *  Ajustar arquivo de tradução - Fazendo e Testando
@@ -67,7 +65,6 @@ public final class ReliquiasNexus extends JavaPlugin {
     private static final Map<UUID, Troca> trocas = new ConcurrentHashMap<>();
     private static final Map<UUID, List<Missao>> missoesOfertas = new ConcurrentHashMap<>();
     private final Map<UUID,TpaRequest> tpaRequests = new HashMap<>();
-    private final Map<UUID,Long> cooldowns = new HashMap<>();
     private static FileConfiguration config;
     private static YamlConfiguration lang;
     private static YamlConfiguration missaoAtivaBK;
@@ -123,9 +120,7 @@ public final class ReliquiasNexus extends JavaPlugin {
         // Inicializar o gerenciador da player list e do boss
         PlayerListManager playerListManager = new PlayerListManager(this);
         bossManager = new BossManager(this);
-
         new UpdaterCheck(this, "dantesys/nexus-plugin").checkForUpdates();
-
         // Comando /nexus
         LiteralArgumentBuilder<CommandSourceStack> nexusRoot = Commands.literal("nexus").executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
@@ -556,7 +551,7 @@ public final class ReliquiasNexus extends JavaPlugin {
                     sender.sendMessage(Component.text("❌ "+lang.getString("loja.falhaPlayer","Apenas jogadores podem usar este comando!")).color(NamedTextColor.RED));
                     return Command.SINGLE_SUCCESS;
                 }))));
-        // Comando /nexus saldo (player) - Abrir menu do banco
+        // Comando /nexus saldo
         nexusRoot.then(Commands.literal(lang.getString("saldo.comando","saldo")).executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
             if (ctx.getSource().getExecutor() instanceof Player player) {
@@ -568,6 +563,7 @@ public final class ReliquiasNexus extends JavaPlugin {
             sender.sendMessage(Component.text("❌ "+lang.getString("saldo.falhaPlayer","Apenas jogadores podem usar este comando!")).color(NamedTextColor.RED));
             return Command.SINGLE_SUCCESS;
         }));
+        // Comando /nexus chatcor
         nexusRoot.then(Commands.literal("chatcor").executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
             if (ctx.getSource().getExecutor() instanceof Player player) {
@@ -628,6 +624,7 @@ public final class ReliquiasNexus extends JavaPlugin {
             }
             return Command.SINGLE_SUCCESS;
         }));
+        // Comando /tpa aceitar
         tpaNode.then(Commands.literal("aceitar").executes(ctx->{
                     final CommandSender sender = ctx.getSource().getSender();
                     if(sender instanceof Player player){
@@ -656,6 +653,7 @@ public final class ReliquiasNexus extends JavaPlugin {
                     }
                     return Command.SINGLE_SUCCESS;
                 }));
+        // Comando /tpa cancelar
         tpaNode.then(Commands.literal("cancelar").executes(ctx->{
                     final CommandSender sender = ctx.getSource().getSender();
                     if(sender instanceof Player player){
