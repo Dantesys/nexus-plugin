@@ -179,6 +179,9 @@ public class LimitadorEvent implements Listener {
         }
         player.getPersistentDataContainer().set(PROTECAO.key,PersistentDataType.STRING,"");
         if(plugin.getConfig().getBoolean("recursos.bauMorte",true) && !bau.isEmpty()){
+            if (localMorte.getY() < player.getWorld().getMinHeight()) {
+                localMorte = getSafeChestLocation(player.getWorld(), localMorte);
+            }
             // === 1. Criar o túmulo (cabeça + baú) ===
             Block blocoBau = localMorte.getBlock();
             Block blocoBau2;
@@ -230,6 +233,27 @@ public class LimitadorEvent implements Listener {
             bussolaMortal.put(player.getUniqueId(),bussola);
         }
     }
+    private Location getSafeChestLocation(World world, Location deathLoc) {
+        int x = deathLoc.getBlockX();
+        int z = deathLoc.getBlockZ();
+
+        // Começa no topo do mundo
+        int y = world.getMaxHeight() - 1;
+
+        // Procura o primeiro bloco sólido de cima pra baixo
+        while (y > world.getMinHeight()) {
+            Block block = world.getBlockAt(x, y, z);
+            if (!block.getType().isAir()) {
+                // achou um bloco sólido, coloca o baú em cima dele
+                return new Location(world, x, y + 1, z);
+            }
+            y--;
+        }
+
+        // fallback: caso não ache nada (ex: mundo plano sem chão)
+        return world.getSpawnLocation();
+    }
+
     @EventHandler
     public void onRespawn(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
