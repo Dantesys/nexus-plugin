@@ -42,16 +42,15 @@ public class TagHead implements Listener {
         Component tag = playerList.getPlayerTag(player);
 
         String rank = plugin.getConfig().getString("players." + player.getUniqueId() + ".rank", "Membro");
-        String cor = plugin.getConfig().getString("cargo." + rank, "#ffffff");
+        String cor = plugin.getConfig().getString("cargos." + rank, "#ffffff");
         boolean corAtiva = player.getPersistentDataContainer().getOrDefault(COR.key, PersistentDataType.BOOLEAN,false);
         TextColor textColor = corAtiva?TextColor.fromHexString(cor):TextColor.fromHexString("#ffffff");
         Component finalMessage = Component.text()
-                .append(tag).color(TextColor.fromHexString(cor))
+                .append(tag.color(TextColor.fromHexString(cor)))
                 .append(Component.text(player.getName()).color(NamedTextColor.WHITE))
                 .append(Component.text(": ").color(NamedTextColor.GRAY))
                 .append(Component.text(event.getMessage()).color(textColor))
                 .build();
-
         event.setCancelled(true);
         Bukkit.getServer().sendMessage(finalMessage);
     }
@@ -62,7 +61,7 @@ public class TagHead implements Listener {
 
         String rank = plugin.getConfig().getString("players." + player.getUniqueId() + ".rank", "Membro");
         String teamName = player.getUniqueId() + rank;
-        String cor = plugin.getConfig().getString("cargo." + rank, "#ffffff");
+        String cor = plugin.getConfig().getString("cargos." + rank, "#ffffff");
 
         Team team = scoreboard.getTeam(teamName);
         if (team == null) {

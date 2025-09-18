@@ -2,14 +2,25 @@ package org.dantesys.reliquiasNexus.loja;
 
 import org.bukkit.inventory.ItemStack;
 
+import java.util.UUID;
+
 public class LojaItem {
     private final ItemStack item;
     private final double precoBase;
     private int estoque;
     private double precoVenda;
+    private UUID player;
     public LojaItem(ItemStack item,double preco){
         this.item=item;
         this.precoBase=preco;
+        this.player=null;
+    }
+    public LojaItem(ItemStack item,double preco,UUID player){
+        this(item,preco);
+        this.player=player;
+    }
+    public UUID getPlayer(){
+        return this.player;
     }
     public double getPreco(boolean base){
         return base?precoBase:precoVenda;

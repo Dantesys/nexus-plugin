@@ -88,12 +88,17 @@ public class LojaManager implements Listener {
             ItemStack item = (ItemStack) map.get("item");
             double preco = 0;
             Object precoObj = map.get("preco");
+            Object player = map.get("player");
+            UUID uuid = null;
             if(precoObj instanceof Double){
                 preco = (Double) precoObj;
             } else if(precoObj instanceof Integer){
                 preco = ((Integer) precoObj).doubleValue();
             }
-            LojaItem lojaItem = new LojaItem(item, preco);
+            if(player instanceof UUID){
+                uuid= (UUID) player;
+            }
+            LojaItem lojaItem = new LojaItem(item,preco,uuid);
             lojaPlayer.add(lojaItem);
         }
         page.updateItens(lojaPlayer);
@@ -374,6 +379,7 @@ public class LojaManager implements Listener {
         for (int i = 0; i < 54; i++) {
             inv.setItem(i, borda);
         }
+        page.updateItens(null);
         page.showPage(inv);
         // Botão de voltar
         ItemStack backArrow = criarCabecaComID(
@@ -582,10 +588,12 @@ public class LojaManager implements Listener {
                 if ("next_button_player".equals(itemId)) {
                     page.nextPage();
                     abrirMenuNormalItems(player);
-                    return;
+                }
+                if ("back_button".equals(itemId)) {
+                    abrirMenuPrincipal(player);
                 }
             }else{
-                LojaItem item = page.getItem(clickedItem);
+                LojaItem item = page.getItem(event.getSlot());
                 LojaPageResult result = page.comprar(item,player);
                 switch(result){
                     case NULO -> {
@@ -612,9 +620,9 @@ public class LojaManager implements Listener {
                             return stack != null && stack.equals(item.getItem());
                         });
                         ReliquiasNexus.getLoja().set("players", itensSalvos);
-                        save(ReliquiasNexus.getLoja());
                     }
                 }
+                abrirMenuNormalItems(player);
             }
         }
     }

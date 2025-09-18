@@ -539,15 +539,13 @@ public final class ReliquiasNexus extends JavaPlugin {
                         ItemStack item = player.getInventory().getItemInMainHand();
                         if (!item.getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)) {
                             player.getInventory().remove(item);
-                            ItemMeta meta = item.getItemMeta();
-                            meta.getPersistentDataContainer().set(LOJAPLAYER.key, PersistentDataType.STRING, player.getUniqueId().toString());
-                            item.setItemMeta(meta);
                             List<Map<String, Object>> itensSalvosPlayers = (List<Map<String, Object>>) lojaSV.getList("players",new ArrayList<>());
                             Map<String, Object> mp = new HashMap<>();
                             mp.put("item",item);
                             mp.put("preco",preco);
+                            mp.put("player",player.getUniqueId().toString());
                             itensSalvosPlayers.add(mp);
-                            lojaSV.set("jogadors",itensSalvosPlayers);
+                            lojaSV.set("players",itensSalvosPlayers);
                             lojaManager.save(lojaSV);
                             sender.sendMessage(Component.text(lang.getString("loja.vendaSuccess", "Item colocado na loja com sucesso!")).color(NamedTextColor.GREEN));
                         } else {
@@ -601,9 +599,9 @@ public final class ReliquiasNexus extends JavaPlugin {
                 final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
                 final Player alvo = targetResolver.resolve(ctx.getSource()).getFirst();
                 if(sender instanceof Player player){
-                    long last = cooldowns.getOrDefault(player.getUniqueId(),0L);
-                    if(System.currentTimeMillis()-last<30){
-                        cooldowns.put(player.getUniqueId(),System.currentTimeMillis());
+                    int cd = player.getPersistentDataContainer().getOrDefault(TPACOOLDOWN.key,PersistentDataType.INTEGER,0);
+                    if(cd<=0){
+                        player.getPersistentDataContainer().set(TPACOOLDOWN.key,PersistentDataType.INTEGER,30);
                         TpaRequest request = new TpaRequest(player,alvo);
                         tpaRequests.put(alvo.getUniqueId(),request);
                         player.sendMessage(Component.text(lang.getString("tpa.send","Pedido enviado!"))
@@ -614,10 +612,10 @@ public final class ReliquiasNexus extends JavaPlugin {
                                 .color(NamedTextColor.GREEN)
                                 .clickEvent(ClickEvent.runCommand("/tpa aceitar"))
                                 .append(Component.text("\n["+lang.getString("tpa.cancelar","CANCELAR")+"]")
-                                        .color(NamedTextColor.GREEN)
+                                        .color(NamedTextColor.RED)
                                         .clickEvent(ClickEvent.runCommand("/tpa cancelar"))));
                     }else{
-                        sender.sendMessage(Component.text("❌ Cooldown: "+(System.currentTimeMillis()-last))
+                        sender.sendMessage(Component.text("❌ Cooldown: "+cd)
                                 .color(NamedTextColor.RED));
                     }
                 }else{
@@ -629,8 +627,8 @@ public final class ReliquiasNexus extends JavaPlugin {
                         .color(NamedTextColor.RED));
             }
             return Command.SINGLE_SUCCESS;
-        })
-                .then(Commands.literal("aceitar").executes(ctx->{
+        }));
+        tpaNode.then(Commands.literal("aceitar").executes(ctx->{
                     final CommandSender sender = ctx.getSource().getSender();
                     if(sender instanceof Player player){
                         TpaRequest request = tpaRequests.remove(player.getUniqueId());
@@ -657,8 +655,8 @@ public final class ReliquiasNexus extends JavaPlugin {
                                 .color(NamedTextColor.RED));
                     }
                     return Command.SINGLE_SUCCESS;
-                })
-                .then(Commands.literal("cancelar").executes(ctx->{
+                }));
+        tpaNode.then(Commands.literal("cancelar").executes(ctx->{
                     final CommandSender sender = ctx.getSource().getSender();
                     if(sender instanceof Player player){
                         TpaRequest request = tpaRequests.remove(player.getUniqueId());
@@ -675,7 +673,7 @@ public final class ReliquiasNexus extends JavaPlugin {
                                 .color(NamedTextColor.RED));
                     }
                     return Command.SINGLE_SUCCESS;
-                }))));
+                }));
         // Comando /nexusAdmin para operadores
         LiteralArgumentBuilder<CommandSourceStack> nexusAdminRoot = Commands.literal("nexusAdmin").requires(sender -> sender.getSender().isOp() || sender.getSender().hasPermission("reliquiasnexus.opzim")).executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
@@ -712,11 +710,11 @@ public final class ReliquiasNexus extends JavaPlugin {
                         sender.sendMessage(Component.text(lang.getString("rank.cor","Cor atualizada com sucesso!")).color(NamedTextColor.GREEN));
                     }
                     TextColor cor = ctx.getArgument("cor", TextColor.class);
-                    config.set("cargos."+rank,cor.asHexString());
+                    config.set("cargos."+rank,cor.asHexString().toLowerCase());
                     saveConfig();
                     return Command.SINGLE_SUCCESS;
         })))));
-        nexusAdminRoot.then(Commands.literal("rank").then(Commands.literal("set").then(Commands.argument("player",ArgumentTypes.player())).then(Commands.argument("rank",StringArgumentType.string()).suggests( (ctx, builder) -> {
+        nexusAdminRoot.then(Commands.literal("rank").then(Commands.literal("set").then(Commands.argument("player",ArgumentTypes.player()).then(Commands.argument("rank",StringArgumentType.string()).suggests( (ctx, builder) -> {
             List<String> ranks = config.getStringList("ranks");
             if(ranks.isEmpty())return builder.buildFuture();
             for (String rank : ranks) {
@@ -725,7 +723,7 @@ public final class ReliquiasNexus extends JavaPlugin {
             return builder.buildFuture();
         })
                 .executes(ctx -> {
-                    final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogador", PlayerSelectorArgumentResolver.class);
+                    final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
                     final Player player = targetResolver.resolve(ctx.getSource()).getFirst();
                     final String rank = ctx.getArgument("rank", String.class);
                     final CommandSender sender = ctx.getSource().getSender();
@@ -734,11 +732,12 @@ public final class ReliquiasNexus extends JavaPlugin {
                         config.set("players."+player.getUniqueId(),rank);
                         player.sendMessage(Component.text("✅ "+lang.getString("rank.mudaPlayer","Seu rank foi alterado para ")+rank).color(NamedTextColor.GREEN));
                         sender.sendMessage(Component.text("✅ "+lang.getString("rank.muda","Rank alterado com sucesso")).color(NamedTextColor.GREEN));
+                        playerListManager.setPlayerRank(player.getUniqueId(),rank);
                     }else{
                         sender.sendMessage(Component.text("❌ "+lang.getString("rank.falhaInvalido","Rank invalido!")).color(NamedTextColor.RED));
                     }
                     return Command.SINGLE_SUCCESS;
-                }))));
+                })))));
         // Comando /nexusAdmin setlevel
         nexusAdminRoot.then(Commands.literal("setlevel").then(Commands.argument("level", IntegerArgumentType.integer(1,config.getInt("levelMax",20))).executes(ctx -> {
             if(ctx.getSource().getExecutor() instanceof Player player){
@@ -890,38 +889,40 @@ public final class ReliquiasNexus extends JavaPlugin {
                                 sender.sendMessage(Component.text(lang.getString("reliquia.limite","O jogador já está no limite de nexus!")).color(NamedTextColor.RED));
                             }
                             return Command.SINGLE_SUCCESS;
-                        }))))
-                .then(Commands.literal("remove").then(Commands.argument("player",ArgumentTypes.player()).then(Commands.argument("nexus",StringArgumentType.string()).suggests((ctx,builder)->{
+                        })))));
+        nexusAdminRoot.then(Commands.literal(lang.getString("reliquia.comando","reliquia")).then(Commands.literal("remove").then(Commands.argument("player",ArgumentTypes.player()).then(Commands.argument("nexus",StringArgumentType.string()).suggests((ctx,builder)->{
                     for (String reliquia : names) {
                         builder.suggest(reliquia);
                     }
                     return builder.buildFuture();
-                }))
-                        .executes(ctx -> {
-                            final CommandSender sender = ctx.getSource().getSender();
-                            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("jogador", PlayerSelectorArgumentResolver.class);
-                            final Player player = targetResolver.resolve(ctx.getSource()).getFirst();
-                            final String reliquiaNome = ctx.getArgument("nexus", String.class).toLowerCase();
-                            String donoStr = config.getString("nexus."+reliquiaNome,"");
-                            if(donoStr.equals(player.getUniqueId().toString())){
-                                for (ItemStack itemStack : player.getInventory()) {
-                                    ItemMeta meta = itemStack.getItemMeta();
-                                    if(meta!=null){
-                                        String itemNome = meta.getPersistentDataContainer().getOrDefault(NEXUS.key,PersistentDataType.STRING,"");
-                                        if(itemNome.equals(reliquiaNome)){
-                                            player.getInventory().remove(itemStack);
-                                            break;
-                                        }
+                })
+                .executes(ctx -> {
+                    final CommandSender sender = ctx.getSource().getSender();
+                    final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
+                    final Player player = targetResolver.resolve(ctx.getSource()).getFirst();
+                    final String reliquiaNome = ctx.getArgument("nexus", String.class).toLowerCase();
+                    String donoStr = config.getString("nexus."+reliquiaNome,"");
+                    if(donoStr.equals(player.getUniqueId().toString())){
+                        for (ItemStack itemStack : player.getInventory()) {
+                            if(itemStack!=null){
+                                ItemMeta meta = itemStack.getItemMeta();
+                                if(meta!=null){
+                                    String itemNome = meta.getPersistentDataContainer().getOrDefault(NEXUS.key,PersistentDataType.STRING,"");
+                                    if(itemNome.equals(reliquiaNome)){
+                                        player.getInventory().remove(itemStack);
+                                        break;
                                     }
                                 }
-                                config.set("nexus." + reliquiaNome, "");
-                                saveConfig();
-                                sender.sendMessage(Component.text(lang.getString("reliquia.remove","Nexus removido com sucesso!")).color(NamedTextColor.GREEN));
-                            }else{
-                                sender.sendMessage(Component.text(lang.getString("reliquia.falhaNaoDono","O jogador não é o dono do Nexus!")).color(NamedTextColor.GREEN));
                             }
-                            return Command.SINGLE_SUCCESS;
-                }))));
+                        }
+                        config.set("nexus." + reliquiaNome, "");
+                        saveConfig();
+                        sender.sendMessage(Component.text(lang.getString("reliquia.remove","Nexus removido com sucesso!")).color(NamedTextColor.GREEN));
+                    }else{
+                        sender.sendMessage(Component.text(lang.getString("reliquia.falhaNaoDono","O jogador não é o dono do Nexus!")).color(NamedTextColor.GREEN));
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })))));
         // Comando /nexusAdmin limite
         nexusAdminRoot.then(Commands.literal("limite").then(Commands.argument("valor", IntegerArgumentType.integer()).executes(ctx -> {
             int valor = ctx.getArgument("valor", int.class);
@@ -1153,7 +1154,7 @@ public final class ReliquiasNexus extends JavaPlugin {
     public static FileConfiguration getLang(){
         return lang;
     }
-    public static YamlConfiguration getLoja(){ return lojaSV;}
+    public static FileConfiguration getLoja(){ return lojaSV;}
     public static void setConfigSave(String path,Object value){
         config.set(path,value);
     }

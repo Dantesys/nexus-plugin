@@ -54,41 +54,54 @@ public class PassivaEvent implements Listener {
     }
     @EventHandler
     public void reviver(EntityResurrectEvent e) {
-        LivingEntity deadEntity = e.getEntity();
-        if(deadEntity instanceof Player player){
-            player.getPersistentDataContainer().set(PROTECAO.key,PersistentDataType.STRING,"");
-            PlayerInventory pinv = player.getInventory();
-            ItemStack item = pinv.getItemInMainHand();
-            ItemStack item2 = pinv.getItemInOffHand();
-            PersistentDataContainerView data = item.getPersistentDataContainer();
-            PersistentDataContainerView data2 = item2.getPersistentDataContainer();
-            if(data.has(NEXUS.key,PersistentDataType.STRING) || data2.has(NEXUS.key,PersistentDataType.STRING)){
-                String nome = data.get(NEXUS.key,PersistentDataType.STRING);
-                if(nome==null || nome.isBlank() || !nome.equals("vida")){
-                    nome = data2.get(NEXUS.key,PersistentDataType.STRING);
-                    if(nome==null || nome.isBlank()|| !nome.equals("vida")){
-                        return;
-                    }
-                }
-                PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-                Nexus n = ItemsRegistro.getFromNome(nome);
-                if(n==null)return;
-                if(dataPlayer.has(TOTEM.key, PersistentDataType.INTEGER)){
-                    int countDown = dataPlayer.getOrDefault(TOTEM.key, PersistentDataType.INTEGER,0);
-                    if(countDown>0){
-                        e.setCancelled(true);
-                    }else{
-                        int tempo = 120;
-                        dataPlayer.set(TOTEM.key,PersistentDataType.INTEGER,tempo);
-                        Bukkit.getScheduler().runTask(ReliquiasNexus.getPlugin(ReliquiasNexus.class), () -> {
-                            player.getInventory().setItemInMainHand(item);
-                            player.getInventory().setItemInOffHand(item2);
-                        });
-                    }
-                }
-            }
+        if (!(e.getEntity() instanceof Player player)) return;
+
+        player.getPersistentDataContainer().set(PROTECAO.key, PersistentDataType.STRING, "");
+        PlayerInventory pinv = player.getInventory();
+        ItemStack main = pinv.getItemInMainHand();
+        ItemStack off  = pinv.getItemInOffHand();
+
+        // pega os PDCs dos itens
+        PersistentDataContainerView dataMain = main.getItemMeta() != null ? main.getItemMeta().getPersistentDataContainer() : null;
+        PersistentDataContainerView dataOff  = off.getItemMeta() != null ? off.getItemMeta().getPersistentDataContainer() : null;
+
+        // checa se um deles é o seu totem
+        String nome = null;
+        if (dataMain != null && dataMain.has(NEXUS.key, PersistentDataType.STRING)) {
+            nome = dataMain.get(NEXUS.key, PersistentDataType.STRING);
         }
+        if ((nome == null || nome.isBlank() || !nome.equals("vida")) && dataOff != null) {
+            nome = dataOff.get(NEXUS.key, PersistentDataType.STRING);
+        }
+        if (nome == null || !nome.equals("vida")) return;
+
+        Nexus n = ItemsRegistro.getFromNome(nome);
+        if (n == null) return;
+
+        PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
+        int countDown = dataPlayer.getOrDefault(TOTEM.key, PersistentDataType.INTEGER, 0);
+
+        if (countDown > 0) {
+            e.setCancelled(true); // em cooldown
+            return;
+        }
+
+        // seta cooldown
+        int tempo = 120;
+        dataPlayer.set(TOTEM.key, PersistentDataType.INTEGER, tempo);
+
+        // CLONA antes que o Minecraft consuma
+        final ItemStack restoreMain = main.clone();
+        final ItemStack restoreOff  = off.clone();
+
+        Bukkit.getScheduler().runTaskLater(ReliquiasNexus.getPlugin(ReliquiasNexus.class), () -> {
+            // devolve exatamente o que foi clonado
+            player.getInventory().setItemInMainHand(restoreMain);
+            player.getInventory().setItemInOffHand(restoreOff);
+            player.updateInventory(); // garante atualização visual
+        }, 1L);
     }
+
     @EventHandler
     public void tick(ServerTickEndEvent event){
         int tick = event.getTickNumber();

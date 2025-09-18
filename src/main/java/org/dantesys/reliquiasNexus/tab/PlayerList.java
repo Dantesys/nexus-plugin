@@ -65,7 +65,7 @@ public class PlayerList {
 
     public Component getPlayerTag(Player player) {
         String rank = plugin.getConfig().getString("players." + player.getUniqueId() + ".rank", "Membro");
-        String cor = plugin.getConfig().getString("cargo." + rank, "#ffffff");
+        String cor = plugin.getConfig().getString("cargos." + rank, "#ffffff");
         String corrigido = rank.substring(0, 1).toUpperCase() + rank.substring(1);
         return Component.text("[" + corrigido + "]").color(TextColor.fromHexString(cor));
     }
