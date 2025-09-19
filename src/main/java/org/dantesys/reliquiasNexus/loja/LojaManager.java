@@ -113,6 +113,9 @@ public class LojaManager implements Listener {
             base.gerarVenda();
             itensAtuais.add(base);
         }
+        Bukkit.getOnlinePlayers().forEach(player -> {
+            player.sendMessage(Component.text("LOJA ATUALIZADA"));
+        });
     }
     public void gerarDefault(YamlConfiguration lojaSV){
         List<Map<String, Object>> itens = new ArrayList<>();
