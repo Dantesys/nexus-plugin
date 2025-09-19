@@ -115,8 +115,8 @@ public class LojaPage {
                 } else if(precoObj instanceof Integer){
                     preco = ((Integer) precoObj).doubleValue();
                 }
-                if(player instanceof UUID){
-                    uuid= (UUID) player;
+                if(player instanceof String uuidStr){
+                    uuid= UUID.fromString(uuidStr);
                 }
                 LojaItem lojaItem = new LojaItem(item,preco,uuid);
                 lojaPlayer.add(lojaItem);
