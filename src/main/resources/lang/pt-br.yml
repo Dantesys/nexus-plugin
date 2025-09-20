@@ -226,6 +226,8 @@ tpa:
   falhaSaldo: "Você não tem saldo suficiente para usar tpa!"
   pagou: "Você pagou <valor> por usar o tpa!"
   cancelado: "Seu pedido foi cancelado!"
+raid:
+  pre: "A barreira entre os mundos está se quebrando..."
 comandos:
   comando:
     - "livro"

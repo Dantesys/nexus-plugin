@@ -50,10 +50,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 /*
 * TODO
-*  Modificar Sistema de loja e criar sistema de loja comunitaria - Testando
-*  Criar Comando TPA - Testanddo
-*  Criar Comando para definir custo de tpa - Testando
-*  Criar Comando para setar o nome do dinheiro - Testando
 *  Ajustar arquivo de tradução - Fazendo e Testando
 *  Refazer sistema de procurado - PENDENTE
 *  Refazer sistema de bosses - PENDENTE
@@ -899,14 +895,24 @@ public final class ReliquiasNexus extends JavaPlugin {
                     final String reliquiaNome = ctx.getArgument("nexus", String.class).toLowerCase();
                     String donoStr = config.getString("nexus."+reliquiaNome,"");
                     if(donoStr.equals(player.getUniqueId().toString())){
-                        for (ItemStack itemStack : player.getInventory()) {
-                            if(itemStack!=null){
-                                ItemMeta meta = itemStack.getItemMeta();
-                                if(meta!=null){
-                                    String itemNome = meta.getPersistentDataContainer().getOrDefault(NEXUS.key,PersistentDataType.STRING,"");
-                                    if(itemNome.equals(reliquiaNome)){
-                                        player.getInventory().remove(itemStack);
-                                        break;
+                        boolean achou=false;
+                        ItemStack[][] invs = {
+                                player.getInventory().getContents(),player.getInventory().getArmorContents(),
+                                player.getInventory().getExtraContents(),player.getInventory().getStorageContents()
+                        };
+                        for(ItemStack[] inv: invs){
+                            if(achou)break;
+                            for(ItemStack itemStack :inv){
+                                if(itemStack!=null){
+                                    ItemMeta meta = itemStack.getItemMeta();
+                                    if(meta!=null){
+                                        String itemNome = meta.getPersistentDataContainer().getOrDefault(NEXUS.key,PersistentDataType.STRING,"");
+                                        if(itemNome.equals(reliquiaNome)){
+                                            achou=true;
+                                            player.getInventory().removeItemAnySlot(itemStack);
+                                            player.updateInventory();
+                                            break;
+                                        }
                                     }
                                 }
                             }
@@ -1102,7 +1108,7 @@ public final class ReliquiasNexus extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ChatListener(this), this);
         getServer().getPluginManager().registerEvents(missoesManager, this);
 
-        getServer().getConsoleSender().sendMessage("§2✅ §a[Nexus]: Plugin Ativado com Sucesso!");
+        getServer().getConsoleSender().sendMessage("§2✅");
         lojaManager.load(lojaSV);
         lojaManager.gerarItensAtuais();
     }
@@ -1150,7 +1156,7 @@ public final class ReliquiasNexus extends JavaPlugin {
         missoesManager.save(missaoAtivaBK);
         lojaManager.save(lojaSV);
         saveConfig();
-        getServer().getConsoleSender().sendMessage("§4❌ §c[Nexus]: Plugin Desativado!");
+        getServer().getConsoleSender().sendMessage("§4❌");
     }
     public static FileConfiguration getNexusConfig(){
         return config;
