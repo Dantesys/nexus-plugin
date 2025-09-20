@@ -9,17 +9,17 @@ public class LojaItem {
     private final double precoBase;
     private int estoque;
     private double precoVenda;
-    private UUID player;
+    private String player;
     public LojaItem(ItemStack item,double preco){
         this.item=item;
         this.precoBase=preco;
         this.player=null;
     }
-    public LojaItem(ItemStack item,double preco,UUID player){
+    public LojaItem(ItemStack item,double preco,String player){
         this(item,preco);
         this.player=player;
     }
-    public UUID getPlayer(){
+    public String getPlayer(){
         return this.player;
     }
     public double getPreco(boolean base){

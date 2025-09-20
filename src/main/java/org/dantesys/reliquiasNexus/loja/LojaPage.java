@@ -36,12 +36,12 @@ public class LojaPage {
     }
 
     public LojaPageResult comprar(LojaItem item, Player player){
-        if(item!=null){
+        if(item!=null && item.getPlayer()!=null){
             double preco = item.getPreco(true);
             double saldo = player.getPersistentDataContainer().getOrDefault(SALDO.key, PersistentDataType.DOUBLE,0.0);
             if(saldo>=preco){
                 if (player.getInventory().firstEmpty() != -1){
-                    UUID uuid = item.getPlayer();
+                    UUID uuid = UUID.fromString(item.getPlayer());
                     OfflinePlayer p = Bukkit.getOfflinePlayer(uuid);
                     Player donoPlayer = p.getPlayer();
                     if(p.isOnline() && donoPlayer!=null){
@@ -108,15 +108,15 @@ public class LojaPage {
                 ItemStack item = (ItemStack) map.get("item");
                 double preco = 0;
                 Object precoObj = map.get("preco");
-                Object player = map.get("player");
-                UUID uuid = null;
+                Object playerObj = map.get("player");
+                String uuid = null;
                 if(precoObj instanceof Double){
                     preco = (Double) precoObj;
                 } else if(precoObj instanceof Integer){
                     preco = ((Integer) precoObj).doubleValue();
                 }
-                if(player instanceof String uuidStr){
-                    uuid= UUID.fromString(uuidStr);
+                if(playerObj instanceof String){
+                    uuid= (String) playerObj;
                 }
                 LojaItem lojaItem = new LojaItem(item,preco,uuid);
                 lojaPlayer.add(lojaItem);

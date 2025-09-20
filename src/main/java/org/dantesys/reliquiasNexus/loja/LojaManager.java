@@ -41,6 +41,7 @@ public class LojaManager implements Listener {
     private final String MAIN_MENU_TITLE;
     private final String SERVER_ITEMS_MENU_TITLE;
     private final String NORMAL_ITEMS_MENU_TITLE;
+    private int ticks;
     public LojaManager(JavaPlugin plugin,YamlConfiguration lang){
         this.plugin=plugin;
         this.MAIN_MENU_TITLE = lang.getString("loja.titulo","Loja Nexus");
@@ -57,6 +58,7 @@ public class LojaManager implements Listener {
                 Arrays.asList("§7"+ReliquiasNexus.getLang().getString("loja.backTooltip","Clique para voltar a pagina")),
                 "back_button_player");
         this.page = new LojaPage(null,backArrowPlayer,nextArrowPlayer);
+        ticks=0;
     }
     private Map<String, Object> criarItem(ItemStack item, double preco) {
         Map<String, Object> map = new HashMap<>();
@@ -89,17 +91,17 @@ public class LojaManager implements Listener {
             ItemStack item = (ItemStack) map.get("item");
             double preco = 0;
             Object precoObj = map.get("preco");
-            Object player = map.get("player");
-            UUID uuid = null;
+            Object playerObj = map.get("player");
+            String player=null;
             if(precoObj instanceof Double){
                 preco = (Double) precoObj;
             } else if(precoObj instanceof Integer){
                 preco = ((Integer) precoObj).doubleValue();
             }
-            if(player instanceof String uuidStr){
-                uuid= UUID.fromString(uuidStr);
+            if(playerObj instanceof String){
+                player= (String) playerObj;
             }
-            LojaItem lojaItem = new LojaItem(item,preco,uuid);
+            LojaItem lojaItem = new LojaItem(item,preco,player);
             lojaPlayer.add(lojaItem);
         }
         page.updateItens(lojaPlayer);
@@ -113,9 +115,7 @@ public class LojaManager implements Listener {
             base.gerarVenda();
             itensAtuais.add(base);
         }
-        Bukkit.getOnlinePlayers().forEach(player -> {
-            player.sendMessage(Component.text("LOJA ATUALIZADA"));
-        });
+        Bukkit.broadcast(Component.text(ReliquiasNexus.getLang().getString("loja.att","LOJA ATUALIZADA")).color(NamedTextColor.GREEN));
     }
     public void gerarDefault(YamlConfiguration lojaSV){
         List<Map<String, Object>> itens = new ArrayList<>();
@@ -463,7 +463,9 @@ public class LojaManager implements Listener {
 
     @EventHandler
     public void tickUpdate(ServerTickEndEvent event){
-        if(event.getTickNumber()%72000==0){
+        ticks++;
+        if(ticks>=72000){
+            ticks=0;
             gerarItensAtuais();
         }
         if(event.getTickNumber()%200==0){
