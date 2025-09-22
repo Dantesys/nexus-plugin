@@ -12,6 +12,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
 import org.dantesys.reliquiasNexus.raids.boss.BossManager;
+import org.dantesys.reliquiasNexus.raids.disasterBoss.DisasterBossManager;
 import org.dantesys.reliquiasNexus.raids.invasao.InvasaoManager;
 
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ public class RaidManager implements Listener {
         Location l = player.getLocation();
         event = switch (tipo){
             case "boss" -> new BossManager(l,plugin);
+            case "disaster" -> new DisasterBossManager(l,plugin);
             default -> new InvasaoManager(l,plugin);
         };
         event.start();
@@ -47,8 +49,10 @@ public class RaidManager implements Listener {
         Location l = player.getLocation();
         if (escolhido <= 50) {
             event = new InvasaoManager(l,plugin);
-        } else {
+        } else if (escolhido <= 75) {
             event = new BossManager(l,plugin);
+        } else {
+            event = new DisasterBossManager(l,plugin);
         }
         event.start();
     }
@@ -81,12 +85,6 @@ public class RaidManager implements Listener {
     public void onEntityDamage(EntityDamageByEntityEvent e) {
         if(event != null && event.isRunning()) {
             event.handleDamage(e); // repassa para o evento atual
-        }
-    }
-    @EventHandler
-    public void entityDeath(EntityDeathEvent e){
-        if(event != null && event.isRunning() && event instanceof BossManager boss){
-            boss.onBossDeath(e);
         }
     }
 }

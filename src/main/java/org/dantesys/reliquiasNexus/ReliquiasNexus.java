@@ -1068,6 +1068,7 @@ public final class ReliquiasNexus extends JavaPlugin {
         nexusAdminRoot.then(Commands.literal("raid").then(Commands.argument("tipo", StringArgumentType.string()).suggests((ctx, builder) -> {
             builder.suggest("invasao");
             builder.suggest("boss");
+            builder.suggest("disaster");
             return builder.buildFuture();
         })
                 .then(Commands.argument("player",ArgumentTypes.player()).executes(ctx -> {

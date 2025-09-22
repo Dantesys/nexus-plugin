@@ -10,7 +10,6 @@ import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
@@ -19,7 +18,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
 import org.dantesys.reliquiasNexus.raids.CommomEvent;
 import org.dantesys.reliquiasNexus.raids.EventStatus;
-import org.dantesys.reliquiasNexus.raids.bosses.*;
+import org.dantesys.reliquiasNexus.raids.boss.bosses.*;
 
 import java.util.*;
 
@@ -75,13 +74,6 @@ public class BossManager extends CommomEvent {
             }
         }.runTaskTimer(plugin, 0L, 1L);
     }
-    public void onBossDeath(EntityDeathEvent e) {
-        if (chefao != null && e.getEntity().getUniqueId().equals(chefao.getBoss().getUniqueId())) {
-            changeStatus(EventStatus.WIN);
-            distributeRewards();
-            stop();
-        }
-    }
     @Override
     public void stop() {
         if(chefao != null && chefao.getBoss().isValid()) chefao.getBoss().remove();
@@ -136,7 +128,6 @@ public class BossManager extends CommomEvent {
         }
         if(damager != null) {
             damagePorJogador.merge(damager.getUniqueId(), e.getFinalDamage(), Double::sum);
-            Bukkit.getLogger().info("[Boss] " + damager.getName() + " causou " + e.getFinalDamage() + " de dano. Total: " + damagePorJogador.get(damager.getUniqueId()));
         }
     }
 

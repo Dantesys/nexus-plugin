@@ -50,11 +50,10 @@ public class ItemsRegistro {
     public static Nexus alquimista;
     public static Nexus golem;
     public static Nexus dragao;
-    public static Nexus morte;
     public static Nexus livro;
     private static final List<Nexus> reliquias = new ArrayList<>();
     public static Nexus nexusStoryBook;
-
+    public static ItemStack fragMagma;
     public static void init(){
         createGuerreiro();
         reliquias.add(guerreiro);
@@ -118,6 +117,7 @@ public class ItemsRegistro {
         reliquias.add(dragao);
         createLivro();
         createNexusStoryBook();
+        createFragMagma();
     }
     private static void createGuerreiro(){
         ItemStack item = new ItemStack(Material.NETHERITE_SWORD,1);
@@ -524,7 +524,18 @@ public class ItemsRegistro {
         item.setItemMeta(meta);
         livro = new Nexus(item,"livro");
     }
-
+    private static void createFragMagma(){
+        ItemStack item = new ItemStack(Material.HEART_OF_THE_SEA);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Fargmento Magma"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.setItemModel(Material.KNOWLEDGE_BOOK.getKey());
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"nexus");
+        item.setItemMeta(meta);
+        fragMagma=item;
+    }
     private static void createNexusStoryBook() {
         ItemStack book = NexusStoryBook.createBook();
         nexusStoryBook = new Nexus(book, "nexus_story");

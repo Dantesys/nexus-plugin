@@ -1,4 +1,4 @@
-package org.dantesys.reliquiasNexus.raids.bosses;
+package org.dantesys.reliquiasNexus.raids.boss.bosses;
 
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.persistence.PersistentDataType;
