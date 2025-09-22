@@ -52,7 +52,8 @@ import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 *  Refazer sistema de procurado - PENDENTE
 *  Refazer sistema de bosses - Fazendo e Testando
 *  Adicionar suporte ao Geyser e Floodgate - Fazendo
-*  Ajustar sistema de limitador - PENDENTE
+*  Ajustar sistema de limitador - Fazendo
+*  Adicionar o disaster boss - PEDENTE
 */
 public final class ReliquiasNexus extends JavaPlugin {
     private static final Map<UUID, Troca> trocas = new ConcurrentHashMap<>();
@@ -1068,7 +1069,8 @@ public final class ReliquiasNexus extends JavaPlugin {
             builder.suggest("invasao");
             builder.suggest("boss");
             return builder.buildFuture();
-        }).then(Commands.argument("player",ArgumentTypes.player()).executes(ctx -> {
+        })
+                .then(Commands.argument("player",ArgumentTypes.player()).executes(ctx -> {
             String rarityName = ctx.getArgument("tipo", String.class);
             final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
             final Player targetPlayer = targetResolver.resolve(ctx.getSource()).getFirst();
@@ -1076,7 +1078,6 @@ public final class ReliquiasNexus extends JavaPlugin {
             ctx.getSource().getSender().sendMessage(Component.text("✅ Raid " + rarityName + " invocado!").color(NamedTextColor.GREEN));
             return Command.SINGLE_SUCCESS;
         }))));
-
         // Novo comando /nexu procurado [player] {valor}
         nexusAdminRoot.then(Commands.literal("procurado")
                 .then(Commands.argument("player", ArgumentTypes.player())
