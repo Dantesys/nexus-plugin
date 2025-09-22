@@ -28,7 +28,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.dantesys.reliquiasNexus.eventos.*;
@@ -40,23 +39,20 @@ import org.dantesys.reliquiasNexus.missoes.MissoesManager;
 import org.dantesys.reliquiasNexus.raids.RaidManager;
 import org.dantesys.reliquiasNexus.tab.PlayerListManager;
 import org.dantesys.reliquiasNexus.util.*;
-import org.dantesys.reliquiasNexus.bosses.BossManager;
-import org.dantesys.reliquiasNexus.bosses.BossRarity;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-
 import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 /*
 * TODO
 *  Ajustar arquivo de tradução - Fazendo e Testando
 *  Refazer sistema de procurado - PENDENTE
-*  Refazer sistema de bosses - PENDENTE
-*  Refazer sistema de economia - Testando
+*  Refazer sistema de bosses - Fazendo e Testando
+*  Adicionar suporte ao Geyser e Floodgate - Fazendo
+*  Ajustar sistema de limitador - PENDENTE
 */
 public final class ReliquiasNexus extends JavaPlugin {
     private static final Map<UUID, Troca> trocas = new ConcurrentHashMap<>();
@@ -76,6 +72,7 @@ public final class ReliquiasNexus extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        BedrockCompat.setup();
         NexusKeys.init(this);
         ItemsRegistro.init();
         saveResource("lang/pt-br.yml",true);
@@ -236,26 +233,32 @@ public final class ReliquiasNexus extends JavaPlugin {
                                         .color(NamedTextColor.GRAY))
                                 .build();
                         sender.sendMessage(msgEnvio);
-                        // Mensagem clicável para o jogador que recebeu
                         List<String> recebido = lang.getStringList("troca.recebido");
-                        Component msgRecebido = Component.text()
-                                .append(Component.text("\n🎁 "+recebido.getFirst()+"\n")
-                                        .color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD))
-                                .append(Component.text(recebido.get(1).replace("<player>",player.getName()) + "\n")
-                                        .color(NamedTextColor.GRAY))
-                                .append(Component.text(recebido.get(2).replace("<nexus>",nome) + "\n\n")
-                                        .color(NamedTextColor.GRAY))
-                                .append(Component.text("✅ "+lang.getString("troca.aceita","ACEITAR"))
-                                        .color(NamedTextColor.GREEN)
-                                        .clickEvent(ClickEvent.runCommand("/nexus aceitar " + player.getUniqueId().toString()))
-                                        .hoverEvent(HoverEvent.showText(Component.text(lang.getString("troca.aceitaMsg","Clique para aceitar a troca")))))
-                                .append(Component.text("❌ "+lang.getString("troca.recusa","RECUSAR"))
-                                        .color(NamedTextColor.RED)
-                                        .clickEvent(ClickEvent.runCommand("/nexus cancelar " + player.getUniqueId().toString()))
-                                        .hoverEvent(HoverEvent.showText(Component.text(lang.getString("troca.recusaMsg","Clique para recusar a troca")))))
-                                .build();
+                        if(BedrockCompat.isBedrockPlayer(p)){
+                            BedrockCompat.sendForm(p,"🎁 "+recebido.getFirst(),
+                                    recebido.get(1).replace("<player>",player.getName()) + "\n"+recebido.get(2).replace("<nexus>",nome),
+                                    List.of("✅ "+lang.getString("troca.aceita","ACEITAR"),"❌ "+lang.getString("troca.recusa","RECUSAR")),
+                                    List.of("/nexus aceitrar "+player.getUniqueId().toString(),"/nexus cancelar " + player.getUniqueId().toString()));
+                        }else{
+                            Component msgRecebido = Component.text()
+                                    .append(Component.text("\n🎁 "+recebido.getFirst()+"\n")
+                                            .color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD))
+                                    .append(Component.text(recebido.get(1).replace("<player>",player.getName()) + "\n")
+                                            .color(NamedTextColor.GRAY))
+                                    .append(Component.text(recebido.get(2).replace("<nexus>",nome) + "\n\n")
+                                            .color(NamedTextColor.GRAY))
+                                    .append(Component.text("✅ "+lang.getString("troca.aceita","ACEITAR"))
+                                            .color(NamedTextColor.GREEN)
+                                            .clickEvent(ClickEvent.runCommand("/nexus aceitar " + player.getUniqueId().toString()))
+                                            .hoverEvent(HoverEvent.showText(Component.text(lang.getString("troca.aceitaMsg","Clique para aceitar a troca")))))
+                                    .append(Component.text("❌ "+lang.getString("troca.recusa","RECUSAR"))
+                                            .color(NamedTextColor.RED)
+                                            .clickEvent(ClickEvent.runCommand("/nexus cancelar " + player.getUniqueId().toString()))
+                                            .hoverEvent(HoverEvent.showText(Component.text(lang.getString("troca.recusaMsg","Clique para recusar a troca")))))
+                                    .build();
 
-                        p.sendMessage(msgRecebido);
+                            p.sendMessage(msgRecebido);
+                        }
                     }
                 }else{
                     sender.sendMessage(Component.text("❌ "+lang.getString("troca.falhaMao","Você precisa segurar uma relíquia Nexus na mão!"))
@@ -444,25 +447,43 @@ public final class ReliquiasNexus extends JavaPlugin {
                 if(tempo<=0 && emMissao<=0){
                     List<Missao> plMissoes = missoesOfertas.containsKey(player.getUniqueId())?missoesOfertas.remove(player.getUniqueId()):missoesManager.gerarMissoes(player);
                     missoesOfertas.put(player.getUniqueId(),plMissoes);
-                    Component msg = Component.text("\n "+lang.getString("missao.disponivel","MISSÕES DISPONIVEIS")+"\n")
-                            .color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD);
-                    player.sendMessage(msg);
-                    for(int i=0;i<plMissoes.size();i++){
-                        Missao m = plMissoes.get(i);
-                        String dif = switch(m.getDificuldade()){
-                            case 2 -> "★★☆☆☆";
-                            case 3 -> "★★★☆☆";
-                            case 4 -> "★★★★☆";
-                            case 5 -> "★★★★★";
-                            default -> "★☆☆☆☆";
-                        };
-                        Component missao = Component.text("\n"+lang.getString("missao.tipo","Tipo: <nome> - ").replace("<nome>",m.getTipo()))
-                                .color(NamedTextColor.GRAY)
-                                .append(Component.text(dif).color(NamedTextColor.YELLOW))
-                                .append(Component.text("\n["+lang.getString("missao.aceitar","ACEITAR")+"]")
-                                .color(NamedTextColor.GREEN)
-                                .clickEvent(ClickEvent.runCommand("/nexus missaoaceitar " + (i+1))));
-                        player.sendMessage(missao);
+                    if(BedrockCompat.isBedrockPlayer(player)){
+                        List<String> textos = new ArrayList<>();
+                        List<String> comandos = new ArrayList<>();
+                        for(int i=0;i<plMissoes.size();i++){
+                            Missao m = plMissoes.get(i);
+                            String dif = switch(m.getDificuldade()){
+                                case 2 -> "★★☆☆☆";
+                                case 3 -> "★★★☆☆";
+                                case 4 -> "★★★★☆";
+                                case 5 -> "★★★★★";
+                                default -> "★☆☆☆☆";
+                            };
+                            textos.add(lang.getString("missao.tipo","Tipo: <nome> - ").replace("<nome>",m.getTipo())+" "+dif);
+                            comandos.add("/nexus missaoaceitar "+(i+1));
+                        }
+                        BedrockCompat.sendForm(player,lang.getString("missao.disponivel","MISSÕES DISPONIVEIS"), "",textos,comandos);
+                    }else{
+                        Component msg = Component.text("\n "+lang.getString("missao.disponivel","MISSÕES DISPONIVEIS")+"\n")
+                                .color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD);
+                        player.sendMessage(msg);
+                        for(int i=0;i<plMissoes.size();i++){
+                            Missao m = plMissoes.get(i);
+                            String dif = switch(m.getDificuldade()){
+                                case 2 -> "★★☆☆☆";
+                                case 3 -> "★★★☆☆";
+                                case 4 -> "★★★★☆";
+                                case 5 -> "★★★★★";
+                                default -> "★☆☆☆☆";
+                            };
+                            Component missao = Component.text("\n"+lang.getString("missao.tipo","Tipo: <nome> - ").replace("<nome>",m.getTipo()))
+                                    .color(NamedTextColor.GRAY)
+                                    .append(Component.text(dif).color(NamedTextColor.YELLOW))
+                                    .append(Component.text("\n["+lang.getString("missao.aceitar","ACEITAR")+"]")
+                                            .color(NamedTextColor.GREEN)
+                                            .clickEvent(ClickEvent.runCommand("/nexus missaoaceitar " + (i+1))));
+                            player.sendMessage(missao);
+                        }
                     }
                 }else{
                     sender.sendMessage(Component.text("❌ "+lang.getString("missao.falhaTempo","Aguarde mais <time> segundos!").replace("<time>",tempo<=0?emMissao+"":tempo+"")).color(NamedTextColor.RED));
@@ -597,16 +618,22 @@ public final class ReliquiasNexus extends JavaPlugin {
                         player.getPersistentDataContainer().set(TPACOOLDOWN.key,PersistentDataType.INTEGER,30);
                         TpaRequest request = new TpaRequest(player,alvo);
                         tpaRequests.put(alvo.getUniqueId(),request);
-                        player.sendMessage(Component.text(lang.getString("tpa.send","Pedido enviado!"))
-                                .color(NamedTextColor.GREEN));
-                        alvo.sendMessage(Component.text(player.getName()+" "+lang.getString("tpa.sendPlayer","quer se teleportar até você!"))
-                                .color(NamedTextColor.YELLOW));
-                        alvo.sendMessage(Component.text("\n["+lang.getString("tpa.aceitar","ACEITAR")+"]")
-                                .color(NamedTextColor.GREEN)
-                                .clickEvent(ClickEvent.runCommand("/tpa aceitar"))
-                                .append(Component.text("\n["+lang.getString("tpa.cancelar","CANCELAR")+"]")
-                                        .color(NamedTextColor.RED)
-                                        .clickEvent(ClickEvent.runCommand("/tpa cancelar"))));
+                        if(BedrockCompat.isBedrockPlayer(alvo)){
+                            BedrockCompat.sendForm(alvo,"TPA", player.getName()+" "+lang.getString("tpa.sendPlayer","quer se teleportar até você!"),
+                                    List.of("["+lang.getString("tpa.aceitar","ACEITAR")+"]","["+lang.getString("tpa.cancelar","CANCELAR")+"]"),
+                                    List.of("/tpa aceitar","/tpa cancelar"));
+                        }else{
+                            player.sendMessage(Component.text(lang.getString("tpa.send","Pedido enviado!"))
+                                    .color(NamedTextColor.GREEN));
+                            alvo.sendMessage(Component.text(player.getName()+" "+lang.getString("tpa.sendPlayer","quer se teleportar até você!"))
+                                    .color(NamedTextColor.YELLOW));
+                            alvo.sendMessage(Component.text("\n["+lang.getString("tpa.aceitar","ACEITAR")+"]")
+                                    .color(NamedTextColor.GREEN)
+                                    .clickEvent(ClickEvent.runCommand("/tpa aceitar"))
+                                    .append(Component.text("\n["+lang.getString("tpa.cancelar","CANCELAR")+"]")
+                                            .color(NamedTextColor.RED)
+                                            .clickEvent(ClickEvent.runCommand("/tpa cancelar"))));
+                        }
                     }else{
                         sender.sendMessage(Component.text("❌ Cooldown: "+cd)
                                 .color(NamedTextColor.RED));
@@ -1045,12 +1072,8 @@ public final class ReliquiasNexus extends JavaPlugin {
             String rarityName = ctx.getArgument("tipo", String.class);
             final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
             final Player targetPlayer = targetResolver.resolve(ctx.getSource()).getFirst();
-            if (targetPlayer != null) {
-                bossManager.startRaid(targetPlayer,rarityName);
-                ctx.getSource().getSender().sendMessage(Component.text("✅ Raid " + rarityName + " invocado!").color(NamedTextColor.GREEN));
-            } else {
-                ctx.getSource().getSender().sendMessage(Component.text("❌ tipo inválido!").color(NamedTextColor.RED));
-            }
+            bossManager.startRaid(targetPlayer, rarityName);
+            ctx.getSource().getSender().sendMessage(Component.text("✅ Raid " + rarityName + " invocado!").color(NamedTextColor.GREEN));
             return Command.SINGLE_SUCCESS;
         }))));
 
@@ -1087,7 +1110,6 @@ public final class ReliquiasNexus extends JavaPlugin {
                         )
                 )
         );
-
         // Registrar comandos
         LiteralCommandNode<CommandSourceStack> nexusCommand = nexusRoot.build();
         LiteralCommandNode<CommandSourceStack> nexusAdminCommand = nexusAdminRoot.build();
@@ -1098,7 +1120,6 @@ public final class ReliquiasNexus extends JavaPlugin {
             commands.registrar().register(ecCommandNode);
             commands.registrar().register(tpaCommand);
         });
-
         // Registrar eventos
         getServer().getPluginManager().registerEvents(new JoinQuitEvent(this), this);
         getServer().getPluginManager().registerEvents(new LimitadorEvent(this), this);
@@ -1107,7 +1128,6 @@ public final class ReliquiasNexus extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new EvoluirEvent(this), this);
         getServer().getPluginManager().registerEvents(new SpecialEvent(this), this);
         getServer().getPluginManager().registerEvents(lojaManager, this);
-        getServer().getPluginManager().registerEvents(new BancoEvent(this), this);
         getServer().getPluginManager().registerEvents(playerListManager, this);
         getServer().getPluginManager().registerEvents(new ChatListener(this), this);
         getServer().getPluginManager().registerEvents(missoesManager, this);
@@ -1116,7 +1136,6 @@ public final class ReliquiasNexus extends JavaPlugin {
         lojaManager.load(lojaSV);
         lojaManager.gerarItensAtuais();
     }
-
     private boolean processarTroca(Player player1, Player player2, String relic1, String relic2) {
         boolean achou1=false;
         ItemStack p1Item = null;
@@ -1154,7 +1173,6 @@ public final class ReliquiasNexus extends JavaPlugin {
         }
         return false;
     }
-
     @Override
     public void onDisable() {
         missoesManager.save(missaoAtivaBK);

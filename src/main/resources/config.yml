@@ -31,8 +31,8 @@ recursos:
   # Se ativado, um novo jogador recebeu uma relíquia não utilizada ao entrar pela primeira vez.
   nexus_onjoin: false
 
-# Limite de reliquias que um jogador pode ter, se o jogador passar disso ele é derrotado e é deixado com apenas 1 reliquia
-# Limit of relics that a player can have, if the player exceeds this he is defeated and is left with only 1 relic
+# Limite de relíquias que um jogador pode ser obtidas por missões, se o jogador passar disso quando morrer só receberá essa quantidade
+# Limit of relics that a player can obtain through missions, if the player exceeds this when he dies he will only receive that amount
 limite: 4
 
 # Level maximo que as reliquias podem evoluir, se definido como 1 ou menor desabilida o level maximo

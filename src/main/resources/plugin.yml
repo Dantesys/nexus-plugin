@@ -3,7 +3,7 @@ version: 'v1.0.8'
 main: org.dantesys.reliquiasNexus.ReliquiasNexus
 api-version: '1.21'
 authors: [ Dantesys ]
-
+softdepend: [ floodgate ]
 commands:
   nexus:
     description: Comando principal do Nexus
@@ -14,6 +14,9 @@ commands:
   ec:
     description: Abrir ender chest
     usage: /ec
+  tpa:
+    description: Sistema de teleporte
+    usage: /tpa
 
 permissions:
   reliquiasnexus.opzim:

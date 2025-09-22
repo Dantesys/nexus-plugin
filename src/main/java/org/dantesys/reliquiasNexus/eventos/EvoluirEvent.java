@@ -1310,7 +1310,6 @@ public class EvoluirEvent implements Listener {
                         msg="Você roubou uma reliquia!";
                     }
                     player.sendMessage(msg);
-                    LimitadorEvent.checkLimit(player);
                 }
                 else{
                     String msg = ReliquiasNexus.getLang().getString("ladrao.expurgo");

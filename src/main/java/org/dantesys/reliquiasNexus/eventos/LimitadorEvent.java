@@ -32,20 +32,6 @@ public class LimitadorEvent implements Listener {
     }
     private final Map<UUID, List<ItemStack>> reliquiasSalvas = new HashMap<>();
     private final Map<UUID,ItemStack> bussolaMortal = new HashMap<>();
-    public static void checkLimit(Player player){
-        if(passou(player)){
-            player.setHealth(0);
-        }
-    }
-    private static boolean passou(Player player){
-        PersistentDataContainer container = player.getPersistentDataContainer();
-        if(container.has(QTD.key, PersistentDataType.INTEGER)){
-            int qtd = container.getOrDefault(QTD.key, PersistentDataType.INTEGER,0);
-            int limite = ReliquiasNexus.getNexusConfig().getInt("limite");
-            return qtd > limite;
-        }
-        return false;
-    }
     @EventHandler
     public void pegouChao(EntityPickupItemEvent event){
         if(event.getEntity() instanceof Player player){
@@ -72,7 +58,6 @@ public class LimitadorEvent implements Listener {
                         playerData.set(QTD.key,PersistentDataType.INTEGER,qtd);
                         ReliquiasNexus.setConfigSave("nexus."+nome,player.getUniqueId().toString());
                         plugin.saveConfig();
-                        checkLimit(player);
                     }
                 }
             }
@@ -109,7 +94,6 @@ public class LimitadorEvent implements Listener {
                             int qa = assasino.getPersistentDataContainer().getOrDefault(QTD.key,PersistentDataType.INTEGER,0);
                             qa++;
                             assasino.getPersistentDataContainer().set(QTD.key,PersistentDataType.INTEGER,qa);
-                            checkLimit(player);
                             event.getDrops().remove(item);
                         }
                         else{
@@ -142,35 +126,27 @@ public class LimitadorEvent implements Listener {
                 event.deathScreenMessageOverride(Component.text("§c"+msg));
             }
         }
-        if(passou(player)){
-            String msgAll = ReliquiasNexus.getLang().getString("morreumsg.limite.all");
-            if(msgAll==null){
-                msgAll="O Jogador <player> foi eliminado por ter reliquias demais!";
+        int limite = plugin.getConfig().getInt("limite",4);
+        if(player.getPersistentDataContainer().getOrDefault(QTD.key,PersistentDataType.INTEGER,0)>limite){
+            player.getPersistentDataContainer().set(QTD.key,PersistentDataType.INTEGER,limite);
+            Collections.shuffle(manterRelics);
+            List<ItemStack> itensAtuais = new ArrayList<>();
+            for(int i = 0; i < limite && i < manterRelics.size(); i++){
+                ItemStack item = manterRelics.get(i);
+                itensAtuais.add(item);
             }
-            msgAll=msgAll.replace("<player>",player.getName());
-            String msg = ReliquiasNexus.getLang().getString("morreumsg.limite.player");
-            if(msg==null){
-                msg="Você foi eliminado por ter reliquias demais, se controla cara!";
-            }
-            event.deathMessage(Component.text("§c"+msgAll));
-            event.deathScreenMessageOverride(Component.text("§c"+msg));
-            player.getPersistentDataContainer().set(QTD.key,PersistentDataType.INTEGER,1);
-            Random rd = new Random();
-            int i = rd.nextInt(0, manterRelics.size()-1);
-            ItemStack is = manterRelics.get(i);
+            manterRelics.removeIf(itensAtuais::contains);
             manterRelics.forEach(r -> {
-                if(!r.equals(is)){
-                    ItemMeta meta = r.getItemMeta();
-                    PersistentDataContainer data = meta.getPersistentDataContainer();
-                    if(data.has(NEXUS.key,PersistentDataType.STRING)){
-                        String nome = data.get(NEXUS.key,PersistentDataType.STRING);
-                        data.set(DONO.key,PersistentDataType.STRING,"");
-                        ReliquiasNexus.setConfigSave("nexus."+nome,"");
-                        plugin.saveConfig();
-                    }
+                ItemMeta meta = r.getItemMeta();
+                PersistentDataContainer data = meta.getPersistentDataContainer();
+                if(data.has(NEXUS.key,PersistentDataType.STRING)){
+                    String nome = data.get(NEXUS.key,PersistentDataType.STRING);
+                    data.set(DONO.key,PersistentDataType.STRING,"");
+                    ReliquiasNexus.setConfigSave("nexus."+nome,"");
+                    plugin.saveConfig();
                 }
             });
-            manterRelics.removeIf(f -> !f.equals(is));
+            manterRelics = itensAtuais;
         }
         if (!manterRelics.isEmpty()) {
             reliquiasSalvas.put(player.getUniqueId(), manterRelics);
@@ -253,7 +229,6 @@ public class LimitadorEvent implements Listener {
         // fallback: caso não ache nada (ex: mundo plano sem chão)
         return world.getSpawnLocation();
     }
-
     @EventHandler
     public void onRespawn(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
