@@ -21,6 +21,7 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.BundleMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.components.FoodComponent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -1493,31 +1494,28 @@ public class EvoluirEvent implements Listener {
         Player player = event.getPlayer();
         PlayerInventory inv = player.getInventory();
         PersistentDataContainer dataPlayer = player.getPersistentDataContainer();
-        ItemStack pocao = event.getItem();
-        if(pocao.getType().equals(Material.POTION)){
-            for (int i = 0; i <= 8; i++) {
-                ItemStack stack = inv.getItem(i);
-                if(stack!=null && stack.getPersistentDataContainer().has(NEXUS.key, PersistentDataType.STRING)){
-                    String nome = stack.getPersistentDataContainer().get(NEXUS.key, PersistentDataType.STRING);
-                    if (nome != null && !nome.isBlank()) {
-                        Nexus item = ItemsRegistro.getFromNome(nome);
-                        if(item!=null){
-                            if(item.getNome().equals("mago")){
-                                int l=dataPlayer.getOrDefault(MAGO.key,PersistentDataType.INTEGER,1);
-                                int usos=dataPlayer.getOrDefault(MISSAOMAGO.key,PersistentDataType.INTEGER,0);
-                                usos++;
-                                dataPlayer.set(MISSAOMAGO.key,PersistentDataType.INTEGER,usos);
-                                tentarEvoluir(player,stack,l,getSlotOfItem(player,stack));
-                            }
-                            if(item.getNome().equals("alquimista")){
-                                int l=dataPlayer.getOrDefault(ALQUIMISTA.key,PersistentDataType.INTEGER,1);
-                                int usos=dataPlayer.getOrDefault(MISSAOALQUIMISTA.key,PersistentDataType.INTEGER,0);
-                                usos++;
-                                dataPlayer.set(MISSAOMAGO.key,PersistentDataType.INTEGER,usos);
-                                tentarEvoluir(player,stack,l,getSlotOfItem(player,stack));
-                            }
-                        }
-                    }
+        ItemStack item = event.getItem();
+        // Checa se é uma poção (tipo de item)
+        if (item.getType() == Material.POTION || item.getType() == Material.SPLASH_POTION || item.getType() == Material.LINGERING_POTION) {
+
+            // Aqui você pode checar a poção específica se quiser (por efeito, cor, meta)
+            PotionMeta meta = (PotionMeta) item.getItemMeta();
+            if (meta != null) {
+                if(temReliquia(player,"mago")){
+                    int l=dataPlayer.getOrDefault(MAGO.key,PersistentDataType.INTEGER,1);
+                    int usos=dataPlayer.getOrDefault(MISSAOMAGO.key,PersistentDataType.INTEGER,0);
+                    usos++;
+                    dataPlayer.set(MISSAOMAGO.key,PersistentDataType.INTEGER,usos);
+                    ItemStack stack = getReliquia(player,"mago");
+                    tentarEvoluir(player,stack,l,getSlotOfItem(player,stack));
+                }
+                if(temReliquia(player,"alquimista")){
+                    int l=dataPlayer.getOrDefault(ALQUIMISTA.key,PersistentDataType.INTEGER,1);
+                    int usos=dataPlayer.getOrDefault(MISSAOALQUIMISTA.key,PersistentDataType.INTEGER,0);
+                    usos++;
+                    dataPlayer.set(MISSAOALQUIMISTA.key,PersistentDataType.INTEGER,usos);
+                    ItemStack stack = getReliquia(player,"alquimista");
+                    tentarEvoluir(player,stack,l,getSlotOfItem(player,stack));
                 }
             }
         }

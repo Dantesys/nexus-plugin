@@ -153,7 +153,7 @@ nexusAdmin:
   - "/nexusAdmin saldo <player> add <valor> <div> Adiciona valor ao saldo, se for negativo remove"
   - "/nexusAdmin moneyName <name> <div> Altera o nome do dinheiro do servidor"
   - "/nexusAdmin procurado <player> <valor> <div> Marcar jogador como procurado"
-  - "/nexusAdmin boss <raridade> <div> Invocar um boss de uma raridade específica"
+  - "/nexusAdmin raid <tipo> <player> <div> Invocar uma raid próxima ao jogador"
 #Texto do /nexusAdmin rank
 rank:
   titulo: "Lista de ranks/cargos do servidor"
@@ -228,6 +228,7 @@ tpa:
   cancelado: "Seu pedido foi cancelado!"
 raid:
   pre: "A barreira entre os mundos está se quebrando..."
+  win: "Você ganhou <money> <name> pela invasão!"
 comandos:
   comando:
     - "livro"

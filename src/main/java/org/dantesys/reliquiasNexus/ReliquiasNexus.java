@@ -28,6 +28,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.dantesys.reliquiasNexus.eventos.*;
@@ -36,10 +37,12 @@ import org.dantesys.reliquiasNexus.items.Nexus;
 import org.dantesys.reliquiasNexus.loja.LojaManager;
 import org.dantesys.reliquiasNexus.missoes.Missao;
 import org.dantesys.reliquiasNexus.missoes.MissoesManager;
+import org.dantesys.reliquiasNexus.raids.RaidManager;
 import org.dantesys.reliquiasNexus.tab.PlayerListManager;
 import org.dantesys.reliquiasNexus.util.*;
 import org.dantesys.reliquiasNexus.bosses.BossManager;
 import org.dantesys.reliquiasNexus.bosses.BossRarity;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,7 +68,7 @@ public final class ReliquiasNexus extends JavaPlugin {
     private static YamlConfiguration lojaSV;
     private MissoesManager missoesManager;
     private LojaManager lojaManager;
-    private BossManager bossManager;
+    private RaidManager bossManager;
     public final List<String> names = List.of("guerreiro","ceifador","vida","mares","barbaro",
             "fazendeiro","espiao","arqueiro","cacador","tempestade","mineiro","fenix","protetor",
             "hulk","sculk","pescador","flash","mago","ladrao","domador","cozinheiro","construtor",
@@ -113,7 +116,7 @@ public final class ReliquiasNexus extends JavaPlugin {
         }
         // Inicializar o gerenciador da player list e do boss
         PlayerListManager playerListManager = new PlayerListManager(this);
-        bossManager = new BossManager(this);
+        bossManager = new RaidManager(this);
         new UpdaterCheck(this, "dantesys/nexus-plugin").checkForUpdates();
         // Comando /nexus
         LiteralArgumentBuilder<CommandSourceStack> nexusRoot = Commands.literal("nexus").executes(ctx -> {
@@ -874,7 +877,7 @@ public final class ReliquiasNexus extends JavaPlugin {
                                 meta.getPersistentDataContainer().set(DONO.key,PersistentDataType.STRING,player.getUniqueId().toString());
                                 stack.setItemMeta(meta);
                                 player.getInventory().addItem(stack);
-                                String msg=ReliquiasNexus.getLang().getString("reliquia.send","Você recebeu o nexus do <relic>");
+                                String msg=ReliquiasNexus.getLang().getString("reliquia.send","Você recebeu o nexus do <relic>").replace("<relic>",nome);
                                 player.sendMessage(Component.text(msg).color(NamedTextColor.GREEN));
                                 sender.sendMessage(Component.text(lang.getString("reliquia.sendSuccess","O jogador recebeu o nexus!")).color(NamedTextColor.GREEN));
                             }else{
@@ -935,21 +938,22 @@ public final class ReliquiasNexus extends JavaPlugin {
             return Command.SINGLE_SUCCESS;
         })));
         // Comando /nexusAdmin recursos
-        nexusAdminRoot.then(Commands.literal(lang.getString("recursos.comando","recursos")).then(Commands.argument("recurso",StringArgumentType.string()).suggests((ctx,builder) -> {
-            List<String> recursos = lang.getStringList("recursos.list");
-            for (String nome : recursos) {
-                builder.suggest(nome);
-            }
-            return builder.buildFuture();
-        })
-                .then(Commands.argument("ativado",BoolArgumentType.bool())).executes(ctx -> {
-                    String recurso=ctx.getArgument("recurso", String.class).toLowerCase();;
-                    boolean ativado = ctx.getArgument("ativado", boolean.class);
-                    config.set("recursos."+recurso,ativado);
-                    saveConfig();
-                    ctx.getSource().getSender().sendMessage(Component.text("✅ " + recurso + ": "+ativado).color(NamedTextColor.GREEN));
-                    return Command.SINGLE_SUCCESS;
-                })));
+        nexusAdminRoot.then(Commands.literal("recursos").then(Commands.argument("recurso", StringArgumentType.string()) // /nexusAdmin recursos <recurso>
+                        .suggests((ctx, builder) -> {
+                            List<String> recursos = lang.getStringList("recursos.list");
+                            for (String nome : recursos) {
+                                builder.suggest(nome);
+                            }
+                            return builder.buildFuture();
+                        })
+                        .then(Commands.argument("ativado", BoolArgumentType.bool()).executes(ctx -> {
+                            String recurso = ctx.getArgument("recurso", String.class).toLowerCase();
+                            boolean ativado = ctx.getArgument("ativado", boolean.class);
+                            config.set("recursos." + recurso, ativado);
+                            saveConfig();
+                            ctx.getSource().getSender().sendMessage(Component.text("✅ " + recurso + ": " + ativado).color(NamedTextColor.GREEN));
+                            return Command.SINGLE_SUCCESS;
+                        }))));
         // Comando /nexusAdmin op
         nexusAdminRoot.then(Commands.literal("op").then(Commands.argument("player", ArgumentTypes.player()).executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
@@ -1033,22 +1037,22 @@ public final class ReliquiasNexus extends JavaPlugin {
             return Command.SINGLE_SUCCESS;
         })));
         // Novo comando /nexu boss
-        nexusAdminRoot.then(Commands.literal("boss").then(Commands.argument("rarity", StringArgumentType.string()).suggests((ctx, builder) -> {
-            for (BossRarity rarity : BossRarity.values()) {
-                builder.suggest(rarity.name().toLowerCase());
-            }
+        nexusAdminRoot.then(Commands.literal("raid").then(Commands.argument("tipo", StringArgumentType.string()).suggests((ctx, builder) -> {
+            builder.suggest("invasao");
+            builder.suggest("boss");
             return builder.buildFuture();
-        }).executes(ctx -> {
-            String rarityName = ctx.getArgument("rarity", String.class);
-            BossRarity rarity = BossRarity.fromString(rarityName);
-            if (rarity != null) {
-                bossManager.spawnBoss(rarity, false); // Alterado aqui
-                ctx.getSource().getSender().sendMessage(Component.text("✅ Boss de raridade " + rarity.displayName + " invocado!").color(NamedTextColor.GREEN));
+        }).then(Commands.argument("player",ArgumentTypes.player()).executes(ctx -> {
+            String rarityName = ctx.getArgument("tipo", String.class);
+            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
+            final Player targetPlayer = targetResolver.resolve(ctx.getSource()).getFirst();
+            if (targetPlayer != null) {
+                bossManager.startRaid(targetPlayer,rarityName);
+                ctx.getSource().getSender().sendMessage(Component.text("✅ Raid " + rarityName + " invocado!").color(NamedTextColor.GREEN));
             } else {
-                ctx.getSource().getSender().sendMessage(Component.text("❌ Raridade inválida!").color(NamedTextColor.RED));
+                ctx.getSource().getSender().sendMessage(Component.text("❌ tipo inválido!").color(NamedTextColor.RED));
             }
             return Command.SINGLE_SUCCESS;
-        })));
+        }))));
 
         // Novo comando /nexu procurado [player] {valor}
         nexusAdminRoot.then(Commands.literal("procurado")
@@ -1107,8 +1111,8 @@ public final class ReliquiasNexus extends JavaPlugin {
         getServer().getPluginManager().registerEvents(playerListManager, this);
         getServer().getPluginManager().registerEvents(new ChatListener(this), this);
         getServer().getPluginManager().registerEvents(missoesManager, this);
-
-        getServer().getConsoleSender().sendMessage("§2✅");
+        getServer().getPluginManager().registerEvents(bossManager, this);
+        getServer().getConsoleSender().sendMessage("§2[Nexus] ✅");
         lojaManager.load(lojaSV);
         lojaManager.gerarItensAtuais();
     }
@@ -1156,7 +1160,7 @@ public final class ReliquiasNexus extends JavaPlugin {
         missoesManager.save(missaoAtivaBK);
         lojaManager.save(lojaSV);
         saveConfig();
-        getServer().getConsoleSender().sendMessage("§4❌");
+        getServer().getConsoleSender().sendMessage("§4[Nexus] ❌");
     }
     public static FileConfiguration getNexusConfig(){
         return config;
