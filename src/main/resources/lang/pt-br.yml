@@ -228,7 +228,10 @@ tpa:
   cancelado: "Seu pedido foi cancelado!"
 raid:
   pre: "A barreira entre os mundos está se quebrando..."
-  win: "Você ganhou <money> <name> pela invasão!"
+  preinvasao: "Você ouve o som de tropas caminhando!"
+  preboss: "Você o som de um rugido!"
+  predisaster: "Você sente uma presença ameaçadora!"
+  win: "Você ganhou <money> <name> pela raid!"
 comandos:
   comando:
     - "livro"

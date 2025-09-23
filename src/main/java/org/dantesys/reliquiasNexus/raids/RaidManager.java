@@ -4,11 +4,11 @@ import com.destroystokyo.paper.event.server.ServerTickEndEvent;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.dantesys.reliquiasNexus.ReliquiasNexus;
 import org.dantesys.reliquiasNexus.raids.boss.BossManager;
@@ -24,6 +24,7 @@ public class RaidManager implements Listener {
     private int cooldown;
     private final Random rd = new Random();
     private CommomEvent event;
+    private int escolhido=0;
 
     public RaidManager(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -31,8 +32,8 @@ public class RaidManager implements Listener {
     }
 
     private void resetCooldown() {
-        int min = 15 * 60 * 20; // 15 min
-        int max = 45 * 60 * 20; // 45 min
+        int min = 30 * 60 * 20;
+        int max = 60 * 60 * 20;
         cooldown = rd.nextInt(max - min + 1) + min;
     }
     public void startRaid(Player player, String tipo){
@@ -45,7 +46,6 @@ public class RaidManager implements Listener {
         event.start();
     }
     private void startRaid(Player player){
-        int escolhido = rd.nextInt(100);
         Location l = player.getLocation();
         if (escolhido <= 50) {
             event = new InvasaoManager(l,plugin);
@@ -64,6 +64,29 @@ public class RaidManager implements Listener {
                 Bukkit.broadcast(Component.text(
                         ReliquiasNexus.getLang().getString("raid.pre", "A barreira entre os mundos está se quebrando...")
                 ));
+                if(Bukkit.getOnlinePlayers().isEmpty()){
+                    resetCooldown();
+                }
+            }
+            if (cooldown == 600) {
+                escolhido = rd.nextInt(100);
+                if (escolhido <= 50) {
+                    Bukkit.broadcast(Component.text(
+                            ReliquiasNexus.getLang().getString("raid.preinvasao", "Você ouve o som de tropas caminhando!")
+                    ));
+                    Bukkit.getOnlinePlayers().forEach(player-> player.playSound(player.getLocation(), Sound.ENTITY_PILLAGER_AMBIENT, 1.0f, 1.0f));
+                } else if (escolhido <= 75) {
+                    Bukkit.broadcast(Component.text(
+                            ReliquiasNexus.getLang().getString("raid.preboss", "Você o som de um rugido!")
+                    ));
+                    Bukkit.getOnlinePlayers().forEach(player-> player.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1.0f, 1.0f));
+
+                } else {
+                    Bukkit.broadcast(Component.text(
+                            ReliquiasNexus.getLang().getString("raid.predisaster", "Você sente uma presença ameaçadora!")
+                    ));
+                    Bukkit.getOnlinePlayers().forEach(player-> player.playSound(player.getLocation(), Sound.ENTITY_WITHER_SPAWN, 1.0f, 1.0f));
+                }
             }
             if (cooldown <= 0) {
                 List<Player> players = new ArrayList<>(Bukkit.getOnlinePlayers());

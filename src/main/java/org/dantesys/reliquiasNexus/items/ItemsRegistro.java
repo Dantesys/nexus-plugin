@@ -54,6 +54,13 @@ public class ItemsRegistro {
     private static final List<Nexus> reliquias = new ArrayList<>();
     public static Nexus nexusStoryBook;
     public static ItemStack fragMagma;
+    public static ItemStack fragWater;
+    public static ItemStack fragTempest;
+    public static ItemStack fragEarth;
+    public static ItemStack fragToxic;
+    public static ItemStack fragSnow;
+    public static ItemStack fragSolar;
+    public static ItemStack fragUmbra;
     public static void init(){
         createGuerreiro();
         reliquias.add(guerreiro);
@@ -118,6 +125,13 @@ public class ItemsRegistro {
         createLivro();
         createNexusStoryBook();
         createFragMagma();
+        createFragWater();
+        createFragTempest();
+        createFragEarth();
+        createFragToxic();
+        createFragSnow();
+        createFragSolar();
+        createFragUmbra();
     }
     private static void createGuerreiro(){
         ItemStack item = new ItemStack(Material.NETHERITE_SWORD,1);
@@ -527,14 +541,90 @@ public class ItemsRegistro {
     private static void createFragMagma(){
         ItemStack item = new ItemStack(Material.HEART_OF_THE_SEA);
         ItemMeta meta = item.getItemMeta();
-        meta.displayName(Component.text("§6Fargmento Magma"));
+        meta.displayName(Component.text("§6Fragmento Magma"));
         meta.setUnbreakable(true);
         meta.setEnchantmentGlintOverride(true);
         meta.setRarity(ItemRarity.RARE);
-        meta.setItemModel(Material.KNOWLEDGE_BOOK.getKey());
         meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"nexus");
         item.setItemMeta(meta);
         fragMagma=item;
+    }
+    private static void createFragWater(){
+        ItemStack item = new ItemStack(Material.HEART_OF_THE_SEA);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Fragmento Water"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"nexus");
+        item.setItemMeta(meta);
+        fragWater=item;
+    }
+    private static void createFragTempest(){
+        ItemStack item = new ItemStack(Material.HEART_OF_THE_SEA);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Fragmento Tempest"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"nexus");
+        item.setItemMeta(meta);
+        fragTempest=item;
+    }
+    private static void createFragEarth(){
+        ItemStack item = new ItemStack(Material.HEART_OF_THE_SEA);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Fragmento Earth"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"nexus");
+        item.setItemMeta(meta);
+        fragEarth=item;
+    }
+    private static void createFragToxic(){
+        ItemStack item = new ItemStack(Material.HEART_OF_THE_SEA);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Fragmento Toxic"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"nexus");
+        item.setItemMeta(meta);
+        fragToxic=item;
+    }
+    private static void createFragSnow(){
+        ItemStack item = new ItemStack(Material.HEART_OF_THE_SEA);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Fragmento Snow"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"nexus");
+        item.setItemMeta(meta);
+        fragSnow=item;
+    }
+    private static void createFragSolar(){
+        ItemStack item = new ItemStack(Material.HEART_OF_THE_SEA);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Fragmento Solar"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"nexus");
+        item.setItemMeta(meta);
+        fragSolar=item;
+    }
+    private static void createFragUmbra(){
+        ItemStack item = new ItemStack(Material.HEART_OF_THE_SEA);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("§6Fragmento Umbra"));
+        meta.setUnbreakable(true);
+        meta.setEnchantmentGlintOverride(true);
+        meta.setRarity(ItemRarity.RARE);
+        meta.getPersistentDataContainer().set(DONO.key, PersistentDataType.STRING,"nexus");
+        item.setItemMeta(meta);
+        fragUmbra=item;
     }
     private static void createNexusStoryBook() {
         ItemStack book = NexusStoryBook.createBook();

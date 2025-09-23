@@ -20,8 +20,7 @@ import org.dantesys.reliquiasNexus.ReliquiasNexus;
 import org.dantesys.reliquiasNexus.raids.CommomEvent;
 import org.dantesys.reliquiasNexus.raids.EventStatus;
 import org.dantesys.reliquiasNexus.raids.boss.bosses.*;
-import org.dantesys.reliquiasNexus.raids.disasterBoss.dbosses.DBossBase;
-import org.dantesys.reliquiasNexus.raids.disasterBoss.dbosses.Magma;
+import org.dantesys.reliquiasNexus.raids.disasterBoss.dbosses.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -99,7 +98,16 @@ public void stop() {
 private void spawnBoss() {
     int escolha = random.nextInt(8);
 
-    chefao = new Magma(spawnEntity(Blaze.class));
+    chefao = switch(escolha){
+        case 1 -> new Water(spawnEntity(ElderGuardian.class));
+        case 2 -> new Tempest(spawnEntity(Breeze.class));
+        case 3 -> new Earth(spawnEntity(Ravager.class));
+        case 4 -> new Toxic(spawnEntity(Witch.class));
+        case 5 -> new Snow(spawnEntity(Stray.class));
+        case 6 -> new Solar(spawnEntity(Blaze.class));
+        case 7 -> new Umbra(spawnEntity(WitherSkeleton.class));
+        default -> new Magma(spawnEntity(MagmaCube.class));
+    };
 
     // Custom name e atributos
     chefao.getBoss().getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH).setBaseValue(1000);

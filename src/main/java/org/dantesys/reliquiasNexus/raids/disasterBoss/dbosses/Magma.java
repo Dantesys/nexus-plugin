@@ -1,8 +1,8 @@
 package org.dantesys.reliquiasNexus.raids.disasterBoss.dbosses;
 
 import org.bukkit.Location;
-import org.bukkit.entity.Blaze;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.MagmaCube;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -19,8 +19,8 @@ public class Magma extends DBossBase{
     public void spawnMinios() {
         for (int i = 0; i < 3; i++) {
             Location loc = boss.getLocation().add(Math.random() * 3 - 1.5, 0, Math.random() * 3 - 1.5);
-            Blaze minion = boss.getWorld().spawn(loc, Blaze.class);
-            minion.setCustomName("Magmalord Minion");
+            MagmaCube minion = boss.getWorld().spawn(loc, MagmaCube.class);
+            minion.setCustomName("Minion");
         }
     }
     @Override
@@ -49,6 +49,7 @@ public class Magma extends DBossBase{
         List<ItemStack> drops = new ArrayList<>();
         ItemStack frag = fragMagma.clone();
         frag.setAmount(Math.max(1,rd.nextInt(5)));
+        drops.add(frag);
         return drops;
     }
 }
