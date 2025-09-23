@@ -3,24 +3,21 @@ package org.dantesys.reliquiasNexus.raids.disasterBoss.dbosses;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.List;
+
+import static org.dantesys.reliquiasNexus.util.NexusKeys.NEXUS;
 
 public abstract class DBossBase {
     protected LivingEntity boss;
     protected int cdFull;
     protected int cdHalf;
     protected int cdLow;
-    public DBossBase(LivingEntity boss){
-        this.boss=boss;
-        cdFull=0;
-        cdHalf=0;
-        cdLow=0;
-    }
     public DBossBase(LivingEntity boss,String nome){
         boss.setCustomName(nome);
         boss.setCustomNameVisible(true);
-        this(boss);
+        boss.getPersistentDataContainer().set(NEXUS.key, PersistentDataType.STRING,"BOSS");
         this.boss=boss;
         cdFull=0;
         cdHalf=0;

@@ -119,7 +119,7 @@ private <T extends LivingEntity> T spawnEntity(Class<T> clazz){
 }
 
 private void setupBossBar() {
-    bossBar = Bukkit.createBossBar("Boss Lv." + chefao.getBoss().getCustomName() + " - " +(this.timer/20)+" s", BarColor.RED, BarStyle.SEGMENTED_6);
+    bossBar = Bukkit.createBossBar("Boss Lv. " + chefao.getBoss().getCustomName() + " - " +(this.timer/20)+" s", BarColor.RED, BarStyle.SEGMENTED_6);
     bossBar.setVisible(true);
     // Adiciona todos os players online
     Bukkit.getOnlinePlayers().forEach(bossBar::addPlayer);
@@ -176,7 +176,7 @@ private void distributeRewards() {
 
         String precoStr = String.format("%.2f", recompensa);
         p.sendMessage(Component.text("💰  " +
-                ReliquiasNexus.getLang().getString("raid.win", "Você ganhou <money> <name> pela invasão!")
+                ReliquiasNexus.getLang().getString("raid.win", "Você ganhou <money> <name> pela raid!")
                         .replace("<money>", precoStr)
                         .replace("<name>", ReliquiasNexus.getNexusConfig().getString("recursos.moneyName","moly"))
         ).color(NamedTextColor.GREEN));

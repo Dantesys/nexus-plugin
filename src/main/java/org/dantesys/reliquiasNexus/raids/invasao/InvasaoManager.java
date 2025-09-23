@@ -225,7 +225,7 @@ public class InvasaoManager extends CommomEvent{
 
             String precoStr = String.format("%.2f", recompensa);
             p.sendMessage(Component.text("💰  " +
-                    ReliquiasNexus.getLang().getString("raid.win", "Você ganhou <money> <name> pela invasão!")
+                    ReliquiasNexus.getLang().getString("raid.win", "Você ganhou <money> <name> pela raid!")
                             .replace("<money>", precoStr)
                             .replace("<name>", ReliquiasNexus.getNexusConfig().getString("recursos.moneyName","moly"))
             ).color(NamedTextColor.GREEN));
