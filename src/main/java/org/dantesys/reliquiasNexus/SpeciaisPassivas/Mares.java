@@ -66,10 +66,10 @@ public class Mares {
                     atingidos.add(vivo);
                     if(vivo instanceof Player pl){
                         if(pl != player){
-                            vivo.damage(finalDamage);
+                            vivo.damage(finalDamage,player);
                         }
                     }else{
-                        vivo.damage(finalDamage);
+                        vivo.damage(finalDamage,player);
                     }
                 }
                 pressf.remove(surdo);
@@ -108,11 +108,11 @@ public class Mares {
                     atingidos.add(vivo);
                     if(vivo instanceof Player pl){
                         if(pl != player){
-                            vivo.damage(damage);
+                            vivo.damage(damage,player);
                             vivo.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS,level*20,2));
                         }
                     }else{
-                        vivo.damage(damage);
+                        vivo.damage(damage,player);
                         vivo.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS,level*20,2));
                     }
                 }
@@ -146,11 +146,11 @@ public class Mares {
                     if(vivo instanceof Player p){
                         if(p!=player){
                             vivo.setRemainingAir(0);
-                            vivo.damage(damage);
+                            vivo.damage(damage,player);
                         }
                     }else{
                         vivo.setRemainingAir(0);
-                        vivo.damage(damage);
+                        vivo.damage(damage,player);
                     }
                 }
                 pressf.remove(surdo);

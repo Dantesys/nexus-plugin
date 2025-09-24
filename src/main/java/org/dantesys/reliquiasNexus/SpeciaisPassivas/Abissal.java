@@ -34,16 +34,13 @@ public class Abissal {
     }
     private static void marcarRasgo(Player player) {
         PersistentDataContainer data = player.getPersistentDataContainer();
-
         Location loc = player.getLocation();
-
         data.set(worldKey, PersistentDataType.STRING, loc.getWorld().getName());
         data.set(xKey, PersistentDataType.DOUBLE, loc.getX());
         data.set(yKey, PersistentDataType.DOUBLE, loc.getY());
         data.set(zKey, PersistentDataType.DOUBLE, loc.getZ());
         data.set(yawKey, PersistentDataType.FLOAT, loc.getYaw());
         data.set(pitchKey, PersistentDataType.FLOAT, loc.getPitch());
-
         player.sendMessage("§5[Rasgo do Vazio] §7Ponto marcado.");
     }
     private static void retornarRasgo(Player player) {
@@ -51,29 +48,22 @@ public class Abissal {
         if(data.has(worldKey, PersistentDataType.STRING)) {
             String worldName = data.get(worldKey, PersistentDataType.STRING);
             World world = Bukkit.getWorld(worldName);
-
             if(world == null) {
                 player.sendMessage("§cO mundo salvo não existe mais!");
                 return;
             }
-
             double x = data.get(xKey, PersistentDataType.DOUBLE);
             double y = data.get(yKey, PersistentDataType.DOUBLE);
             double z = data.get(zKey, PersistentDataType.DOUBLE);
             float yaw = data.get(yawKey, PersistentDataType.FLOAT);
             float pitch = data.get(pitchKey, PersistentDataType.FLOAT);
-
             Location destino = new Location(world, x, y, z, yaw, pitch);
-
             // Partículas antes de teleportar
             player.getWorld().spawnParticle(Particle.PORTAL, player.getLocation(), 100, 1, 1, 1);
-
             player.teleport(destino);
-
             // Partículas depois
             world.spawnParticle(Particle.DRAGON_BREATH, destino, 150, 1, 1, 1);
             world.playSound(destino, Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 0.6f);
-
             // Limpando o ponto
             data.remove(worldKey);
             data.remove(xKey);
@@ -81,7 +71,6 @@ public class Abissal {
             data.remove(zKey);
             data.remove(yawKey);
             data.remove(pitchKey);
-
             player.sendMessage("§5[Rasgo do Vazio] §7Você retornou ao ponto marcado!");
         } else {
             player.sendMessage("§cNenhum ponto foi marcado.");

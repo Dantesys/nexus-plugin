@@ -3,6 +3,7 @@ package org.dantesys.reliquiasNexus.eventos;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -113,6 +114,11 @@ public class JoinQuitEvent implements Listener {
             saldoOff.save(file);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        if(player.getPersistentDataContainer().has(PROCURADO.key)){
+            double recompensa = player.getPersistentDataContainer().getOrDefault(PROCURADO.key,PersistentDataType.DOUBLE,0.0);
+            String precoStr = String.format("$ %.2f ", recompensa);
+            Bukkit.broadcast(Component.text(ReliquiasNexus.getLang().getString("procurados.join","Cuidado!<break> jogador procurado acabou de entrar<break> recompensa <value> <moneyName>").replace("<value>",precoStr).replace("<break>","\n").replace("<moneyName>",plugin.getConfig().getString("recursos.moneyName","moly"))).color(NamedTextColor.YELLOW));
         }
     }
     @EventHandler

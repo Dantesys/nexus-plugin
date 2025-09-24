@@ -84,7 +84,7 @@ public class Mineiro {
         }
         world.spawnParticle(Particle.BLOCK, loc, 100, raioTerremoto, 1, raioTerremoto, Material.STONE.createBlockData());
         world.playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 1f, 0.8f);
-        Location frente = loc.clone().add(player.getLocation().getDirection().multiply(7));
+        Location frente = loc.clone().add(player.getLocation().getDirection().multiply(1));
         int tamanho = 5;
         int altura = 5;
         for (int x = -tamanho/2; x <= tamanho/2; x++) {
@@ -99,18 +99,7 @@ public class Mineiro {
         }
         player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 10*level, 9));
     }
-    private static boolean isOre(Material mat) {
-        return switch(mat) {
-            case DIAMOND_ORE, DEEPSLATE_DIAMOND_ORE,
-                 IRON_ORE, DEEPSLATE_IRON_ORE,
-                 GOLD_ORE, DEEPSLATE_GOLD_ORE,
-                 EMERALD_ORE, DEEPSLATE_EMERALD_ORE,
-                 LAPIS_ORE, DEEPSLATE_LAPIS_ORE,
-                 REDSTONE_ORE, DEEPSLATE_REDSTONE_ORE,
-                 COPPER_ORE, DEEPSLATE_COPPER_ORE -> true;
-            default -> false;
-        };
-    }
+
     private static boolean isStone(Material mat){
         return switch(mat){
             case STONE, DEEPSLATE, ANDESITE, TUFF, DIORITE, GRANITE, GRAVEL -> true;

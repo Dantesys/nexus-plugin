@@ -49,11 +49,11 @@ import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 /*
 * TODO
 *  Ajustar arquivo de tradução - Fazendo e Testando
-*  Refazer sistema de procurado - PENDENTE
-*  Refazer sistema de bosses - Fazendo e Testando
-*  Adicionar suporte ao Geyser e Floodgate - Fazendo
-*  Ajustar sistema de limitador - Fazendo
-*  Adicionar o disaster boss - PEDENTE
+*  Refazer sistema de procurado - Fazendo
+*  Refazer sistema de bosses - Testando
+*  Adicionar suporte ao Geyser e Floodgate - Testando
+*  Ajustar sistema de limitador - Testando
+*  Refazer sistema de times - PEDENTE
 */
 public final class ReliquiasNexus extends JavaPlugin {
     private static final Map<UUID, Troca> trocas = new ConcurrentHashMap<>();
@@ -594,7 +594,7 @@ public final class ReliquiasNexus extends JavaPlugin {
             sender.sendMessage(Component.text("❌ "+lang.getString("chatcor.falhaPlayer","Apenas jogadores podem usar este comando!")).color(NamedTextColor.RED));
             return Command.SINGLE_SUCCESS;
         }));
-        // Comando para abrir o ender chest
+        // Comando /ec
         LiteralCommandNode<CommandSourceStack> ecCommandNode = Commands.literal("ec").executes(ctx -> {
             if (ctx.getSource().getExecutor() instanceof Player player) {
                 PersistentDataContainer playerData = player.getPersistentDataContainer();
@@ -1080,38 +1080,17 @@ public final class ReliquiasNexus extends JavaPlugin {
             return Command.SINGLE_SUCCESS;
         }))));
         // Novo comando /nexu procurado [player] {valor}
-        nexusAdminRoot.then(Commands.literal("procurado")
-                .then(Commands.argument("player", ArgumentTypes.player())
-                        .then(Commands.argument("valor", DoubleArgumentType.doubleArg(0.1))
-                                .executes(ctx -> {
-                                    CommandSender sender = ctx.getSource().getSender();
-                                    if (sender instanceof Player player) {
-                                        final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
-                                        Player alvo = targetResolver.resolve(ctx.getSource()).getFirst();
-                                        double valor = ctx.getArgument("valor", Double.class);
-
-                                        if (alvo.equals(player)) {
-                                            player.sendMessage(Component.text("§cVocê não pode se marcar como procurado!").color(NamedTextColor.RED));
-                                            return Command.SINGLE_SUCCESS;
-                                        }
-
-                                        ConfigurationSection wantedSection = config.getConfigurationSection("procurados");
-                                        if (wantedSection == null) {
-                                            wantedSection = config.createSection("procurados");
-                                        }
-
-                                        wantedSection.set(alvo.getUniqueId().toString() + ".recompensa", valor);
-                                        wantedSection.set(alvo.getUniqueId().toString() + ".expiracao", System.currentTimeMillis() + (3L * 24 * 60 * 60 * 1000));
-                                        saveConfig();
-
-                                        Bukkit.broadcast(Component.text("§4O jogador §c" + alvo.getName() + " §4foi adicionado à lista de procurados! Recompensa: §6" + valor + " moly.").color(NamedTextColor.RED));
-                                        return Command.SINGLE_SUCCESS;
-                                    }
-                                    return Command.SINGLE_SUCCESS;
-                                })
-                        )
-                )
-        );
+        nexusAdminRoot.then(Commands.literal("procurado").then(Commands.argument("player", ArgumentTypes.player()).then(Commands.argument("valor", DoubleArgumentType.doubleArg(0.1)).executes(ctx -> {
+            final PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
+            Player alvo = targetResolver.resolve(ctx.getSource()).getFirst();
+            double valor = ctx.getArgument("valor", Double.class);
+            double recompensa = alvo.getPersistentDataContainer().getOrDefault(PROCURADO.key,PersistentDataType.DOUBLE,0.0);
+            recompensa+=valor;
+            alvo.getPersistentDataContainer().set(PROCURADO.key,PersistentDataType.DOUBLE,recompensa);
+            String precoStr = String.format("$ %.2f ", recompensa);
+            Bukkit.broadcast(Component.text(ReliquiasNexus.getLang().getString("procurados.recompensa","Procurando <player>, com uma recompensa de <value> <moneyName>").replace("<value>",precoStr).replace("<player>",alvo.getName()).replace("<moneyName>",config.getString("recursos.moneyName","moly"))).color(NamedTextColor.YELLOW));
+            return Command.SINGLE_SUCCESS;
+        }))));
         // Registrar comandos
         LiteralCommandNode<CommandSourceStack> nexusCommand = nexusRoot.build();
         LiteralCommandNode<CommandSourceStack> nexusAdminCommand = nexusAdminRoot.build();

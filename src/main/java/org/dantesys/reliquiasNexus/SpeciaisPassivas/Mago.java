@@ -253,7 +253,7 @@ public class Mago {
                     atingidos.add(vivo);
                     if(vivo instanceof Player pl){
                         if(pl != player){
-                            vivo.damage(damage);
+                            vivo.damage(damage,player);
                         }
                     }else{
                         Material m = EntityToEgg.getEntityEgg(vivo.getType());
@@ -380,9 +380,5 @@ public class Mago {
                 case 8 -> fragmentoCaos(level,player);
             }
         }
-    }
-
-    public static <C> void getSpecialbyLevel(C orDefault, Player player) {
-
     }
 }

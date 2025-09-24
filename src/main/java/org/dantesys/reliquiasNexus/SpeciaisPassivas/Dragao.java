@@ -113,7 +113,6 @@ public class Dragao {
     }
     private static void formaDraconicaUltimate(int level,Player player) {
         World world = player.getWorld();
-        Location centro = player.getLocation();
 
         int duracaoSegundos = 15; // duração fixa da ultimate
         double danoBase = 3 + level; // dano por impacto
@@ -138,13 +137,13 @@ public class Dragao {
                             Vector direcao = mob.getLocation().toVector().subtract(player.getLocation().toVector()).normalize();
                             mob.setVelocity(direcao.multiply(empurrao).setY(0.5));
                             mob.damage(danoBase, player);
-                            mob.setFireTicks(40); // 2 segundos de fogo
-                            world.spawnParticle(Particle.FLAME, mob.getLocation().add(0,1,0), 10, 0.5,0.5,0.5,0.1);
+                            mob.setFireTicks(40+level); // 2 segundos de fogo
+                            world.spawnParticle(Particle.FLAME, mob.getLocation().add(0,1,0), 20, 0.5,0.5,0.5,0.1);
                         }
                     }
 
                     // Rajadas de partículas ao redor do jogador
-                    world.spawnParticle(Particle.DRAGON_BREATH, player.getLocation().add(0,1,0), 20, 1.5,1.5,1.5,0.15);
+                    world.spawnParticle(Particle.DRAGON_BREATH, player.getLocation().add(0,1,0), 40, 1.5,1.5,1.5,0.15);
                 }
         ).scheduleTimer(1L);
     }

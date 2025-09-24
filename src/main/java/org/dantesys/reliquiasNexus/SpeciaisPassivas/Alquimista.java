@@ -142,7 +142,7 @@ public class Alquimista {
     private static void transmutacao(int level,Player player) {
         World world = player.getWorld();
         Location centro = player.getLocation();
-        int raio = 10 + level; // aumenta com level
+        int raio = 5 + level; // aumenta com level
 
         // Transforma mobs agressivos
         for (Entity e : world.getNearbyEntities(centro, raio, raio, raio)) {

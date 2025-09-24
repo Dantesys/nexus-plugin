@@ -59,12 +59,12 @@ public class Tempestade {
                 if(surdo instanceof LivingEntity vivo){
                     if(vivo instanceof Player pl){
                         if(pl != player){
-                            vivo.damage(finalDamage);
+                            vivo.damage(finalDamage,player);
                             vivo.getWorld().strikeLightningEffect(vivo.getLocation());
                             t.stop();
                         }
                     }else{
-                        vivo.damage(finalDamage);
+                        vivo.damage(finalDamage,player);
                         vivo.getWorld().strikeLightningEffect(vivo.getLocation());
                         t.stop();
                     }
@@ -103,14 +103,14 @@ public class Tempestade {
                     if(vivo instanceof Player pl){
                         if(pl != player){
                             player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE   ,200,9));
-                            vivo.damage(finalDamage);
+                            vivo.damage(finalDamage,player);
                             vivo.getWorld().strikeLightningEffect(vivo.getLocation());
                             vivo.getWorld().createExplosion(vivo, (float) finalDamage,false,false);
                             t.stop();
                         }
                     }else{
                         player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE   ,200,9));
-                        vivo.damage(finalDamage);
+                        vivo.damage(finalDamage,player);
                         vivo.getWorld().strikeLightningEffect(vivo.getLocation());
                         vivo.getWorld().createExplosion(vivo, (float) finalDamage,false,false);
                         t.stop();
@@ -141,7 +141,7 @@ public class Tempestade {
         },(t)->{
             for(Entity e: player.getNearbyEntities(finalRange,finalRange,finalRange)){
                 if(e instanceof LivingEntity vivo){
-                    vivo.damage(damage);
+                    vivo.damage(damage,player);
                     world.strikeLightningEffect(vivo.getLocation());
                 }
             }

@@ -93,10 +93,10 @@ public class Ceifador {
                     player.heal(finalDamage);
                     if(vivo instanceof Player pl){
                         if(pl != player){
-                            vivo.damage(finalDamage);
+                            vivo.damage(finalDamage,player);
                         }
                     }else{
-                        vivo.damage(finalDamage);
+                        vivo.damage(finalDamage,player);
                     }
                 }
                 pressf.remove(surdo);
@@ -141,7 +141,7 @@ public class Ceifador {
                                 wd.dropItemNaturally(ld,stack);
                                 vivo.setHealth(0);
                             }else{
-                                vivo.damage(level);
+                                vivo.damage(level,player);
                                 player.heal(level);
                             }
                         }
@@ -155,7 +155,7 @@ public class Ceifador {
                             wd.dropItemNaturally(ld,stack);
                             vivo.setHealth(0);
                         }else{
-                            vivo.damage(level);
+                            vivo.damage(level,player);
                             player.heal(level);
                         }
                     }

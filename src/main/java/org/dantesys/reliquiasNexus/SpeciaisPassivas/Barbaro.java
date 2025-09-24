@@ -49,12 +49,12 @@ public class Barbaro {
             if(e instanceof LivingEntity vivo){
                 if(vivo instanceof Player pl){
                     if(pl != player){
-                        vivo.damage(damage);
+                        vivo.damage(damage,player);
                         vivo.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS,600+20*level,level-6));
                         vivo.addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA,600+20*level,level-6));
                     }
                 }else{
-                    vivo.damage(damage);
+                    vivo.damage(damage,player);
                     vivo.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS,600+20*level,level-6));
                     vivo.addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA,600+20*level,level-6));
                 }
@@ -85,10 +85,10 @@ public class Barbaro {
                     atingidos.add(vivo);
                     if(vivo instanceof Player pl){
                         if(pl != player){
-                            vivo.damage(damage);
+                            vivo.damage(damage,player);
                         }
                     }else{
-                        vivo.damage(damage);
+                        vivo.damage(damage,player);
                     }
                 }
                 pressf.remove(surdo);

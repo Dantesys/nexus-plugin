@@ -16,7 +16,6 @@ import java.util.Collection;
 public class Sculk {
     public static void getPassivabyLevel(int level, Player player){
         player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION,600,level));
-        player.setMetadata("wardenImunity", new FixedMetadataValue(ReliquiasNexus.getPlugin(ReliquiasNexus.class), true));
     }
     public static void getSpecialbyLevel(int level, Player player){
         if(level<8){//1-7
@@ -28,11 +27,11 @@ public class Sculk {
         }
     }
     private static void sonar(int level, Player player){
-        for(Entity e:player.getNearbyEntities(level,level,level)){
+        for(Entity e:player.getNearbyEntities(level*5,level*5,level*5)){
             if(e instanceof LivingEntity vivo){
                 vivo.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING,600+20*level,0));
                 vivo.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS,600+20*level,level));
-                vivo.damage((double) level /10);
+                vivo.damage((double) level /10,player);
                 vivo.getWorld().playSound(vivo,Sound.ENTITY_WARDEN_EMERGE,1f,0.8f);
             }
         }
@@ -60,10 +59,10 @@ public class Sculk {
                 if(surdo instanceof LivingEntity vivo){
                     if(vivo instanceof Player pl){
                         if(pl != player){
-                            vivo.damage(finalDamage);
+                            vivo.damage(finalDamage,player);
                         }
                     }else{
-                        vivo.damage(finalDamage);
+                        vivo.damage(finalDamage,player);
                     }
                 }
                 pressf.remove(surdo);
@@ -80,7 +79,7 @@ public class Sculk {
         Location center = player.getLocation();
 
         double raio = 5 + level;
-        double dano = level * 0.75;
+        double dano = level * 2;
 
         // Som central
         world.playSound(center, Sound.ENTITY_WARDEN_SONIC_BOOM, 3f, 1f);
@@ -88,7 +87,7 @@ public class Sculk {
         // Efeito em área
         for (Entity e : player.getNearbyEntities(raio, raio, raio)) {
             if (e instanceof LivingEntity vivo && vivo != player) {
-                vivo.damage(dano);
+                vivo.damage(dano,player);
                 vivo.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 600+20*level, 1));
                 vivo.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 600+20*level, 0));
                 vivo.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 600+20*level, 0));

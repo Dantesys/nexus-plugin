@@ -17,11 +17,11 @@ public class BedrockCompat {
         if(Bukkit.getPluginManager().getPlugin("floodgate")!=null){
             try{
                 floodgateApiClass = Class.forName("org.geysermc.floodgate.api.FloodgateApi");
-                simpleFormClass = Class.forName("org.geyser.cumulus.form.SimpleForm");
+                simpleFormClass = Class.forName("org.geysermc.cumulus.form.SimpleForm");
                 enabled=true;
                 Bukkit.getLogger().info("[Nexus] Bedrock support actived!");
             } catch (ClassNotFoundException e) {
-                Bukkit.getLogger().warning("[Nexus] Bedrock support erro!");
+                Bukkit.getLogger().warning("[Nexus] Bedrock support error!");
             }
         }
     }

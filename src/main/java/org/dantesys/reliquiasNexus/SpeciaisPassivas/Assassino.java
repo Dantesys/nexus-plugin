@@ -52,11 +52,11 @@ public class Assassino {
                     atingidos.add(vivo);
                     if(vivo instanceof Player pl){
                         if(pl != player){
-                            vivo.damage(finalDamage);
+                            vivo.damage(finalDamage,player);
                             vivo.addPotionEffect(new PotionEffect(PotionEffectType.POISON,200,level));
                         }
                     }else{
-                        vivo.damage(finalDamage);
+                        vivo.damage(finalDamage,player);
                         vivo.addPotionEffect(new PotionEffect(PotionEffectType.POISON,200,level));
                     }
                 }

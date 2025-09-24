@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public enum NexusKeys {
+    PROCURADO,
     MISSAOCOOLDOWN,
     TPACOOLDOWN,
     MISSAOTEMPO,
@@ -83,12 +84,6 @@ public enum NexusKeys {
     MISSAOGOLEM,
     DRAGAO,
     MISSAODRAGAO,
-    MISSAO_TIPO,
-    MISSAO_META,
-    MISSAO_PROGRESO,
-    MISSAO_ENDTIME,
-    MISSAO_SPECIAL,
-    MISSAO_DIFFICULTY,
     LOJA_ITEM_KEY,
     SALDO,
     TEAM_NAME,

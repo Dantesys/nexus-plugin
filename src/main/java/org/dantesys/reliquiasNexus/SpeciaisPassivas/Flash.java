@@ -61,10 +61,10 @@ public class Flash {
                     atingidos.add(vivo);
                     if(vivo instanceof Player pl){
                         if(pl != player){
-                            vivo.damage(finalDamage);
+                            vivo.damage(finalDamage,player);
                         }
                     }else{
-                        vivo.damage(finalDamage);
+                        vivo.damage(finalDamage,player);
                     }
                 }
                 pressf.remove(surdo);
@@ -84,7 +84,7 @@ public class Flash {
         player.teleport(destino);
         for (Entity e : origem.getNearbyEntities(3, 3, 3)) { // raio da mini-explosão
             if (e instanceof LivingEntity alvo && alvo != player) {
-                alvo.damage(level); // dano leve
+                alvo.damage(level,player); // dano leve
                 alvo.setVelocity(alvo.getLocation().toVector().subtract(origem.toVector()).normalize().multiply(0.5)); // knockback
                 alvo.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 400, 0));
             }

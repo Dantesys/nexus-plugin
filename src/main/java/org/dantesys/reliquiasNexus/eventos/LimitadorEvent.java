@@ -1,6 +1,7 @@
 package org.dantesys.reliquiasNexus.eventos;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.*;
 import org.bukkit.block.*;
 import org.bukkit.entity.Player;
@@ -149,6 +150,52 @@ public class LimitadorEvent implements Listener {
             manterRelics = itensAtuais;
         }
         if (!manterRelics.isEmpty()) {
+            Player assassino = player.getKiller();
+            if(assassino!=null){
+                if(plugin.getConfig().getBoolean("expurgo",false)){
+                    Collections.shuffle(manterRelics);
+                    ItemStack perdeu = manterRelics.removeFirst();
+                    ItemMeta meta = perdeu.getItemMeta();
+                    PersistentDataContainer data = meta.getPersistentDataContainer();
+                    if(data.has(NEXUS.key,PersistentDataType.STRING)){
+                        String nome = data.get(NEXUS.key,PersistentDataType.STRING);
+                        data.set(DONO.key,PersistentDataType.STRING,assassino.getUniqueId().toString());
+                        ReliquiasNexus.setConfigSave("nexus."+nome,assassino.getUniqueId().toString());
+                        plugin.saveConfig();
+                    }
+                    perdeu.setItemMeta(meta);
+                    int q = assassino.getPersistentDataContainer().getOrDefault(QTD.key,PersistentDataType.INTEGER,0);
+                    assassino.getPersistentDataContainer().set(QTD.key,PersistentDataType.INTEGER,q+1);
+                    assassino.getInventory().addItem(perdeu);
+                    q=player.getPersistentDataContainer().getOrDefault(QTD.key,PersistentDataType.INTEGER,0);
+                    player.getPersistentDataContainer().set(QTD.key,PersistentDataType.INTEGER,q-1);
+                }else{
+                    if(player.getPersistentDataContainer().has(PROCURADO.key)){
+                        double recompensa = player.getPersistentDataContainer().getOrDefault(PROCURADO.key,PersistentDataType.DOUBLE,0.0);
+                        player.getPersistentDataContainer().remove(PROCURADO.key);
+                        double saldo = player.getPersistentDataContainer().getOrDefault(SALDO.key,PersistentDataType.DOUBLE,0.0);
+                        double saldoA = assassino.getPersistentDataContainer().getOrDefault(SALDO.key,PersistentDataType.DOUBLE,0.0);
+                        if(saldoA<0.0){
+                            assassino.sendMessage(Component.text(ReliquiasNexus.getLang().getString("procurados.negativo","Você não ganhou a recompensa por está endividado!")).color(NamedTextColor.RED));
+                        }else{
+                            saldo-=recompensa;
+                            player.getPersistentDataContainer().set(SALDO.key,PersistentDataType.DOUBLE,saldo);
+                            String precoStr = String.format("$ %.2f ", recompensa);
+                            player.sendMessage(Component.text(ReliquiasNexus.getLang().getString("procurados.perdeu","Você perdeu <value> <moneyName>, por está sendo um procurado!").replace("<value>",precoStr).replace("<moneyName>",plugin.getConfig().getString("recursos.moneyName","moly"))).color(NamedTextColor.RED));
+                            saldoA+=recompensa;
+                            assassino.getPersistentDataContainer().set(SALDO.key,PersistentDataType.DOUBLE,saldoA);
+                            assassino.sendMessage(Component.text(ReliquiasNexus.getLang().getString("procurados.ganhou","Você ganhou <value> <moneyName>, por derrotar um procurado!").replace("<value>",precoStr).replace("<moneyName>",plugin.getConfig().getString("recursos.moneyName","moly"))).color(NamedTextColor.GREEN));
+                        }
+                    }else{
+                        double recompensa = assassino.getPersistentDataContainer().getOrDefault(PROCURADO.key,PersistentDataType.DOUBLE,0.0);
+                        Random rd = new Random();
+                        recompensa+=(100+(rd.nextDouble()*200));
+                        assassino.getPersistentDataContainer().set(PROCURADO.key,PersistentDataType.DOUBLE,recompensa);
+                        String precoStr = String.format("$ %.2f ", recompensa);
+                        Bukkit.broadcast(Component.text(ReliquiasNexus.getLang().getString("procurados.recompensa","Procurando <player>, com uma recompensa de <value> <moneyName>").replace("<value>",precoStr).replace("<player>",assassino.getName()).replace("<moneyName>",plugin.getConfig().getString("recursos.moneyName","moly"))).color(NamedTextColor.YELLOW));
+                    }
+                }
+            }
             reliquiasSalvas.put(player.getUniqueId(), manterRelics);
         }else{
             player.getPersistentDataContainer().set(QTD.key,PersistentDataType.INTEGER,0);

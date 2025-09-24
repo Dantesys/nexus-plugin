@@ -220,7 +220,7 @@ public class EvoluirEvent implements Listener {
                 player.getAttribute(Attribute.SWEEPING_DAMAGE_RATIO).setBaseValue(levelAtual*0.05);
             }
             case "dragao" -> {
-                dataPlayer.set(MISSAODRAGAO.key, PersistentDataType.DOUBLE, 0d);
+                dataPlayer.set(MISSAODRAGAO.key, PersistentDataType.INTEGER, 0);
                 dataPlayer.set(DRAGAO.key,PersistentDataType.INTEGER,levelAtual+1);
                 player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20+levelAtual);
                 player.getAttribute(Attribute.ARMOR).setBaseValue(levelAtual/5);
@@ -636,7 +636,7 @@ public class EvoluirEvent implements Listener {
                 }
             }
             case "dragao" -> {
-                double colheitas = player.getPersistentDataContainer().getOrDefault(MISSAODRAGAO.key, PersistentDataType.DOUBLE, 0d);
+                int colheitas = player.getPersistentDataContainer().getOrDefault(MISSAODRAGAO.key, PersistentDataType.INTEGER, 0);
                 if(colheitas>=level){
                     condicao="";
                 }else{
@@ -1276,11 +1276,9 @@ public class EvoluirEvent implements Listener {
                         int protecao = player.getPersistentDataContainer().getOrDefault(MISSAOSCULK.key, PersistentDataType.INTEGER, 0);
                         int level = player.getPersistentDataContainer().getOrDefault(SCULK.key,PersistentDataType.INTEGER,1);
                         protecao++;
-                        if(player.hasMetadata("wardenImunity")){
-                            event.setDamage(0);
-                            war.setAnger(player,0);
-                            player.removeMetadata("wardenImunity",plugin);
-                        }
+                        event.setDamage(0);
+                        player.heal(20);
+                        war.setAnger(player,0);
                         player.getPersistentDataContainer().set(MISSAOSCULK.key, PersistentDataType.INTEGER, protecao);
                         tentarEvoluir(player,n.getItem(level),level,getSlotOfItem(player,stack));
                     }

@@ -40,7 +40,7 @@ public class Fenix {
         player.spawnParticle(Particle.FLAME,player.getLocation(),level);
         for(Entity e: player.getNearbyEntities(level,level,level)){
             if(e instanceof LivingEntity vivo){
-                vivo.damage(level);
+                vivo.damage(level,player);
                 vivo.setFireTicks(20*level);
                 vivo.getWorld().spawnParticle(Particle.FLAME,vivo.getLocation(),level);
             }
@@ -56,7 +56,7 @@ public class Fenix {
         player.spawnParticle(Particle.FLAME,player.getLocation(),level);
         for(Entity e: player.getNearbyEntities(20,20,20)){
             if(e instanceof LivingEntity vivo){
-                vivo.damage((double) level /2);
+                vivo.damage((double) level /2,player);
                 vivo.setFireTicks(20*level);
                 vivo.getWorld().spawnParticle(Particle.FLAME,vivo.getLocation(),level);
             }
