@@ -8,7 +8,7 @@ import org.bukkit.potion.PotionEffectType;
 
 public class Vida {
     public static void getPassivabyLevel(int level, Player player){
-        player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION,600,0));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION,600,level));
     }
     public static void getSpecialbyLevel(int level, Player player){
         if(level<8){//1-7
