@@ -49,11 +49,11 @@ import static org.dantesys.reliquiasNexus.util.NexusKeys.*;
 /*
 * TODO
 *  Ajustar arquivo de tradução - Fazendo e Testando
-*  Refazer sistema de procurado - Fazendo
+*  Refazer sistema de procurado - Testando
 *  Refazer sistema de bosses - Testando
 *  Adicionar suporte ao Geyser e Floodgate - Testando
 *  Ajustar sistema de limitador - Testando
-*  Refazer sistema de times - PEDENTE
+*  Fazer o mundo das dungeons - PENDENTE
 */
 public final class ReliquiasNexus extends JavaPlugin {
     private static final Map<UUID, Troca> trocas = new ConcurrentHashMap<>();
